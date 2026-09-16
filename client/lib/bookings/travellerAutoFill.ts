@@ -125,14 +125,27 @@ export function resolveCompanionTraveller(
   };
 }
 
+export type TravellerSnapshot = {
+  givenName: string;
+  surname: string;
+  fullName: string;
+  nationality?: string;
+  dateOfBirth?: string;
+  passportNumber?: string;
+  passportExpiry?: string;
+  phone?: string;
+  email?: string;
+  [key: string]: unknown;
+};
+
 export function buildTravellerSnapshot(
   formData: TravellerFormData,
-): { givenName: string; surname: string; [key: string]: unknown } {
+): TravellerSnapshot {
   const given = formData.givenName.trim();
   const sur = formData.surname.trim();
   const fullName = [given, sur].filter(Boolean).join(" ");
 
-  const snapshot: { givenName: string; surname: string; [key: string]: unknown } = {
+  const snapshot: TravellerSnapshot = {
     givenName: given,
     surname: sur,
     fullName,
