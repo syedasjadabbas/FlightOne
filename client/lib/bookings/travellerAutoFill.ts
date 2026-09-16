@@ -127,12 +127,12 @@ export function resolveCompanionTraveller(
 
 export function buildTravellerSnapshot(
   formData: TravellerFormData,
-): Record<string, unknown> {
+): { givenName: string; surname: string; [key: string]: unknown } {
   const given = formData.givenName.trim();
   const sur = formData.surname.trim();
   const fullName = [given, sur].filter(Boolean).join(" ");
 
-  const snapshot: Record<string, unknown> = {
+  const snapshot: { givenName: string; surname: string; [key: string]: unknown } = {
     givenName: given,
     surname: sur,
     fullName,

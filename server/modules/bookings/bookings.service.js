@@ -154,6 +154,63 @@ async function ingestVaultDocumentsSafe({
 }
 
 /**
+ * Enqueue confirmed booking notification across in-app and email channels.
+ * Swallow errors; notification failures must never fail the ticketing transition.
+ */
+async function sendBookingConfirmationNotificationSafe(ticketed) {
+  try {
+    const { enqueueNotificationOutbox } = await import("../../lib/notifications/enqueue.js");
+    const productLabel =
+      ticketed.product === "FLIGHT"
+        ? "Flight"
+        : ticketed.product === "HOTEL"
+          ? "Hotel"
+          : "Trip";
+    const ref = ticketed.externalRef || ticketed.id;
+    const title = `${productLabel} Booking Confirmed (${ref})`;
+    const body = `Your ${productLabel.toLowerCase()} booking ${ticketed.id} has been confirmed with reference ${ref}.`;
+    await enqueueNotificationOutbox([
+      {
+        userId: ticketed.userId,
+        channel: "APP",
+        dedupeKey: `booking:confirmed:${ticketed.id}:app`,
+        title,
+        body,
+        payload: {
+          bookingId: ticketed.id,
+          status: ticketed.status,
+          product: ticketed.product,
+          externalRef: ticketed.externalRef,
+          amountMinor: ticketed.amountMinor,
+          currency: ticketed.currency,
+        },
+      },
+      {
+        userId: ticketed.userId,
+        channel: "EMAIL",
+        dedupeKey: `booking:confirmed:${ticketed.id}:email`,
+        title,
+        body,
+        payload: {
+          bookingId: ticketed.id,
+          status: ticketed.status,
+          product: ticketed.product,
+          externalRef: ticketed.externalRef,
+          amountMinor: ticketed.amountMinor,
+          currency: ticketed.currency,
+        },
+      },
+    ]);
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error("Failed to enqueue booking confirmation notification", {
+      bookingId: ticketed?.id,
+      err: e,
+    });
+  }
+}
+
+/**
  * Best-effort Module 09 journey-watch creation on ticketing (dynamic import
  * — modules/journey/ has no reason to import back into bookings — swallow
  * errors; a watch-creation failure must never fail the ticket transition
@@ -699,6 +756,18 @@ export async function getBookingById(userId, bookingId) {
     where: { id: bookingId, userId },
     select: {
       ...BOOKING_SELECT,
+      payments: {
+        select: {
+          id: true,
+          status: true,
+          provider: true,
+          amountMinor: true,
+          currency: true,
+          providerPaymentId: true,
+          createdAt: true,
+        },
+        orderBy: { createdAt: "desc" },
+      },
       transitions: {
         orderBy: { createdAt: "asc" },
         select: TRANSITION_SELECT,
@@ -1117,6 +1186,8 @@ export async function ticketBooking(userId, bookingId, { clientAmountMinor } = {
     currency: ticketed.currency,
     amountMinor: ticketed.amountMinor,
   });
+
+  await sendBookingConfirmationNotificationSafe(ticketed);
 
   await enqueueOpsEventSafe({
     type: "BOOKING_TICKETED",

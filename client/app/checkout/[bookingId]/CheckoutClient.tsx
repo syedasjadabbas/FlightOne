@@ -227,18 +227,26 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
     setFormData(compData);
   }
 
+  const hasSuccessfulPayment = Boolean(
+    booking?.payments?.some(
+      (p) => p.status === "CAPTURED" || p.status === "AUTHORIZED",
+    ),
+  );
+
   async function onPay() {
     setLocalError(null);
     if (priceChange) {
       setLocalError("Accept the updated price before continuing checkout");
       return;
     }
-    const validation = validateTravellerFormData(formData);
-    if (!validation.isValid) {
-      setLocalError("Traveller given name and surname are required before payment");
-      return;
+    if (booking?.status === "QUOTED") {
+      const validation = validateTravellerFormData(formData);
+      if (!validation.isValid) {
+        setLocalError("Traveller given name and surname are required before payment");
+        return;
+      }
     }
-    if (!payCap?.canCapture) {
+    if (!payCap?.canCapture && payMethod === "card") {
       setLocalError(
         payCap?.reasons?.join("; ") || "Payment gateway is not configured — cannot capture payment",
       );
@@ -258,6 +266,24 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
         paymentMethodToken: payMethod === "card" ? paymentToken.trim() : undefined,
         method: payMethod,
       }).unwrap();
+
+      if (booking?.status === "QUOTED") {
+        const travellerSnapshot = buildTravellerSnapshot(formData);
+        await reserve({
+          id: bookingId,
+          clientAmountMinor: serverAmountMinor,
+          travellerSnapshot,
+        }).unwrap();
+
+        if (supplierCap?.canTicket) {
+          try {
+            await ticket({ id: bookingId, clientAmountMinor: serverAmountMinor }).unwrap();
+          } catch {
+            // Keep in RESERVED if supplier ticketing is unconfigured or rejected
+          }
+        }
+      }
+
       await refetch();
       await refetchGate();
     } catch (err) {
@@ -432,8 +458,16 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
         <CheckoutReservedActions
           busy={busy}
           canTicket={Boolean(supplierCap?.canTicket)}
+          hasPayment={hasSuccessfulPayment}
           checkoutBlockedByPriceChange={checkoutBlockedByPriceChange}
+          corporateBlocked={corporateBlocked}
+          payMethod={payMethod}
+          paymentToken={paymentToken}
+          setPaymentToken={setPaymentToken}
+          canCapture={Boolean(payCap?.canCapture)}
+          paying={payState.isLoading}
           ticketing={ticketState.isLoading}
+          onPay={() => void onPay()}
           onTicket={() => void onTicket()}
         />
       ) : null}

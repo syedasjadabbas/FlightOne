@@ -2,6 +2,7 @@
  * Module 03 — tokenized payment capture against a booking.
  * Does not invent success. Corporate credit is recorded only after Module 06 approval.
  */
+import logger from "../../lib/logger.js";
 import prisma from "../../config/prisma.js";
 import { AppError } from "../../lib/customError.js";
 import { assertNonNegativeMinorAmount } from "../../lib/money.js";
@@ -82,8 +83,30 @@ export function assertBookingPayable(booking, userId) {
   if (!booking || booking.userId !== userId) {
     throw new AppError(404, "Booking not found");
   }
-  if (booking.status !== "QUOTED") {
+  if (!["QUOTED", "RESERVED"].includes(booking.status)) {
     throw new AppError(409, `Cannot pay a booking in status ${booking.status}`);
+  }
+}
+
+/**
+ * Trigger ticketing when payment captures against a RESERVED hold.
+ * Fails closed: if supplier ticketing is unconfigured or rejected, booking remains RESERVED.
+ */
+async function maybeTriggerTicketing(userId, bookingId, bookingStatus, paymentRow) {
+  if (
+    bookingStatus === "RESERVED" &&
+    paymentRow &&
+    ["CAPTURED", "AUTHORIZED"].includes(paymentRow.status)
+  ) {
+    try {
+      const { ticketBooking } = await import("../bookings/bookings.service.js");
+      await ticketBooking(userId, bookingId, {}, "CUSTOMER");
+    } catch (ticketErr) {
+      logger.warn("Automatic ticketing after payment failed or supplier unconfigured", {
+        bookingId,
+        err: ticketErr?.message,
+      });
+    }
   }
 }
 
@@ -124,7 +147,10 @@ export async function payBooking(
   }
 
   const already = await getSuccessfulPayment(bookingId, userId);
-  if (already) return enqueuePaymentCaptured(already);
+  if (already) {
+    await maybeTriggerTicketing(userId, bookingId, booking.status, already);
+    return enqueuePaymentCaptured(already);
+  }
 
   const companyId = booking.metadata?.companyId;
   if (companyId || method === "corporate_credit") {
@@ -151,21 +177,18 @@ export async function payBooking(
       idempotencyKey: idempotencyKey ?? `corp-${bookingId}`,
       failureReason: null,
     };
-    if (retryFailedId) {
-      return enqueuePaymentCaptured(
-        await prisma.payment.update({
+    const saved = retryFailedId
+      ? await prisma.payment.update({
           where: { id: retryFailedId },
           data: corpData,
           select: PAYMENT_SELECT,
-        }),
-      );
-    }
-    return enqueuePaymentCaptured(
-      await prisma.payment.create({
-        data: corpData,
-        select: PAYMENT_SELECT,
-      }),
-    );
+        })
+      : await prisma.payment.create({
+          data: corpData,
+          select: PAYMENT_SELECT,
+        });
+    await maybeTriggerTicketing(userId, bookingId, booking.status, saved);
+    return enqueuePaymentCaptured(saved);
   }
 
   // Fully covered by reward credit — no card capture.
@@ -182,21 +205,18 @@ export async function payBooking(
       idempotencyKey: idempotencyKey ?? `rewards-zero-${bookingId}`,
       failureReason: null,
     };
-    if (retryFailedId) {
-      return enqueuePaymentCaptured(
-        await prisma.payment.update({
+    const saved = retryFailedId
+      ? await prisma.payment.update({
           where: { id: retryFailedId },
           data: zeroData,
           select: PAYMENT_SELECT,
-        }),
-      );
-    }
-    return enqueuePaymentCaptured(
-      await prisma.payment.create({
-        data: zeroData,
-        select: PAYMENT_SELECT,
-      }),
-    );
+        })
+      : await prisma.payment.create({
+          data: zeroData,
+          select: PAYMENT_SELECT,
+        });
+    await maybeTriggerTicketing(userId, bookingId, booking.status, saved);
+    return enqueuePaymentCaptured(saved);
   }
 
   let result;
@@ -241,6 +261,7 @@ export async function payBooking(
     err.details = { payment: row };
     throw err;
   }
+  await maybeTriggerTicketing(userId, bookingId, booking.status, row);
   return enqueuePaymentCaptured(row);
 }
 

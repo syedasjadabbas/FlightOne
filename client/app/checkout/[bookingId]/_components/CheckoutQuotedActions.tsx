@@ -250,33 +250,103 @@ export function CheckoutQuotedActions({
 export function CheckoutReservedActions({
   busy,
   canTicket,
+  hasPayment,
   checkoutBlockedByPriceChange,
+  corporateBlocked = false,
+  payMethod,
+  paymentToken,
+  setPaymentToken,
+  canCapture,
+  paying,
   ticketing,
+  onPay,
   onTicket,
 }: {
   busy: boolean;
   canTicket: boolean;
+  hasPayment: boolean;
   checkoutBlockedByPriceChange: boolean;
+  corporateBlocked?: boolean;
+  payMethod: "card" | "corporate_credit";
+  paymentToken: string;
+  setPaymentToken: (v: string) => void;
+  canCapture: boolean;
+  paying: boolean;
   ticketing: boolean;
+  onPay: () => void;
   onTicket: () => void;
 }) {
   return (
     <div className="fo-desk__panel fo-checkout__actions">
-      <p className="fo-desk__section-label">Issue ticket</p>
-      <div className="fo-checkout__cta-row">
-        <Button
-          type="button"
-          disabled={busy || !canTicket || checkoutBlockedByPriceChange}
-          onClick={onTicket}
-        >
-          {ticketing ? "Ticketing…" : "Issue ticket / voucher"}
-        </Button>
-      </div>
-      {!canTicket ? (
-        <p className="fo-checkout__note">
-          Ticketing stays blocked until the supplier can issue a real ticket or voucher.
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="fo-desk__section-label" style={{ margin: 0 }}>
+          {hasPayment ? "Supplier reservation & ticketing" : "Payment for reserved hold"}
         </p>
-      ) : null}
+        {hasPayment ? (
+          <span className="inline-flex items-center gap-1 rounded-full bg-[color-mix(in_oklab,var(--cyan)_12%,transparent)] px-2.5 py-0.5 text-[11px] font-medium text-[var(--cyan)]">
+            <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+            </svg>
+            Payment confirmed
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-0.5 text-[11px] font-medium text-amber-500">
+            Payment required to ticket
+          </span>
+        )}
+      </div>
+
+      {!hasPayment ? (
+        <>
+          <p className="fo-checkout__note">
+            Your seat is held with the supplier. Complete payment to issue the ticket before the hold expires.
+          </p>
+          {payMethod === "card" ? (
+            <Input
+              label="Payment method token"
+              value={paymentToken}
+              onChange={(e) => setPaymentToken(e.target.value)}
+              placeholder="pm_… (tokenized — never enter raw PAN/CVV)"
+              disabled={busy || !canCapture || checkoutBlockedByPriceChange || corporateBlocked}
+            />
+          ) : (
+            <p className="fo-checkout__note">
+              Corporate credit selected — card token not required. Company credit is checked server-side.
+            </p>
+          )}
+          <div className="fo-checkout__cta-row pt-2">
+            <Button
+              type="button"
+              disabled={
+                busy ||
+                (!canCapture && payMethod === "card") ||
+                checkoutBlockedByPriceChange ||
+                corporateBlocked
+              }
+              onClick={onPay}
+            >
+              {paying ? "Processing payment…" : "Pay to issue ticket"}
+            </Button>
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="fo-checkout__cta-row pt-2">
+            <Button
+              type="button"
+              disabled={busy || !canTicket || checkoutBlockedByPriceChange}
+              onClick={onTicket}
+            >
+              {ticketing ? "Ticketing…" : "Issue ticket / voucher"}
+            </Button>
+          </div>
+          {!canTicket ? (
+            <p className="fo-checkout__note">
+              Ticketing stays blocked until the supplier can issue a real ticket or voucher.
+            </p>
+          ) : null}
+        </>
+      )}
     </div>
   );
 }

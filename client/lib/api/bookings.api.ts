@@ -26,6 +26,7 @@ export type BookingDetail = {
   reservedUntil: string | null;
   travellerSnapshot: Record<string, unknown> | null;
   metadata: Record<string, unknown> | null;
+  payments?: PaymentRow[];
   paymentCapability?: {
     configured: boolean;
     canCapture: boolean;
