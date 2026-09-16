@@ -1,0 +1,56 @@
+---
+description: Layering, boundaries, resilience (timeouts/retries/idempotency), jobs — for server/service/API files.
+globs: ["**/api/**", "**/server/**", "**/*.service.*", "**/*.controller.*", "**/*.repository.*", "**/jobs/**", "**/queues/**"]
+alwaysApply: false
+---
+
+# Backend Standard
+
+Default stack: **Node.js · TypeScript · NestJS/Fastify · Prisma/Drizzle · PostgreSQL · Redis ·
+BullMQ · Docker.** Python (FastAPI) and Go are first-class alternatives by fit.
+
+## Architecture
+
+- **Layered / clean:** `transport (HTTP/GraphQL) → application (use cases) → domain (business
+  rules) → infrastructure (DB, cache, external APIs)`. Dependencies point inward; the domain
+  imports nothing framework-specific.
+- **Thin controllers, rich services, pure domain.** Controllers parse/validate and delegate.
+  Business rules live in the domain, not the HTTP layer.
+- **Dependency injection** for adapters (DB, clients, clock, IDs) — enables testing and swapping.
+- **Stateless services.** Session/state lives in Postgres/Redis, not process memory. Scale out.
+
+## Boundaries & validation
+
+- Validate every inbound payload with a schema (Zod/class-validator) → typed domain objects.
+- Define explicit DTOs; never leak ORM entities or internal fields to the wire.
+- Map domain errors to transport errors in one place (a filter/middleware), consistently.
+
+## Reliability
+
+- **Timeouts, retries with exponential backoff + jitter, and circuit breakers** on every
+  outbound call. No unbounded waits.
+- **Idempotency** for mutations that can be retried (idempotency keys, dedupe).
+- **Graceful shutdown:** drain in-flight requests, close DB/queue connections, honor SIGTERM.
+- **Backpressure:** bound queues and concurrency; shed load before you fall over.
+
+## Async & jobs
+
+- Offload slow/at-least-once work to a queue (BullMQ/SQS). Jobs are **idempotent** and retryable
+  with a dead-letter queue for poison messages.
+- Never block the event loop — stream large payloads, chunk heavy CPU work or move it off-thread.
+- Schedule recurring work with a real scheduler (cron/queue), not `setInterval` in a web process.
+
+## Data access
+
+- Repository/data-mapper pattern to isolate persistence. Keep transactions in the application layer.
+- No N+1 (batch/eager-load). Paginate everything unbounded. Short transactions.
+
+## Config & secrets
+
+- Config from environment, validated at startup (fail fast on missing/invalid config).
+- Secrets from a vault, never in code/logs.
+
+## Quality gates
+
+- Type-clean, lint-clean. Unit tests for domain logic; integration tests for adapters/endpoints.
+- Load-tested for the expected throughput; graceful degradation verified.

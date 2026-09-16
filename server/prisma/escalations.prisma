@@ -1,0 +1,119 @@
+// Module 13 — Human Agent Escalation
+// Owned by modules/escalations/. See docs/modules/13-human-agent-escalation.md
+// and dev guide §7 ("Human escalation carries full context — the complete AI
+// conversation + booking state hands off to a live consultant with nothing
+// lost").
+//
+// `conversationId` / `userId` / `assignedToUserId` / `bookingId` are plain
+// scalar columns, not Prisma relations — same intentional cross-module scalar
+// pattern as `UserRole.companyId` in prisma/foundation.prisma. This keeps
+// escalations migrations scoped to escalation tables only (no ALTER on
+// User/Conversation/Booking) and means modules/escalations/ doesn't need to
+// touch schema.prisma, conversations.prisma, or bookings.prisma to ship.
+//
+// This file lives alongside prisma/schema.prisma (multi-file schema, GA since
+// Prisma 6.7 — no preview flag needed). The `generator`/`datasource` blocks
+// stay in schema.prisma.
+
+enum EscalationStatus {
+  OPEN
+  ASSIGNED
+  IN_PROGRESS
+  RESOLVED
+  CANCELLED
+}
+
+/// Why a conversation was handed off to a human. PRD Module 13 triggers are
+/// the primary set; legacy VIP/MEDICAL/SSR aliases remain for older rows/callers.
+/// Adjacent modules may still use VISA_UNCERTAIN / JOURNEY_DISRUPTION / OTHER.
+enum EscalationTrigger {
+  CUSTOMER_REQUEST
+  VIP_BOOKING
+  VIP
+  COMPLEX_ITINERARY
+  SUPPLIER_FAILURE
+  REFUND_DISPUTE
+  MEDICAL_ASSISTANCE
+  MEDICAL
+  SPECIAL_SERVICE_REQUEST
+  SSR
+  AI_DISCOUNT_LIMIT
+  VISA_UNCERTAIN
+  JOURNEY_DISRUPTION
+  OTHER
+}
+
+/// A human-agent handoff ticket. `contextSnapshot` is the single source of
+/// truth for "zero context loss" (module doc; dev guide §7): it MUST contain
+/// the full `messages[]` array loaded verbatim from the DB at escalation
+/// time — never a summary or truncation — plus whatever booking/pricing/
+/// profile snippets were available at the moment of the trigger. Written
+/// once at creation and never mutated afterwards, so a consultant can always
+/// trust it reflects exactly what the AI/customer saw at handoff time.
+model EscalationTicket {
+  id               String            @id @default(cuid())
+  conversationId   String
+  // Customer who owns the conversation being escalated (User.id, no FK — see
+  // file header).
+  userId           String
+  status           EscalationStatus  @default(OPEN)
+  trigger          EscalationTrigger
+  // Higher = more urgent in the consultant queue. Defaulted per-trigger by
+  // modules/escalations/escalations.service.js at creation time.
+  priority         Int               @default(0)
+  // Consultant (User.id) who claimed the ticket — set by POST /:id/claim.
+  assignedToUserId String?
+  // Booking in context at escalation time, if any (Module 03's Booking.id).
+  bookingId        String?
+
+  /// Routing pool key (VIP / MEDICAL / COMPLEX / GENERAL). Not an availability claim.
+  routingPool   String?
+  /// POOL_ROUTED | UNROUTED_NO_ELIGIBLE — never invents assignment/SLA.
+  routingStatus String?
+
+  // { messages: Message[] (verbatim), capturedAt, booking?, pricing?, profile?, routing?, ... }
+  contextSnapshot Json
+
+  /// PRD does not define warm handoff — platform uses COLD (full transfer). WARM is deferred.
+  handoffMode String @default("COLD")
+
+  resolutionNote    String?
+  /// Outcome category for AI quality review (not a booking status).
+  resolutionOutcome String?
+  resolvedAt        DateTime?
+
+  /// Last consultant write-back summary (SUCCEEDED | FAILED | EXTERNAL_DEPENDENCY).
+  lastWriteBackStatus String?
+  lastWriteBackAt     DateTime?
+  lastWriteBackAction String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([conversationId])
+  @@index([status])
+  @@index([assignedToUserId])
+  @@index([userId])
+  @@index([userId, status])
+  @@index([routingPool, status])
+}
+
+/// Consultant service actions applied through Module 03/09/14 — never a parallel state machine.
+model EscalationAction {
+  id             String   @id @default(cuid())
+  escalationId   String
+  actionType     String
+  status         String
+  actorUserId    String
+  bookingId      String?
+  targetType     String?
+  targetId       String?
+  idempotencyKey String?  @unique
+  result         Json?
+  error          String?
+  createdAt      DateTime @default(now())
+
+  @@index([escalationId])
+  @@index([escalationId, actionType])
+  @@index([actorUserId])
+}

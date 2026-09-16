@@ -1,0 +1,21 @@
+// Module 17 — Management Dashboard instrumentation.
+// Minimal search funnel event — NOT a duplicate booking/payment store.
+// See docs/modules/17-management-dashboard.md
+
+model DashboardSearchEvent {
+  id           String         @id @default(cuid())
+  userId       String?
+  product      BookingProduct
+  supplierCode String?
+  resultCount  Int            @default(0)
+  success      Boolean        @default(true)
+  errorCode    String?
+  createdAt    DateTime       @default(now())
+
+  @@index([createdAt])
+  /// Conversion funnel: count WHERE createdAt range [AND product].
+  @@index([createdAt, product])
+  @@index([product])
+  @@index([supplierCode])
+  @@index([userId])
+}

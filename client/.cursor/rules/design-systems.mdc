@@ -1,0 +1,52 @@
+---
+description: Tokens, component states, motion, Apple-grade consistency — for styling/design-token files.
+globs: ["**/*.tsx", "**/*.css", "**/tailwind.config.*", "**/theme/**", "**/tokens/**"]
+alwaysApply: false
+---
+
+# Design Systems & UI Standard
+
+Aim for **Apple-quality polish**: precise, restrained, consistent, and considered. Consistency
+and craft beat novelty. Every screen should feel like it belongs to the same product.
+
+## Tokens (the single source of truth)
+
+- **Spacing** on a scale (4/8px rhythm) — never arbitrary pixel values.
+- **Typography** scale with defined sizes, weights, line-heights, and tracking. Establish a clear
+  hierarchy (display → heading → body → caption). Limit typefaces (one or two).
+- **Color** as semantic tokens (`bg`, `fg`, `muted`, `primary`, `destructive`, `border`) mapped
+  to raw values, themeable for light/dark. Meet contrast requirements at the token level.
+- **Radii, shadows/elevation, motion durations, and z-index** are all tokenized.
+
+## Components
+
+- Build on accessible primitives (shadcn/ui, Radix). Theme via tokens; don't fork the primitive.
+- Every component supports its full state matrix: default, hover, focus-visible, active, disabled,
+  loading, error, empty, selected. Design them all — not just the happy default.
+- Variants over booleans (`variant="primary" size="sm"`), typed and documented.
+- Document components (Storybook) with every state and usage guidance.
+
+## Layout & composition
+
+- Grid and consistent spacing; align to the rhythm. Generous, intentional whitespace.
+- Responsive and fluid from 320px up; content-first breakpoints, not device-specific hacks.
+- Optical alignment and balance over pixel-literalism where they differ.
+
+## Motion
+
+- Purposeful: communicates state, guides attention, provides continuity. Never decoration for its
+  own sake.
+- Fast (150–300ms), natural easing (ease-out for entrances, spring for playful), interruptible.
+- Animate `transform`/`opacity` for 60fps. Respect `prefers-reduced-motion` — provide a calm
+  fallback, never remove essential feedback.
+
+## Content & microcopy
+
+- Clear, concise, human. Consistent voice. Helpful empty and error states with a next action.
+- Labels over placeholders for form fields. Never rely on placeholder as the only label.
+
+## Quality bar
+
+- Pixel-consistent spacing and alignment; consistent iconography and weight; no orphaned styles.
+- Accessible: contrast, focus, keyboard, labels.
+- Feels fast: instant feedback (<100ms), skeletons over spinners, no layout shift.

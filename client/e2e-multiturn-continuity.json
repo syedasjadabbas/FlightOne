@@ -1,0 +1,133 @@
+{
+  "conversations": [
+    {
+      "label": "KHI-DXB-yes",
+      "turns": [
+        {
+          "user": "i wanna fly to dubai from karachi on 10th sept",
+          "reply": "I found 15 live options for Dubai from PKR 94,579. Browse the results panel to compare, filter, and View deal — tell me if you'd like to refine.",
+          "action": "search",
+          "query": {
+            "origin": "KHI",
+            "destination": "DXB",
+            "departureDate": "2026-09-10",
+            "passengers": 1,
+            "cabinClass": "ECONOMY"
+          },
+          "liveFlights": true,
+          "offerCount": 15,
+          "reaskedDestination": false,
+          "reaskedKnownRoute": false,
+          "preserved": {
+            "origin": true,
+            "destination": true,
+            "departureDate": true
+          }
+        },
+        {
+          "user": "yes",
+          "reply": "I found 15 live options for Dubai from PKR 94,579. Browse the results panel to compare, filter, and View deal — tell me if you'd like to refine.",
+          "action": "search",
+          "query": {
+            "origin": "KHI",
+            "destination": "DXB",
+            "departureDate": "2026-09-10",
+            "passengers": 1,
+            "cabinClass": "ECONOMY"
+          },
+          "liveFlights": true,
+          "offerCount": 15,
+          "reaskedDestination": false,
+          "reaskedKnownRoute": false,
+          "preserved": {
+            "origin": true,
+            "destination": true,
+            "departureDate": true
+          }
+        },
+        {
+          "user": "one way",
+          "reply": "I found 15 live options for Dubai from PKR 94,579. Browse the results panel to compare, filter, and View deal — tell me if you'd like to refine.",
+          "action": "search",
+          "query": {
+            "origin": "KHI",
+            "destination": "DXB",
+            "departureDate": "2026-09-10",
+            "passengers": 1,
+            "cabinClass": "ECONOMY"
+          },
+          "liveFlights": true,
+          "offerCount": 15,
+          "reaskedDestination": false,
+          "reaskedKnownRoute": false,
+          "preserved": {
+            "origin": true,
+            "destination": true,
+            "departureDate": true
+          }
+        }
+      ]
+    },
+    {
+      "label": "LHE-DXB",
+      "turns": [
+        {
+          "user": "i wanna fly from lahore to dubai on september 10",
+          "reply": "I found 15 live options for Dubai from PKR 109,153. Browse the results panel to compare, filter, and View deal — tell me if you'd like to refine.",
+          "action": "search",
+          "query": {
+            "origin": "LHE",
+            "destination": "DXB",
+            "departureDate": "2026-09-10",
+            "passengers": 1,
+            "cabinClass": "ECONOMY"
+          },
+          "liveFlights": true,
+          "offerCount": 15,
+          "reaskedDestination": false,
+          "reaskedKnownRoute": false,
+          "preserved": {
+            "origin": true,
+            "destination": true,
+            "departureDate": true
+          }
+        }
+      ]
+    },
+    {
+      "label": "KHI-DXB-RT",
+      "turns": [
+        {
+          "user": "return flight from karachi to dubai from september 10 to september 15",
+          "reply": "I found 15 live options for Dubai from PKR 113,035. Browse the results panel to compare, filter, and View deal — tell me if you'd like to refine.",
+          "action": "search",
+          "query": {
+            "origin": "KHI",
+            "destination": "DXB",
+            "departureDate": "2026-09-10",
+            "returnDate": "2026-09-15",
+            "passengers": 1,
+            "cabinClass": "ECONOMY"
+          },
+          "liveFlights": true,
+          "offerCount": 15,
+          "reaskedDestination": false,
+          "reaskedKnownRoute": false,
+          "preserved": {
+            "origin": true,
+            "destination": true,
+            "departureDate": true
+          }
+        }
+      ]
+    }
+  ],
+  "status": "PASS",
+  "finalTravelportRequest": {
+    "origin": "KHI",
+    "destination": "DXB",
+    "departureDate": "2026-09-10",
+    "passengers": 1,
+    "cabinClass": "ECONOMY"
+  }
+}

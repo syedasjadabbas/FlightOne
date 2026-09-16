@@ -1,0 +1,147 @@
+// Module 15 — Operations Platform.
+// See docs/modules/15-operations-platform.md
+
+model OpsOutboxEvent {
+  id                   String          @id @default(cuid())
+  type                 String
+  aggregateType        String
+  aggregateId          String
+  payload              Json
+  status               OpsOutboxStatus @default(PENDING)
+  attempts             Int             @default(0)
+  lastError            String?
+  idempotencyKey       String?
+  createdAt            DateTime        @default(now())
+  deliveredAt          DateTime?
+  /// Set when a worker claims the row (PROCESSING); used to reclaim stale claims.
+  processingStartedAt  DateTime?
+
+  @@unique([idempotencyKey])
+  @@index([status])
+  @@index([type])
+  @@index([createdAt])
+  @@index([status, createdAt])
+}
+
+enum OpsOutboxStatus {
+  PENDING
+  PROCESSING
+  DELIVERED
+  FAILED
+  /// Persisted; external destinations were unconfigured — never treated as successful delivery.
+  SKIPPED_UNCONFIGURED
+}
+
+model AccountingEntry {
+  id             String              @id @default(cuid())
+  bookingId      String?
+  entryType      AccountingEntryType
+  currency       String
+  amountMinor    Int
+  memo           String?
+  idempotencyKey String?
+  sourceEventId  String?
+  /// Corporate isolation — from Booking.metadata.companyId when present.
+  companyId      String?
+  userId         String?
+  supplierCode   String?
+  paymentId      String?
+  createdAt      DateTime            @default(now())
+
+  @@unique([idempotencyKey])
+  @@index([bookingId])
+  @@index([entryType])
+  @@index([createdAt])
+  @@index([companyId])
+  @@index([userId])
+  @@index([paymentId])
+  @@index([currency, entryType])
+}
+
+enum AccountingEntryType {
+  REVENUE
+  COST
+  COMMISSION
+  REFUND
+  PAYMENT
+  MARGIN
+  CREDIT
+}
+
+model SupplierReconItem {
+  id             String              @id @default(cuid())
+  supplierCode   String
+  externalRef    String?
+  bookingId      String?
+  expectedMinor  Int
+  invoicedMinor  Int?
+  currency       String?
+  status         SupplierReconStatus @default(OPEN)
+  notes          String?
+  mismatchReason String?
+  idempotencyKey String?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  @@unique([idempotencyKey])
+  @@index([status])
+  @@index([supplierCode])
+}
+
+enum SupplierReconStatus {
+  OPEN
+  MATCHED
+  DISCREPANCY
+  MISMATCH
+  DATA_UNAVAILABLE
+  UNCONFIGURED
+  REQUIRES_REVIEW
+}
+
+model CommissionRecord {
+  id              String   @id @default(cuid())
+  bookingId       String
+  currency        String
+  basisMinor      Int
+  commissionBps   Int
+  commissionMinor Int
+  status          String   @default("RECORDED")
+  source          String
+  idempotencyKey  String   @unique
+  formula         Json?
+  companyId       String?
+  userId          String?
+  supplierCode    String?
+  createdAt       DateTime @default(now())
+
+  @@index([bookingId])
+  @@index([companyId])
+  @@index([userId])
+  @@index([currency])
+}
+
+enum OpsSyncStatus {
+  PENDING
+  DELIVERED
+  SKIPPED_UNCONFIGURED
+  FAILED
+}
+
+/// Per-integration delivery attempt for an outbox event (idempotent).
+model OpsExternalSync {
+  id             String        @id @default(cuid())
+  integration    String
+  eventId        String
+  eventType      String
+  status         OpsSyncStatus @default(PENDING)
+  externalRef    String?
+  idempotencyKey String        @unique
+  response       Json?
+  error          String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([integration])
+  @@index([eventId])
+  @@index([status])
+}

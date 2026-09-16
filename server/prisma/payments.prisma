@@ -1,0 +1,45 @@
+// Module 03 — tokenized payment records. Never stores PAN/CVV.
+// Owned by modules/payments/. See docs/modules/03-ai-booking-engine.md.
+
+enum PaymentStatus {
+  PENDING
+  AUTHORIZED
+  CAPTURED
+  FAILED
+  VOIDED
+}
+
+enum PaymentProvider {
+  UNCONFIGURED
+  STRIPE
+  CORPORATE_CREDIT
+  SIMULATED
+}
+
+model Payment {
+  id      String          @id @default(cuid())
+  userId  String
+  user    User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookingId String
+  booking   Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  status   PaymentStatus
+  provider PaymentProvider
+  currency String
+  amountMinor Int
+
+  /// Gateway PaymentIntent / charge id — never a PAN.
+  providerPaymentId String?
+  /// Tokenized method reference from the gateway (pm_… / tok_…). Never raw card data.
+  paymentMethodToken String?
+  failureReason String?
+  idempotencyKey String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([bookingId, idempotencyKey])
+  @@index([bookingId])
+  @@index([userId])
+  @@index([status])
+}

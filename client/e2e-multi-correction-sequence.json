@@ -1,0 +1,448 @@
+{
+  "turns": [
+    {
+      "label": "T1",
+      "user": "I want to fly from Lahore to Dubai on September 10, 2026.",
+      "previousTravelPlan": null,
+      "mergedPlan": {
+        "action": "search",
+        "query": {
+          "origin": "LHE",
+          "destination": "DXB",
+          "departureDate": "2026-09-10",
+          "passengers": 1,
+          "cabinClass": "ECONOMY"
+        }
+      },
+      "finalTravelportRequest": {
+        "origin": "LHE",
+        "destination": "DXB",
+        "departureDate": "2026-09-10"
+      },
+      "resultRoutes": [
+        {
+          "origin": "LHE",
+          "destination": "DXB",
+          "date": "2026-09-10"
+        },
+        {
+          "origin": "LHE",
+          "destination": "DXB",
+          "date": "2026-09-10"
+        },
+        {
+          "origin": "LHE",
+          "destination": "DXB",
+          "date": "2026-09-10"
+        },
+        {
+          "origin": "LHE",
+          "destination": "DXB",
+          "date": "2026-09-10"
+        },
+        {
+          "origin": "LHE",
+          "destination": "DXB",
+          "date": "2026-09-10"
+        },
+        {
+          "origin": "LHE",
+          "destination": "DXB",
+          "date": "2026-09-10"
+        },
+        {
+          "origin": "LHE",
+          "destination": "DXB",
+          "date": "2026-09-10"
+        },
+        {
+          "origin": "LHE",
+          "destination": "DXB",
+          "date": "2026-09-10"
+        },
+        {
+          "origin": "LHE",
+          "destination": "DXB",
+          "date": "2026-09-10"
+        },
+        {
+          "origin": "LHE",
+          "destination": "DXB",
+          "date": "2026-09-10"
+        },
+        {
+          "origin": "LHE",
+          "destination": "DXB",
+          "date": "2026-09-10"
+        },
+        {
+          "origin": "LHE",
+          "destination": "DXB",
+          "date": "2026-09-10"
+        }
+      ],
+      "offerCount": 12,
+      "liveFlights": true,
+      "reply": "I found 12 live options for Dubai from PKR 124,031. Browse the results panel to compare, filter, and View deal — tell me if you'd like to re"
+    },
+    {
+      "label": "T2",
+      "user": "Actually Istanbul instead on September 15.",
+      "previousTravelPlan": {
+        "action": "search",
+        "query": {
+          "origin": "LHE",
+          "destination": "DXB",
+          "departureDate": "2026-09-10",
+          "passengers": 1,
+          "cabinClass": "ECONOMY"
+        }
+      },
+      "mergedPlan": {
+        "action": "search",
+        "query": {
+          "origin": "LHE",
+          "destination": "IST",
+          "departureDate": "2026-09-15",
+          "passengers": 1,
+          "cabinClass": "ECONOMY"
+        }
+      },
+      "finalTravelportRequest": {
+        "origin": "LHE",
+        "destination": "IST",
+        "departureDate": "2026-09-15"
+      },
+      "resultRoutes": [
+        {
+          "origin": "LHE",
+          "destination": "IST",
+          "date": "2026-09-15"
+        },
+        {
+          "origin": "LHE",
+          "destination": "IST",
+          "date": "2026-09-15"
+        },
+        {
+          "origin": "LHE",
+          "destination": "IST",
+          "date": "2026-09-15"
+        },
+        {
+          "origin": "LHE",
+          "destination": "IST",
+          "date": "2026-09-15"
+        },
+        {
+          "origin": "LHE",
+          "destination": "IST",
+          "date": "2026-09-15"
+        },
+        {
+          "origin": "LHE",
+          "destination": "IST",
+          "date": "2026-09-15"
+        },
+        {
+          "origin": "LHE",
+          "destination": "IST",
+          "date": "2026-09-15"
+        },
+        {
+          "origin": "LHE",
+          "destination": "IST",
+          "date": "2026-09-15"
+        },
+        {
+          "origin": "LHE",
+          "destination": "IST",
+          "date": "2026-09-15"
+        },
+        {
+          "origin": "LHE",
+          "destination": "IST",
+          "date": "2026-09-15"
+        },
+        {
+          "origin": "LHE",
+          "destination": "IST",
+          "date": "2026-09-15"
+        },
+        {
+          "origin": "LHE",
+          "destination": "IST",
+          "date": "2026-09-15"
+        }
+      ],
+      "offerCount": 12,
+      "liveFlights": true,
+      "reply": "I found 12 live options for Turkey from PKR 221,993. Browse the results panel to compare, filter, and View deal — tell me if you'd like to r"
+    },
+    {
+      "label": "T3",
+      "user": "No, London instead.",
+      "previousTravelPlan": {
+        "action": "search",
+        "query": {
+          "origin": "LHE",
+          "destination": "IST",
+          "departureDate": "2026-09-15",
+          "passengers": 1,
+          "cabinClass": "ECONOMY"
+        }
+      },
+      "mergedPlan": {
+        "action": "search",
+        "query": {
+          "origin": "LHE",
+          "destination": "LHR",
+          "departureDate": "2026-09-15",
+          "passengers": 1,
+          "cabinClass": "ECONOMY"
+        }
+      },
+      "finalTravelportRequest": {
+        "origin": "LHE",
+        "destination": "LHR",
+        "departureDate": "2026-09-15"
+      },
+      "resultRoutes": [
+        {
+          "origin": "LHE",
+          "destination": "LHR",
+          "date": "2026-09-15"
+        },
+        {
+          "origin": "LHE",
+          "destination": "LHR",
+          "date": "2026-09-15"
+        },
+        {
+          "origin": "LHE",
+          "destination": "LHR",
+          "date": "2026-09-15"
+        },
+        {
+          "origin": "LHE",
+          "destination": "LHR",
+          "date": "2026-09-15"
+        },
+        {
+          "origin": "LHE",
+          "destination": "LHR",
+          "date": "2026-09-15"
+        },
+        {
+          "origin": "LHE",
+          "destination": "LHR",
+          "date": "2026-09-15"
+        },
+        {
+          "origin": "LHE",
+          "destination": "LHR",
+          "date": "2026-09-15"
+        },
+        {
+          "origin": "LHE",
+          "destination": "LHR",
+          "date": "2026-09-15"
+        },
+        {
+          "origin": "LHE",
+          "destination": "LHR",
+          "date": "2026-09-15"
+        }
+      ],
+      "offerCount": 9,
+      "liveFlights": true,
+      "reply": "I found 9 live options for London from PKR 224,118. Browse the results panel to compare, filter, and View deal — tell me if you'd like to re"
+    },
+    {
+      "label": "T4",
+      "user": "Actually from Karachi.",
+      "previousTravelPlan": {
+        "action": "search",
+        "query": {
+          "origin": "LHE",
+          "destination": "LHR",
+          "departureDate": "2026-09-15",
+          "passengers": 1,
+          "cabinClass": "ECONOMY"
+        }
+      },
+      "mergedPlan": {
+        "action": "search",
+        "query": {
+          "origin": "KHI",
+          "destination": "LHR",
+          "departureDate": "2026-09-15",
+          "passengers": 1,
+          "cabinClass": "ECONOMY"
+        }
+      },
+      "finalTravelportRequest": {
+        "origin": "KHI",
+        "destination": "LHR",
+        "departureDate": "2026-09-15"
+      },
+      "resultRoutes": [
+        {
+          "origin": "KHI",
+          "destination": "LHR",
+          "date": "2026-09-15"
+        },
+        {
+          "origin": "KHI",
+          "destination": "LHR",
+          "date": "2026-09-15"
+        },
+        {
+          "origin": "KHI",
+          "destination": "LHR",
+          "date": "2026-09-15"
+        },
+        {
+          "origin": "KHI",
+          "destination": "LHR",
+          "date": "2026-09-15"
+        },
+        {
+          "origin": "KHI",
+          "destination": "LHR",
+          "date": "2026-09-15"
+        },
+        {
+          "origin": "KHI",
+          "destination": "LHR",
+          "date": "2026-09-15"
+        },
+        {
+          "origin": "KHI",
+          "destination": "LHR",
+          "date": "2026-09-15"
+        },
+        {
+          "origin": "KHI",
+          "destination": "LHR",
+          "date": "2026-09-15"
+        },
+        {
+          "origin": "KHI",
+          "destination": "LHR",
+          "date": "2026-09-15"
+        },
+        {
+          "origin": "KHI",
+          "destination": "LHR",
+          "date": "2026-09-15"
+        },
+        {
+          "origin": "KHI",
+          "destination": "LHR",
+          "date": "2026-09-15"
+        }
+      ],
+      "offerCount": 11,
+      "liveFlights": true,
+      "reply": "I found 11 live options for London from PKR 134,611. Browse the results panel to compare, filter, and View deal — tell me if you'd like to r"
+    }
+  ],
+  "bonus": {
+    "user": "I want Dubai instead.",
+    "mergedPlan": {
+      "action": "search",
+      "query": {
+        "origin": "KHI",
+        "destination": "DXB",
+        "departureDate": "2026-09-15",
+        "passengers": 1,
+        "cabinClass": "ECONOMY"
+      }
+    },
+    "finalTravelportRequest": {
+      "origin": "KHI",
+      "destination": "DXB",
+      "departureDate": "2026-09-15"
+    },
+    "resultRoutes": [
+      {
+        "origin": "KHI",
+        "destination": "DXB",
+        "date": "2026-09-15"
+      },
+      {
+        "origin": "KHI",
+        "destination": "DXB",
+        "date": "2026-09-15"
+      },
+      {
+        "origin": "KHI",
+        "destination": "DXB",
+        "date": "2026-09-15"
+      },
+      {
+        "origin": "KHI",
+        "destination": "DXB",
+        "date": "2026-09-15"
+      },
+      {
+        "origin": "KHI",
+        "destination": "DXB",
+        "date": "2026-09-15"
+      },
+      {
+        "origin": "KHI",
+        "destination": "DXB",
+        "date": "2026-09-15"
+      },
+      {
+        "origin": "KHI",
+        "destination": "DXB",
+        "date": "2026-09-15"
+      },
+      {
+        "origin": "KHI",
+        "destination": "DXB",
+        "date": "2026-09-15"
+      },
+      {
+        "origin": "KHI",
+        "destination": "DXB",
+        "date": "2026-09-15"
+      },
+      {
+        "origin": "KHI",
+        "destination": "DXB",
+        "date": "2026-09-15"
+      },
+      {
+        "origin": "KHI",
+        "destination": "DXB",
+        "date": "2026-09-15"
+      },
+      {
+        "origin": "KHI",
+        "destination": "DXB",
+        "date": "2026-09-15"
+      },
+      {
+        "origin": "KHI",
+        "destination": "DXB",
+        "date": "2026-09-15"
+      },
+      {
+        "origin": "KHI",
+        "destination": "DXB",
+        "date": "2026-09-15"
+      },
+      {
+        "origin": "KHI",
+        "destination": "DXB",
+        "date": "2026-09-15"
+      }
+    ],
+    "reply": "I found 15 live options for Dubai from PKR 67,863. Browse the results panel to compare, filter, and View deal — tell me if you'd like to ref"
+  },
+  "status": "PASS"
+}

@@ -1,0 +1,6356 @@
+{
+  "1440x900@100%_landing": {
+    "doc": {
+      "innerHeight": 900,
+      "innerWidth": 1440,
+      "visualViewportHeight": 900,
+      "visualViewportWidth": 1440,
+      "docClientHeight": 900,
+      "docScrollHeight": 900,
+      "bodyClientHeight": 900,
+      "bodyScrollHeight": 900,
+      "scrollY": 0,
+      "foChatActive": false,
+      "bodyChildren": [
+        {
+          "tag": "div",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "main",
+          "cls": "fo-stage fo-stage--chat relative flex min-h-[100dvh] w-full min-w-0 flex-col",
+          "rectH": 900
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "next-route-announcer",
+          "cls": "",
+          "rectH": 0
+        }
+      ],
+      "cssVars": {
+        "foNavHeight": "",
+        "foChatAppHeight": "",
+        "chatComposerHeight": "",
+        "chatMessagesEndPad": ""
+      }
+    },
+    "els": {
+      "html": {
+        "rect": {
+          "top": 0,
+          "bottom": 900,
+          "height": 900,
+          "width": 1440
+        },
+        "scrollHeight": 900,
+        "clientHeight": 900,
+        "height": "900px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "clip visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "body": {
+        "rect": {
+          "top": 0,
+          "bottom": 900,
+          "height": 900,
+          "width": 1440
+        },
+        "scrollHeight": 900,
+        "clientHeight": 900,
+        "height": "900px",
+        "minHeight": "100%",
+        "maxHeight": "none",
+        "overflow": "clip visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "flex"
+      },
+      "main": {
+        "rect": {
+          "top": 0,
+          "bottom": 900,
+          "height": 900,
+          "width": 1440
+        },
+        "scrollHeight": 900,
+        "clientHeight": 900,
+        "height": "900px",
+        "minHeight": "900px",
+        "maxHeight": "none",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "relative",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "flex"
+      },
+      "foChatApp": {
+        "rect": {
+          "top": 62,
+          "bottom": 900,
+          "height": 838,
+          "width": 1440
+        },
+        "scrollHeight": 838,
+        "clientHeight": 838,
+        "height": "838.312px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "relative",
+        "flex": "1 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "askAiShell": {
+        "rect": {
+          "top": 62,
+          "bottom": 900,
+          "height": 838,
+          "width": 1440
+        },
+        "scrollHeight": 838,
+        "clientHeight": 838,
+        "height": "838.312px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "relative",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatPane": {
+        "rect": {
+          "top": 62,
+          "bottom": 900,
+          "height": 838,
+          "width": 1440
+        },
+        "scrollHeight": 838,
+        "clientHeight": 838,
+        "height": "838.312px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatPage": {
+        "rect": {
+          "top": 62,
+          "bottom": 900,
+          "height": 838,
+          "width": 1440
+        },
+        "scrollHeight": 838,
+        "clientHeight": 838,
+        "height": "838.312px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "1 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatInner": {
+        "rect": {
+          "top": 62,
+          "bottom": 900,
+          "height": 838,
+          "width": 1440
+        },
+        "scrollHeight": 838,
+        "clientHeight": 838,
+        "height": "838.312px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "1 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatHeader": {
+        "rect": {
+          "top": 62,
+          "bottom": 199,
+          "height": 137,
+          "width": 1440
+        },
+        "scrollHeight": 137,
+        "clientHeight": 137,
+        "height": "137.281px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "messages": {
+        "rect": {
+          "top": 199,
+          "bottom": 517,
+          "height": 318,
+          "width": 1440
+        },
+        "scrollHeight": 318,
+        "clientHeight": 318,
+        "height": "318px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "relative",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "messagesInner": {
+        "rect": {
+          "top": 199,
+          "bottom": 517,
+          "height": 318,
+          "width": 1280
+        },
+        "scrollHeight": 318,
+        "clientHeight": 318,
+        "height": "318px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "footer": {
+        "rect": {
+          "top": 517,
+          "bottom": 653,
+          "height": 137,
+          "width": 1440
+        },
+        "scrollHeight": 137,
+        "clientHeight": 137,
+        "height": "136.516px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "relative",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "nav": {
+        "rect": {
+          "top": 0,
+          "bottom": 62,
+          "height": 62,
+          "width": 1440
+        },
+        "scrollHeight": 62,
+        "clientHeight": 62,
+        "height": "61.6875px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "sticky",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      }
+    },
+    "analysis": {
+      "documentScrolls": false,
+      "bodyScrolls": false,
+      "footerBelowViewport": false,
+      "headerAboveViewport": false,
+      "footerBottomVsInnerHeight": -247,
+      "messagesIsScrollContainer": false,
+      "messagesCanScroll": false,
+      "messagesScrollsNotDoc": false,
+      "chatPageActive": false,
+      "chatInnerSumVsChatPage": -246,
+      "chatPageVsFoChatApp": 0,
+      "foChatAppVsVar": 838
+    }
+  },
+  "1440x900@100%_active_stress": {
+    "doc": {
+      "innerHeight": 900,
+      "innerWidth": 1440,
+      "visualViewportHeight": 900,
+      "visualViewportWidth": 1440,
+      "docClientHeight": 900,
+      "docScrollHeight": 900,
+      "bodyClientHeight": 900,
+      "bodyScrollHeight": 900,
+      "scrollY": 0,
+      "foChatActive": true,
+      "bodyChildren": [
+        {
+          "tag": "div",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "main",
+          "cls": "fo-stage fo-stage--chat relative flex min-h-[100dvh] w-full min-w-0 flex-col",
+          "rectH": 900
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "next-route-announcer",
+          "cls": "",
+          "rectH": 0
+        }
+      ],
+      "cssVars": {
+        "foNavHeight": "61.6875px",
+        "foChatAppHeight": "838.3125px",
+        "chatComposerHeight": "177.84375px",
+        "chatMessagesEndPad": "35px"
+      }
+    },
+    "els": {
+      "html": {
+        "rect": {
+          "top": 0,
+          "bottom": 900,
+          "height": 900,
+          "width": 1440
+        },
+        "scrollHeight": 900,
+        "clientHeight": 900,
+        "height": "900px",
+        "minHeight": "0px",
+        "maxHeight": "900px",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "body": {
+        "rect": {
+          "top": 0,
+          "bottom": 900,
+          "height": 900,
+          "width": 1440
+        },
+        "scrollHeight": 900,
+        "clientHeight": 900,
+        "height": "900px",
+        "minHeight": "100%",
+        "maxHeight": "900px",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "flex"
+      },
+      "main": {
+        "rect": {
+          "top": 0,
+          "bottom": 900,
+          "height": 900,
+          "width": 1440
+        },
+        "scrollHeight": 900,
+        "clientHeight": 900,
+        "height": "900px",
+        "minHeight": "0px",
+        "maxHeight": "900px",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "relative",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "flex"
+      },
+      "foChatApp": {
+        "rect": {
+          "top": 62,
+          "bottom": 900,
+          "height": 838,
+          "width": 1440
+        },
+        "scrollHeight": 838,
+        "clientHeight": 838,
+        "height": "838.312px",
+        "minHeight": "0px",
+        "maxHeight": "838.312px",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "relative",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "flex"
+      },
+      "askAiShell": {
+        "rect": {
+          "top": 62,
+          "bottom": 900,
+          "height": 838,
+          "width": 1440
+        },
+        "scrollHeight": 838,
+        "clientHeight": 838,
+        "height": "838.312px",
+        "minHeight": "0px",
+        "maxHeight": "100%",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "relative",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatPane": {
+        "rect": {
+          "top": 62,
+          "bottom": 900,
+          "height": 838,
+          "width": 1440
+        },
+        "scrollHeight": 838,
+        "clientHeight": 838,
+        "height": "838.312px",
+        "minHeight": "0px",
+        "maxHeight": "100%",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatPage": {
+        "rect": {
+          "top": 62,
+          "bottom": 900,
+          "height": 838,
+          "width": 1440
+        },
+        "scrollHeight": 838,
+        "clientHeight": 838,
+        "height": "838.312px",
+        "minHeight": "0px",
+        "maxHeight": "100%",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatInner": {
+        "rect": {
+          "top": 62,
+          "bottom": 900,
+          "height": 838,
+          "width": 1440
+        },
+        "scrollHeight": 838,
+        "clientHeight": 838,
+        "height": "838.312px",
+        "minHeight": "0px",
+        "maxHeight": "100%",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatHeader": {
+        "rect": {
+          "top": 62,
+          "bottom": 133,
+          "height": 72,
+          "width": 1440
+        },
+        "scrollHeight": 71,
+        "clientHeight": 71,
+        "height": "71.5156px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "messages": {
+        "rect": {
+          "top": 133,
+          "bottom": 722,
+          "height": 589,
+          "width": 1440
+        },
+        "scrollHeight": 1209,
+        "clientHeight": 589,
+        "height": "588.953px",
+        "minHeight": "0px",
+        "maxHeight": "100%",
+        "overflow": "hidden auto",
+        "overflowY": "auto",
+        "position": "relative",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "block"
+      },
+      "messagesInner": {
+        "rect": {
+          "top": -487,
+          "bottom": 722,
+          "height": 1209,
+          "width": 1280
+        },
+        "scrollHeight": 1209,
+        "clientHeight": 1209,
+        "height": "1209.11px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "footer": {
+        "rect": {
+          "top": 722,
+          "bottom": 900,
+          "height": 178,
+          "width": 1440
+        },
+        "scrollHeight": 178,
+        "clientHeight": 178,
+        "height": "177.844px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "relative",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "nav": {
+        "rect": {
+          "top": 0,
+          "bottom": 62,
+          "height": 62,
+          "width": 1440
+        },
+        "scrollHeight": 62,
+        "clientHeight": 62,
+        "height": "61.6875px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "sticky",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      }
+    },
+    "analysis": {
+      "documentScrolls": false,
+      "bodyScrolls": false,
+      "footerBelowViewport": false,
+      "headerAboveViewport": false,
+      "footerBottomVsInnerHeight": 0,
+      "messagesIsScrollContainer": true,
+      "messagesCanScroll": true,
+      "messagesScrollsNotDoc": true,
+      "chatPageActive": true,
+      "chatInnerSumVsChatPage": 1,
+      "chatPageVsFoChatApp": 0,
+      "foChatAppVsVar": 838
+    }
+  },
+  "1280x800@100%_landing": {
+    "doc": {
+      "innerHeight": 800,
+      "innerWidth": 1280,
+      "visualViewportHeight": 800,
+      "visualViewportWidth": 1280,
+      "docClientHeight": 800,
+      "docScrollHeight": 800,
+      "bodyClientHeight": 800,
+      "bodyScrollHeight": 800,
+      "scrollY": 0,
+      "foChatActive": false,
+      "bodyChildren": [
+        {
+          "tag": "div",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "main",
+          "cls": "fo-stage fo-stage--chat relative flex min-h-[100dvh] w-full min-w-0 flex-col",
+          "rectH": 800
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "next-route-announcer",
+          "cls": "",
+          "rectH": 0
+        }
+      ],
+      "cssVars": {
+        "foNavHeight": "",
+        "foChatAppHeight": "",
+        "chatComposerHeight": "",
+        "chatMessagesEndPad": ""
+      }
+    },
+    "els": {
+      "html": {
+        "rect": {
+          "top": 0,
+          "bottom": 800,
+          "height": 800,
+          "width": 1280
+        },
+        "scrollHeight": 800,
+        "clientHeight": 800,
+        "height": "800px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "clip visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "body": {
+        "rect": {
+          "top": 0,
+          "bottom": 800,
+          "height": 800,
+          "width": 1280
+        },
+        "scrollHeight": 800,
+        "clientHeight": 800,
+        "height": "800px",
+        "minHeight": "100%",
+        "maxHeight": "none",
+        "overflow": "clip visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "flex"
+      },
+      "main": {
+        "rect": {
+          "top": 0,
+          "bottom": 800,
+          "height": 800,
+          "width": 1280
+        },
+        "scrollHeight": 800,
+        "clientHeight": 800,
+        "height": "800px",
+        "minHeight": "800px",
+        "maxHeight": "none",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "relative",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "flex"
+      },
+      "foChatApp": {
+        "rect": {
+          "top": 62,
+          "bottom": 800,
+          "height": 738,
+          "width": 1280
+        },
+        "scrollHeight": 738,
+        "clientHeight": 738,
+        "height": "738.312px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "relative",
+        "flex": "1 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "askAiShell": {
+        "rect": {
+          "top": 62,
+          "bottom": 800,
+          "height": 738,
+          "width": 1280
+        },
+        "scrollHeight": 738,
+        "clientHeight": 738,
+        "height": "738.312px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "relative",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatPane": {
+        "rect": {
+          "top": 62,
+          "bottom": 800,
+          "height": 738,
+          "width": 1280
+        },
+        "scrollHeight": 738,
+        "clientHeight": 738,
+        "height": "738.312px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatPage": {
+        "rect": {
+          "top": 62,
+          "bottom": 800,
+          "height": 738,
+          "width": 1280
+        },
+        "scrollHeight": 738,
+        "clientHeight": 738,
+        "height": "738.312px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "1 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatInner": {
+        "rect": {
+          "top": 62,
+          "bottom": 800,
+          "height": 738,
+          "width": 1280
+        },
+        "scrollHeight": 738,
+        "clientHeight": 738,
+        "height": "738.312px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "1 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatHeader": {
+        "rect": {
+          "top": 62,
+          "bottom": 199,
+          "height": 137,
+          "width": 1280
+        },
+        "scrollHeight": 137,
+        "clientHeight": 137,
+        "height": "137.281px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "messages": {
+        "rect": {
+          "top": 199,
+          "bottom": 517,
+          "height": 318,
+          "width": 1280
+        },
+        "scrollHeight": 318,
+        "clientHeight": 318,
+        "height": "318px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "relative",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "messagesInner": {
+        "rect": {
+          "top": 199,
+          "bottom": 517,
+          "height": 318,
+          "width": 1280
+        },
+        "scrollHeight": 318,
+        "clientHeight": 318,
+        "height": "318px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "footer": {
+        "rect": {
+          "top": 517,
+          "bottom": 653,
+          "height": 137,
+          "width": 1280
+        },
+        "scrollHeight": 137,
+        "clientHeight": 137,
+        "height": "136.516px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "relative",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "nav": {
+        "rect": {
+          "top": 0,
+          "bottom": 62,
+          "height": 62,
+          "width": 1280
+        },
+        "scrollHeight": 62,
+        "clientHeight": 62,
+        "height": "61.6875px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "sticky",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      }
+    },
+    "analysis": {
+      "documentScrolls": false,
+      "bodyScrolls": false,
+      "footerBelowViewport": false,
+      "headerAboveViewport": false,
+      "footerBottomVsInnerHeight": -147,
+      "messagesIsScrollContainer": false,
+      "messagesCanScroll": false,
+      "messagesScrollsNotDoc": false,
+      "chatPageActive": false,
+      "chatInnerSumVsChatPage": -146,
+      "chatPageVsFoChatApp": 0,
+      "foChatAppVsVar": 738
+    }
+  },
+  "1280x800@100%_active_stress": {
+    "doc": {
+      "innerHeight": 800,
+      "innerWidth": 1280,
+      "visualViewportHeight": 800,
+      "visualViewportWidth": 1280,
+      "docClientHeight": 800,
+      "docScrollHeight": 800,
+      "bodyClientHeight": 800,
+      "bodyScrollHeight": 800,
+      "scrollY": 0,
+      "foChatActive": true,
+      "bodyChildren": [
+        {
+          "tag": "div",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "main",
+          "cls": "fo-stage fo-stage--chat relative flex min-h-[100dvh] w-full min-w-0 flex-col",
+          "rectH": 800
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "next-route-announcer",
+          "cls": "",
+          "rectH": 0
+        }
+      ],
+      "cssVars": {
+        "foNavHeight": "61.6875px",
+        "foChatAppHeight": "738.3125px",
+        "chatComposerHeight": "177.84375px",
+        "chatMessagesEndPad": "35px"
+      }
+    },
+    "els": {
+      "html": {
+        "rect": {
+          "top": 0,
+          "bottom": 800,
+          "height": 800,
+          "width": 1280
+        },
+        "scrollHeight": 800,
+        "clientHeight": 800,
+        "height": "800px",
+        "minHeight": "0px",
+        "maxHeight": "800px",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "body": {
+        "rect": {
+          "top": 0,
+          "bottom": 800,
+          "height": 800,
+          "width": 1280
+        },
+        "scrollHeight": 800,
+        "clientHeight": 800,
+        "height": "800px",
+        "minHeight": "100%",
+        "maxHeight": "800px",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "flex"
+      },
+      "main": {
+        "rect": {
+          "top": 0,
+          "bottom": 800,
+          "height": 800,
+          "width": 1280
+        },
+        "scrollHeight": 800,
+        "clientHeight": 800,
+        "height": "800px",
+        "minHeight": "0px",
+        "maxHeight": "800px",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "relative",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "flex"
+      },
+      "foChatApp": {
+        "rect": {
+          "top": 62,
+          "bottom": 800,
+          "height": 738,
+          "width": 1280
+        },
+        "scrollHeight": 738,
+        "clientHeight": 738,
+        "height": "738.312px",
+        "minHeight": "0px",
+        "maxHeight": "738.312px",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "relative",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "flex"
+      },
+      "askAiShell": {
+        "rect": {
+          "top": 62,
+          "bottom": 800,
+          "height": 738,
+          "width": 1280
+        },
+        "scrollHeight": 738,
+        "clientHeight": 738,
+        "height": "738.312px",
+        "minHeight": "0px",
+        "maxHeight": "100%",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "relative",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatPane": {
+        "rect": {
+          "top": 62,
+          "bottom": 800,
+          "height": 738,
+          "width": 1280
+        },
+        "scrollHeight": 738,
+        "clientHeight": 738,
+        "height": "738.312px",
+        "minHeight": "0px",
+        "maxHeight": "100%",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatPage": {
+        "rect": {
+          "top": 62,
+          "bottom": 800,
+          "height": 738,
+          "width": 1280
+        },
+        "scrollHeight": 738,
+        "clientHeight": 738,
+        "height": "738.312px",
+        "minHeight": "0px",
+        "maxHeight": "100%",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatInner": {
+        "rect": {
+          "top": 62,
+          "bottom": 800,
+          "height": 738,
+          "width": 1280
+        },
+        "scrollHeight": 738,
+        "clientHeight": 738,
+        "height": "738.312px",
+        "minHeight": "0px",
+        "maxHeight": "100%",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatHeader": {
+        "rect": {
+          "top": 62,
+          "bottom": 133,
+          "height": 72,
+          "width": 1280
+        },
+        "scrollHeight": 71,
+        "clientHeight": 71,
+        "height": "71.5156px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "messages": {
+        "rect": {
+          "top": 133,
+          "bottom": 622,
+          "height": 489,
+          "width": 1280
+        },
+        "scrollHeight": 1209,
+        "clientHeight": 489,
+        "height": "488.953px",
+        "minHeight": "0px",
+        "maxHeight": "100%",
+        "overflow": "hidden auto",
+        "overflowY": "auto",
+        "position": "relative",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "block"
+      },
+      "messagesInner": {
+        "rect": {
+          "top": -587,
+          "bottom": 622,
+          "height": 1209,
+          "width": 1270
+        },
+        "scrollHeight": 1209,
+        "clientHeight": 1209,
+        "height": "1209.11px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "footer": {
+        "rect": {
+          "top": 622,
+          "bottom": 800,
+          "height": 178,
+          "width": 1280
+        },
+        "scrollHeight": 178,
+        "clientHeight": 178,
+        "height": "177.844px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "relative",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "nav": {
+        "rect": {
+          "top": 0,
+          "bottom": 62,
+          "height": 62,
+          "width": 1280
+        },
+        "scrollHeight": 62,
+        "clientHeight": 62,
+        "height": "61.6875px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "sticky",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      }
+    },
+    "analysis": {
+      "documentScrolls": false,
+      "bodyScrolls": false,
+      "footerBelowViewport": false,
+      "headerAboveViewport": false,
+      "footerBottomVsInnerHeight": 0,
+      "messagesIsScrollContainer": true,
+      "messagesCanScroll": true,
+      "messagesScrollsNotDoc": true,
+      "chatPageActive": true,
+      "chatInnerSumVsChatPage": 1,
+      "chatPageVsFoChatApp": 0,
+      "foChatAppVsVar": 738
+    }
+  },
+  "390x844@100%_landing": {
+    "doc": {
+      "innerHeight": 844,
+      "innerWidth": 390,
+      "visualViewportHeight": 844,
+      "visualViewportWidth": 390,
+      "docClientHeight": 844,
+      "docScrollHeight": 844,
+      "bodyClientHeight": 844,
+      "bodyScrollHeight": 844,
+      "scrollY": 0,
+      "foChatActive": false,
+      "bodyChildren": [
+        {
+          "tag": "div",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "main",
+          "cls": "fo-stage fo-stage--chat relative flex min-h-[100dvh] w-full min-w-0 flex-col",
+          "rectH": 844
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "next-route-announcer",
+          "cls": "",
+          "rectH": 0
+        }
+      ],
+      "cssVars": {
+        "foNavHeight": "",
+        "foChatAppHeight": "",
+        "chatComposerHeight": "",
+        "chatMessagesEndPad": ""
+      }
+    },
+    "els": {
+      "html": {
+        "rect": {
+          "top": 0,
+          "bottom": 844,
+          "height": 844,
+          "width": 390
+        },
+        "scrollHeight": 844,
+        "clientHeight": 844,
+        "height": "844px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "clip visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "body": {
+        "rect": {
+          "top": 0,
+          "bottom": 844,
+          "height": 844,
+          "width": 390
+        },
+        "scrollHeight": 844,
+        "clientHeight": 844,
+        "height": "844px",
+        "minHeight": "100%",
+        "maxHeight": "none",
+        "overflow": "clip visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "flex"
+      },
+      "main": {
+        "rect": {
+          "top": 0,
+          "bottom": 844,
+          "height": 844,
+          "width": 390
+        },
+        "scrollHeight": 844,
+        "clientHeight": 844,
+        "height": "844px",
+        "minHeight": "844px",
+        "maxHeight": "none",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "relative",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "flex"
+      },
+      "foChatApp": {
+        "rect": {
+          "top": 62,
+          "bottom": 844,
+          "height": 782,
+          "width": 390
+        },
+        "scrollHeight": 782,
+        "clientHeight": 782,
+        "height": "782.312px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "relative",
+        "flex": "1 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "askAiShell": {
+        "rect": {
+          "top": 62,
+          "bottom": 844,
+          "height": 782,
+          "width": 390
+        },
+        "scrollHeight": 782,
+        "clientHeight": 782,
+        "height": "782.312px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "relative",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatPane": {
+        "rect": {
+          "top": 62,
+          "bottom": 844,
+          "height": 782,
+          "width": 390
+        },
+        "scrollHeight": 782,
+        "clientHeight": 782,
+        "height": "782.312px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatPage": {
+        "rect": {
+          "top": 62,
+          "bottom": 844,
+          "height": 782,
+          "width": 390
+        },
+        "scrollHeight": 782,
+        "clientHeight": 782,
+        "height": "782.312px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "1 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatInner": {
+        "rect": {
+          "top": 62,
+          "bottom": 844,
+          "height": 782,
+          "width": 390
+        },
+        "scrollHeight": 782,
+        "clientHeight": 782,
+        "height": "782.312px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "1 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatHeader": {
+        "rect": {
+          "top": 62,
+          "bottom": 187,
+          "height": 126,
+          "width": 390
+        },
+        "scrollHeight": 126,
+        "clientHeight": 126,
+        "height": "125.719px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "messages": {
+        "rect": {
+          "top": 187,
+          "bottom": 699,
+          "height": 512,
+          "width": 390
+        },
+        "scrollHeight": 512,
+        "clientHeight": 512,
+        "height": "511.891px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "relative",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "messagesInner": {
+        "rect": {
+          "top": 187,
+          "bottom": 699,
+          "height": 512,
+          "width": 390
+        },
+        "scrollHeight": 512,
+        "clientHeight": 512,
+        "height": "511.891px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "footer": {
+        "rect": {
+          "top": 699,
+          "bottom": 815,
+          "height": 116,
+          "width": 390
+        },
+        "scrollHeight": 116,
+        "clientHeight": 116,
+        "height": "115.531px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "relative",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "nav": {
+        "rect": {
+          "top": 0,
+          "bottom": 62,
+          "height": 62,
+          "width": 390
+        },
+        "scrollHeight": 62,
+        "clientHeight": 62,
+        "height": "61.6875px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "sticky",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      }
+    },
+    "analysis": {
+      "documentScrolls": false,
+      "bodyScrolls": false,
+      "footerBelowViewport": false,
+      "headerAboveViewport": false,
+      "footerBottomVsInnerHeight": -29,
+      "messagesIsScrollContainer": false,
+      "messagesCanScroll": false,
+      "messagesScrollsNotDoc": false,
+      "chatPageActive": false,
+      "chatInnerSumVsChatPage": -28,
+      "chatPageVsFoChatApp": 0,
+      "foChatAppVsVar": 782
+    }
+  },
+  "390x844@100%_active_stress": {
+    "doc": {
+      "innerHeight": 844,
+      "innerWidth": 390,
+      "visualViewportHeight": 844,
+      "visualViewportWidth": 390,
+      "docClientHeight": 844,
+      "docScrollHeight": 844,
+      "bodyClientHeight": 844,
+      "bodyScrollHeight": 844,
+      "scrollY": 0,
+      "foChatActive": true,
+      "bodyChildren": [
+        {
+          "tag": "div",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "main",
+          "cls": "fo-stage fo-stage--chat relative flex min-h-[100dvh] w-full min-w-0 flex-col",
+          "rectH": 844
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "next-route-announcer",
+          "cls": "",
+          "rectH": 0
+        }
+      ],
+      "cssVars": {
+        "foNavHeight": "61.6875px",
+        "foChatAppHeight": "782.3125px",
+        "chatComposerHeight": "205.1875px",
+        "chatMessagesEndPad": "39px"
+      }
+    },
+    "els": {
+      "html": {
+        "rect": {
+          "top": 0,
+          "bottom": 844,
+          "height": 844,
+          "width": 390
+        },
+        "scrollHeight": 844,
+        "clientHeight": 844,
+        "height": "844px",
+        "minHeight": "0px",
+        "maxHeight": "844px",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "body": {
+        "rect": {
+          "top": 0,
+          "bottom": 844,
+          "height": 844,
+          "width": 390
+        },
+        "scrollHeight": 844,
+        "clientHeight": 844,
+        "height": "844px",
+        "minHeight": "100%",
+        "maxHeight": "844px",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "flex"
+      },
+      "main": {
+        "rect": {
+          "top": 0,
+          "bottom": 844,
+          "height": 844,
+          "width": 390
+        },
+        "scrollHeight": 844,
+        "clientHeight": 844,
+        "height": "844px",
+        "minHeight": "0px",
+        "maxHeight": "844px",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "relative",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "flex"
+      },
+      "foChatApp": {
+        "rect": {
+          "top": 62,
+          "bottom": 844,
+          "height": 782,
+          "width": 390
+        },
+        "scrollHeight": 782,
+        "clientHeight": 782,
+        "height": "782.312px",
+        "minHeight": "0px",
+        "maxHeight": "782.312px",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "relative",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "flex"
+      },
+      "askAiShell": {
+        "rect": {
+          "top": 62,
+          "bottom": 844,
+          "height": 782,
+          "width": 390
+        },
+        "scrollHeight": 782,
+        "clientHeight": 782,
+        "height": "782.312px",
+        "minHeight": "0px",
+        "maxHeight": "100%",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "relative",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatPane": {
+        "rect": {
+          "top": 62,
+          "bottom": 844,
+          "height": 782,
+          "width": 390
+        },
+        "scrollHeight": 782,
+        "clientHeight": 782,
+        "height": "782.312px",
+        "minHeight": "0px",
+        "maxHeight": "100%",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatPage": {
+        "rect": {
+          "top": 62,
+          "bottom": 844,
+          "height": 782,
+          "width": 390
+        },
+        "scrollHeight": 782,
+        "clientHeight": 782,
+        "height": "782.312px",
+        "minHeight": "0px",
+        "maxHeight": "100%",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatInner": {
+        "rect": {
+          "top": 62,
+          "bottom": 844,
+          "height": 782,
+          "width": 390
+        },
+        "scrollHeight": 782,
+        "clientHeight": 782,
+        "height": "782.312px",
+        "minHeight": "0px",
+        "maxHeight": "100%",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatHeader": {
+        "rect": {
+          "top": 62,
+          "bottom": 174,
+          "height": 112,
+          "width": 390
+        },
+        "scrollHeight": 111,
+        "clientHeight": 111,
+        "height": "112.438px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "messages": {
+        "rect": {
+          "top": 174,
+          "bottom": 639,
+          "height": 465,
+          "width": 390
+        },
+        "scrollHeight": 1607,
+        "clientHeight": 465,
+        "height": "464.688px",
+        "minHeight": "0px",
+        "maxHeight": "100%",
+        "overflow": "hidden auto",
+        "overflowY": "auto",
+        "position": "relative",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "block"
+      },
+      "messagesInner": {
+        "rect": {
+          "top": -968,
+          "bottom": 640,
+          "height": 1607,
+          "width": 380
+        },
+        "scrollHeight": 1607,
+        "clientHeight": 1607,
+        "height": "1607.48px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "footer": {
+        "rect": {
+          "top": 639,
+          "bottom": 844,
+          "height": 205,
+          "width": 390
+        },
+        "scrollHeight": 205,
+        "clientHeight": 205,
+        "height": "205.188px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "relative",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "nav": {
+        "rect": {
+          "top": 0,
+          "bottom": 62,
+          "height": 62,
+          "width": 390
+        },
+        "scrollHeight": 62,
+        "clientHeight": 62,
+        "height": "61.6875px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "sticky",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      }
+    },
+    "analysis": {
+      "documentScrolls": false,
+      "bodyScrolls": false,
+      "footerBelowViewport": false,
+      "headerAboveViewport": false,
+      "footerBottomVsInnerHeight": 0,
+      "messagesIsScrollContainer": true,
+      "messagesCanScroll": true,
+      "messagesScrollsNotDoc": true,
+      "chatPageActive": true,
+      "chatInnerSumVsChatPage": 0,
+      "chatPageVsFoChatApp": 0,
+      "foChatAppVsVar": 782
+    }
+  },
+  "430x932@100%_landing": {
+    "doc": {
+      "innerHeight": 932,
+      "innerWidth": 430,
+      "visualViewportHeight": 932,
+      "visualViewportWidth": 430,
+      "docClientHeight": 932,
+      "docScrollHeight": 932,
+      "bodyClientHeight": 932,
+      "bodyScrollHeight": 932,
+      "scrollY": 0,
+      "foChatActive": false,
+      "bodyChildren": [
+        {
+          "tag": "div",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "main",
+          "cls": "fo-stage fo-stage--chat relative flex min-h-[100dvh] w-full min-w-0 flex-col",
+          "rectH": 932
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "next-route-announcer",
+          "cls": "",
+          "rectH": 0
+        }
+      ],
+      "cssVars": {
+        "foNavHeight": "",
+        "foChatAppHeight": "",
+        "chatComposerHeight": "",
+        "chatMessagesEndPad": ""
+      }
+    },
+    "els": {
+      "html": {
+        "rect": {
+          "top": 0,
+          "bottom": 932,
+          "height": 932,
+          "width": 430
+        },
+        "scrollHeight": 932,
+        "clientHeight": 932,
+        "height": "932px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "clip visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "body": {
+        "rect": {
+          "top": 0,
+          "bottom": 932,
+          "height": 932,
+          "width": 430
+        },
+        "scrollHeight": 932,
+        "clientHeight": 932,
+        "height": "932px",
+        "minHeight": "100%",
+        "maxHeight": "none",
+        "overflow": "clip visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "flex"
+      },
+      "main": {
+        "rect": {
+          "top": 0,
+          "bottom": 932,
+          "height": 932,
+          "width": 430
+        },
+        "scrollHeight": 932,
+        "clientHeight": 932,
+        "height": "932px",
+        "minHeight": "932px",
+        "maxHeight": "none",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "relative",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "flex"
+      },
+      "foChatApp": {
+        "rect": {
+          "top": 62,
+          "bottom": 932,
+          "height": 870,
+          "width": 430
+        },
+        "scrollHeight": 870,
+        "clientHeight": 870,
+        "height": "870.312px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "relative",
+        "flex": "1 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "askAiShell": {
+        "rect": {
+          "top": 62,
+          "bottom": 932,
+          "height": 870,
+          "width": 430
+        },
+        "scrollHeight": 870,
+        "clientHeight": 870,
+        "height": "870.312px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "relative",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatPane": {
+        "rect": {
+          "top": 62,
+          "bottom": 932,
+          "height": 870,
+          "width": 430
+        },
+        "scrollHeight": 870,
+        "clientHeight": 870,
+        "height": "870.312px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatPage": {
+        "rect": {
+          "top": 62,
+          "bottom": 932,
+          "height": 870,
+          "width": 430
+        },
+        "scrollHeight": 870,
+        "clientHeight": 870,
+        "height": "870.312px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "1 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatInner": {
+        "rect": {
+          "top": 62,
+          "bottom": 932,
+          "height": 870,
+          "width": 430
+        },
+        "scrollHeight": 870,
+        "clientHeight": 870,
+        "height": "870.312px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "1 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatHeader": {
+        "rect": {
+          "top": 62,
+          "bottom": 187,
+          "height": 126,
+          "width": 430
+        },
+        "scrollHeight": 126,
+        "clientHeight": 126,
+        "height": "125.719px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "messages": {
+        "rect": {
+          "top": 187,
+          "bottom": 699,
+          "height": 512,
+          "width": 430
+        },
+        "scrollHeight": 512,
+        "clientHeight": 512,
+        "height": "511.891px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "relative",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "messagesInner": {
+        "rect": {
+          "top": 187,
+          "bottom": 699,
+          "height": 512,
+          "width": 430
+        },
+        "scrollHeight": 512,
+        "clientHeight": 512,
+        "height": "511.891px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "footer": {
+        "rect": {
+          "top": 699,
+          "bottom": 815,
+          "height": 116,
+          "width": 430
+        },
+        "scrollHeight": 116,
+        "clientHeight": 116,
+        "height": "115.531px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "relative",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "nav": {
+        "rect": {
+          "top": 0,
+          "bottom": 62,
+          "height": 62,
+          "width": 430
+        },
+        "scrollHeight": 62,
+        "clientHeight": 62,
+        "height": "61.6875px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "sticky",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      }
+    },
+    "analysis": {
+      "documentScrolls": false,
+      "bodyScrolls": false,
+      "footerBelowViewport": false,
+      "headerAboveViewport": false,
+      "footerBottomVsInnerHeight": -117,
+      "messagesIsScrollContainer": false,
+      "messagesCanScroll": false,
+      "messagesScrollsNotDoc": false,
+      "chatPageActive": false,
+      "chatInnerSumVsChatPage": -116,
+      "chatPageVsFoChatApp": 0,
+      "foChatAppVsVar": 870
+    }
+  },
+  "430x932@100%_active_stress": {
+    "doc": {
+      "innerHeight": 932,
+      "innerWidth": 430,
+      "visualViewportHeight": 932,
+      "visualViewportWidth": 430,
+      "docClientHeight": 932,
+      "docScrollHeight": 932,
+      "bodyClientHeight": 932,
+      "bodyScrollHeight": 932,
+      "scrollY": 0,
+      "foChatActive": true,
+      "bodyChildren": [
+        {
+          "tag": "div",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "main",
+          "cls": "fo-stage fo-stage--chat relative flex min-h-[100dvh] w-full min-w-0 flex-col",
+          "rectH": 932
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "next-route-announcer",
+          "cls": "",
+          "rectH": 0
+        }
+      ],
+      "cssVars": {
+        "foNavHeight": "61.6875px",
+        "foChatAppHeight": "870.3125px",
+        "chatComposerHeight": "205.1875px",
+        "chatMessagesEndPad": "39px"
+      }
+    },
+    "els": {
+      "html": {
+        "rect": {
+          "top": 0,
+          "bottom": 932,
+          "height": 932,
+          "width": 430
+        },
+        "scrollHeight": 932,
+        "clientHeight": 932,
+        "height": "932px",
+        "minHeight": "0px",
+        "maxHeight": "932px",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "body": {
+        "rect": {
+          "top": 0,
+          "bottom": 932,
+          "height": 932,
+          "width": 430
+        },
+        "scrollHeight": 932,
+        "clientHeight": 932,
+        "height": "932px",
+        "minHeight": "100%",
+        "maxHeight": "932px",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "flex"
+      },
+      "main": {
+        "rect": {
+          "top": 0,
+          "bottom": 932,
+          "height": 932,
+          "width": 430
+        },
+        "scrollHeight": 932,
+        "clientHeight": 932,
+        "height": "932px",
+        "minHeight": "0px",
+        "maxHeight": "932px",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "relative",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "flex"
+      },
+      "foChatApp": {
+        "rect": {
+          "top": 62,
+          "bottom": 932,
+          "height": 870,
+          "width": 430
+        },
+        "scrollHeight": 870,
+        "clientHeight": 870,
+        "height": "870.312px",
+        "minHeight": "0px",
+        "maxHeight": "870.312px",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "relative",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "flex"
+      },
+      "askAiShell": {
+        "rect": {
+          "top": 62,
+          "bottom": 932,
+          "height": 870,
+          "width": 430
+        },
+        "scrollHeight": 870,
+        "clientHeight": 870,
+        "height": "870.312px",
+        "minHeight": "0px",
+        "maxHeight": "100%",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "relative",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatPane": {
+        "rect": {
+          "top": 62,
+          "bottom": 932,
+          "height": 870,
+          "width": 430
+        },
+        "scrollHeight": 870,
+        "clientHeight": 870,
+        "height": "870.312px",
+        "minHeight": "0px",
+        "maxHeight": "100%",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatPage": {
+        "rect": {
+          "top": 62,
+          "bottom": 932,
+          "height": 870,
+          "width": 430
+        },
+        "scrollHeight": 870,
+        "clientHeight": 870,
+        "height": "870.312px",
+        "minHeight": "0px",
+        "maxHeight": "100%",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatInner": {
+        "rect": {
+          "top": 62,
+          "bottom": 932,
+          "height": 870,
+          "width": 430
+        },
+        "scrollHeight": 870,
+        "clientHeight": 870,
+        "height": "870.312px",
+        "minHeight": "0px",
+        "maxHeight": "100%",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatHeader": {
+        "rect": {
+          "top": 62,
+          "bottom": 152,
+          "height": 91,
+          "width": 430
+        },
+        "scrollHeight": 90,
+        "clientHeight": 90,
+        "height": "90.6562px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "messages": {
+        "rect": {
+          "top": 152,
+          "bottom": 727,
+          "height": 574,
+          "width": 430
+        },
+        "scrollHeight": 1584,
+        "clientHeight": 574,
+        "height": "574.469px",
+        "minHeight": "0px",
+        "maxHeight": "100%",
+        "overflow": "hidden auto",
+        "overflowY": "auto",
+        "position": "relative",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "block"
+      },
+      "messagesInner": {
+        "rect": {
+          "top": -858,
+          "bottom": 726,
+          "height": 1584,
+          "width": 420
+        },
+        "scrollHeight": 1584,
+        "clientHeight": 1584,
+        "height": "1583.8px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "footer": {
+        "rect": {
+          "top": 727,
+          "bottom": 932,
+          "height": 205,
+          "width": 430
+        },
+        "scrollHeight": 205,
+        "clientHeight": 205,
+        "height": "205.188px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "relative",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "nav": {
+        "rect": {
+          "top": 0,
+          "bottom": 62,
+          "height": 62,
+          "width": 430
+        },
+        "scrollHeight": 62,
+        "clientHeight": 62,
+        "height": "61.6875px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "sticky",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      }
+    },
+    "analysis": {
+      "documentScrolls": false,
+      "bodyScrolls": false,
+      "footerBelowViewport": false,
+      "headerAboveViewport": false,
+      "footerBottomVsInnerHeight": 0,
+      "messagesIsScrollContainer": true,
+      "messagesCanScroll": true,
+      "messagesScrollsNotDoc": true,
+      "chatPageActive": true,
+      "chatInnerSumVsChatPage": 0,
+      "chatPageVsFoChatApp": 0,
+      "foChatAppVsVar": 870
+    }
+  },
+  "1440x900@90%_landing": {
+    "doc": {
+      "innerHeight": 900,
+      "innerWidth": 1440,
+      "visualViewportHeight": 900,
+      "visualViewportWidth": 1440,
+      "docClientHeight": 900,
+      "docScrollHeight": 900,
+      "bodyClientHeight": 900,
+      "bodyScrollHeight": 900,
+      "scrollY": 0,
+      "foChatActive": false,
+      "bodyChildren": [
+        {
+          "tag": "div",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "main",
+          "cls": "fo-stage fo-stage--chat relative flex min-h-[100dvh] w-full min-w-0 flex-col",
+          "rectH": 900
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "next-route-announcer",
+          "cls": "",
+          "rectH": 0
+        }
+      ],
+      "cssVars": {
+        "foNavHeight": "",
+        "foChatAppHeight": "",
+        "chatComposerHeight": "",
+        "chatMessagesEndPad": ""
+      }
+    },
+    "els": {
+      "html": {
+        "rect": {
+          "top": 0,
+          "bottom": 900,
+          "height": 900,
+          "width": 1440
+        },
+        "scrollHeight": 900,
+        "clientHeight": 900,
+        "height": "900px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "clip visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "body": {
+        "rect": {
+          "top": 0,
+          "bottom": 900,
+          "height": 900,
+          "width": 1440
+        },
+        "scrollHeight": 900,
+        "clientHeight": 900,
+        "height": "900px",
+        "minHeight": "100%",
+        "maxHeight": "none",
+        "overflow": "clip visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "flex"
+      },
+      "main": {
+        "rect": {
+          "top": 0,
+          "bottom": 900,
+          "height": 900,
+          "width": 1440
+        },
+        "scrollHeight": 900,
+        "clientHeight": 900,
+        "height": "900px",
+        "minHeight": "900px",
+        "maxHeight": "none",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "relative",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "flex"
+      },
+      "foChatApp": {
+        "rect": {
+          "top": 62,
+          "bottom": 900,
+          "height": 838,
+          "width": 1440
+        },
+        "scrollHeight": 838,
+        "clientHeight": 838,
+        "height": "838.312px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "relative",
+        "flex": "1 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "askAiShell": {
+        "rect": {
+          "top": 62,
+          "bottom": 900,
+          "height": 838,
+          "width": 1440
+        },
+        "scrollHeight": 838,
+        "clientHeight": 838,
+        "height": "838.312px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "relative",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatPane": {
+        "rect": {
+          "top": 62,
+          "bottom": 900,
+          "height": 838,
+          "width": 1440
+        },
+        "scrollHeight": 838,
+        "clientHeight": 838,
+        "height": "838.312px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatPage": {
+        "rect": {
+          "top": 62,
+          "bottom": 900,
+          "height": 838,
+          "width": 1440
+        },
+        "scrollHeight": 838,
+        "clientHeight": 838,
+        "height": "838.312px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "1 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatInner": {
+        "rect": {
+          "top": 62,
+          "bottom": 900,
+          "height": 838,
+          "width": 1440
+        },
+        "scrollHeight": 838,
+        "clientHeight": 838,
+        "height": "838.312px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "1 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatHeader": {
+        "rect": {
+          "top": 62,
+          "bottom": 199,
+          "height": 137,
+          "width": 1440
+        },
+        "scrollHeight": 137,
+        "clientHeight": 137,
+        "height": "137.281px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "messages": {
+        "rect": {
+          "top": 199,
+          "bottom": 517,
+          "height": 318,
+          "width": 1440
+        },
+        "scrollHeight": 318,
+        "clientHeight": 318,
+        "height": "318px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "relative",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "messagesInner": {
+        "rect": {
+          "top": 199,
+          "bottom": 517,
+          "height": 318,
+          "width": 1280
+        },
+        "scrollHeight": 318,
+        "clientHeight": 318,
+        "height": "318px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "footer": {
+        "rect": {
+          "top": 517,
+          "bottom": 653,
+          "height": 137,
+          "width": 1440
+        },
+        "scrollHeight": 137,
+        "clientHeight": 137,
+        "height": "136.516px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "relative",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "nav": {
+        "rect": {
+          "top": 0,
+          "bottom": 62,
+          "height": 62,
+          "width": 1440
+        },
+        "scrollHeight": 62,
+        "clientHeight": 62,
+        "height": "61.6875px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "sticky",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      }
+    },
+    "analysis": {
+      "documentScrolls": false,
+      "bodyScrolls": false,
+      "footerBelowViewport": false,
+      "headerAboveViewport": false,
+      "footerBottomVsInnerHeight": -247,
+      "messagesIsScrollContainer": false,
+      "messagesCanScroll": false,
+      "messagesScrollsNotDoc": false,
+      "chatPageActive": false,
+      "chatInnerSumVsChatPage": -246,
+      "chatPageVsFoChatApp": 0,
+      "foChatAppVsVar": 838
+    }
+  },
+  "1440x900@90%_active_stress": {
+    "doc": {
+      "innerHeight": 900,
+      "innerWidth": 1440,
+      "visualViewportHeight": 900,
+      "visualViewportWidth": 1440,
+      "docClientHeight": 900,
+      "docScrollHeight": 900,
+      "bodyClientHeight": 900,
+      "bodyScrollHeight": 900,
+      "scrollY": 0,
+      "foChatActive": true,
+      "bodyChildren": [
+        {
+          "tag": "div",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "main",
+          "cls": "fo-stage fo-stage--chat relative flex min-h-[100dvh] w-full min-w-0 flex-col",
+          "rectH": 900
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "next-route-announcer",
+          "cls": "",
+          "rectH": 0
+        }
+      ],
+      "cssVars": {
+        "foNavHeight": "61.6875px",
+        "foChatAppHeight": "838.3125px",
+        "chatComposerHeight": "177.84375px",
+        "chatMessagesEndPad": "35px"
+      }
+    },
+    "els": {
+      "html": {
+        "rect": {
+          "top": 0,
+          "bottom": 900,
+          "height": 900,
+          "width": 1440
+        },
+        "scrollHeight": 900,
+        "clientHeight": 900,
+        "height": "900px",
+        "minHeight": "0px",
+        "maxHeight": "900px",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "body": {
+        "rect": {
+          "top": 0,
+          "bottom": 900,
+          "height": 900,
+          "width": 1440
+        },
+        "scrollHeight": 900,
+        "clientHeight": 900,
+        "height": "900px",
+        "minHeight": "100%",
+        "maxHeight": "900px",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "flex"
+      },
+      "main": {
+        "rect": {
+          "top": 0,
+          "bottom": 900,
+          "height": 900,
+          "width": 1440
+        },
+        "scrollHeight": 900,
+        "clientHeight": 900,
+        "height": "900px",
+        "minHeight": "0px",
+        "maxHeight": "900px",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "relative",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "flex"
+      },
+      "foChatApp": {
+        "rect": {
+          "top": 62,
+          "bottom": 900,
+          "height": 838,
+          "width": 1440
+        },
+        "scrollHeight": 838,
+        "clientHeight": 838,
+        "height": "838.312px",
+        "minHeight": "0px",
+        "maxHeight": "838.312px",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "relative",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "flex"
+      },
+      "askAiShell": {
+        "rect": {
+          "top": 62,
+          "bottom": 900,
+          "height": 838,
+          "width": 1440
+        },
+        "scrollHeight": 838,
+        "clientHeight": 838,
+        "height": "838.312px",
+        "minHeight": "0px",
+        "maxHeight": "100%",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "relative",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatPane": {
+        "rect": {
+          "top": 62,
+          "bottom": 900,
+          "height": 838,
+          "width": 1440
+        },
+        "scrollHeight": 838,
+        "clientHeight": 838,
+        "height": "838.312px",
+        "minHeight": "0px",
+        "maxHeight": "100%",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatPage": {
+        "rect": {
+          "top": 62,
+          "bottom": 900,
+          "height": 838,
+          "width": 1440
+        },
+        "scrollHeight": 838,
+        "clientHeight": 838,
+        "height": "838.312px",
+        "minHeight": "0px",
+        "maxHeight": "100%",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatInner": {
+        "rect": {
+          "top": 62,
+          "bottom": 900,
+          "height": 838,
+          "width": 1440
+        },
+        "scrollHeight": 838,
+        "clientHeight": 838,
+        "height": "838.312px",
+        "minHeight": "0px",
+        "maxHeight": "100%",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatHeader": {
+        "rect": {
+          "top": 62,
+          "bottom": 133,
+          "height": 72,
+          "width": 1440
+        },
+        "scrollHeight": 71,
+        "clientHeight": 71,
+        "height": "71.5156px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "messages": {
+        "rect": {
+          "top": 133,
+          "bottom": 722,
+          "height": 589,
+          "width": 1440
+        },
+        "scrollHeight": 1209,
+        "clientHeight": 589,
+        "height": "588.953px",
+        "minHeight": "0px",
+        "maxHeight": "100%",
+        "overflow": "hidden auto",
+        "overflowY": "auto",
+        "position": "relative",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "block"
+      },
+      "messagesInner": {
+        "rect": {
+          "top": -487,
+          "bottom": 722,
+          "height": 1209,
+          "width": 1280
+        },
+        "scrollHeight": 1209,
+        "clientHeight": 1209,
+        "height": "1209.11px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "footer": {
+        "rect": {
+          "top": 722,
+          "bottom": 900,
+          "height": 178,
+          "width": 1440
+        },
+        "scrollHeight": 178,
+        "clientHeight": 178,
+        "height": "177.844px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "relative",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "nav": {
+        "rect": {
+          "top": 0,
+          "bottom": 62,
+          "height": 62,
+          "width": 1440
+        },
+        "scrollHeight": 62,
+        "clientHeight": 62,
+        "height": "61.6875px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "sticky",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      }
+    },
+    "analysis": {
+      "documentScrolls": false,
+      "bodyScrolls": false,
+      "footerBelowViewport": false,
+      "headerAboveViewport": false,
+      "footerBottomVsInnerHeight": 0,
+      "messagesIsScrollContainer": true,
+      "messagesCanScroll": true,
+      "messagesScrollsNotDoc": true,
+      "chatPageActive": true,
+      "chatInnerSumVsChatPage": 1,
+      "chatPageVsFoChatApp": 0,
+      "foChatAppVsVar": 838
+    }
+  },
+  "1440x900@80%_landing": {
+    "doc": {
+      "innerHeight": 900,
+      "innerWidth": 1440,
+      "visualViewportHeight": 900,
+      "visualViewportWidth": 1440,
+      "docClientHeight": 900,
+      "docScrollHeight": 900,
+      "bodyClientHeight": 900,
+      "bodyScrollHeight": 900,
+      "scrollY": 0,
+      "foChatActive": false,
+      "bodyChildren": [
+        {
+          "tag": "div",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "main",
+          "cls": "fo-stage fo-stage--chat relative flex min-h-[100dvh] w-full min-w-0 flex-col",
+          "rectH": 900
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "next-route-announcer",
+          "cls": "",
+          "rectH": 0
+        }
+      ],
+      "cssVars": {
+        "foNavHeight": "",
+        "foChatAppHeight": "",
+        "chatComposerHeight": "",
+        "chatMessagesEndPad": ""
+      }
+    },
+    "els": {
+      "html": {
+        "rect": {
+          "top": 0,
+          "bottom": 900,
+          "height": 900,
+          "width": 1440
+        },
+        "scrollHeight": 900,
+        "clientHeight": 900,
+        "height": "900px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "clip visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "body": {
+        "rect": {
+          "top": 0,
+          "bottom": 900,
+          "height": 900,
+          "width": 1440
+        },
+        "scrollHeight": 900,
+        "clientHeight": 900,
+        "height": "900px",
+        "minHeight": "100%",
+        "maxHeight": "none",
+        "overflow": "clip visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "flex"
+      },
+      "main": {
+        "rect": {
+          "top": 0,
+          "bottom": 900,
+          "height": 900,
+          "width": 1440
+        },
+        "scrollHeight": 900,
+        "clientHeight": 900,
+        "height": "900px",
+        "minHeight": "900px",
+        "maxHeight": "none",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "relative",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "flex"
+      },
+      "foChatApp": {
+        "rect": {
+          "top": 62,
+          "bottom": 900,
+          "height": 838,
+          "width": 1440
+        },
+        "scrollHeight": 838,
+        "clientHeight": 838,
+        "height": "838.312px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "relative",
+        "flex": "1 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "askAiShell": {
+        "rect": {
+          "top": 62,
+          "bottom": 900,
+          "height": 838,
+          "width": 1440
+        },
+        "scrollHeight": 838,
+        "clientHeight": 838,
+        "height": "838.312px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "relative",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatPane": {
+        "rect": {
+          "top": 62,
+          "bottom": 900,
+          "height": 838,
+          "width": 1440
+        },
+        "scrollHeight": 838,
+        "clientHeight": 838,
+        "height": "838.312px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatPage": {
+        "rect": {
+          "top": 62,
+          "bottom": 900,
+          "height": 838,
+          "width": 1440
+        },
+        "scrollHeight": 838,
+        "clientHeight": 838,
+        "height": "838.312px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "1 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatInner": {
+        "rect": {
+          "top": 62,
+          "bottom": 900,
+          "height": 838,
+          "width": 1440
+        },
+        "scrollHeight": 838,
+        "clientHeight": 838,
+        "height": "838.312px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "1 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatHeader": {
+        "rect": {
+          "top": 62,
+          "bottom": 199,
+          "height": 137,
+          "width": 1440
+        },
+        "scrollHeight": 137,
+        "clientHeight": 137,
+        "height": "137.281px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "messages": {
+        "rect": {
+          "top": 199,
+          "bottom": 517,
+          "height": 318,
+          "width": 1440
+        },
+        "scrollHeight": 318,
+        "clientHeight": 318,
+        "height": "318px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "relative",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "messagesInner": {
+        "rect": {
+          "top": 199,
+          "bottom": 517,
+          "height": 318,
+          "width": 1280
+        },
+        "scrollHeight": 318,
+        "clientHeight": 318,
+        "height": "318px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "footer": {
+        "rect": {
+          "top": 517,
+          "bottom": 653,
+          "height": 137,
+          "width": 1440
+        },
+        "scrollHeight": 137,
+        "clientHeight": 137,
+        "height": "136.516px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "relative",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "nav": {
+        "rect": {
+          "top": 0,
+          "bottom": 62,
+          "height": 62,
+          "width": 1440
+        },
+        "scrollHeight": 62,
+        "clientHeight": 62,
+        "height": "61.6875px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "sticky",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      }
+    },
+    "analysis": {
+      "documentScrolls": false,
+      "bodyScrolls": false,
+      "footerBelowViewport": false,
+      "headerAboveViewport": false,
+      "footerBottomVsInnerHeight": -247,
+      "messagesIsScrollContainer": false,
+      "messagesCanScroll": false,
+      "messagesScrollsNotDoc": false,
+      "chatPageActive": false,
+      "chatInnerSumVsChatPage": -246,
+      "chatPageVsFoChatApp": 0,
+      "foChatAppVsVar": 838
+    }
+  },
+  "1440x900@80%_active_stress": {
+    "doc": {
+      "innerHeight": 900,
+      "innerWidth": 1440,
+      "visualViewportHeight": 900,
+      "visualViewportWidth": 1440,
+      "docClientHeight": 900,
+      "docScrollHeight": 900,
+      "bodyClientHeight": 900,
+      "bodyScrollHeight": 900,
+      "scrollY": 0,
+      "foChatActive": true,
+      "bodyChildren": [
+        {
+          "tag": "div",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "main",
+          "cls": "fo-stage fo-stage--chat relative flex min-h-[100dvh] w-full min-w-0 flex-col",
+          "rectH": 900
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "next-route-announcer",
+          "cls": "",
+          "rectH": 0
+        }
+      ],
+      "cssVars": {
+        "foNavHeight": "61.6875px",
+        "foChatAppHeight": "838.3125px",
+        "chatComposerHeight": "177.84375px",
+        "chatMessagesEndPad": "35px"
+      }
+    },
+    "els": {
+      "html": {
+        "rect": {
+          "top": 0,
+          "bottom": 900,
+          "height": 900,
+          "width": 1440
+        },
+        "scrollHeight": 900,
+        "clientHeight": 900,
+        "height": "900px",
+        "minHeight": "0px",
+        "maxHeight": "900px",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "body": {
+        "rect": {
+          "top": 0,
+          "bottom": 900,
+          "height": 900,
+          "width": 1440
+        },
+        "scrollHeight": 900,
+        "clientHeight": 900,
+        "height": "900px",
+        "minHeight": "100%",
+        "maxHeight": "900px",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "flex"
+      },
+      "main": {
+        "rect": {
+          "top": 0,
+          "bottom": 900,
+          "height": 900,
+          "width": 1440
+        },
+        "scrollHeight": 900,
+        "clientHeight": 900,
+        "height": "900px",
+        "minHeight": "0px",
+        "maxHeight": "900px",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "relative",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "flex"
+      },
+      "foChatApp": {
+        "rect": {
+          "top": 62,
+          "bottom": 900,
+          "height": 838,
+          "width": 1440
+        },
+        "scrollHeight": 838,
+        "clientHeight": 838,
+        "height": "838.312px",
+        "minHeight": "0px",
+        "maxHeight": "838.312px",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "relative",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "flex"
+      },
+      "askAiShell": {
+        "rect": {
+          "top": 62,
+          "bottom": 900,
+          "height": 838,
+          "width": 1440
+        },
+        "scrollHeight": 838,
+        "clientHeight": 838,
+        "height": "838.312px",
+        "minHeight": "0px",
+        "maxHeight": "100%",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "relative",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatPane": {
+        "rect": {
+          "top": 62,
+          "bottom": 900,
+          "height": 838,
+          "width": 1440
+        },
+        "scrollHeight": 838,
+        "clientHeight": 838,
+        "height": "838.312px",
+        "minHeight": "0px",
+        "maxHeight": "100%",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatPage": {
+        "rect": {
+          "top": 62,
+          "bottom": 900,
+          "height": 838,
+          "width": 1440
+        },
+        "scrollHeight": 838,
+        "clientHeight": 838,
+        "height": "838.312px",
+        "minHeight": "0px",
+        "maxHeight": "100%",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatInner": {
+        "rect": {
+          "top": 62,
+          "bottom": 900,
+          "height": 838,
+          "width": 1440
+        },
+        "scrollHeight": 838,
+        "clientHeight": 838,
+        "height": "838.312px",
+        "minHeight": "0px",
+        "maxHeight": "100%",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatHeader": {
+        "rect": {
+          "top": 62,
+          "bottom": 133,
+          "height": 72,
+          "width": 1440
+        },
+        "scrollHeight": 71,
+        "clientHeight": 71,
+        "height": "71.5156px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "messages": {
+        "rect": {
+          "top": 133,
+          "bottom": 722,
+          "height": 589,
+          "width": 1440
+        },
+        "scrollHeight": 1209,
+        "clientHeight": 589,
+        "height": "588.953px",
+        "minHeight": "0px",
+        "maxHeight": "100%",
+        "overflow": "hidden auto",
+        "overflowY": "auto",
+        "position": "relative",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "block"
+      },
+      "messagesInner": {
+        "rect": {
+          "top": -487,
+          "bottom": 722,
+          "height": 1209,
+          "width": 1280
+        },
+        "scrollHeight": 1209,
+        "clientHeight": 1209,
+        "height": "1209.11px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "footer": {
+        "rect": {
+          "top": 722,
+          "bottom": 900,
+          "height": 178,
+          "width": 1440
+        },
+        "scrollHeight": 178,
+        "clientHeight": 178,
+        "height": "177.844px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "relative",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "nav": {
+        "rect": {
+          "top": 0,
+          "bottom": 62,
+          "height": 62,
+          "width": 1440
+        },
+        "scrollHeight": 62,
+        "clientHeight": 62,
+        "height": "61.6875px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "sticky",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      }
+    },
+    "analysis": {
+      "documentScrolls": false,
+      "bodyScrolls": false,
+      "footerBelowViewport": false,
+      "headerAboveViewport": false,
+      "footerBottomVsInnerHeight": 0,
+      "messagesIsScrollContainer": true,
+      "messagesCanScroll": true,
+      "messagesScrollsNotDoc": true,
+      "chatPageActive": true,
+      "chatInnerSumVsChatPage": 1,
+      "chatPageVsFoChatApp": 0,
+      "foChatAppVsVar": 838
+    }
+  },
+  "1440x900@110%_landing": {
+    "doc": {
+      "innerHeight": 900,
+      "innerWidth": 1440,
+      "visualViewportHeight": 818.1817626953125,
+      "visualViewportWidth": 1309.0908203125,
+      "docClientHeight": 900,
+      "docScrollHeight": 900,
+      "bodyClientHeight": 900,
+      "bodyScrollHeight": 900,
+      "scrollY": 0,
+      "foChatActive": false,
+      "bodyChildren": [
+        {
+          "tag": "div",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "main",
+          "cls": "fo-stage fo-stage--chat relative flex min-h-[100dvh] w-full min-w-0 flex-col",
+          "rectH": 900
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "next-route-announcer",
+          "cls": "",
+          "rectH": 0
+        }
+      ],
+      "cssVars": {
+        "foNavHeight": "",
+        "foChatAppHeight": "",
+        "chatComposerHeight": "",
+        "chatMessagesEndPad": ""
+      }
+    },
+    "els": {
+      "html": {
+        "rect": {
+          "top": 0,
+          "bottom": 900,
+          "height": 900,
+          "width": 1440
+        },
+        "scrollHeight": 900,
+        "clientHeight": 900,
+        "height": "900px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "clip visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "body": {
+        "rect": {
+          "top": 0,
+          "bottom": 900,
+          "height": 900,
+          "width": 1440
+        },
+        "scrollHeight": 900,
+        "clientHeight": 900,
+        "height": "900px",
+        "minHeight": "100%",
+        "maxHeight": "none",
+        "overflow": "clip visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "flex"
+      },
+      "main": {
+        "rect": {
+          "top": 0,
+          "bottom": 900,
+          "height": 900,
+          "width": 1440
+        },
+        "scrollHeight": 900,
+        "clientHeight": 900,
+        "height": "900px",
+        "minHeight": "900px",
+        "maxHeight": "none",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "relative",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "flex"
+      },
+      "foChatApp": {
+        "rect": {
+          "top": 62,
+          "bottom": 900,
+          "height": 838,
+          "width": 1440
+        },
+        "scrollHeight": 838,
+        "clientHeight": 838,
+        "height": "838.312px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "relative",
+        "flex": "1 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "askAiShell": {
+        "rect": {
+          "top": 62,
+          "bottom": 900,
+          "height": 838,
+          "width": 1440
+        },
+        "scrollHeight": 838,
+        "clientHeight": 838,
+        "height": "838.312px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "relative",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatPane": {
+        "rect": {
+          "top": 62,
+          "bottom": 900,
+          "height": 838,
+          "width": 1440
+        },
+        "scrollHeight": 838,
+        "clientHeight": 838,
+        "height": "838.312px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatPage": {
+        "rect": {
+          "top": 62,
+          "bottom": 900,
+          "height": 838,
+          "width": 1440
+        },
+        "scrollHeight": 838,
+        "clientHeight": 838,
+        "height": "838.312px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "1 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatInner": {
+        "rect": {
+          "top": 62,
+          "bottom": 900,
+          "height": 838,
+          "width": 1440
+        },
+        "scrollHeight": 838,
+        "clientHeight": 838,
+        "height": "838.312px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "1 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatHeader": {
+        "rect": {
+          "top": 62,
+          "bottom": 199,
+          "height": 137,
+          "width": 1440
+        },
+        "scrollHeight": 137,
+        "clientHeight": 137,
+        "height": "137.281px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "messages": {
+        "rect": {
+          "top": 199,
+          "bottom": 517,
+          "height": 318,
+          "width": 1440
+        },
+        "scrollHeight": 318,
+        "clientHeight": 318,
+        "height": "318px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "relative",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "messagesInner": {
+        "rect": {
+          "top": 199,
+          "bottom": 517,
+          "height": 318,
+          "width": 1280
+        },
+        "scrollHeight": 318,
+        "clientHeight": 318,
+        "height": "318px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "footer": {
+        "rect": {
+          "top": 517,
+          "bottom": 653,
+          "height": 137,
+          "width": 1440
+        },
+        "scrollHeight": 137,
+        "clientHeight": 137,
+        "height": "136.516px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "relative",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "nav": {
+        "rect": {
+          "top": 0,
+          "bottom": 62,
+          "height": 62,
+          "width": 1440
+        },
+        "scrollHeight": 62,
+        "clientHeight": 62,
+        "height": "61.6875px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "sticky",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      }
+    },
+    "analysis": {
+      "documentScrolls": false,
+      "bodyScrolls": false,
+      "footerBelowViewport": false,
+      "headerAboveViewport": false,
+      "footerBottomVsInnerHeight": -247,
+      "messagesIsScrollContainer": false,
+      "messagesCanScroll": false,
+      "messagesScrollsNotDoc": false,
+      "chatPageActive": false,
+      "chatInnerSumVsChatPage": -246,
+      "chatPageVsFoChatApp": 0,
+      "foChatAppVsVar": 838
+    }
+  },
+  "1440x900@110%_active_stress": {
+    "doc": {
+      "innerHeight": 900,
+      "innerWidth": 1440,
+      "visualViewportHeight": 818.1817626953125,
+      "visualViewportWidth": 1309.0908203125,
+      "docClientHeight": 900,
+      "docScrollHeight": 900,
+      "bodyClientHeight": 900,
+      "bodyScrollHeight": 900,
+      "scrollY": 0,
+      "foChatActive": true,
+      "bodyChildren": [
+        {
+          "tag": "div",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "main",
+          "cls": "fo-stage fo-stage--chat relative flex min-h-[100dvh] w-full min-w-0 flex-col",
+          "rectH": 900
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "next-route-announcer",
+          "cls": "",
+          "rectH": 0
+        }
+      ],
+      "cssVars": {
+        "foNavHeight": "61.6875px",
+        "foChatAppHeight": "756.4942626953125px",
+        "chatComposerHeight": "177.84375px",
+        "chatMessagesEndPad": "35px"
+      }
+    },
+    "els": {
+      "html": {
+        "rect": {
+          "top": 0,
+          "bottom": 900,
+          "height": 900,
+          "width": 1440
+        },
+        "scrollHeight": 900,
+        "clientHeight": 900,
+        "height": "900px",
+        "minHeight": "0px",
+        "maxHeight": "900px",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "body": {
+        "rect": {
+          "top": 0,
+          "bottom": 900,
+          "height": 900,
+          "width": 1440
+        },
+        "scrollHeight": 900,
+        "clientHeight": 900,
+        "height": "900px",
+        "minHeight": "100%",
+        "maxHeight": "900px",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "flex"
+      },
+      "main": {
+        "rect": {
+          "top": 0,
+          "bottom": 900,
+          "height": 900,
+          "width": 1440
+        },
+        "scrollHeight": 900,
+        "clientHeight": 900,
+        "height": "900px",
+        "minHeight": "0px",
+        "maxHeight": "900px",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "relative",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "flex"
+      },
+      "foChatApp": {
+        "rect": {
+          "top": 62,
+          "bottom": 818,
+          "height": 756,
+          "width": 1440
+        },
+        "scrollHeight": 756,
+        "clientHeight": 756,
+        "height": "756.484px",
+        "minHeight": "0px",
+        "maxHeight": "756.494px",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "relative",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "flex"
+      },
+      "askAiShell": {
+        "rect": {
+          "top": 62,
+          "bottom": 818,
+          "height": 756,
+          "width": 1440
+        },
+        "scrollHeight": 756,
+        "clientHeight": 756,
+        "height": "756.484px",
+        "minHeight": "0px",
+        "maxHeight": "100%",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "relative",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatPane": {
+        "rect": {
+          "top": 62,
+          "bottom": 818,
+          "height": 756,
+          "width": 1440
+        },
+        "scrollHeight": 756,
+        "clientHeight": 756,
+        "height": "756.484px",
+        "minHeight": "0px",
+        "maxHeight": "100%",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatPage": {
+        "rect": {
+          "top": 62,
+          "bottom": 818,
+          "height": 756,
+          "width": 1440
+        },
+        "scrollHeight": 756,
+        "clientHeight": 756,
+        "height": "756.484px",
+        "minHeight": "0px",
+        "maxHeight": "100%",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatInner": {
+        "rect": {
+          "top": 62,
+          "bottom": 818,
+          "height": 756,
+          "width": 1440
+        },
+        "scrollHeight": 756,
+        "clientHeight": 756,
+        "height": "756.484px",
+        "minHeight": "0px",
+        "maxHeight": "100%",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatHeader": {
+        "rect": {
+          "top": 62,
+          "bottom": 133,
+          "height": 72,
+          "width": 1440
+        },
+        "scrollHeight": 71,
+        "clientHeight": 71,
+        "height": "71.5156px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "messages": {
+        "rect": {
+          "top": 133,
+          "bottom": 640,
+          "height": 507,
+          "width": 1440
+        },
+        "scrollHeight": 1209,
+        "clientHeight": 507,
+        "height": "507.125px",
+        "minHeight": "0px",
+        "maxHeight": "100%",
+        "overflow": "hidden auto",
+        "overflowY": "auto",
+        "position": "relative",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "block"
+      },
+      "messagesInner": {
+        "rect": {
+          "top": -569,
+          "bottom": 640,
+          "height": 1209,
+          "width": 1280
+        },
+        "scrollHeight": 1209,
+        "clientHeight": 1209,
+        "height": "1209.11px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "footer": {
+        "rect": {
+          "top": 640,
+          "bottom": 818,
+          "height": 178,
+          "width": 1440
+        },
+        "scrollHeight": 178,
+        "clientHeight": 178,
+        "height": "177.844px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "relative",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "nav": {
+        "rect": {
+          "top": 0,
+          "bottom": 62,
+          "height": 62,
+          "width": 1440
+        },
+        "scrollHeight": 62,
+        "clientHeight": 62,
+        "height": "61.6875px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "sticky",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      }
+    },
+    "analysis": {
+      "documentScrolls": false,
+      "bodyScrolls": false,
+      "footerBelowViewport": false,
+      "headerAboveViewport": false,
+      "footerBottomVsInnerHeight": -82,
+      "messagesIsScrollContainer": true,
+      "messagesCanScroll": true,
+      "messagesScrollsNotDoc": true,
+      "chatPageActive": true,
+      "chatInnerSumVsChatPage": 1,
+      "chatPageVsFoChatApp": 0,
+      "foChatAppVsVar": 756
+    }
+  },
+  "1440x900@125%_landing": {
+    "doc": {
+      "innerHeight": 900,
+      "innerWidth": 1440,
+      "visualViewportHeight": 720,
+      "visualViewportWidth": 1152,
+      "docClientHeight": 900,
+      "docScrollHeight": 900,
+      "bodyClientHeight": 900,
+      "bodyScrollHeight": 900,
+      "scrollY": 0,
+      "foChatActive": false,
+      "bodyChildren": [
+        {
+          "tag": "div",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "main",
+          "cls": "fo-stage fo-stage--chat relative flex min-h-[100dvh] w-full min-w-0 flex-col",
+          "rectH": 900
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "next-route-announcer",
+          "cls": "",
+          "rectH": 0
+        }
+      ],
+      "cssVars": {
+        "foNavHeight": "",
+        "foChatAppHeight": "",
+        "chatComposerHeight": "",
+        "chatMessagesEndPad": ""
+      }
+    },
+    "els": {
+      "html": {
+        "rect": {
+          "top": 0,
+          "bottom": 900,
+          "height": 900,
+          "width": 1440
+        },
+        "scrollHeight": 900,
+        "clientHeight": 900,
+        "height": "900px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "clip visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "body": {
+        "rect": {
+          "top": 0,
+          "bottom": 900,
+          "height": 900,
+          "width": 1440
+        },
+        "scrollHeight": 900,
+        "clientHeight": 900,
+        "height": "900px",
+        "minHeight": "100%",
+        "maxHeight": "none",
+        "overflow": "clip visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "flex"
+      },
+      "main": {
+        "rect": {
+          "top": 0,
+          "bottom": 900,
+          "height": 900,
+          "width": 1440
+        },
+        "scrollHeight": 900,
+        "clientHeight": 900,
+        "height": "900px",
+        "minHeight": "900px",
+        "maxHeight": "none",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "relative",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "flex"
+      },
+      "foChatApp": {
+        "rect": {
+          "top": 62,
+          "bottom": 900,
+          "height": 838,
+          "width": 1440
+        },
+        "scrollHeight": 838,
+        "clientHeight": 838,
+        "height": "838.312px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "relative",
+        "flex": "1 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "askAiShell": {
+        "rect": {
+          "top": 62,
+          "bottom": 900,
+          "height": 838,
+          "width": 1440
+        },
+        "scrollHeight": 838,
+        "clientHeight": 838,
+        "height": "838.312px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "relative",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatPane": {
+        "rect": {
+          "top": 62,
+          "bottom": 900,
+          "height": 838,
+          "width": 1440
+        },
+        "scrollHeight": 838,
+        "clientHeight": 838,
+        "height": "838.312px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatPage": {
+        "rect": {
+          "top": 62,
+          "bottom": 900,
+          "height": 838,
+          "width": 1440
+        },
+        "scrollHeight": 838,
+        "clientHeight": 838,
+        "height": "838.312px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "1 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatInner": {
+        "rect": {
+          "top": 62,
+          "bottom": 900,
+          "height": 838,
+          "width": 1440
+        },
+        "scrollHeight": 838,
+        "clientHeight": 838,
+        "height": "838.312px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "1 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatHeader": {
+        "rect": {
+          "top": 62,
+          "bottom": 199,
+          "height": 137,
+          "width": 1440
+        },
+        "scrollHeight": 137,
+        "clientHeight": 137,
+        "height": "137.281px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "messages": {
+        "rect": {
+          "top": 199,
+          "bottom": 517,
+          "height": 318,
+          "width": 1440
+        },
+        "scrollHeight": 318,
+        "clientHeight": 318,
+        "height": "318px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "relative",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "messagesInner": {
+        "rect": {
+          "top": 199,
+          "bottom": 517,
+          "height": 318,
+          "width": 1280
+        },
+        "scrollHeight": 318,
+        "clientHeight": 318,
+        "height": "318px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "footer": {
+        "rect": {
+          "top": 517,
+          "bottom": 653,
+          "height": 137,
+          "width": 1440
+        },
+        "scrollHeight": 137,
+        "clientHeight": 137,
+        "height": "136.516px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "relative",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "nav": {
+        "rect": {
+          "top": 0,
+          "bottom": 62,
+          "height": 62,
+          "width": 1440
+        },
+        "scrollHeight": 62,
+        "clientHeight": 62,
+        "height": "61.6875px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "sticky",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      }
+    },
+    "analysis": {
+      "documentScrolls": false,
+      "bodyScrolls": false,
+      "footerBelowViewport": false,
+      "headerAboveViewport": false,
+      "footerBottomVsInnerHeight": -247,
+      "messagesIsScrollContainer": false,
+      "messagesCanScroll": false,
+      "messagesScrollsNotDoc": false,
+      "chatPageActive": false,
+      "chatInnerSumVsChatPage": -246,
+      "chatPageVsFoChatApp": 0,
+      "foChatAppVsVar": 838
+    }
+  },
+  "1440x900@125%_active_stress": {
+    "doc": {
+      "innerHeight": 900,
+      "innerWidth": 1440,
+      "visualViewportHeight": 720,
+      "visualViewportWidth": 1152,
+      "docClientHeight": 900,
+      "docScrollHeight": 900,
+      "bodyClientHeight": 900,
+      "bodyScrollHeight": 900,
+      "scrollY": 0,
+      "foChatActive": true,
+      "bodyChildren": [
+        {
+          "tag": "div",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "main",
+          "cls": "fo-stage fo-stage--chat relative flex min-h-[100dvh] w-full min-w-0 flex-col",
+          "rectH": 900
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "next-route-announcer",
+          "cls": "",
+          "rectH": 0
+        }
+      ],
+      "cssVars": {
+        "foNavHeight": "61.6875px",
+        "foChatAppHeight": "658.3125px",
+        "chatComposerHeight": "177.84375px",
+        "chatMessagesEndPad": "35px"
+      }
+    },
+    "els": {
+      "html": {
+        "rect": {
+          "top": 0,
+          "bottom": 900,
+          "height": 900,
+          "width": 1440
+        },
+        "scrollHeight": 900,
+        "clientHeight": 900,
+        "height": "900px",
+        "minHeight": "0px",
+        "maxHeight": "900px",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "body": {
+        "rect": {
+          "top": 0,
+          "bottom": 900,
+          "height": 900,
+          "width": 1440
+        },
+        "scrollHeight": 900,
+        "clientHeight": 900,
+        "height": "900px",
+        "minHeight": "100%",
+        "maxHeight": "900px",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "flex"
+      },
+      "main": {
+        "rect": {
+          "top": 0,
+          "bottom": 900,
+          "height": 900,
+          "width": 1440
+        },
+        "scrollHeight": 900,
+        "clientHeight": 900,
+        "height": "900px",
+        "minHeight": "0px",
+        "maxHeight": "900px",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "relative",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "flex"
+      },
+      "foChatApp": {
+        "rect": {
+          "top": 62,
+          "bottom": 720,
+          "height": 658,
+          "width": 1440
+        },
+        "scrollHeight": 658,
+        "clientHeight": 658,
+        "height": "658.312px",
+        "minHeight": "0px",
+        "maxHeight": "658.312px",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "relative",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "flex"
+      },
+      "askAiShell": {
+        "rect": {
+          "top": 62,
+          "bottom": 720,
+          "height": 658,
+          "width": 1440
+        },
+        "scrollHeight": 658,
+        "clientHeight": 658,
+        "height": "658.312px",
+        "minHeight": "0px",
+        "maxHeight": "100%",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "relative",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatPane": {
+        "rect": {
+          "top": 62,
+          "bottom": 720,
+          "height": 658,
+          "width": 1440
+        },
+        "scrollHeight": 658,
+        "clientHeight": 658,
+        "height": "658.312px",
+        "minHeight": "0px",
+        "maxHeight": "100%",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatPage": {
+        "rect": {
+          "top": 62,
+          "bottom": 720,
+          "height": 658,
+          "width": 1440
+        },
+        "scrollHeight": 658,
+        "clientHeight": 658,
+        "height": "658.312px",
+        "minHeight": "0px",
+        "maxHeight": "100%",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatInner": {
+        "rect": {
+          "top": 62,
+          "bottom": 720,
+          "height": 658,
+          "width": 1440
+        },
+        "scrollHeight": 658,
+        "clientHeight": 658,
+        "height": "658.312px",
+        "minHeight": "0px",
+        "maxHeight": "100%",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatHeader": {
+        "rect": {
+          "top": 62,
+          "bottom": 133,
+          "height": 72,
+          "width": 1440
+        },
+        "scrollHeight": 71,
+        "clientHeight": 71,
+        "height": "71.5156px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "messages": {
+        "rect": {
+          "top": 133,
+          "bottom": 542,
+          "height": 409,
+          "width": 1440
+        },
+        "scrollHeight": 1209,
+        "clientHeight": 409,
+        "height": "408.953px",
+        "minHeight": "0px",
+        "maxHeight": "100%",
+        "overflow": "hidden auto",
+        "overflowY": "auto",
+        "position": "relative",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "block"
+      },
+      "messagesInner": {
+        "rect": {
+          "top": -667,
+          "bottom": 542,
+          "height": 1209,
+          "width": 1280
+        },
+        "scrollHeight": 1209,
+        "clientHeight": 1209,
+        "height": "1209.11px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "footer": {
+        "rect": {
+          "top": 542,
+          "bottom": 720,
+          "height": 178,
+          "width": 1440
+        },
+        "scrollHeight": 178,
+        "clientHeight": 178,
+        "height": "177.844px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "relative",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "nav": {
+        "rect": {
+          "top": 0,
+          "bottom": 62,
+          "height": 62,
+          "width": 1440
+        },
+        "scrollHeight": 62,
+        "clientHeight": 62,
+        "height": "61.6875px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "sticky",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      }
+    },
+    "analysis": {
+      "documentScrolls": false,
+      "bodyScrolls": false,
+      "footerBelowViewport": false,
+      "headerAboveViewport": false,
+      "footerBottomVsInnerHeight": -180,
+      "messagesIsScrollContainer": true,
+      "messagesCanScroll": true,
+      "messagesScrollsNotDoc": true,
+      "chatPageActive": true,
+      "chatInnerSumVsChatPage": 1,
+      "chatPageVsFoChatApp": 0,
+      "foChatAppVsVar": 658
+    }
+  },
+  "1440x900@150%_landing": {
+    "doc": {
+      "innerHeight": 900,
+      "innerWidth": 1440,
+      "visualViewportHeight": 600,
+      "visualViewportWidth": 960,
+      "docClientHeight": 900,
+      "docScrollHeight": 900,
+      "bodyClientHeight": 900,
+      "bodyScrollHeight": 900,
+      "scrollY": 0,
+      "foChatActive": false,
+      "bodyChildren": [
+        {
+          "tag": "div",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "main",
+          "cls": "fo-stage fo-stage--chat relative flex min-h-[100dvh] w-full min-w-0 flex-col",
+          "rectH": 900
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "next-route-announcer",
+          "cls": "",
+          "rectH": 0
+        }
+      ],
+      "cssVars": {
+        "foNavHeight": "",
+        "foChatAppHeight": "",
+        "chatComposerHeight": "",
+        "chatMessagesEndPad": ""
+      }
+    },
+    "els": {
+      "html": {
+        "rect": {
+          "top": 0,
+          "bottom": 900,
+          "height": 900,
+          "width": 1440
+        },
+        "scrollHeight": 900,
+        "clientHeight": 900,
+        "height": "900px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "clip visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "body": {
+        "rect": {
+          "top": 0,
+          "bottom": 900,
+          "height": 900,
+          "width": 1440
+        },
+        "scrollHeight": 900,
+        "clientHeight": 900,
+        "height": "900px",
+        "minHeight": "100%",
+        "maxHeight": "none",
+        "overflow": "clip visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "flex"
+      },
+      "main": {
+        "rect": {
+          "top": 0,
+          "bottom": 900,
+          "height": 900,
+          "width": 1440
+        },
+        "scrollHeight": 900,
+        "clientHeight": 900,
+        "height": "900px",
+        "minHeight": "900px",
+        "maxHeight": "none",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "relative",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "flex"
+      },
+      "foChatApp": {
+        "rect": {
+          "top": 62,
+          "bottom": 900,
+          "height": 838,
+          "width": 1440
+        },
+        "scrollHeight": 838,
+        "clientHeight": 838,
+        "height": "838.312px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "relative",
+        "flex": "1 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "askAiShell": {
+        "rect": {
+          "top": 62,
+          "bottom": 900,
+          "height": 838,
+          "width": 1440
+        },
+        "scrollHeight": 838,
+        "clientHeight": 838,
+        "height": "838.312px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "relative",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatPane": {
+        "rect": {
+          "top": 62,
+          "bottom": 900,
+          "height": 838,
+          "width": 1440
+        },
+        "scrollHeight": 838,
+        "clientHeight": 838,
+        "height": "838.312px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatPage": {
+        "rect": {
+          "top": 62,
+          "bottom": 900,
+          "height": 838,
+          "width": 1440
+        },
+        "scrollHeight": 838,
+        "clientHeight": 838,
+        "height": "838.312px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "1 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatInner": {
+        "rect": {
+          "top": 62,
+          "bottom": 900,
+          "height": 838,
+          "width": 1440
+        },
+        "scrollHeight": 838,
+        "clientHeight": 838,
+        "height": "838.312px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "1 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatHeader": {
+        "rect": {
+          "top": 62,
+          "bottom": 199,
+          "height": 137,
+          "width": 1440
+        },
+        "scrollHeight": 137,
+        "clientHeight": 137,
+        "height": "137.281px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "messages": {
+        "rect": {
+          "top": 199,
+          "bottom": 517,
+          "height": 318,
+          "width": 1440
+        },
+        "scrollHeight": 318,
+        "clientHeight": 318,
+        "height": "318px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "relative",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "messagesInner": {
+        "rect": {
+          "top": 199,
+          "bottom": 517,
+          "height": 318,
+          "width": 1280
+        },
+        "scrollHeight": 318,
+        "clientHeight": 318,
+        "height": "318px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "footer": {
+        "rect": {
+          "top": 517,
+          "bottom": 653,
+          "height": 137,
+          "width": 1440
+        },
+        "scrollHeight": 137,
+        "clientHeight": 137,
+        "height": "136.516px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "relative",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "nav": {
+        "rect": {
+          "top": 0,
+          "bottom": 62,
+          "height": 62,
+          "width": 1440
+        },
+        "scrollHeight": 62,
+        "clientHeight": 62,
+        "height": "61.6875px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "sticky",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      }
+    },
+    "analysis": {
+      "documentScrolls": false,
+      "bodyScrolls": false,
+      "footerBelowViewport": false,
+      "headerAboveViewport": false,
+      "footerBottomVsInnerHeight": -247,
+      "messagesIsScrollContainer": false,
+      "messagesCanScroll": false,
+      "messagesScrollsNotDoc": false,
+      "chatPageActive": false,
+      "chatInnerSumVsChatPage": -246,
+      "chatPageVsFoChatApp": 0,
+      "foChatAppVsVar": 838
+    }
+  },
+  "1440x900@150%_active_stress": {
+    "doc": {
+      "innerHeight": 900,
+      "innerWidth": 1440,
+      "visualViewportHeight": 600,
+      "visualViewportWidth": 960,
+      "docClientHeight": 900,
+      "docScrollHeight": 900,
+      "bodyClientHeight": 900,
+      "bodyScrollHeight": 900,
+      "scrollY": 0,
+      "foChatActive": true,
+      "bodyChildren": [
+        {
+          "tag": "div",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "main",
+          "cls": "fo-stage fo-stage--chat relative flex min-h-[100dvh] w-full min-w-0 flex-col",
+          "rectH": 900
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "script",
+          "cls": "",
+          "rectH": 0
+        },
+        {
+          "tag": "next-route-announcer",
+          "cls": "",
+          "rectH": 0
+        }
+      ],
+      "cssVars": {
+        "foNavHeight": "61.6875px",
+        "foChatAppHeight": "538.3125px",
+        "chatComposerHeight": "177.84375px",
+        "chatMessagesEndPad": "35px"
+      }
+    },
+    "els": {
+      "html": {
+        "rect": {
+          "top": 0,
+          "bottom": 900,
+          "height": 900,
+          "width": 1440
+        },
+        "scrollHeight": 900,
+        "clientHeight": 900,
+        "height": "900px",
+        "minHeight": "0px",
+        "maxHeight": "900px",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "body": {
+        "rect": {
+          "top": 0,
+          "bottom": 900,
+          "height": 900,
+          "width": 1440
+        },
+        "scrollHeight": 900,
+        "clientHeight": 900,
+        "height": "900px",
+        "minHeight": "100%",
+        "maxHeight": "900px",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "flex"
+      },
+      "main": {
+        "rect": {
+          "top": 0,
+          "bottom": 900,
+          "height": 900,
+          "width": 1440
+        },
+        "scrollHeight": 900,
+        "clientHeight": 900,
+        "height": "900px",
+        "minHeight": "0px",
+        "maxHeight": "900px",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "relative",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "flex"
+      },
+      "foChatApp": {
+        "rect": {
+          "top": 62,
+          "bottom": 600,
+          "height": 538,
+          "width": 1440
+        },
+        "scrollHeight": 538,
+        "clientHeight": 538,
+        "height": "538.312px",
+        "minHeight": "0px",
+        "maxHeight": "538.312px",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "relative",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "flex"
+      },
+      "askAiShell": {
+        "rect": {
+          "top": 62,
+          "bottom": 600,
+          "height": 538,
+          "width": 1440
+        },
+        "scrollHeight": 538,
+        "clientHeight": 538,
+        "height": "538.312px",
+        "minHeight": "0px",
+        "maxHeight": "100%",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "relative",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatPane": {
+        "rect": {
+          "top": 62,
+          "bottom": 600,
+          "height": 538,
+          "width": 1440
+        },
+        "scrollHeight": 538,
+        "clientHeight": 538,
+        "height": "538.312px",
+        "minHeight": "0px",
+        "maxHeight": "100%",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatPage": {
+        "rect": {
+          "top": 62,
+          "bottom": 600,
+          "height": 538,
+          "width": 1440
+        },
+        "scrollHeight": 538,
+        "clientHeight": 538,
+        "height": "538.312px",
+        "minHeight": "0px",
+        "maxHeight": "100%",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatInner": {
+        "rect": {
+          "top": 62,
+          "bottom": 600,
+          "height": 538,
+          "width": 1440
+        },
+        "scrollHeight": 538,
+        "clientHeight": 538,
+        "height": "538.312px",
+        "minHeight": "0px",
+        "maxHeight": "100%",
+        "overflow": "hidden",
+        "overflowY": "hidden",
+        "position": "static",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "flex"
+      },
+      "chatHeader": {
+        "rect": {
+          "top": 62,
+          "bottom": 133,
+          "height": 72,
+          "width": 1440
+        },
+        "scrollHeight": 71,
+        "clientHeight": 71,
+        "height": "71.5156px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "messages": {
+        "rect": {
+          "top": 133,
+          "bottom": 422,
+          "height": 289,
+          "width": 1440
+        },
+        "scrollHeight": 1209,
+        "clientHeight": 289,
+        "height": "288.953px",
+        "minHeight": "0px",
+        "maxHeight": "100%",
+        "overflow": "hidden auto",
+        "overflowY": "auto",
+        "position": "relative",
+        "flex": "1 1 0%",
+        "flexShrink": "1",
+        "flexGrow": "1",
+        "display": "block"
+      },
+      "messagesInner": {
+        "rect": {
+          "top": -787,
+          "bottom": 422,
+          "height": 1209,
+          "width": 1280
+        },
+        "scrollHeight": 1209,
+        "clientHeight": 1209,
+        "height": "1209.11px",
+        "minHeight": "0px",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "static",
+        "flex": "0 1 auto",
+        "flexShrink": "1",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "footer": {
+        "rect": {
+          "top": 422,
+          "bottom": 600,
+          "height": 178,
+          "width": 1440
+        },
+        "scrollHeight": 178,
+        "clientHeight": 178,
+        "height": "177.844px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "relative",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      },
+      "nav": {
+        "rect": {
+          "top": 0,
+          "bottom": 62,
+          "height": 62,
+          "width": 1440
+        },
+        "scrollHeight": 62,
+        "clientHeight": 62,
+        "height": "61.6875px",
+        "minHeight": "auto",
+        "maxHeight": "none",
+        "overflow": "visible",
+        "overflowY": "visible",
+        "position": "sticky",
+        "flex": "0 0 auto",
+        "flexShrink": "0",
+        "flexGrow": "0",
+        "display": "block"
+      }
+    },
+    "analysis": {
+      "documentScrolls": false,
+      "bodyScrolls": false,
+      "footerBelowViewport": false,
+      "headerAboveViewport": false,
+      "footerBottomVsInnerHeight": -300,
+      "messagesIsScrollContainer": true,
+      "messagesCanScroll": true,
+      "messagesScrollsNotDoc": true,
+      "chatPageActive": true,
+      "chatInnerSumVsChatPage": 1,
+      "chatPageVsFoChatApp": 0,
+      "foChatAppVsVar": 538
+    }
+  }
+}

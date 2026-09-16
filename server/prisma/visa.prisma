@@ -1,0 +1,137 @@
+// Module 08 — Visa Intelligence (Phase 2 slice). Owned by modules/visa/.
+// See docs/modules/08-visa-intelligence.md.
+//
+// This file lives alongside prisma/schema.prisma (multi-file schema, GA
+// since Prisma 6.7 — no preview flag needed). The `generator`/`datasource`
+// blocks stay in schema.prisma; relations across files just work.
+//
+// Deliberately has NO foreign key into User — same precedent as
+// prisma/refunds.prisma / prisma/corporate.prisma. `VisaApplication.userId`
+// is a plain indexed String column, not an FK; modules/visa/visa.service.js
+// looks up ownership by comparing `userId === req.user.id` at the
+// application layer, the same pattern refunds.service.js uses for booking
+// ownership.
+//
+// Core concepts (module doc): visa requirements are a lookup against
+// nationality × destination × transit route. Module 16 (AI Knowledge
+// Platform) is the preferred grounding source for free-text visa procedure
+// content when it has been ingested (its `VISA` category exists but is not
+// populated yet — see docs/modules/16-ai-knowledge-platform.md); this
+// `VisaRequirement` table is the deterministic system of record this
+// module queries first so a lookup never depends on whether any knowledge
+// content has been ingested. `modules/visa/visa.service.js#lookupVisa`
+// merges both: structured table hit (always attempted) + optional knowledge
+// hits (best-effort, dynamic import, never a hard dependency).
+
+enum VisaCategory {
+  VISA_FREE
+  VOA
+  E_VISA
+  EMBASSY
+  UNKNOWN
+}
+
+enum VisaApplicationStatus {
+  DRAFT
+  SUBMITTED
+  IN_PROCESS
+  APPROVED
+  REJECTED
+  WITHDRAWN
+}
+
+/// Deterministic nationality→destination visa requirement lookup table —
+/// the system of record this module queries for structured answers (module
+/// doc: "this module is the query/workflow layer on top, not the data-entry
+/// system of record for raw embassy rules" — even so, *this* table is that
+/// system of record for the structured category/processing-time fields;
+/// long-form procedure text belongs in Module 16's KnowledgeDocument).
+/// `transitNotes` on a row describes transit-through-this-country rules for
+/// travellers of `nationalityCode` (i.e. this same row doubles as the
+/// "layover country requirement" record when `destinationCode` is used as a
+/// transit country in a lookup — see visa.service.js#lookupVisa).
+model VisaRequirement {
+  id String @id @default(cuid())
+
+  nationalityCode String // ISO 3166-1 alpha-2, e.g. "PK"
+  destinationCode String // ISO 3166-1 alpha-2, e.g. "AE"
+
+  category VisaCategory
+
+  /// Transit/layover-specific guidance for this nationality at this
+  /// destination when used as a transit country (e.g. "Airside transit up
+  /// to 8h without a visa; landside transit requires a TWOV permit").
+  transitNotes String?
+
+  /// Array of required document descriptions, e.g.
+  /// `["Passport valid 6+ months", "Passport photo", "Bank statement"]`.
+  requiredDocuments Json?
+
+  /// Embassy/consulate contact + jurisdiction info, e.g.
+  /// `{ "name": "...", "address": "...", "phone": "...", "jurisdiction": "..." }`.
+  embassyInfo Json?
+
+  processingDaysMin Int?
+  processingDaysMax Int?
+
+  /// Attribution — an AI/consultant answer must never present this as
+  /// current fact without a source + verification date (dev guide §7 /
+  /// module doc's grounding requirement).
+  source String?
+  lastVerifiedAt DateTime?
+
+  /// Soft-disable instead of delete — superseded/incorrect rows are
+  /// retired, not silently dropped (mirrors KnowledgeDocument's
+  /// `isActive` versioning precedent).
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([nationalityCode, destinationCode])
+  @@index([destinationCode])
+  @@index([isActive])
+}
+
+/// A traveller's visa application workflow instance — appointment tracking,
+/// document checklist progress, and status (module doc, "Application
+/// workflow"). Separate from `VisaRequirement`: this is the customer's
+/// in-progress case, not the reference data it was opened against.
+model VisaApplication {
+  id String @id @default(cuid())
+
+  userId String // plain scalar, no relation — see file header.
+
+  nationalityCode String
+  destinationCode String
+
+  /// Snapshot of the requirement category at the time the application was
+  /// opened (from `lookupVisa`, if a matching `VisaRequirement` existed) —
+  /// not a live FK, so a later change to the reference table doesn't
+  /// retroactively rewrite an in-flight application's own record.
+  category VisaCategory?
+
+  status VisaApplicationStatus @default(DRAFT)
+
+  appointmentAt       DateTime?
+  appointmentLocation String?
+
+  /// Document checklist progress, e.g.
+  /// `[{ "item": "Passport copy", "done": true }, ...]` — checked against
+  /// the traveller's vault contents (Module 07) at the application layer,
+  /// not enforced by the schema.
+  checklist Json?
+
+  /// Vault document ids (Module 07 `VaultDocument.id`) linked to this
+  /// application, e.g. `["clxyz...", "clabc..."]` — plain id array, no FK
+  /// (same cross-module no-FK precedent as the rest of this file).
+  vaultDocumentIds Json?
+
+  notes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}

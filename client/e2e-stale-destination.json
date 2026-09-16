@@ -1,0 +1,85 @@
+{
+  "cases": [
+    {
+      "id": "A",
+      "q1": {
+        "origin": "LHE",
+        "destination": "DXB",
+        "departureDate": "2026-09-10",
+        "passengers": 1,
+        "cabinClass": "ECONOMY"
+      },
+      "q2": {
+        "origin": "LHE",
+        "destination": "IST",
+        "departureDate": "2026-09-15",
+        "passengers": 1,
+        "cabinClass": "ECONOMY"
+      },
+      "dests": [
+        "IST",
+        "IST",
+        "IST",
+        "IST",
+        "IST",
+        "IST",
+        "IST",
+        "IST",
+        "IST",
+        "IST",
+        "IST",
+        "IST"
+      ]
+    },
+    {
+      "id": "B",
+      "q2": {
+        "origin": "KHI",
+        "destination": "LHR",
+        "departureDate": "2026-09-15",
+        "passengers": 1,
+        "cabinClass": "ECONOMY"
+      },
+      "origins": [
+        "KHI",
+        "KHI",
+        "KHI",
+        "KHI",
+        "KHI",
+        "KHI",
+        "KHI",
+        "KHI",
+        "KHI",
+        "KHI",
+        "KHI"
+      ],
+      "dests": [
+        "LHR",
+        "LHR",
+        "LHR",
+        "LHR",
+        "LHR",
+        "LHR",
+        "LHR",
+        "LHR",
+        "LHR",
+        "LHR",
+        "LHR"
+      ]
+    },
+    {
+      "id": "C",
+      "action": "clarify",
+      "q2": {
+        "origin": "LHE",
+        "destination": "",
+        "departureDate": "2026-09-15",
+        "passengers": 1,
+        "cabinClass": "ECONOMY"
+      },
+      "dests": [],
+      "reply": "Which city in China would you like to fly to? Beijing, Shanghai, or another city?"
+    }
+  ],
+  "status": "PASS"
+}

@@ -1,0 +1,97 @@
+// Module 16 — AI Knowledge Platform.
+// See docs/modules/16-ai-knowledge-platform.md
+//
+// Internal FlightOne knowledge (SOPs, policies, contracts) — NOT Traveller Vault.
+// Retrieval is deterministic keyword/term-overlap over Postgres (no embeddings).
+
+enum KnowledgeCategory {
+  SOP
+  AIRLINE_POLICY
+  SUPPLIER_RULE
+  CORPORATE_TRAVEL_POLICY
+  VISA_RULE
+  SUPPLIER_CONTRACT
+  VISA_PROCEDURE
+  CORPORATE_AGREEMENT
+  TRAVEL_POLICY
+  /// Legacy Phase-1 values retained for migration compatibility.
+  VISA
+  CORPORATE
+  OTHER
+}
+
+enum KnowledgeStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+  EXPIRED
+}
+
+enum KnowledgeVisibility {
+  /// Safe to cite/show to customers when answering.
+  CUSTOMER_SAFE
+  /// May ground Ava answers; do not dump source text to customers.
+  INTERNAL
+  /// Ops/restricted only — never returned to ordinary customers.
+  RESTRICTED
+}
+
+enum KnowledgeIngestionStatus {
+  READY
+  PENDING
+  FAILED
+  UNSUPPORTED
+}
+
+/// One versioned knowledge record. Versions of the same logical document share `documentKey`.
+model KnowledgeDocument {
+  id          String              @id @default(cuid())
+  documentKey String
+  title       String
+  category    KnowledgeCategory
+  visibility  KnowledgeVisibility @default(INTERNAL)
+  status      KnowledgeStatus     @default(DRAFT)
+  version     Int                 @default(1)
+
+  source       String?
+  ownerUserId  String?
+  effectiveFrom DateTime?
+  expiresAt     DateTime?
+  lastVerifiedAt DateTime?
+
+  content          String
+  ingestionStatus  KnowledgeIngestionStatus @default(READY)
+  ingestionError   String?
+
+  /// Legacy soft-flag kept in sync with status for older callers.
+  isActive Boolean @default(true)
+
+  chunks KnowledgeChunk[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([documentKey, version])
+  @@index([documentKey])
+  @@index([category])
+  @@index([status])
+  @@index([visibility])
+  @@index([isActive])
+  @@index([expiresAt])
+  @@index([effectiveFrom])
+}
+
+model KnowledgeChunk {
+  id         String            @id @default(cuid())
+  documentId String
+  document   KnowledgeDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  ordinal Int
+  content String
+  tags    String[] @default([])
+
+  createdAt DateTime @default(now())
+
+  @@index([documentId])
+  @@index([ordinal])
+}

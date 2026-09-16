@@ -1,0 +1,659 @@
+"use client";
+
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { ConsultantResponse } from "@/lib/consultant/types";
+import type { TravelPlan } from "@/lib/consultant/travelPlan";
+import type { ConsultantStreamEvent } from "@/lib/consultant/streamTypes";
+import type { TravellerLocation } from "@/lib/geo/types";
+import { applyFilterPills, togglePill } from "@/lib/ask-ai/applyFilters";
+import {
+  applySidebarFiltersToItineraries,
+  applySidebarFiltersToOffers,
+  buildSidebarFilterFacets,
+  defaultSidebarFilters,
+  seedSidebarFiltersFromPills,
+  type SidebarFilterFacets,
+  type SidebarFilterState,
+} from "@/lib/ask-ai/sidebarFilters";
+import { sortOffers } from "@/lib/ask-ai/sortOffers";
+import type {
+  FilterPill,
+  ResultsSortKey,
+  SearchPhase,
+} from "@/lib/ask-ai/types";
+import {
+  previewLoadingRoute,
+  routeCodesFromTravelPlan,
+  type LoadingRouteCodes,
+} from "@/lib/ask-ai/loadingRoute";
+import {
+  clearChatHandoff,
+  loadChatHandoff,
+  saveChatHandoff,
+} from "@/lib/ask-ai/chatHandoff";
+import {
+  ensureConversationId,
+  loadConversationResumeById,
+  loadLatestConversationResume,
+  recordAssistantMessage,
+  recordGuestHandoffMessages,
+  recordTurnMessages,
+  requestConversationEscalation,
+} from "@/lib/ask-ai/persistConversation";
+import {
+  detectEscalationIntent,
+  honestHandoffReply,
+} from "@/lib/ask-ai/escalationGuidance";
+import { useAuthStore } from "@/store/auth.store";
+import { useCorporateProfileStore } from "@/store/corporateProfile.store";
+import { networkErrorReply } from "@/lib/consultant/serviceMessages";
+import type { AskAiChatResult, UiMessage } from "../chat.types";
+import { GREETING, buildGreeting } from "../chat.types";
+import { isLiveSearchPanel } from "@/lib/ask-ai/chatResultsState";
+
+const BEST_FARE_RE = /\b(best fare|cheapest|lowest price|best price)\b/i;
+
+/** Ava guest chat — SSE to /api/chat with searchResults rail state. */
+export function useAskAiChat(
+  location: TravellerLocation | null,
+): AskAiChatResult {
+  const [messages, setMessages] = useState<UiMessage[]>([GREETING]);
+  const [busy, setBusy] = useState(false);
+  const [provider, setProvider] = useState<string | null>(null);
+  const [greetedFor, setGreetedFor] = useState<string | null>(null);
+  const [searchPanel, setSearchPanel] =
+    useState<AskAiChatResult["searchPanel"]>(null);
+  const [previousTravelPlan, setPreviousTravelPlan] = useState<TravelPlan | null>(
+    null,
+  );
+  const [searchPhase, setSearchPhase] = useState<SearchPhase>("idle");
+  const [filterPills, setFilterPills] = useState<FilterPill[]>([]);
+  const [sidebarFilters, setSidebarFilters] =
+    useState<SidebarFilterState | null>(null);
+  const [sidebarFacets, setSidebarFacets] =
+    useState<SidebarFilterFacets | null>(null);
+  const [sortKey, setSortKey] = useState<ResultsSortKey>("angle");
+  const [activeOriginIdx, setActiveOriginIdx] = useState(0);
+  const [searchResultMessageId, setSearchResultMessageId] = useState<string | null>(
+    null,
+  );
+  const [followUpSuggestions, setFollowUpSuggestions] = useState<string[]>([]);
+  const [loadingRoute, setLoadingRoute] = useState<LoadingRouteCodes | null>(null);
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const conversationIdRef = useRef<string | null>(null);
+  const previousTravelPlanRef = useRef<TravelPlan | null>(null);
+  const sessionRestoredRef = useRef(false);
+  const accessToken = useAuthStore((s) => s.accessToken);
+  const hasHydratedAuth = useAuthStore((s) => s.hasHydrated);
+
+  useEffect(() => {
+    conversationIdRef.current = conversationId;
+  }, [conversationId]);
+
+  useEffect(() => {
+    previousTravelPlanRef.current = previousTravelPlan;
+  }, [previousTravelPlan]);
+
+  // Restore guest handoff (login nav) OR authenticated server conversation (cross-device).
+  // Guests who refresh /chat start fresh — do not restore sessionStorage handoff.
+  useEffect(() => {
+    if (!hasHydratedAuth || sessionRestoredRef.current) return;
+    sessionRestoredRef.current = true;
+
+    const handoff = loadChatHandoff();
+
+    // Unauthenticated full reload: wipe temporary guest handoff and keep landing state.
+    if (!accessToken) {
+      const nav = performance.getEntriesByType(
+        "navigation",
+      )[0] as PerformanceNavigationTiming | undefined;
+      if (nav?.type === "reload") {
+        clearChatHandoff();
+        return;
+      }
+      if (!handoff) return;
+
+      const restored = handoff.messages.filter((m) => m.content?.trim());
+      if (restored.length > 0) setMessages(restored);
+      if (handoff.previousTravelPlan) {
+        setPreviousTravelPlan(handoff.previousTravelPlan);
+      }
+      if (handoff.conversationId) {
+        setConversationId(handoff.conversationId);
+        conversationIdRef.current = handoff.conversationId;
+      }
+      return;
+    }
+
+    // Authenticated: prefer in-tab handoff (login/signup), else resume latest server thread.
+    void (async () => {
+      if (handoff) {
+        const restored = handoff.messages.filter((m) => m.content?.trim());
+        if (restored.length > 0) setMessages(restored);
+        if (handoff.previousTravelPlan) {
+          setPreviousTravelPlan(handoff.previousTravelPlan);
+        }
+        const title =
+          restored.find((m) => m.role === "user")?.content.slice(0, 80) ||
+          "FlightOne chat";
+        const id = await ensureConversationId(handoff.conversationId, title);
+        if (id) {
+          setConversationId(id);
+          conversationIdRef.current = id;
+          if (!handoff.conversationId) {
+            await recordGuestHandoffMessages(id, restored);
+          }
+        }
+        clearChatHandoff();
+        return;
+      }
+
+      const resume = await loadLatestConversationResume();
+      if (!resume) return;
+      setConversationId(resume.conversationId);
+      conversationIdRef.current = resume.conversationId;
+      setMessages(resume.messages);
+      if (resume.travelPlan) {
+        setPreviousTravelPlan(resume.travelPlan);
+      }
+    })();
+  }, [hasHydratedAuth, accessToken]);
+
+  // Keep a handoff snapshot so /login → /chat doesn't wipe the active thread.
+  useEffect(() => {
+    if (messages.length <= 1 && messages[0]?.id === "greet") return;
+    saveChatHandoff({
+      messages,
+      previousTravelPlan,
+      conversationId,
+    });
+  }, [messages, previousTravelPlan, conversationId]);
+
+  useEffect(() => {
+    if (!location) return;
+    const key = `${location.place}|${location.source}`;
+    if (greetedFor === key) return;
+    setGreetedFor(key);
+    setMessages((prev) => {
+      if (prev.length === 1 && prev[0]?.id === "greet") {
+        return [buildGreeting(location)];
+      }
+      return prev;
+    });
+  }, [location, greetedFor]);
+
+  const displayedOffers = useMemo(() => {
+    if (!searchPanel) return [];
+    const variantOffers = searchPanel.originVariants?.[activeOriginIdx]?.offers;
+    const base = variantOffers?.length ? variantOffers : searchPanel.offers;
+    const pillFiltered = applyFilterPills(base, filterPills);
+    const sidebarFiltered =
+      sidebarFilters && sidebarFacets
+        ? applySidebarFiltersToOffers(
+            pillFiltered,
+            sidebarFilters,
+            sidebarFacets,
+          )
+        : pillFiltered;
+    return sortOffers(sidebarFiltered, sortKey);
+  }, [
+    searchPanel,
+    filterPills,
+    sidebarFilters,
+    sidebarFacets,
+    sortKey,
+    activeOriginIdx,
+  ]);
+
+  const displayedItineraries = useMemo(() => {
+    if (!searchPanel?.itineraries?.length) return [];
+    const list = searchPanel.itineraries;
+    if (!sidebarFilters || !sidebarFacets) return list;
+    return applySidebarFiltersToItineraries(
+      list,
+      sidebarFilters,
+      sidebarFacets,
+    );
+  }, [searchPanel?.itineraries, sidebarFilters, sidebarFacets]);
+
+  useEffect(() => {
+    if (!searchPanel) {
+      setSidebarFacets(null);
+      setSidebarFilters(null);
+      return;
+    }
+    const variantOffers = searchPanel.originVariants?.[activeOriginIdx]?.offers;
+    const offers = variantOffers?.length ? variantOffers : searchPanel.offers;
+    const facets = buildSidebarFilterFacets(
+      offers,
+      searchPanel.itineraries ?? [],
+    );
+    setSidebarFacets(facets);
+    setSidebarFilters(
+      facets
+        ? seedSidebarFiltersFromPills(facets, searchPanel.filterPills)
+        : null,
+    );
+  }, [searchPanel, activeOriginIdx]);
+
+  useEffect(() => {
+    setActiveOriginIdx(0);
+  }, [searchPanel?.tripTitle, searchPanel?.legRoute]);
+
+  const onTogglePill = useCallback(
+    (pillId: string) => {
+      setFilterPills((prev) => {
+        const next = togglePill(prev, pillId);
+        if (sidebarFacets) {
+          setSidebarFilters(seedSidebarFiltersFromPills(sidebarFacets, next));
+        }
+        return next;
+      });
+    },
+    [sidebarFacets],
+  );
+
+  const onSidebarFiltersChange = useCallback((next: SidebarFilterState) => {
+    setSidebarFilters(next);
+  }, []);
+
+  const onClearSidebarFilters = useCallback(() => {
+    if (!sidebarFacets) return;
+    setSidebarFilters(defaultSidebarFilters(sidebarFacets));
+    setFilterPills((prev) => prev.map((p) => ({ ...p, active: false })));
+  }, [sidebarFacets]);
+
+  const onSortChange = useCallback((sort: ResultsSortKey) => {
+    setSortKey(sort);
+  }, []);
+
+  const onTripTitleChange = useCallback((title: string) => {
+    setSearchPanel((prev) => (prev ? { ...prev, tripTitle: title } : prev));
+  }, []);
+
+  async function persistAuthenticatedTurn(
+    userContent: string,
+    assistantContent: string,
+    replyProvider?: string | null,
+    travelPlan?: TravelPlan | null,
+  ) {
+    if (!useAuthStore.getState().accessToken) return;
+    if (!userContent.trim() || !assistantContent.trim()) return;
+    const id = await ensureConversationId(
+      conversationIdRef.current,
+      userContent.slice(0, 80),
+    );
+    if (!id) return;
+    conversationIdRef.current = id;
+    setConversationId(id);
+    await recordTurnMessages(
+      id,
+      userContent,
+      assistantContent,
+      replyProvider,
+      travelPlan !== undefined ? travelPlan : previousTravelPlanRef.current,
+    );
+  }
+
+  async function send(text: string) {
+    const trimmed = text.trim();
+    if (!trimmed || busy) return;
+
+    const turnId = crypto.randomUUID();
+    if (process.env.NODE_ENV === "development") {
+      console.log(`[chat] submit id=${turnId}`);
+    }
+
+    const wantsBestFare = BEST_FARE_RE.test(trimmed);
+    if (wantsBestFare) setSortKey("price");
+
+    const userMsg: UiMessage = {
+      id: crypto.randomUUID(),
+      role: "user",
+      content: trimmed,
+    };
+    const assistantId = crypto.randomUUID();
+    setMessages((prev) => [
+      ...prev,
+      userMsg,
+      { id: assistantId, role: "assistant", content: "" },
+    ]);
+    setBusy(true);
+    setSearchPhase("extract");
+    setSearchResultMessageId(null);
+    // Clear prior panel so Results never shows a stale route (e.g. Istanbul)
+    // while a new Lahore→Dubai search is in flight.
+    setSearchPanel(null);
+    setFilterPills([]);
+    setSidebarFilters(null);
+    setSidebarFacets(null);
+    setFollowUpSuggestions([]);
+
+    const history = [...messages, userMsg]
+      .filter((m) => m.id !== "greet")
+      .map((m) => ({ role: m.role, content: m.content }));
+
+    const defaultOriginPlace = location?.place || location?.city || "Lahore";
+    const defaultOriginIata = location?.iata || "LHE";
+    const routePreview = previewLoadingRoute(trimmed, {
+      today: new Date().toISOString().slice(0, 10),
+      defaultOriginIata,
+      defaultOriginPlace,
+      history,
+      previousPlan: previousTravelPlan,
+    });
+    setLoadingRoute(routePreview);
+
+    const keepPriceSort = (
+      panel: NonNullable<AskAiChatResult["searchPanel"]>,
+    ) => {
+      if (
+        wantsBestFare &&
+        panel.multiCity &&
+        (panel.itineraries?.length ?? 0) > 0
+      ) {
+        setSortKey((prev) => (prev === "angle" ? "price" : prev));
+      }
+    };
+
+    try {
+      if (process.env.NODE_ENV === "development") {
+        console.log(`[chat] request id=${turnId}`);
+      }
+      const accessToken = useAuthStore.getState().accessToken;
+      const escalationTrigger = accessToken ? detectEscalationIntent(trimmed) : null;
+      if (escalationTrigger) {
+        const id = await ensureConversationId(
+          conversationIdRef.current,
+          trimmed.slice(0, 80),
+        );
+        if (id) {
+          conversationIdRef.current = id;
+          setConversationId(id);
+          // Persist prior turns + this user message BEFORE creating the ticket
+          // so the handoff snapshot includes the request that triggered escalation.
+          await recordGuestHandoffMessages(id, [...messages, userMsg]);
+          const ticket = await requestConversationEscalation(id, {
+            trigger: escalationTrigger,
+            note: trimmed.slice(0, 500),
+          });
+          if (ticket) {
+            const reply = honestHandoffReply({
+              trigger: escalationTrigger,
+              escalationId: ticket.id,
+              status: ticket.status,
+              deduplicated: ticket.deduplicated,
+            });
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === assistantId
+                  ? { ...m, content: reply, provider: "escalation" }
+                  : m,
+              ),
+            );
+            setBusy(false);
+            setSearchPhase("done");
+            setLoadingRoute(null);
+            await recordAssistantMessage(id, reply, "escalation");
+            return;
+          }
+        }
+        // Fall through to Ava if escalate API failed (e.g. network) — guidance still applies.
+      }
+      const corp = useCorporateProfileStore.getState();
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+          ...(corp.mode === "CORPORATE" && corp.companyId
+            ? {
+                "X-FlightOne-Profile": "CORPORATE",
+                "X-FlightOne-Company-Id": corp.companyId,
+              }
+            : {}),
+        },
+        body: JSON.stringify({
+          message: trimmed,
+          history,
+          location,
+          previousTravelPlan,
+          stream: true,
+          turnId,
+        }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+      if (process.env.NODE_ENV === "development") {
+        console.log(`[chat] response id=${turnId}`);
+      }
+
+      const ctype = res.headers.get("content-type") || "";
+      if (!ctype.includes("text/event-stream") || !res.body) {
+        applyFinal(
+          assistantId,
+          (await res.json()) as ConsultantResponse,
+          keepPriceSort,
+          trimmed,
+        );
+        return;
+      }
+
+      await readSse(res.body, (event) => {
+        if (event.type === "status") {
+          setSearchPhase(event.phase === "done" ? "done" : event.phase);
+          return;
+        }
+        if (event.type === "searchResults") {
+          const panel = event.panel;
+          setFollowUpSuggestions(panel.followUpSuggestions ?? []);
+          if (event.meta?.travelPlan !== undefined) {
+            setPreviousTravelPlan(event.meta.travelPlan ?? null);
+            const fromPlan = routeCodesFromTravelPlan(event.meta.travelPlan ?? null);
+            if (fromPlan) setLoadingRoute(fromPlan);
+          }
+
+          if (isLiveSearchPanel(panel)) {
+            setSearchPanel(panel);
+            setSearchResultMessageId(assistantId);
+            setFilterPills(panel.filterPills);
+            setActiveOriginIdx(0);
+            if (event.meta.provider) setProvider(event.meta.provider);
+            keepPriceSort(panel);
+          } else {
+            setSearchPanel(null);
+            setSearchResultMessageId(null);
+            setFilterPills([]);
+            setSidebarFilters(null);
+            setSidebarFacets(null);
+          }
+          return;
+        }
+        if (event.type === "token") {
+          setSearchPhase((p) =>
+            p === "search" || p === "extract" ? "reply" : p,
+          );
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === assistantId
+                ? { ...m, content: m.content + event.delta }
+                : m,
+            ),
+          );
+          return;
+        }
+        if (event.type === "done") {
+          applyFinal(assistantId, event.result, keepPriceSort, trimmed);
+          setSearchPhase("done");
+          return;
+        }
+        if (event.type === "error") {
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === assistantId
+                ? { ...m, content: m.content || event.message }
+                : m,
+            ),
+          );
+          setSearchPhase("done");
+        }
+      });
+    } catch {
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === assistantId
+            ? { ...m, content: m.content || networkErrorReply() }
+            : m,
+        ),
+      );
+      setSearchPhase("done");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function applyFinal(
+    assistantId: string,
+    data: ConsultantResponse,
+    keepPriceSort?: (
+      panel: NonNullable<AskAiChatResult["searchPanel"]>,
+    ) => void,
+    userContent?: string,
+  ) {
+    setProvider(data.meta.provider);
+    if (data.meta.travelPlan !== undefined) {
+      setPreviousTravelPlan(data.meta.travelPlan ?? null);
+      const fromPlan = routeCodesFromTravelPlan(data.meta.travelPlan ?? null);
+      if (fromPlan) setLoadingRoute(fromPlan);
+    }
+    if (data.searchPanel) {
+      const incoming = data.searchPanel;
+      setFollowUpSuggestions(incoming.followUpSuggestions ?? []);
+
+      if (isLiveSearchPanel(incoming)) {
+        const incomingCount =
+          (incoming.offers?.length ?? 0) + (incoming.itineraries?.length ?? 0);
+        setSearchPanel((prev) => {
+          const prevCount =
+            (prev?.offers?.length ?? 0) + (prev?.itineraries?.length ?? 0);
+          if (incomingCount === 0 && prevCount > 0) return prev;
+          return incoming;
+        });
+        setSearchResultMessageId(assistantId);
+        if (incomingCount > 0) {
+          setFilterPills(incoming.filterPills);
+        }
+        keepPriceSort?.(incoming);
+      } else {
+        setSearchPanel(null);
+        setSearchResultMessageId(null);
+      }
+    }
+    const replyFromApi = data.reply || "";
+    setMessages((prev) => {
+      const existing = prev.find((m) => m.id === assistantId)?.content || "";
+      const finalReply = replyFromApi || existing;
+      if (userContent && finalReply.trim()) {
+        void persistAuthenticatedTurn(
+          userContent,
+          finalReply,
+          data.meta.provider,
+          data.meta.travelPlan ?? previousTravelPlanRef.current,
+        );
+      }
+      return prev.map((m) =>
+        m.id === assistantId
+          ? {
+              ...m,
+              content: finalReply,
+              provider: data.meta.provider,
+            }
+          : m,
+      );
+    });
+  }
+
+  return {
+    messages,
+    busy,
+    provider,
+    send,
+    searchPanel,
+    searchPhase,
+    searchResultMessageId,
+    filterPills,
+    sortKey,
+    displayedOffers,
+    displayedItineraries,
+    sidebarFilters,
+    sidebarFacets,
+    activeOriginIdx,
+    onOriginChange: setActiveOriginIdx,
+    followUpSuggestions,
+    onTogglePill,
+    onSidebarFiltersChange,
+    onClearSidebarFilters,
+    onSortChange,
+    onTripTitleChange,
+    loadingRoute,
+    conversationId,
+    resumeConversationById: async (id: string) => {
+      const resume = await loadConversationResumeById(id);
+      if (!resume) return false;
+      setConversationId(resume.conversationId);
+      conversationIdRef.current = resume.conversationId;
+      setMessages(resume.messages);
+      if (resume.travelPlan) setPreviousTravelPlan(resume.travelPlan);
+      setSearchPanel(null);
+      return true;
+    },
+    startNewChat: () => {
+      setConversationId(null);
+      conversationIdRef.current = null;
+      setMessages([location ? buildGreeting(location) : GREETING]);
+      setPreviousTravelPlan(null);
+      previousTravelPlanRef.current = null;
+      setSearchPanel(null);
+      setSearchPhase("idle");
+      setFilterPills([]);
+      setSidebarFilters(null);
+      setSidebarFacets(null);
+      setFollowUpSuggestions([]);
+      setLoadingRoute(null);
+      setSearchResultMessageId(null);
+      clearChatHandoff();
+    },
+  };
+}
+
+async function readSse(
+  body: ReadableStream<Uint8Array>,
+  onEvent: (event: ConsultantStreamEvent) => void,
+) {
+  const reader = body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+
+    let sep: number;
+    while ((sep = buffer.indexOf("\n\n")) >= 0) {
+      const block = buffer.slice(0, sep);
+      buffer = buffer.slice(sep + 2);
+      for (const rawLine of block.split("\n")) {
+        const line = rawLine.trim();
+        if (!line.startsWith("data:")) continue;
+        const payload = line.slice(5).trim();
+        if (!payload) continue;
+        try {
+          onEvent(JSON.parse(payload) as ConsultantStreamEvent);
+        } catch {
+          // skip malformed
+        }
+      }
+    }
+  }
+}

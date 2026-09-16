@@ -1,0 +1,54 @@
+---
+description: READMEs, ADRs, comments that explain why, runbooks that work — for markdown/doc files.
+globs: ["**/*.md", "**/*.mdx", "**/README*", "**/docs/**"]
+alwaysApply: false
+---
+
+# Documentation Standard
+
+Docs are part of the product. Undocumented software is unfinished software. Write for the reader
+who arrives at 2am with no context.
+
+## Principles
+
+- **Document the why and the how-to, not the what.** The code shows what; docs give context,
+  intent, and usage.
+- **Docs live with code and change with code.** Update docs in the same PR as the change. Stale
+  docs are worse than none — they actively mislead.
+- **Right doc for the audience:** READMEs for users/contributors, ADRs for decisions, RFCs for
+  proposals, runbooks for operators, API reference for consumers, comments for maintainers.
+
+## Every project's README answers
+
+1. **What** is this and what problem does it solve?
+2. **Quick start** — clone to running locally in the fewest steps that actually work.
+3. **How to test** and how to run the linters/typecheck.
+4. **Architecture** — a short map of the structure and key concepts (link deeper docs).
+5. **How to deploy** and how to configure (env vars, with a template).
+6. **How to contribute** — conventions, PR process, where to ask.
+
+## Code comments
+
+- Explain intent, invariants, tradeoffs, and gotchas — link to the issue/RFC for context.
+- No comments that restate the code. No commented-out code.
+- Public APIs get doc comments (TSDoc/JSDoc/docstrings): purpose, params, returns, throws, example.
+
+## Decision records (ADRs)
+
+- Record significant/expensive-to-reverse decisions: context, options considered, decision,
+  consequences. Immutable once accepted; supersede rather than edit.
+
+## API docs
+
+- Spec-first (OpenAPI/SDL) is the source of truth; generate reference docs from it. Include auth,
+  errors, examples, and versioning/deprecation notes.
+
+## Operational docs
+
+- **Runbooks** for every alert and common operational task: symptom → diagnosis → remediation.
+- **Postmortems** for incidents: blameless, timeline, root cause, action items with owners.
+
+## Quality bar
+
+- Accurate (matches the code today), concise, skimmable (headings, lists, code blocks), and
+  example-driven. Tested instructions actually work when followed literally.

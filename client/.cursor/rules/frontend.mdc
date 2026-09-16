@@ -1,0 +1,64 @@
+---
+description: Architecture, components, state, styling, performance, a11y — for React/Next.js/frontend files.
+globs: ["**/*.tsx", "**/*.jsx", "**/components/**", "**/app/**", "**/pages/**", "**/*.css"]
+alwaysApply: false
+---
+
+# Frontend Standard
+
+Default stack: **Next.js (App Router) · React · TypeScript · TailwindCSS · shadcn/ui ·
+Framer Motion · Zustand · TanStack Query · React Hook Form · Zod.**
+
+## Architecture
+
+- **Feature-based structure:** colocate components, hooks, state, and tests by feature.
+- **Server-first (RSC) by default;** reach for Client Components only when you need
+  interactivity, browser APIs, or state. Keep the client bundle lean.
+- **Separate concerns:** presentational components (dumb, props-in) vs. container/logic.
+- **Colocate state with its consumers;** lift only when genuinely shared. Server state
+  (TanStack Query) ≠ client state (Zustand/local). Don't put server data in a global store.
+- **Composition over configuration:** small components composed, not giant prop-driven monoliths.
+
+## Components
+
+- Small, single-purpose, named for what they render. One component per file (plus its subparts).
+- Props are typed and minimal; avoid boolean prop explosions — prefer variants.
+- Derive, don't duplicate, state. No state that can be computed from other state.
+- Lists have stable keys (never the index for reorderable lists).
+- Every async surface handles **loading, empty, error, and success** states explicitly.
+
+## Styling
+
+- Tailwind utility-first; extract repetition into components, not `@apply` soup.
+- Design tokens (spacing/color/typography scale) via Tailwind config — no magic pixel values.
+- shadcn/ui as the primitive layer; theme it, don't fork it. Dark mode via CSS variables.
+- Consistent spacing rhythm, restrained palette, clear typographic hierarchy — Apple-grade polish.
+
+## State & data
+
+- **Server state:** TanStack Query — caching, revalidation, mutations, optimistic updates.
+- **Forms:** React Hook Form + Zod resolver; validate on the client for UX and the server for trust.
+- **Global client state:** Zustand, kept small and typed. Avoid Context for high-frequency updates.
+- Never fetch in `useEffect` when a framework data primitive (RSC, loaders, Query) fits.
+
+## Performance
+
+- Meet Core Web Vitals: LCP < 2.5s, INP < 200ms, CLS < 0.1.
+- Code-split by route/interaction; lazy-load below the fold; `next/image` for images.
+- Memoize deliberately (measure first); avoid re-render storms; virtualize long lists.
+- Ship less JavaScript. Audit the bundle. Prefetch on intent.
+
+## Accessibility
+
+- Semantic HTML first; ARIA only to fill gaps. Keyboard-operable, visible focus, labeled controls.
+- Respect `prefers-reduced-motion` and `prefers-color-scheme`.
+
+## Motion
+
+- Purposeful, fast (150–300ms), naturally eased, interruptible. Animate `transform`/`opacity`
+  (GPU-friendly), not layout properties. Disable non-essential motion under reduced-motion.
+
+## Quality gates
+
+- Type-clean, lint-clean, formatted. Component states covered (tests/Storybook).
+- No console errors/warnings. No layout shift. No unlabeled interactive elements.

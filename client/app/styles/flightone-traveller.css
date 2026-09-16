@@ -1,0 +1,584 @@
+/**
+ * Traveller module — operational layouts for profile, vault, visa, rewards,
+ * journey, refunds, escalations. Open sections + hairlines; cards only for forms.
+ * Signature: cyan hairline under the page title + uppercase section rails.
+ */
+
+.fo-traveller {
+  --fo-traveller-max: 72rem;
+  --fo-traveller-select-radius: 0.65rem;
+  position: relative;
+  z-index: 10;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  padding: clamp(1.25rem, 2.5vw, 2.5rem) var(--fo-page-gutter, clamp(1rem, 2.5vw, 3rem))
+    clamp(1.75rem, 3vw, 3rem);
+}
+
+.fo-traveller--narrow {
+  --fo-traveller-max: 52rem;
+}
+
+.fo-traveller--wide {
+  --fo-traveller-max: 78rem;
+}
+
+.fo-traveller--full {
+  --fo-traveller-max: var(--fo-page-max, 84rem);
+}
+
+.fo-traveller__inner {
+  width: 100%;
+  max-width: var(--fo-traveller-max);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.4rem, 2.6vw, 1.95rem);
+}
+
+/* Soft atmospheric plane under traveller content (not a card stack) */
+.fo-stage:has(> .fo-traveller) {
+  background: var(--fo-atmosphere);
+}
+
+/* ── Page header ───────────────────────────────────────────── */
+
+.fo-traveller__header {
+  display: grid;
+  gap: 0.55rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid color-mix(in oklab, var(--cyan) 18%, var(--line));
+}
+
+.fo-traveller__header-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem 1.25rem;
+}
+
+.fo-traveller__back {
+  display: inline-block;
+  margin-bottom: 0.1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--ink-faint);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.fo-traveller__back:hover {
+  color: var(--sky);
+}
+
+.fo-traveller__back:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--sky) 45%, transparent);
+  outline-offset: 2px;
+}
+
+.fo-traveller__title {
+  margin: 0;
+  font-family: var(--font-hero);
+  font-size: clamp(1.55rem, 3.2vw, 1.9rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.12;
+  color: var(--navy);
+}
+
+.fo-traveller__lede {
+  margin: 0;
+  max-width: 36rem;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+.fo-traveller__lede a {
+  color: var(--sky);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.fo-traveller__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.fo-traveller__meta {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--ink-faint);
+}
+
+.fo-traveller__meta-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.85rem;
+  font-size: 0.75rem;
+  color: var(--ink-faint);
+}
+
+.fo-traveller__meta-list li::before {
+  content: "";
+  display: inline-block;
+  width: 0.35rem;
+  height: 0.35rem;
+  margin-right: 0.4rem;
+  margin-bottom: 0.1rem;
+  border-radius: 1px;
+  background: color-mix(in oklab, var(--cyan) 55%, var(--navy));
+  vertical-align: middle;
+}
+
+/* ── Sections ──────────────────────────────────────────────── */
+
+.fo-traveller__section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.fo-traveller__section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.35rem 0.75rem;
+}
+
+.fo-traveller__section-title {
+  margin: 0;
+  font-family: var(--font-hero);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.fo-traveller__section-note {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--ink-faint);
+}
+
+.fo-traveller__panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 1rem 1.05rem;
+  border: 1px solid var(--line);
+  border-radius: 0.65rem;
+  background: color-mix(in oklab, white 92%, var(--horizon-cool));
+  box-shadow: none;
+}
+
+.fo-traveller__panel--warn {
+  border-color: color-mix(in oklab, var(--danger) 28%, var(--line));
+  background: color-mix(in oklab, var(--danger) 4%, white);
+}
+
+/* ── Filters / toggles ─────────────────────────────────────── */
+
+.fo-traveller__filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.fo-traveller__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 2rem;
+  padding: 0.3rem 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 0.35rem;
+  background: transparent;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition:
+    background 0.12s ease,
+    border-color 0.12s ease,
+    color 0.12s ease;
+}
+
+.fo-traveller__toggle:hover {
+  border-color: color-mix(in oklab, var(--cyan) 35%, var(--line));
+  color: var(--navy);
+}
+
+.fo-traveller__toggle:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--sky) 45%, transparent);
+  outline-offset: 2px;
+}
+
+.fo-traveller__toggle[aria-pressed="true"],
+.fo-traveller__toggle--on {
+  border-color: color-mix(in oklab, var(--cyan) 40%, var(--line));
+  background: color-mix(in oklab, var(--horizon-cool) 75%, white);
+  color: var(--navy);
+}
+
+/* Native select — match Input until SearchableSelect is wired */
+.fo-traveller__select,
+.fo-traveller select {
+  width: 100%;
+  min-height: 2.65rem;
+  padding: 0.55rem 2.1rem 0.55rem 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: var(--fo-traveller-select-radius);
+  background-color: white;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%2355606e' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 0.75rem;
+  appearance: none;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: var(--ink);
+  outline: none;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.fo-traveller__select--inline,
+.fo-traveller select.fo-traveller__select--inline {
+  width: auto;
+  min-width: 10rem;
+  min-height: 2.25rem;
+  padding-top: 0.4rem;
+  padding-bottom: 0.4rem;
+  font-size: 0.8125rem;
+}
+
+.fo-traveller__select:focus-visible,
+.fo-traveller select:focus-visible {
+  border-color: var(--sky);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--sky) 28%, transparent);
+}
+
+.fo-traveller__select:disabled,
+.fo-traveller select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.fo-traveller__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.fo-traveller__field > span,
+.fo-traveller__field > label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+.fo-traveller__field-hint {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--ink-faint);
+}
+
+/* ── Lists / rows (no card-in-card) ─────────────────────────── */
+
+.fo-traveller__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--line);
+}
+
+.fo-traveller__row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 0.9rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.fo-traveller__row-link {
+  display: block;
+  margin: 0 -0.35rem;
+  padding: 0.9rem 0.35rem;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0.25rem;
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.12s ease;
+}
+
+.fo-traveller__row-link:hover {
+  background: color-mix(in oklab, var(--horizon-cool) 55%, transparent);
+}
+
+.fo-traveller__row-link:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--sky) 45%, transparent);
+  outline-offset: 2px;
+}
+
+.fo-traveller__row-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.35rem 0.75rem;
+}
+
+.fo-traveller__row-title {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.fo-traveller__row-meta {
+  margin: 0.2rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--ink-faint);
+}
+
+.fo-traveller__row-body {
+  margin: 0.25rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+
+.fo-traveller__row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+/* ── Status chip (not pill spam) ───────────────────────────── */
+
+.fo-traveller__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.15rem 0.45rem;
+  border: 1px solid color-mix(in oklab, var(--cyan) 22%, var(--line));
+  border-radius: 0.25rem;
+  background: color-mix(in oklab, var(--horizon-cool) 70%, white);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--navy);
+  white-space: nowrap;
+}
+
+.fo-traveller__chip--warn {
+  border-color: color-mix(in oklab, var(--danger) 30%, var(--line));
+  background: color-mix(in oklab, var(--danger) 6%, white);
+  color: var(--danger);
+}
+
+.fo-traveller__chip--muted {
+  border-color: var(--line);
+  background: transparent;
+  color: var(--ink-faint);
+  font-weight: 500;
+}
+
+/* ── Empty / error ─────────────────────────────────────────── */
+
+.fo-traveller__state {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 1.1rem 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.fo-traveller__state-title {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.fo-traveller__state-body {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.fo-traveller__state--error .fo-traveller__state-title {
+  color: var(--danger);
+}
+
+/* ── Facts / progress / balance ────────────────────────────── */
+
+.fo-traveller__facts {
+  margin: 0;
+  display: grid;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+}
+
+.fo-traveller__fact {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-bottom: 0.45rem;
+  border-bottom: 1px solid color-mix(in oklab, var(--line) 70%, transparent);
+}
+
+.fo-traveller__fact:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.fo-traveller__fact dt {
+  color: var(--ink-soft);
+}
+
+.fo-traveller__fact dd {
+  margin: 0;
+  text-align: right;
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.fo-traveller__balance {
+  margin: 0;
+  font-family: var(--font-hero);
+  font-size: clamp(2.1rem, 5.5vw, 2.65rem);
+  font-weight: 700;
+  letter-spacing: -0.045em;
+  line-height: 1;
+  color: var(--navy);
+}
+
+.fo-traveller__balance span {
+  margin-left: 0.4rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--ink-faint);
+}
+
+.fo-traveller__score {
+  margin: 0;
+  font-family: var(--font-hero);
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--navy);
+}
+
+.fo-traveller__progress {
+  height: 0.35rem;
+  overflow: hidden;
+  border-radius: 2px;
+  background: color-mix(in oklab, var(--cyan) 12%, white);
+}
+
+.fo-traveller__progress > span {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--sky);
+  transition: width 0.3s ease;
+}
+
+/* ── Pagination ────────────────────────────────────────────── */
+
+.fo-traveller__pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  padding-top: 0.35rem;
+  border-top: 1px solid var(--line);
+  font-size: 0.75rem;
+  color: var(--ink-faint);
+}
+
+.fo-traveller__pager-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.fo-traveller__pager-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  min-height: 2rem;
+  padding: 0.25rem 0.55rem;
+  border: 1px solid var(--line);
+  border-radius: 0.35rem;
+  background: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition:
+    background 0.12s ease,
+    border-color 0.12s ease,
+    color 0.12s ease;
+}
+
+.fo-traveller__pager-btn:hover:not(:disabled) {
+  border-color: color-mix(in oklab, var(--cyan) 35%, var(--line));
+  color: var(--navy);
+}
+
+.fo-traveller__pager-btn:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--sky) 45%, transparent);
+  outline-offset: 2px;
+}
+
+.fo-traveller__pager-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.fo-traveller__pager-btn--current {
+  border-color: color-mix(in oklab, var(--cyan) 40%, var(--line));
+  background: color-mix(in oklab, var(--horizon-cool) 70%, white);
+  color: var(--navy);
+}
+
+.fo-traveller__pager-ellipsis {
+  padding: 0 0.15rem;
+  color: var(--ink-faint);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fo-traveller__progress > span,
+  .fo-traveller__row-link,
+  .fo-traveller__back,
+  .fo-traveller__toggle,
+  .fo-traveller__pager-btn,
+  .fo-traveller__select,
+  .fo-traveller select {
+    transition: none;
+  }
+}

@@ -1,0 +1,56 @@
+---
+description: Logs, metrics, traces, alerting that's actually actionable at 3am — for backend/service code.
+globs: ["**/*.ts", "**/*.py", "**/*.go", "**/logger.*", "**/telemetry/**"]
+alwaysApply: false
+---
+
+# Observability Standard
+
+You cannot operate, debug, or scale what you cannot see. Instrument for the questions you'll ask
+at 3am, not the ones that are easy to answer now.
+
+## Three pillars
+
+- **Logs** — discrete, structured events. What happened, with context.
+- **Metrics** — aggregatable numbers over time. How the system behaves in aggregate.
+- **Traces** — the path of a single request across services. Where the time and errors go.
+
+Correlate all three with a shared **request/trace ID** propagated through every hop.
+
+## Logging
+
+- **Structured (JSON) in production.** Machine-parseable, queryable fields — not string soup.
+- **Levels mean something:** `error` (needs a human), `warn` (handled but suspicious),
+  `info` (notable business events), `debug` (developer detail, off in prod).
+- **Include context:** trace ID, user/tenant ID (not PII), operation, key params (redacted),
+  duration, outcome.
+- **Never log** secrets, tokens, passwords, full PII, or card data. Redact at the boundary.
+- One log line per meaningful event — not a novel, not silence.
+
+## Metrics (golden signals)
+
+- **Latency** (p50/p95/p99 — watch the tail), **traffic/throughput**, **errors**, **saturation**
+  (CPU, memory, connections, queue depth).
+- RED for services (Rate, Errors, Duration); USE for resources (Utilization, Saturation, Errors).
+- Business metrics too: signups, orders, conversion — the numbers the company cares about.
+
+## Tracing
+
+- Distributed tracing (OpenTelemetry) across service and async boundaries. Span the DB calls,
+  external APIs, and queue hops. Sample intelligently (keep all errors/slow traces).
+
+## Alerting
+
+- **Alert on symptoms** (SLO/SLA breaches users feel), not every internal cause.
+- Every alert is actionable and links to a runbook. No alert without a "what to do."
+- Tune out noise ruthlessly — alert fatigue is a reliability risk.
+
+## Health & readiness
+
+- `/health` (liveness) and `/ready` (readiness: dependencies reachable) endpoints for orchestration.
+- Dashboards for the golden signals per service, plus a top-level system overview.
+
+## Definition of observable
+
+If a user reports "it's slow/broken," you can find *which* request, *where* the time/error went,
+and *why* — from telemetry alone, without adding logs and redeploying.

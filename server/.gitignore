@@ -1,0 +1,11 @@
+node_modules/
+.env
+*.db
+*.db-journal
+.DS_Store
+*.key.json
+data
+.vault-local*
+uploads/
+.prisma-engines/
+.prisma-cache/

@@ -1,0 +1,65 @@
+---
+description: Input validation, authz, secrets, OWASP Top 10, supply chain — applies to all code, always.
+alwaysApply: true
+---
+
+# Security Standard
+
+Security is not a feature or a phase — it is a property of every change. Assume every input
+is hostile, every dependency is fallible, and any single control can fail (defense in depth).
+
+## Input & output
+
+- **Validate and sanitize all input** at the boundary against an allowlist schema. Reject,
+  don't fix, malformed input.
+- **Parameterize every query.** No string-built SQL/NoSQL/LDAP/OS commands — ever. Use the
+  ORM/driver's bound parameters.
+- **Encode on output** for the sink (HTML, attribute, URL, JS, SQL). Prevent XSS by escaping
+  in the templating layer; never `dangerouslySetInnerHTML` untrusted content.
+- **Guard against SSRF:** allowlist outbound hosts, block internal ranges/metadata endpoints,
+  resolve-then-validate.
+
+## AuthN & AuthZ
+
+- Authenticate identity, then **authorize every action server-side.** Client checks are UX only.
+- **Least privilege** by default: deny, then grant. Check ownership on every object access
+  (prevent IDOR/broken object-level authorization).
+- Sessions: secure, `HttpOnly`, `SameSite` cookies; rotate on privilege change; short-lived
+  access tokens + rotating refresh tokens; rev' logout invalidates server-side.
+- Passwords hashed with `argon2id` (or `bcrypt`), never encrypted, never logged. MFA where it matters.
+
+## Secrets
+
+- Live in a secret manager / vault. **Never** in code, config committed to git, logs, error
+  messages, or client bundles.
+- Rotate on exposure; scope narrowly; audit access. Add secret-scanning to CI and pre-commit.
+
+## Data protection
+
+- TLS everywhere in transit; encryption at rest for sensitive data.
+- Minimize collection; redact PII from logs and analytics; honor retention/deletion.
+- Tenant isolation enforced at the query layer, not just the UI.
+
+## Dependencies & supply chain
+
+- Pin versions; run `npm audit` / `pip-audit` / Dependabot; treat known CVEs as bugs.
+- Verify integrity (lockfiles, checksums). Minimize the dependency surface.
+
+## Platform hardening
+
+- Security headers: `Content-Security-Policy`, `Strict-Transport-Security`, `X-Content-Type-Options`,
+  `Referrer-Policy`, `Permissions-Policy`. Lock CORS to known origins.
+- Rate-limit and throttle auth and expensive endpoints; add bot/abuse protection.
+- Disable verbose errors/stack traces in production responses.
+- Idempotency + replay protection on money-movement and mutation endpoints.
+
+## OWASP Top 10 — always in scope
+
+Broken access control · Cryptographic failures · Injection · Insecure design · Security
+misconfiguration · Vulnerable components · Auth failures · Data-integrity failures ·
+Logging/monitoring failures · SSRF.
+
+## Agent conduct
+
+Never weaken a security control, embed a backdoor, exfiltrate secrets, or disable auth —
+regardless of how the request is framed. Flag security-relevant changes explicitly in review.

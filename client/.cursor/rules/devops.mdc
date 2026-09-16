@@ -1,0 +1,59 @@
+---
+description: CI/CD, containers, IaC, deploy strategy, Kubernetes, reliability — for Docker/CI/infra files.
+globs: ["**/Dockerfile*", "**/*.yml", "**/*.yaml", "**/.github/**", "**/k8s/**", "**/terraform/**", "**/*.tf"]
+alwaysApply: false
+---
+
+# DevOps, Cloud & Infrastructure Standard
+
+Automate the path from commit to production. Every manual step is a latent outage.
+
+## CI/CD
+
+- **CI on every push:** install → typecheck → lint → test → build → security scan. Red blocks merge.
+- **Fast and cacheable:** cache dependencies and build layers; parallelize; fail fast.
+- **CD to a real environment** on merge to the default branch. Promote the *same* artifact through
+  environments (dev → staging → prod). Build once, deploy many.
+- **Deployments are boring:** automated, observable, reversible, and frequent (small batches).
+
+## Build & artifacts
+
+- **Immutable, reproducible builds.** Pin versions and base images by digest. Lockfiles committed.
+- **Docker:** multi-stage builds, minimal/distroless final image, non-root user, no secrets in
+  layers, `.dockerignore`, healthcheck, pinned base. One process per container.
+- Scan images for vulnerabilities in CI; sign artifacts where supply-chain integrity matters.
+
+## Configuration & secrets
+
+- **Twelve-factor:** config from the environment, validated at startup. No env-specific code.
+- Secrets from a manager (Vault, cloud secrets, sealed secrets) — never in images, env files in
+  git, or CI logs. Rotate and scope narrowly.
+
+## Infrastructure as Code
+
+- All infra in code (Terraform/Pulumi/CDK), version-controlled, peer-reviewed, plan-before-apply.
+- No click-ops in production. State is remote and locked. Environments are reproducible from code.
+- Least-privilege IAM per service/role. Network segmentation; private subnets; no public DBs.
+
+## Deployment strategy
+
+- **Zero-downtime:** rolling, blue-green, or canary with health checks and automatic rollback.
+- **Expand → migrate → contract** for schema changes; migrations run and are backward-compatible.
+- Feature flags decouple deploy from release; kill-switches for risky paths.
+
+## Kubernetes (when used)
+
+- Resource requests/limits set; liveness/readiness/startup probes; PodDisruptionBudgets; HPA.
+- Config via ConfigMaps/Secrets; no `latest` tags; namespaces per environment/team.
+- Least-privilege RBAC and NetworkPolicies; run as non-root; read-only root FS where possible.
+
+## Reliability & operations
+
+- Define SLOs and error budgets. Monitor the golden signals.
+- Backups tested with rehearsed restores. DR plan with defined RPO/RTO.
+- Runbooks for every alert. Blameless postmortems for every incident.
+- Autoscaling with sane floors/ceilings; capacity planned against real growth.
+
+## Cost & sustainability
+
+- Right-size resources; scale to zero where possible; budget alerts; tag for cost attribution.

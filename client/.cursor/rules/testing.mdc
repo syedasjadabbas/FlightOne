@@ -1,0 +1,58 @@
+---
+description: The test pyramid, behavior over implementation, edge coverage, determinism — for test files and testing work.
+globs: ["**/*.test.*", "**/*.spec.*", "**/tests/**", "**/__tests__/**", "**/test/**"]
+alwaysApply: false
+---
+
+# Testing Standard
+
+## The pyramid
+
+- **Unit (most):** pure logic, milliseconds each, no I/O. The bulk of coverage.
+- **Integration (some):** modules + real adapters (DB, cache, queue) via containers/test doubles.
+- **End-to-end (few):** critical user journeys through the real stack. Slow, high value, kept lean.
+
+Invert this (E2E-heavy "ice cream cone") and the suite becomes slow, flaky, and ignored.
+
+## Principles
+
+- **Test behavior, not implementation.** A refactor that preserves behavior must keep tests green.
+  Assert on outputs and observable effects, not private internals.
+- **Every bug fix begins with a failing test** that reproduces it, then the fix makes it pass.
+- **Deterministic & isolated:** no shared mutable state, no order dependence, no real network/clock
+  unless that's the subject. Fake time, seed randomness, use fresh fixtures.
+- **One reason to fail per test.** Clear name describing the scenario and expectation:
+  `returns 404 when the order does not exist`.
+- **AAA:** Arrange, Act, Assert — visually separated.
+- **Cover the edges:** empty, null/undefined, boundaries, very large, concurrent, malformed,
+  and hostile/malicious input. The happy path is the easy 20%.
+
+## What to test
+
+- Business rules and domain logic — thoroughly.
+- Error paths, validation, and failure handling — as much as the happy path.
+- Contracts at boundaries (API schemas, event shapes) — via contract/integration tests.
+- Regression cases for every production incident.
+
+## What not to over-test
+
+- Framework internals, the language, or third-party libraries (test *your* use of them).
+- Trivial getters/setters and pure config.
+- Coverage percentage as a target — **cover risk, not lines.**
+
+## Tooling defaults
+
+- **JS/TS:** Vitest or Jest (unit/integration), Playwright (E2E), Testing Library (components),
+  MSW (network mocking), Storybook (component states/visual).
+- **Python:** pytest + fixtures, hypothesis for property tests.
+- **Contract:** Pact or schema-based contract tests across service boundaries.
+
+## Quality gates
+
+- Suite runs in CI on every push; a red suite blocks merge.
+- Flaky tests are quarantined and fixed, never `.skip`-ped indefinitely.
+- New/changed logic ships with tests in the same PR.
+
+## Verification
+
+Run the tests and read the output. "Should pass" is not "passed." Show the result.

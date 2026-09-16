@@ -1,0 +1,38 @@
+// Module 04 — Intelligent Recommendation Engine: accept/reject/ignore signal
+// capture for the ranking "learning loop" checklist item. Owned by
+// modules/recommendations/. See docs/modules/04-recommendation-engine.md.
+//
+// This file lives alongside prisma/schema.prisma (multi-file schema, GA since
+// Prisma 6.7 — no preview flag needed). Deliberately has NO relation back to
+// User/Conversation: offers ranked by this module are ephemeral (passed in on
+// each /rank call by the caller, never persisted by this module — Module 03
+// owns persisted booking/offer state), so there is nothing safe to
+// foreign-key against except a plain, unenforced userId/conversationId. This
+// keeps the migration for this file scoped to a single new table with zero
+// risk to other modules' tables (Module 04's ownership is
+// modules/recommendations/ only, per the module brief).
+
+enum RecommendationSignal {
+  ACCEPT
+  REJECT
+  IGNORE
+}
+
+/// One row per accept/reject/ignore signal a customer (or the AI on their
+/// behalf) gave for a specific ranked offer. `context` stores ranking-relevant
+/// offer attributes present at feedback time (airline/stops/refundable) so the
+/// learning loop can weight future recommendations without inventing data.
+model RecommendationFeedback {
+  id             String               @id @default(cuid())
+  userId         String
+  offerId        String
+  conversationId String?
+  signal         RecommendationSignal
+  /// Optional offer attributes at feedback time: { airlineCode?, stops?, refundable? }.
+  context        Json?
+  createdAt      DateTime             @default(now())
+
+  @@index([userId])
+  @@index([offerId])
+  @@index([conversationId])
+}

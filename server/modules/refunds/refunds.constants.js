@@ -1,0 +1,56 @@
+/**
+ * Module 14 — Refund & Reissue domain constants.
+ */
+
+export const REFUND_CASE_STATUSES = [
+  "DRAFT",
+  "QUOTED",
+  "ELIGIBLE",
+  "SUBMITTED",
+  "PROCESSING",
+  "COMPLETED",
+  "FAILED",
+  "REQUIRES_HUMAN",
+  "REJECTED",
+  "NOT_ELIGIBLE",
+];
+
+/** Kinds accepted on create / calculate paths. */
+export const REFUND_CALCULATE_KINDS = [
+  "REFUND",
+  "PARTIAL_REFUND",
+  "CANCELLATION",
+  "SCHEDULE_CHANGE",
+];
+
+export const REFUND_CASE_KINDS = [
+  "REFUND",
+  "PARTIAL_REFUND",
+  "EXCHANGE",
+  "REISSUE",
+  "CANCELLATION",
+  "SCHEDULE_CHANGE",
+];
+
+export const EXCHANGE_KINDS = ["EXCHANGE", "REISSUE"];
+
+/** Map booking status → post-refund booking status. */
+export const BOOKING_TARGET_STATUS_BY_SOURCE = Object.freeze({
+  QUOTED: "CANCELLED",
+  RESERVED: "CANCELLED",
+  TICKETED: "REFUNDED",
+  ACTIVE: "REFUNDED",
+});
+
+export const CASE_ALLOWED_TRANSITIONS = Object.freeze({
+  DRAFT: ["SUBMITTED", "NOT_ELIGIBLE", "REJECTED"],
+  QUOTED: ["SUBMITTED", "ELIGIBLE", "NOT_ELIGIBLE", "REJECTED"],
+  ELIGIBLE: ["SUBMITTED", "NOT_ELIGIBLE", "REJECTED"],
+  SUBMITTED: ["PROCESSING", "REQUIRES_HUMAN", "COMPLETED", "FAILED", "REJECTED"],
+  PROCESSING: ["COMPLETED", "FAILED", "REQUIRES_HUMAN"],
+  REQUIRES_HUMAN: ["PROCESSING", "COMPLETED", "FAILED", "REJECTED"],
+  COMPLETED: [],
+  FAILED: [],
+  REJECTED: [],
+  NOT_ELIGIBLE: [],
+});

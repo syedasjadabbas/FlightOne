@@ -1,0 +1,46 @@
+{
+  "//": "Ported from ~/.claude/mcp/servers.json for Cursor. Copy to <project>/.cursor/mcp.json — verify the exact path/precedence against cursor.com/docs/mcp for your Cursor version first; that wasn't fully confirmed while building this. Fill env vars from a secret manager — NEVER hardcode tokens in committed files.",
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "${workspaceFolder}"],
+      "//": "Restrict the path argument to the project root — least privilege."
+    },
+    "git": {
+      "command": "uvx",
+      "args": ["mcp-server-git", "--repository", "${workspaceFolder}"]
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": { "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}" },
+      "//": "Use a fine-grained, least-privilege PAT scoped to the repos you need."
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+    },
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"]
+    },
+    "fetch": {
+      "command": "uvx",
+      "args": ["mcp-server-fetch"]
+    },
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"],
+      "//": "Up-to-date, version-specific library docs. Some deployments are remote (type: http)."
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest"]
+    },
+    "postgres": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-postgres", "${DATABASE_URL_READONLY}"],
+      "//": "Point at a READ-ONLY role. Never a superuser or write-capable connection."
+    }
+  }
+}

@@ -1,0 +1,96 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "darwin-arm64"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String    @id @default(cuid())
+  email             String    @unique
+  name              String?
+  passwordHash      String?
+  /// Set when password changes/resets — access JWTs with iat before this are rejected.
+  passwordChangedAt DateTime?
+  emailVerifiedAt   DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  refreshTokens           RefreshToken[]
+  passwordResetTokens     PasswordResetToken[]
+  emailVerificationTokens EmailVerificationToken[]
+
+  // Module 02 — Customer Identity & Profile (owned by modules/profile/)
+  profile           TravellerProfile?
+  companions        TravellerCompanion[]
+  identityDocuments TravellerIdentityDocument[]
+
+  // Module 00 — Foundation & Security (see prisma/foundation.prisma)
+  userRoles UserRole[]
+  auditLogs AuditLog[]
+
+  // Module 01 — AI Travel Consultant (see prisma/conversations.prisma)
+  conversations Conversation[]
+
+  // Module 03 — AI Booking Engine (see prisma/bookings.prisma)
+  bookings              Booking[]
+  supplierOfferSnapshots SupplierOfferSnapshot[]
+  payments              Payment[]
+}
+
+model RefreshToken {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash  String    @unique
+  /// Stable id for a login session across refresh rotations (reuse detection).
+  familyId   String
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  /// Why revoked: refresh_rotate | logout | reuse_detected | admin_revoke | password_reset | …
+  revokeReason String?
+  /// Last successful use (issue or refresh rotation). Safe session metadata only.
+  lastUsedAt DateTime  @default(now())
+  /// Truncated User-Agent captured at session issue — never a secret.
+  userAgent  String?
+  /// Optional client IP at issue (safe display metadata).
+  ip         String?
+  createdAt  DateTime  @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@index([userId, revokedAt])
+  @@index([familyId])
+}
+
+/// Single-use password reset tokens. Only `tokenHash` is stored — never the raw token.
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  consumedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+/// Single-use email verification tokens. Only `tokenHash` is stored.
+model EmailVerificationToken {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash  String    @unique
+  attempts   Int       @default(0)
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}

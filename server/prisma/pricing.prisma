@@ -1,0 +1,73 @@
+// Module 05 — Pricing & Margin Engine: single source of pricing truth.
+// Owned by modules/pricing/. See docs/modules/05-pricing-margin-engine.md and
+// dev guide §7 ("AI never has unilateral authority over money" / "pricing is
+// computed and re-validated server-side at every step").
+//
+// This file lives alongside prisma/schema.prisma (multi-file schema, GA since
+// Prisma 6.7 — no preview flag needed). The `generator`/`datasource` blocks
+// stay in schema.prisma; relations across files just work.
+//
+// Deliberately has NO foreign keys into Booking/User — this module computes
+// prices, it does not own booking or identity rows (owned by
+// modules/bookings/ and prisma/bookings.prisma respectively). Bookings
+// records the priced result it received in its own `metadata` Json column
+// (see modules/bookings/bookings.service.js) rather than this schema growing
+// a relation into another module's table.
+
+/// A dynamic markup rule: net fare -> customer price spread, expressed in
+/// basis points (1250 = 12.5%). All match fields are optional filters — a
+/// null field matches any value; `routePattern` supports a trailing `*`
+/// wildcard (e.g. "LHE-*" matches any route starting with "LHE-").
+/// Highest `priority` wins among all currently-matching active rules
+/// (module doc: "Dynamic markup rules (by route, supplier, cabin, season, or
+/// customer segment)").
+model MarkupRule {
+  id           String    @id @default(cuid())
+  name         String
+  routePattern String? // e.g. "LHE-*", "LHE-DXB" — null = any route
+  supplierCode String? // e.g. "GALILEO" — null = any supplier
+  cabin        String? // e.g. "ECONOMY", "BUSINESS" — null = any cabin
+  segment      String? // e.g. customer/loyalty segment — null = any segment
+  markupBps    Int // basis points, e.g. 1250 = 12.5%
+  priority     Int       @default(0) // higher wins when multiple rules match
+  isActive     Boolean   @default(true)
+  validFrom    DateTime?
+  validTo      DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive, priority])
+  @@index([routePattern])
+  @@index([supplierCode])
+}
+
+/// Promotional discount code, expressed in basis points off the pre-discount
+/// sell price. Usage-capped and validity-windowed (module doc: "Promotional
+/// discount codes/campaigns, with validity windows and usage limits").
+/// `usedCount` is incremented atomically (conditional `$executeRaw`, never a
+/// read-then-write race) only on ticket issuance, not on every quote/reprice.
+model PromoCode {
+  id          String    @id @default(cuid())
+  code        String    @unique
+  discountBps Int
+  maxUses     Int?
+  usedCount   Int       @default(0)
+  validFrom   DateTime?
+  validTo     DateTime?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+
+  @@index([isActive])
+}
+
+/// Singleton-ish key/value config store for pricing limits and defaults —
+/// e.g. "ai_discount_max_bps", "default_markup_bps", "negotiation_buffer_bps".
+/// `key` is the primary key (there is only ever one row per key; upsert by
+/// key when seeding/updating). Values are always integers (bps or minor
+/// units depending on key) — never floats (dev guide §5).
+model PricingConfig {
+  key       String   @id
+  valueInt  Int
+  updatedAt DateTime @updatedAt
+}

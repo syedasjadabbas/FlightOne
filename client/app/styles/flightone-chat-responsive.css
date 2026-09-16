@@ -1,0 +1,968 @@
+/**
+ * Chat landing — single-screen fit (75% → 150% zoom).
+ *
+ * Reverse scaling: shorter effective height (high zoom) → smaller pads/type.
+ * Driven by svh + max-height tiers — not zoom-% media queries.
+ * No html/body overflow-x-only (phantom scrollbar). No 100vh dead band.
+ */
+
+:root {
+  --fo-chat-gutter: clamp(0.75rem, 4vw, 2rem);
+  --fo-chat-max: min(var(--fo-content-max, 80rem), 100%);
+  --fo-landing-max: min(90vw, 75rem); /* 1200px */
+}
+
+.chat-page,
+.fo-stage--chat {
+  --fo-content-gutter: var(--fo-chat-gutter);
+}
+
+/* Landing column + height-aware compress (1 ≈ tall, shrinks as svh drops) */
+.chat-page--landing {
+  --fo-chat-max: var(--fo-landing-max);
+  --chat-content-max: var(--fo-landing-max);
+  --fo-landing-compress: clamp(0.55, 100svh / 900, 1);
+  --fo-landing-gap: calc(clamp(0.5rem, 2vw, 1rem) * var(--fo-landing-compress));
+  --fo-landing-section-y: calc(clamp(0.5rem, 2vw, 1.25rem) * var(--fo-landing-compress));
+  --fo-landing-pad: calc(clamp(0.5rem, 2vw, 1rem) * var(--fo-landing-compress));
+}
+
+/* ── Shell containment ───────────────────────────────────────── */
+
+.fo-stage--chat,
+.ask-ai-shell--chat,
+.ask-ai-shell__chat-pane,
+.chat-page,
+.chat-page__inner,
+.chat-page__header,
+.chat-page__messages,
+.chat-page__footer,
+.chat-composer-dock,
+.chat-composer-block {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.fo-stage--chat,
+.ask-ai-shell--chat,
+.chat-page {
+  overflow-x: clip;
+}
+
+.chat-page__content,
+.chat-page__messages-inner {
+  max-width: var(--fo-chat-max);
+  margin-inline: auto;
+  padding-inline: var(--fo-chat-gutter);
+}
+
+html:has(.chat-page--landing) .fo-site-nav__inner,
+.chat-page--landing .chat-page__content,
+.chat-page--landing .chat-page__messages-inner {
+  max-width: var(--fo-landing-max);
+  margin-inline: auto;
+  padding-inline: var(--fo-chat-gutter);
+  box-sizing: border-box;
+}
+
+/* ── Site nav ────────────────────────────────────────────────── */
+
+html:has(.chat-page:not(.chat-page--landing)) .fo-site-nav__inner {
+  max-width: var(--fo-chat-max);
+  padding-inline: var(--fo-chat-gutter);
+}
+
+.fo-site-nav__brand {
+  max-width: 100%;
+}
+
+.fo-site-nav__brand-text {
+  overflow-wrap: anywhere;
+}
+
+/* ── Landing header / guest banner ───────────────────────────── */
+
+.chat-page--landing .chat-page__header {
+  min-width: 0;
+  padding-top: max(0.65rem, calc(0.85rem * var(--fo-landing-compress)));
+  padding-bottom: max(0.35rem, calc(0.45rem * var(--fo-landing-compress)));
+}
+
+.chat-page--landing .chat-page__header > .chat-page__content {
+  display: flex;
+  flex-direction: column;
+  gap: calc(0.45rem * var(--fo-landing-compress));
+}
+
+.chat-page--landing .chat-page__meta,
+.chat-page--landing .chat-page__meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: clamp(0.25rem, 1vw, 0.4rem) clamp(0.5rem, 2vw, 0.75rem);
+  max-width: 100%;
+  min-width: 0;
+}
+
+.chat-page--landing .chat-page__banner {
+  margin: 0;
+}
+
+.chat-page__header-compact,
+.chat-page__header-line,
+.chat-page__meta-row,
+.chat-page__banner,
+.guest-banner {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.guest-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: clamp(0.3rem, 1vw, 0.45rem) clamp(0.4rem, 1.5vw, 0.65rem);
+  width: 100%;
+  box-sizing: border-box;
+  padding: calc(0.4rem * var(--fo-landing-compress, 1)) clamp(0.55rem, 1.5vw, 0.85rem);
+}
+
+.guest-banner__copy {
+  flex: 1 1 12rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: clamp(0.75rem, 1.5vw, 0.875rem);
+  line-height: 1.4;
+}
+
+.guest-banner__action {
+  flex: 0 0 auto;
+  max-width: 100%;
+}
+
+.chat-page--landing .guest-banner {
+  padding: calc(0.25rem * var(--fo-landing-compress, 1)) 0;
+  background: transparent;
+  border: none;
+}
+
+.guest-banner__action--secondary {
+  opacity: 0.9;
+}
+
+/* ── Hero ────────────────────────────────────────────────────── */
+
+.chat-hero--landing {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  /* visible on both axes — overflow-x:clip alone forces overflow-y:auto and clips cards */
+  overflow: visible;
+  padding-top: var(--fo-landing-section-y);
+  padding-bottom: calc(0.55rem * var(--fo-landing-compress, 1));
+}
+
+.chat-page--landing .chat-hero--landing {
+  overflow: visible;
+}
+
+.chat-hero__content {
+  position: relative;
+  z-index: 1;
+  max-width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--fo-landing-gap);
+}
+
+.chat-page--landing .chat-hero__content {
+  gap: var(--fo-landing-gap);
+}
+
+.chat-page--landing .chat-hero__eyebrow,
+.chat-page--landing .chat-hero__title,
+.chat-page--landing .chat-hero__lede {
+  margin: 0;
+}
+
+.chat-hero__eyebrow {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  font-size: clamp(0.625rem, 1.2vw, 0.75rem);
+}
+
+.chat-hero__title,
+.chat-page--landing .chat-hero__title,
+.chat-hero--landing .chat-hero__title {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  font-size: clamp(1.5rem, 4vw, 2.2rem) !important;
+  line-height: 1.2 !important;
+  letter-spacing: -0.03em;
+}
+
+.chat-hero__lede,
+.chat-page--landing .chat-hero__lede,
+.chat-hero--landing .chat-hero__lede {
+  max-width: min(36rem, 100%);
+  overflow-wrap: anywhere;
+  font-size: clamp(0.75rem, 1.5vw, 0.9rem) !important;
+  line-height: 1.4 !important;
+  margin-block: clamp(0.15rem, 0.6vw, 0.35rem) 0 !important;
+}
+
+/* Decorative scene — scales with viewport, never drives layout height */
+.chat-hero__doodles,
+.fo-hero-scene {
+  pointer-events: none;
+}
+
+.chat-page--landing .fo-hero-scene {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 0;
+  width: min(36%, clamp(5rem, 18vw, 12rem));
+  height: auto;
+  aspect-ratio: 16 / 11;
+  max-height: clamp(3.5rem, 12vw, 9rem);
+  opacity: 0.85;
+}
+
+@media (max-width: 42rem) {
+  .chat-page--landing .fo-hero-scene {
+    width: min(32%, 7.5rem);
+    max-height: 4.75rem;
+    opacity: 0.4;
+  }
+
+  .chat-page--landing .fo-hero-scene__case,
+  .chat-page--landing .fo-hero-scene__ticket,
+  .chat-page--landing .fo-hero-scene__glow {
+    display: none;
+  }
+
+  .chat-page--landing .chat-hero__eyebrow,
+  .chat-page--landing .chat-hero__title,
+  .chat-page--landing .chat-hero__lede {
+    padding-right: 0;
+  }
+}
+
+/* Reserve space for doodles on copy only — never squeeze the card row */
+@media (min-width: 42.01rem) {
+  .chat-page--landing .chat-hero__content {
+    padding-right: 0;
+  }
+
+  .chat-page--landing .chat-hero__eyebrow,
+  .chat-page--landing .chat-hero__title,
+  .chat-page--landing .chat-hero__lede {
+    padding-right: min(26%, 8.5rem);
+  }
+}
+
+@media (max-width: 28rem) {
+  .chat-page--landing .chat-hero__doodles,
+  .chat-page--landing .fo-hero-scene {
+    display: none;
+  }
+}
+
+/* ── Quick-trip cards — compact auto-fit wrap (zoom-safe) ───────
+ * min 12.5rem → 4-up in typical desktop; 3 @ higher zoom; 2 @ narrow.
+ */
+
+.chat-suggestions--hero,
+.chat-page--landing .chat-suggestions--hero {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12.5rem), 1fr));
+  justify-content: stretch;
+  align-items: stretch;
+  align-content: end;
+  grid-auto-rows: auto;
+  gap: 0.65rem !important;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin-top: 0 !important;
+  margin-block: 0.35rem 0 !important;
+  overflow: visible !important;
+  flex: 0 0 auto;
+  min-height: min-content;
+}
+
+.fo-inspire-tile,
+.chat-page--landing .fo-inspire-tile {
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  height: auto;
+  min-height: 0;
+  max-height: none;
+  white-space: normal;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: stretch;
+  gap: 0.2rem;
+  text-align: left;
+  padding: 0.7rem 0.75rem 0.65rem;
+  border-radius: 0.85rem;
+  box-sizing: border-box;
+  overflow: visible;
+  overflow-wrap: anywhere;
+}
+
+.fo-inspire-tile__title,
+.fo-inspire-tile__sub {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  overflow: visible;
+  text-overflow: unset;
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+}
+
+.chat-page--landing .fo-inspire-tile__title {
+  font-size: 0.875rem;
+  line-height: 1.2;
+}
+
+.chat-page--landing .fo-inspire-tile__sub {
+  font-size: 0.6875rem;
+  line-height: 1.3;
+}
+
+.chat-page--landing .fo-inspire-tile__type {
+  font-size: 0.5625rem;
+}
+
+.chat-page--landing .fo-inspire-tile__icon {
+  width: 1.55rem;
+  height: 1.55rem;
+  border-radius: 999px;
+}
+
+.chat-page--landing .fo-inspire-tile__icon::before {
+  inset: 0.32rem;
+}
+
+.chat-page--landing .fo-inspire-tile__cta {
+  padding-top: 0.35rem;
+}
+
+.chat-page--landing .fo-inspire-tile__cta-label {
+  font-size: 0.6875rem;
+}
+
+.chat-page--landing .fo-inspire-tile__cta-go {
+  width: 1.4rem;
+  height: 1.4rem;
+  font-size: 0.75rem;
+}
+
+.chat-page--landing .fo-inspire-tile::before {
+  content: none;
+  display: none;
+}
+
+/* ── Messages / composer stack ───────────────────────────────── */
+
+.chat-page--landing .chat-page__messages-inner {
+  padding-top: calc(0.25rem * var(--fo-landing-compress));
+  padding-bottom: var(--fo-landing-section-y);
+}
+
+.chat-page--landing .chat-page__messages {
+  padding-bottom: 0;
+}
+
+.chat-page--landing .chat-scroll-anchor {
+  display: none;
+}
+
+.chat-page--landing .chat-thread:empty,
+.chat-page--landing .chat-thread:not(:has(.chat-thread__item)) {
+  display: none;
+}
+
+.chat-page--landing .chat-page__footer,
+.chat-page--landing .chat-composer-dock {
+  position: relative;
+  z-index: 20;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  background: var(--fo-surface, #ffffff);
+  border-top: 1px solid color-mix(in oklab, var(--line) 70%, transparent);
+  padding-top: var(--fo-landing-section-y);
+  padding-bottom: max(calc(0.35rem * var(--fo-landing-compress)), env(safe-area-inset-bottom, 0px));
+}
+
+.chat-composer-block,
+.chat-composer-dock,
+.chat-page__footer {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.chat-page--landing .chat-composer-block {
+  width: 100%;
+  max-width: 100%;
+  margin-inline: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.4rem, 1.2vw, 0.7rem);
+  padding: 0 0 max(calc(0.3rem * var(--fo-landing-compress)), env(safe-area-inset-bottom, 0px));
+}
+
+/* Filter pills — tight wrap */
+.chat-composer-actions,
+.chat-suggestions--followup,
+.chat-page--landing .chat-composer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(0.35rem, 1.2vw, 0.55rem);
+  max-width: 100%;
+  min-width: 0;
+}
+
+.chat-page .quick-chip,
+.chat-page .quick-chip--prompt,
+.chat-page .quick-chip--action {
+  max-width: 100%;
+  white-space: nowrap;
+  overflow-wrap: normal;
+  text-align: left;
+}
+
+.chat-page--landing .quick-chip,
+.chat-page--landing .quick-chip--action,
+.chat-page--landing .quick-chip--prompt {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2rem;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.75rem;
+  line-height: 1.2;
+  box-sizing: border-box;
+}
+
+.chat-page .composer-shell {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  flex-wrap: nowrap;
+  min-height: 0;
+  height: auto;
+}
+
+.chat-page--landing .composer-shell {
+  width: 100%;
+  max-width: 100%;
+  min-height: 2.5rem;
+  height: auto;
+  overflow-x: clip;
+  overflow-y: visible;
+}
+
+.chat-page .composer-shell__input,
+.chat-page--landing .composer-shell__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 2.5rem;
+  height: auto;
+  padding-block: clamp(0.45rem, 1vw, 0.65rem);
+  font-size: clamp(0.85rem, 1.2vw, 0.95rem);
+  line-height: 1.35;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.chat-page .composer-shell__input::-webkit-scrollbar,
+.chat-page--landing .composer-shell__input::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.chat-page .send-btn,
+.chat-page--landing .send-btn {
+  flex: 0 0 auto;
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  aspect-ratio: 1;
+  max-width: 100%;
+}
+
+/* ── Zoom compliance shared ──────────────────────────────────── */
+
+html.fo-chat-landing,
+html:has(.chat-page--landing) {
+  font-size: 16px;
+}
+
+.chat-page--landing,
+.chat-page--landing *,
+.chat-page--landing *::before,
+.chat-page--landing *::after,
+html:has(.chat-page--landing) .fo-site-nav,
+html:has(.chat-page--landing) .fo-site-nav * {
+  box-sizing: border-box;
+}
+
+.chat-page--landing .chat-page__content,
+.chat-page--landing .chat-page__messages-inner {
+  width: 100%;
+  max-width: var(--fo-landing-max);
+  min-width: 0;
+  height: auto;
+  margin-inline: auto;
+  padding-inline: var(--fo-chat-gutter);
+  box-sizing: border-box;
+}
+
+.chat-page--landing .chat-page__messages-inner {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.chat-page--landing .chat-hero--landing,
+.chat-page--landing .chat-suggestions--hero,
+.chat-page--landing .chat-composer-block,
+.chat-page--landing .composer-shell {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  height: auto;
+}
+
+.chat-page--landing .chat-hero--landing {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.chat-page--landing .chat-hero__content {
+  gap: clamp(0.45rem, 1.2vw, 0.75rem);
+}
+
+.chat-page--landing .chat-hero--landing {
+  padding-bottom: clamp(0.35rem, 1vw, 0.55rem);
+}
+
+.chat-page--landing .chat-page__messages-inner {
+  padding-bottom: clamp(0.45rem, 1.2vw, 0.75rem);
+}
+
+.chat-page--landing .chat-page__footer,
+.chat-page--landing .chat-composer-dock {
+  padding-top: clamp(0.45rem, 1.2vw, 0.75rem);
+}
+
+.chat-page--landing .chat-composer-block {
+  gap: clamp(0.4rem, 1vw, 0.65rem);
+}
+
+.chat-page--landing .chat-hero__intro {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.35rem, 1vw, 0.55rem);
+}
+
+.chat-page--landing .chat-landing-mid {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 0.75rem;
+  min-height: 0;
+  width: 100%;
+  margin-top: clamp(0.75rem, 2vw, 1.25rem);
+  padding-bottom: clamp(0.25rem, 1vw, 0.5rem);
+  overflow: visible;
+}
+
+.chat-page--landing .chat-composer-actions--landing {
+  flex: 0 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(0.4rem, 1.2vw, 0.65rem);
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.chat-page--landing .chat-page__footer,
+.chat-page--landing .chat-composer-dock {
+  margin-top: auto;
+}
+
+/* Landing inherits SiteNav styles from flightone-visual.css — no pill overrides. */
+
+.chat-page--landing .guest-banner__action {
+  display: inline;
+  min-height: 0;
+  padding: 0;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.chat-page--landing .guest-banner {
+  visibility: visible;
+  opacity: 1;
+}
+
+.chat-page--landing .guest-banner__copy {
+  visibility: visible;
+  opacity: 1;
+  overflow: visible;
+  color: var(--ink-soft);
+  font-size: clamp(0.7rem, 1.2vw, 0.8rem);
+}
+
+.chat-page--landing .chat-hero__title,
+.chat-page--landing .chat-hero__lede,
+.chat-page--landing .guest-banner__copy,
+.chat-page--landing .fo-inspire-tile__title,
+.chat-page--landing .fo-inspire-tile__sub {
+  overflow: visible;
+  text-overflow: unset;
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+}
+
+/*
+ * Reverse scaling for high zoom (short CSS viewport height).
+ * Hide non-essentials + crush pads so hero→cards→pills→composer fit one screen.
+ */
+@media (max-height: 800px) {
+  .chat-page--landing {
+    --fo-landing-compress: clamp(0.5, 100svh / 1000, 0.85);
+    --fo-landing-gap: 0.45rem;
+    --fo-landing-section-y: 0.45rem;
+  }
+
+  .chat-page--landing .chat-page__header {
+    padding-top: 0.55rem;
+    padding-bottom: 0.3rem;
+  }
+
+  .chat-page--landing .chat-page__header > .chat-page__content {
+    gap: 0.3rem;
+  }
+
+  .chat-page--landing .guest-banner {
+    padding-block: 0.25rem;
+  }
+
+  .chat-page--landing .chat-hero--landing {
+    padding-top: 0.4rem;
+    padding-bottom: 0.3rem;
+  }
+
+  .chat-page--landing .chat-hero__eyebrow {
+    display: none;
+  }
+
+  /* Decorative icons — hide when vertical space is tight */
+  .chat-page--landing .fo-hero-scene,
+  .chat-page--landing .chat-hero__doodles {
+    display: none !important;
+  }
+
+  .chat-page--landing .chat-hero__eyebrow,
+  .chat-page--landing .chat-hero__title,
+  .chat-page--landing .chat-hero__lede,
+  .chat-page--landing .chat-hero__content {
+    padding-right: 0 !important;
+  }
+
+  .chat-page--landing .chat-hero__title {
+    font-size: clamp(1.35rem, 3.5vw, 1.85rem) !important;
+    line-height: 1.15 !important;
+  }
+
+  .chat-page--landing .chat-hero__lede {
+    font-size: clamp(0.75rem, 1.4vw, 0.875rem) !important;
+    line-height: 1.35 !important;
+  }
+
+  .chat-page--landing .chat-suggestions--hero {
+    gap: 0.5rem !important;
+    margin-block: 0.25rem 0 !important;
+  }
+
+  .chat-page--landing .fo-inspire-tile {
+    padding: 0.55rem 0.6rem 0.5rem;
+    min-height: 0;
+    max-height: none;
+    gap: 0.15rem;
+  }
+
+  .chat-page--landing .fo-inspire-tile__icon {
+    width: 1.35rem;
+    height: 1.35rem;
+    border-radius: 999px;
+  }
+
+  .chat-page--landing .fo-inspire-tile__icon::before {
+    inset: 0.28rem;
+  }
+
+  .chat-page--landing .fo-inspire-tile__title {
+    font-size: 0.8125rem;
+  }
+
+  .chat-page--landing .fo-inspire-tile__sub {
+    display: none;
+  }
+
+  .chat-page--landing .fo-inspire-tile__cta-go {
+    width: 1.25rem;
+    height: 1.25rem;
+    font-size: 0.7rem;
+  }
+
+  .chat-page--landing .chat-page__messages-inner {
+    padding-top: 0.15rem;
+    padding-bottom: 0.4rem;
+  }
+
+  .chat-page--landing .chat-page__footer,
+  .chat-page--landing .chat-composer-dock {
+    padding-top: 0.4rem;
+    padding-bottom: max(0.3rem, env(safe-area-inset-bottom, 0px));
+  }
+
+  .chat-page--landing .chat-composer-block {
+    gap: 0.4rem;
+  }
+
+  .chat-page--landing .chat-composer__hint {
+    display: none;
+  }
+
+  .chat-page--landing .quick-chip,
+  .chat-page--landing .quick-chip--action {
+    min-height: 2.25rem;
+    padding: 0.3rem 0.75rem;
+    font-size: 0.75rem;
+  }
+
+  .chat-page--landing .composer-shell,
+  .chat-page--landing .composer-shell__input {
+    min-height: 2.35rem;
+  }
+
+  .chat-page--landing .send-btn {
+    min-height: 2.35rem;
+    min-width: 2.35rem;
+    width: 2.35rem;
+    height: 2.35rem;
+  }
+}
+
+/* Ultra-compact — ~150% zoom on 900px-tall displays (CSS height ≈ 600) */
+@media (max-height: 640px) {
+  .chat-page--landing {
+    --fo-landing-compress: 0.5;
+    --fo-landing-gap: 0.3rem;
+    --fo-landing-section-y: 0.28rem;
+  }
+
+  .chat-page--landing .chat-page__meta {
+    gap: 0.1rem 0.4rem;
+  }
+
+  .chat-page--landing .chat-page__header {
+    padding-top: 0.45rem;
+    padding-bottom: 0.2rem;
+  }
+
+  .chat-page--landing .guest-banner {
+    padding-block: 0.15rem;
+  }
+
+  .chat-page--landing .guest-banner__copy {
+    font-size: 0.65rem;
+  }
+
+  .chat-page--landing .guest-banner__action {
+    min-height: 2rem;
+    padding: 0.25rem 0.65rem;
+    font-size: 0.7rem;
+  }
+
+  .chat-page--landing .chat-hero--landing {
+    padding-top: 0.25rem;
+    padding-bottom: 0.2rem;
+  }
+
+  .chat-page--landing .chat-hero__content {
+    gap: 0.3rem;
+  }
+
+  .chat-page--landing .chat-hero__title {
+    font-size: 1.25rem !important;
+  }
+
+  .chat-page--landing .chat-hero__lede {
+    font-size: 0.75rem !important;
+    line-height: 1.3 !important;
+  }
+
+  .chat-page--landing .chat-suggestions--hero {
+    gap: 0.45rem !important;
+    /* Prefer 2×2 at ultra-short height (~150% zoom) */
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .chat-page--landing .fo-inspire-tile {
+    padding: 0.45rem 0.55rem 0.4rem;
+    min-height: 0;
+    max-height: none;
+  }
+
+  .chat-page--landing .fo-inspire-tile__icon {
+    width: 1.2rem;
+    height: 1.2rem;
+  }
+
+  .chat-page--landing .fo-inspire-tile__icon::before {
+    inset: 0.24rem;
+  }
+
+  .chat-page--landing .fo-inspire-tile__cta-label {
+    display: none;
+  }
+
+  .chat-page--landing .fo-inspire-tile__title {
+    font-size: 0.75rem;
+  }
+
+  .chat-page--landing .fo-inspire-tile__cta-go {
+    width: 1.15rem;
+    height: 1.15rem;
+    font-size: 0.65rem;
+  }
+
+  .chat-page--landing .chat-page__messages-inner {
+    padding-bottom: 0.25rem;
+  }
+
+  .chat-page--landing .chat-page__footer,
+  .chat-page--landing .chat-composer-dock {
+    padding-top: 0.25rem;
+    padding-bottom: max(0.25rem, env(safe-area-inset-bottom, 0px));
+  }
+
+  .chat-page--landing .chat-composer-block {
+    gap: 0.3rem;
+  }
+
+  .chat-page--landing .quick-chip,
+  .chat-page--landing .quick-chip--action {
+    min-height: 2rem;
+    padding: 0.25rem 0.65rem;
+    font-size: 0.7rem;
+  }
+
+  .chat-page--landing .composer-shell,
+  .chat-page--landing .composer-shell__input {
+    min-height: 2.25rem;
+  }
+
+  .chat-page--landing .send-btn {
+    min-height: 2.25rem;
+    min-width: 2.25rem;
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+}
+
+/* Show subtle doodles only when there is real vertical room */
+@media (min-width: 64rem) and (min-height: 801px) {
+  .chat-page--landing .fo-hero-scene {
+    display: block;
+    opacity: 0.35;
+    width: clamp(6.25rem, 12vw, 12.5rem);
+    max-height: clamp(3.5rem, 10vw, 7rem);
+  }
+}
+
+/* ── Message thread (active) ─────────────────────────────────── */
+
+.chat-thread,
+.chat-thread__item,
+.message-row,
+.results-msg-cta-wrap {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.message-bubble--assistant,
+.message-bubble--user,
+.thinking-bubble {
+  max-width: min(100%, var(--chat-bubble-ava, 52rem));
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Keep the status card compact — don't stretch to full ava bubble width */
+.chat-page .thinking-bubble {
+  max-width: min(100%, 22.5rem);
+}
+
+.message-bubble--user {
+  max-width: min(100%, var(--chat-bubble-user, 42rem));
+}
+
+.message-bubble__text {
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+.results-msg-cta__btn {
+  max-width: 100%;
+  white-space: normal;
+}
+
+@media (max-width: 720px) {
+  .chat-page--active {
+    --chat-bubble-ava: 100%;
+    --chat-bubble-user: 100%;
+  }
+
+  .chat-page--active .message-bubble--assistant,
+  .chat-page--active .thinking-bubble {
+    max-width: 94%;
+  }
+
+  .chat-page--active .message-bubble--user {
+    max-width: min(100%, 90%);
+  }
+}
+
+@media (max-width: 420px) {
+  .fo-site-nav__brand-text {
+    font-size: 1rem;
+  }
+}

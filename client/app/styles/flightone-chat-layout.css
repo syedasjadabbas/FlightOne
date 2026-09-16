@@ -1,0 +1,433 @@
+/**
+ * FlightOne /chat layout — landing (document flow) vs active (app shell).
+ * Structural only. Visual tokens unchanged.
+ */
+
+@media (min-width: 1920px) {
+  :root {
+    --fo-content-max: 81.25rem;
+  }
+}
+
+/* ── Shared width chain ───────────────────────────────────────── */
+
+html {
+  width: 100%;
+  max-width: 100%;
+}
+
+body {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* Horizontal containment on the stage — NOT on html/body.
+   overflow-x:clip on html/body forces overflow-y to compute to auto,
+   which creates a phantom root scrollbar under browser zoom. */
+html.fo-chat-active,
+html.fo-chat-active body {
+  overflow-x: clip;
+}
+
+.fo-stage--chat,
+.ask-ai-shell,
+.ask-ai-shell--chat,
+.chat-page,
+.chat-page__inner,
+.chat-page__header,
+.chat-page__messages,
+.chat-page__footer,
+.chat-page__content,
+.fo-site-nav,
+.fo-site-nav__inner {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.chat-page {
+  --chat-content-max: min(100%, var(--fo-content-max));
+}
+
+.chat-page__content {
+  max-width: var(--chat-content-max);
+  margin-inline: auto;
+  padding-inline: var(--fo-content-gutter);
+}
+
+.chat-page__messages-inner {
+  max-width: var(--chat-content-max);
+  margin-inline: auto;
+  padding-inline: var(--fo-content-gutter);
+}
+
+.fo-site-nav {
+  padding-inline: 0;
+}
+
+.fo-site-nav__inner {
+  max-width: var(--chat-content-max);
+  margin-inline: auto;
+  padding-inline: var(--fo-content-gutter);
+}
+
+/* ── Chat stage shell ─────────────────────────────────────────── */
+
+/* ── Chat stage shell — full-viewport app shell (ChatGPT / AI workspace style) ── */
+
+html.fo-chat-page,
+html.fo-chat-page body,
+html.fo-chat-active,
+html.fo-chat-active body,
+html.fo-chat-landing,
+html.fo-chat-landing body {
+  height: var(--fo-visual-height, 100dvh);
+  max-height: var(--fo-visual-height, 100dvh);
+  overflow: hidden !important;
+  overscroll-behavior: none;
+  background: var(--fo-atmosphere);
+}
+
+.fo-stage--chat {
+  display: flex;
+  flex-direction: column;
+  height: var(--fo-visual-height, 100dvh);
+  max-height: var(--fo-visual-height, 100dvh);
+  min-height: var(--fo-visual-height, 100dvh);
+  overflow: hidden;
+  width: 100%;
+}
+
+.fo-stage--chat > .fo-chat-nav {
+  flex: 0 0 auto;
+  position: relative;
+  z-index: 30;
+}
+
+.fo-stage--chat > .fo-chat-app {
+  flex: 1 1 0%;
+  height: calc(var(--fo-visual-height, 100dvh) - var(--fo-nav-height, 3.25rem));
+  max-height: calc(var(--fo-visual-height, 100dvh) - var(--fo-nav-height, 3.25rem));
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.fo-chat-console {
+  flex: 1 1 0%;
+  height: 100%;
+  min-height: 0;
+  max-height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: row;
+}
+
+.ask-ai-shell--chat {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0%;
+  height: 100%;
+  min-height: 0;
+  max-height: 100%;
+  overflow: hidden;
+}
+
+.ask-ai-shell--chat > .ask-ai-shell__chat-pane {
+  flex: 1 1 0%;
+  min-height: 0;
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-page {
+  flex: 1 1 0%;
+  min-height: 0;
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-page__inner {
+  flex: 1 1 0%;
+  min-height: 0;
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-page__header {
+  flex: 0 0 auto;
+  flex-shrink: 0;
+}
+
+.chat-page__messages {
+  flex: 1 1 0%;
+  min-height: 0;
+  max-height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior-y: contain;
+  position: relative;
+  -webkit-overflow-scrolling: touch;
+  scroll-padding-bottom: var(--chat-messages-end-pad, 0.75rem);
+}
+
+.chat-page__footer {
+  flex: 0 0 auto;
+  flex-shrink: 0;
+}
+
+.chat-page--landing .chat-page__messages {
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-page--landing .chat-page__messages::-webkit-scrollbar {
+  display: none;
+}
+
+.chat-page--landing .chat-hero--landing {
+  width: 100%;
+  max-width: 100%;
+  overflow: visible;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-page--landing .chat-suggestions--hero {
+  width: 100%;
+  max-width: 100%;
+  overflow: visible;
+  flex: 0 0 auto;
+  align-content: end;
+  align-items: stretch;
+  grid-auto-rows: auto;
+  min-height: min-content;
+}
+
+.chat-page--landing .chat-suggestions--hero::-webkit-scrollbar {
+  display: none;
+}
+
+.chat-page--landing .fo-inspire-tile {
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  min-height: 0;
+  max-height: none;
+  height: auto;
+  overflow: visible;
+  padding: 0.7rem 0.75rem 0.65rem;
+}
+
+.chat-page--landing .chat-composer-block {
+  width: 100%;
+  max-width: 100%;
+  margin-inline: 0;
+  padding: 0.25rem 0 max(0.35rem, env(safe-area-inset-bottom, 0px));
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+/* ── Hero doodle containment ──────────────────────────────────── */
+
+.fo-hero-scene {
+  top: 0;
+  right: 0;
+  left: auto;
+  bottom: auto;
+  max-width: min(38%, 14rem);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* ── Active chat message geometry (unchanged) ─────────────────── */
+
+.chat-page--active .chat-thread {
+  width: 100%;
+  gap: 1.125rem;
+}
+
+@media (min-width: 640px) {
+  .chat-page--active .chat-thread {
+    gap: 1.25rem;
+  }
+}
+
+.chat-page--active .chat-thread__item {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.chat-page--active .message-row {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  align-items: flex-start;
+}
+
+/* User row: full-width flex line, bubble packs to the end (no stretch collapse) */
+.chat-page--active .message-row--user {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: flex-start;
+  width: 100%;
+  min-width: 0;
+}
+
+.chat-page--active .message-row__label {
+  margin-bottom: 0.35rem;
+}
+
+.chat-page--active .message-bubble--assistant,
+.chat-page--active .thinking-bubble {
+  box-sizing: border-box;
+  display: block;
+  width: auto;
+  max-width: min(100%, var(--chat-bubble-ava));
+  min-width: 0;
+  overflow: visible;
+  align-self: flex-start;
+}
+
+.chat-page--active .thinking-bubble {
+  max-width: min(100%, 22.5rem);
+}
+
+.chat-page--active .message-bubble--user {
+  box-sizing: border-box;
+  display: block;
+  width: fit-content;
+  max-width: min(100%, var(--chat-bubble-user, 42rem));
+  min-width: 0;
+  flex: 0 1 auto;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  overflow: visible;
+  margin-inline-start: 0;
+}
+
+.chat-page--active .message-bubble--assistant .message-bubble__text,
+.chat-page--active .thinking-bubble .message-bubble__text {
+  overflow-wrap: break-word;
+  word-break: normal;
+  white-space: pre-wrap;
+}
+
+.chat-page--active .message-bubble--user .message-bubble__text {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  color: inherit;
+}
+
+@media (max-width: 639px) {
+  .chat-page--active {
+    --chat-bubble-ava: 100%;
+    --chat-bubble-user: 100%;
+  }
+
+  .chat-page--active .message-bubble--assistant,
+  .chat-page--active .thinking-bubble {
+    max-width: 92%;
+  }
+
+  .chat-page--active .message-bubble--user {
+    max-width: min(100%, 88%);
+  }
+}
+
+.chat-page--active .results-msg-cta-wrap {
+  width: 100%;
+  min-width: 0;
+}
+
+.chat-page--active .chat-page__header {
+  padding-block: 0.3rem 0.25rem;
+}
+
+.chat-page--active .chat-page__banner {
+  margin-top: 0.25rem;
+}
+
+.chat-page--active .guest-banner {
+  padding: 0.25rem 0.55rem;
+}
+
+.chat-page--active .chat-composer-block {
+  width: 100%;
+  max-width: 100%;
+  margin-inline: 0;
+  padding-inline: 0;
+  gap: 0.65rem;
+  padding-top: 0.7rem;
+  padding-bottom: max(0.35rem, env(safe-area-inset-bottom, 0px));
+}
+
+.chat-page--active .chat-composer-actions {
+  gap: 0.5rem 0.65rem;
+  margin-bottom: 0.1rem;
+}
+
+.chat-page--active .chat-suggestions--followup {
+  margin-bottom: 0.35rem;
+}
+
+.chat-page--active .chat-jump-latest-wrap {
+  position: absolute;
+  bottom: calc(var(--chat-messages-end-pad, 1rem) + 0.25rem);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  pointer-events: none;
+  width: max-content;
+  max-width: calc(100% - 2rem);
+}
+
+.chat-page--active .chat-jump-latest {
+  pointer-events: auto;
+}
+
+/* Past Chats Sidebar styles */
+.fo-chat-sidebar {
+  flex-shrink: 0;
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
+}
+
+.fo-scrollbar-subtle::-webkit-scrollbar {
+  width: 5px;
+}
+
+.fo-scrollbar-subtle::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.fo-scrollbar-subtle::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.2);
+  border-radius: 9999px;
+}
+
+.fo-scrollbar-subtle::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.35);
+}

@@ -1,0 +1,97 @@
+// Module 07 — Traveller Vault: structured document store behind the
+// traveller profile (passports, visas, tickets, hotel vouchers, insurance,
+// FF/loyalty cards, travel certificates). Owned by modules/vault/. See
+// docs/modules/07-traveller-vault.md.
+//
+// Cross-module refs (`ownerUserId`/`companionId`/`bookingId`) are intentional
+// plain scalars — same pattern as `UserRole.companyId` in foundation.prisma —
+// so Module 02/03 schema changes do not force a reshape of this file.
+//
+// This file lives alongside prisma/schema.prisma (multi-file schema, GA
+// since Prisma 6.7). The `generator`/`datasource` blocks stay in
+// schema.prisma; nothing here needs them directly since there are no
+// cross-file relations.
+
+enum VaultDocType {
+  PASSPORT
+  NATIONAL_ID
+  RESIDENCE_PERMIT
+  VISA
+  TICKET
+  HOTEL_VOUCHER
+  INSURANCE
+  FF_CARD
+  LOYALTY_CARD
+  TRAVEL_CERT
+  OTHER
+}
+
+/// A stored document + structured metadata — "a document store with
+/// structured metadata, not just a file bucket" (module doc). Documents
+/// issued by Module 03 (tickets/vouchers) are auto-ingested by
+/// modules/bookings/bookings.service.js on a successful ticket transition
+/// and are treated as immutable once issued (dev guide §7); a renewal/edit
+/// via `PATCH /:id` never mutates history — it creates a new version row
+/// with `supersedesId` pointing at the old one, which is retained (isActive
+/// flips to false) rather than deleted (module doc: "old version retained
+/// for audit, not deleted").
+model VaultDocument {
+  id          String       @id @default(cuid())
+  ownerUserId String
+  companionId String?
+  type        VaultDocType
+  title       String
+  bookingId   String?
+
+  issueDate DateTime?
+  expiresAt DateTime?
+
+  /// Opaque logical URL for clients (`vault://document/{id}`). Never a raw FS path.
+  fileUrl  String?
+  fileMeta Json?
+
+  /// Server-only object key for the storage provider. Never returned to clients.
+  storageKey       String?
+  contentType      String?
+  byteSize         Int?
+  originalFilename String?
+  contentSha256    String?
+
+  // Placeholder for optional encrypted notes — never log or list this field.
+  encryptedNote String?
+
+  version      Int     @default(1)
+  supersedesId String?
+  isActive     Boolean @default(true)
+
+  shareLinks VaultShareLink[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([ownerUserId])
+  @@index([type])
+  @@index([expiresAt])
+  @@index([bookingId])
+  @@index([storageKey])
+}
+
+/// One-time share token for a single document (module doc: "shareable
+/// link/export for a specific document ... access-scoped and expiring").
+/// Only `tokenHash` is stored — the plain token is returned once at
+/// creation time by `POST /:id/share` and never persisted anywhere,
+/// mirroring `RefreshToken.tokenHash` in foundation.prisma.
+model VaultShareLink {
+  id       String        @id @default(cuid())
+  document VaultDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  documentId      String
+  tokenHash       String    @unique
+  expiresAt       DateTime
+  revokedAt       DateTime?
+  createdByUserId String
+
+  createdAt DateTime @default(now())
+
+  @@index([documentId])
+}

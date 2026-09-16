@@ -1,0 +1,54 @@
+---
+description: Measure-first method — algorithmic, database, frontend, caching — for performance work across the stack.
+globs: ["**/*.ts", "**/*.tsx", "**/*.py", "**/*.go", "**/*.rs"]
+alwaysApply: false
+---
+
+# Performance Standard
+
+**Measure, then optimize.** Profiling beats intuition — the bottleneck is rarely where you guess.
+Premature optimization wastes time and adds complexity; *deliberate* optimization ships value.
+
+## Method
+
+1. **Define the budget/SLO** (p95 latency, throughput, memory, bundle size, Core Web Vitals).
+2. **Measure** against realistic data and load. Reproduce the slow case.
+3. **Profile** to find the actual hotspot (CPU, allocations, queries, waterfalls).
+4. **Fix the biggest lever first** — usually algorithmic complexity or a database query.
+5. **Re-measure** to confirm the win and check for regressions elsewhere.
+6. **Lock it in** with a performance regression test / budget in CI.
+
+## Algorithmic
+
+- Complexity dominates. An O(n²) on a hot path outweighs any micro-optimization.
+- Choose the right data structure (map/set for lookups, not `Array.includes` in a loop).
+- Do work once: cache, memoize, batch, precompute. Avoid repeated work in loops.
+
+## Database (usually the bottleneck)
+
+- Index for your queries; kill N+1; paginate; avoid `SELECT *`; keep transactions short.
+- Cache expensive reads with intentional TTL/invalidation.
+
+## Backend
+
+- Don't block the event loop / worker thread. Stream large responses. Parallelize independent I/O.
+- Connection pooling; bounded concurrency; backpressure. Offload heavy/slow work to queues.
+- Compression (gzip/brotli); HTTP keep-alive; sensible cache headers/CDN for cacheable responses.
+
+## Frontend (Core Web Vitals: LCP < 2.5s, INP < 200ms, CLS < 0.1)
+
+- Ship less JS: code-split, tree-shake, lazy-load, defer non-critical work.
+- Optimize images (modern formats, responsive sizes, lazy) and fonts (subset, `font-display`).
+- Avoid layout thrash and re-render storms; virtualize long lists; memoize measured hotspots.
+- Prefetch on intent; cache on the client (TanStack Query); optimistic UI where safe.
+
+## Caching layers (use the right one)
+
+Browser/CDN → app-level (Redis/memory) → DB query cache. Define TTLs, invalidation, and behavior
+on cache miss and cache down. Guard against stampedes (locks, jitter, request coalescing).
+
+## Anti-patterns
+
+- Optimizing without measuring. Micro-optimizing cold paths. Caching without invalidation.
+- Adding a queue/worker/cache for complexity a simpler fix would solve.
+- Treating a p50 win as a p99 win — watch the tail; users feel the tail.

@@ -1,0 +1,1431 @@
+[
+  {
+    "testId": "1",
+    "rawUserRequest": "I want to fly from Lahore to Dubai on September 10, 2026. Show me available flights.",
+    "extractionSource": "llm",
+    "llmError": null,
+    "extractedPlan": {
+      "action": "search",
+      "searches": [
+        {
+          "product": "FLIGHT",
+          "query": {
+            "origin": "LHE",
+            "destination": "DXB",
+            "departureDate": "2026-09-10",
+            "passengers": 1,
+            "cabinClass": "ECONOMY"
+          }
+        }
+      ]
+    },
+    "validation": {
+      "ok": true
+    },
+    "normalized": {
+      "origin": "LHE",
+      "destination": "DXB",
+      "departureDate": "2026-09-10",
+      "returnDate": null,
+      "passengers": 1,
+      "cabin": "ECONOMY"
+    },
+    "travelport": {
+      "status": "OK",
+      "rawOfferCount": 12,
+      "auditRawOfferCount": 15,
+      "discoveryProbes": [
+        "PK",
+        "TG",
+        "EK",
+        "SQ",
+        "UL"
+      ],
+      "ms": 2902,
+      "request": {
+        "product": "FLIGHT",
+        "query": {
+          "origin": "LHE",
+          "destination": "DXB",
+          "departureDate": "2026-09-10",
+          "passengers": 1,
+          "cabinClass": "ECONOMY"
+        }
+      },
+      "error": null,
+      "searchFailure": null,
+      "liveSearchEmpty": false
+    },
+    "counts": {
+      "rawTravelport": 12,
+      "auditTravelport": 15,
+      "normalizedPipeline": 15,
+      "scoredPool": 15,
+      "displayed": 15,
+      "seedInNormalized": 0,
+      "stubInNormalized": 0
+    },
+    "displayedOffers": [
+      {
+        "id": "TP-o1_j1_p0_s3-s4",
+        "origin": "LHE",
+        "destination": "DXB",
+        "departureDate": "2026-09-10",
+        "arrivalDate": "2026-09-11",
+        "airline": "Etihad",
+        "flightNumber": "EY289",
+        "departTime": "19:45",
+        "arriveTime": "03:10",
+        "durationMin": 505,
+        "stops": 1,
+        "baggageKg": null,
+        "cabin": "economy",
+        "priceMinor": 10014000,
+        "currency": "PKR",
+        "supplier": "Travelport",
+        "tags": [
+          "live",
+          "travelport",
+          "gds"
+        ],
+        "returnDate": null,
+        "audit": []
+      },
+      {
+        "id": "TP-o1_j1_p1_s7-s8",
+        "origin": "LHE",
+        "destination": "DXB",
+        "departureDate": "2026-09-10",
+        "arrivalDate": "2026-09-11",
+        "airline": "Etihad",
+        "flightNumber": "EY289",
+        "departTime": "19:45",
+        "arriveTime": "04:45",
+        "durationMin": 600,
+        "stops": 1,
+        "baggageKg": null,
+        "cabin": "economy",
+        "priceMinor": 10014000,
+        "currency": "PKR",
+        "supplier": "Travelport",
+        "tags": [
+          "live",
+          "travelport",
+          "gds"
+        ],
+        "returnDate": null,
+        "audit": []
+      },
+      {
+        "id": "TP-o1_j2_p3_s3-s4",
+        "origin": "LHE",
+        "destination": "DXB",
+        "departureDate": "2026-09-10",
+        "arrivalDate": "2026-09-11",
+        "airline": "Etihad",
+        "flightNumber": "EY289",
+        "departTime": "19:45",
+        "arriveTime": "03:10",
+        "durationMin": 505,
+        "stops": 1,
+        "baggageKg": 25,
+        "cabin": "economy",
+        "priceMinor": 10376000,
+        "currency": "PKR",
+        "supplier": "Travelport",
+        "tags": [
+          "live",
+          "travelport",
+          "gds"
+        ],
+        "returnDate": null,
+        "audit": []
+      },
+      {
+        "id": "TP-o1_j2_p4_s7-s8",
+        "origin": "LHE",
+        "destination": "DXB",
+        "departureDate": "2026-09-10",
+        "arrivalDate": "2026-09-11",
+        "airline": "Etihad",
+        "flightNumber": "EY289",
+        "departTime": "19:45",
+        "arriveTime": "04:45",
+        "durationMin": 600,
+        "stops": 1,
+        "baggageKg": 25,
+        "cabin": "economy",
+        "priceMinor": 10376000,
+        "currency": "PKR",
+        "supplier": "Travelport",
+        "tags": [
+          "live",
+          "travelport",
+          "gds"
+        ],
+        "returnDate": null,
+        "audit": []
+      },
+      {
+        "id": "TP-o1_j3_p6_s3-s4",
+        "origin": "LHE",
+        "destination": "DXB",
+        "departureDate": "2026-09-10",
+        "arrivalDate": "2026-09-11",
+        "airline": "Etihad",
+        "flightNumber": "EY289",
+        "departTime": "19:45",
+        "arriveTime": "03:10",
+        "durationMin": 505,
+        "stops": 1,
+        "baggageKg": 30,
+        "cabin": "economy",
+        "priceMinor": 11602000,
+        "currency": "PKR",
+        "supplier": "Travelport",
+        "tags": [
+          "live",
+          "travelport",
+          "gds"
+        ],
+        "returnDate": null,
+        "audit": []
+      },
+      {
+        "id": "TP-o1_j3_p7_s7-s8",
+        "origin": "LHE",
+        "destination": "DXB",
+        "departureDate": "2026-09-10",
+        "arrivalDate": "2026-09-11",
+        "airline": "Etihad",
+        "flightNumber": "EY289",
+        "departTime": "19:45",
+        "arriveTime": "04:45",
+        "durationMin": 600,
+        "stops": 1,
+        "baggageKg": 30,
+        "cabin": "economy",
+        "priceMinor": 11602000,
+        "currency": "PKR",
+        "supplier": "Travelport",
+        "tags": [
+          "live",
+          "travelport",
+          "gds"
+        ],
+        "returnDate": null,
+        "audit": []
+      },
+      {
+        "id": "TP-o1_j1_p2_s20-s21",
+        "origin": "LHE",
+        "destination": "DXB",
+        "departureDate": "2026-09-10",
+        "arrivalDate": "2026-09-11",
+        "airline": "Etihad",
+        "flightNumber": "EY289",
+        "departTime": "19:45",
+        "arriveTime": "10:25",
+        "durationMin": 940,
+        "stops": 1,
+        "baggageKg": null,
+        "cabin": "economy",
+        "priceMinor": 10014000,
+        "currency": "PKR",
+        "supplier": "Travelport",
+        "tags": [
+          "live",
+          "travelport",
+          "gds"
+        ],
+        "returnDate": null,
+        "audit": []
+      },
+      {
+        "id": "TP-o2_j4_p9_s1-s2",
+        "origin": "LHE",
+        "destination": "DXB",
+        "departureDate": "2026-09-10",
+        "arrivalDate": "2026-09-10",
+        "airline": "Qatar Airways",
+        "flightNumber": "QR621",
+        "departTime": "03:10",
+        "arriveTime": "10:15",
+        "durationMin": 485,
+        "stops": 1,
+        "baggageKg": 25,
+        "cabin": "economy",
+        "priceMinor": 12638400,
+        "currency": "PKR",
+        "supplier": "Travelport",
+        "tags": [
+          "live",
+          "travelport",
+          "gds"
+        ],
+        "returnDate": null,
+        "audit": []
+      },
+      {
+        "id": "TP-o1_j2_p5_s20-s21",
+        "origin": "LHE",
+        "destination": "DXB",
+        "departureDate": "2026-09-10",
+        "arrivalDate": "2026-09-11",
+        "airline": "Etihad",
+        "flightNumber": "EY289",
+        "departTime": "19:45",
+        "arriveTime": "10:25",
+        "durationMin": 940,
+        "stops": 1,
+        "baggageKg": 25,
+        "cabin": "economy",
+        "priceMinor": 10376000,
+        "currency": "PKR",
+        "supplier": "Travelport",
+        "tags": [
+          "live",
+          "travelport",
+          "gds"
+        ],
+        "returnDate": null,
+        "audit": []
+      },
+      {
+        "id": "TP-o2_j4_p10_s5-s6",
+        "origin": "LHE",
+        "destination": "DXB",
+        "departureDate": "2026-09-10",
+        "arrivalDate": "2026-09-10",
+        "airline": "Qatar Airways",
+        "flightNumber": "QR621",
+        "departTime": "03:10",
+        "arriveTime": "11:40",
+        "durationMin": 570,
+        "stops": 1,
+        "baggageKg": 25,
+        "cabin": "economy",
+        "priceMinor": 12638400,
+        "currency": "PKR",
+        "supplier": "Travelport",
+        "tags": [
+          "live",
+          "travelport",
+          "gds"
+        ],
+        "returnDate": null,
+        "audit": []
+      },
+      {
+        "id": "TP-o2_j4_p11_s11-s12",
+        "origin": "LHE",
+        "destination": "DXB",
+        "departureDate": "2026-09-10",
+        "arrivalDate": "2026-09-10",
+        "airline": "Qatar Airways",
+        "flightNumber": "QR629",
+        "departTime": "11:35",
+        "arriveTime": "21:25",
+        "durationMin": 650,
+        "stops": 1,
+        "baggageKg": 25,
+        "cabin": "economy",
+        "priceMinor": 12638400,
+        "currency": "PKR",
+        "supplier": "Travelport",
+        "tags": [
+          "live",
+          "travelport",
+          "gds"
+        ],
+        "returnDate": null,
+        "audit": []
+      },
+      {
+        "id": "TP-o1_j1_p0_s1-s2",
+        "origin": "LHE",
+        "destination": "DXB",
+        "departureDate": "2026-09-10",
+        "arrivalDate": "2026-09-10",
+        "airline": "SriLankan",
+        "flightNumber": "UL154",
+        "departTime": "12:00",
+        "arriveTime": "21:40",
+        "durationMin": 640,
+        "stops": 1,
+        "baggageKg": 30,
+        "cabin": "economy",
+        "priceMinor": 12828000,
+        "currency": "PKR",
+        "supplier": "Travelport",
+        "tags": [
+          "live",
+          "travelport",
+          "gds"
+        ],
+        "returnDate": null,
+        "audit": []
+      },
+      {
+        "id": "TP-o1_j3_p8_s20-s21",
+        "origin": "LHE",
+        "destination": "DXB",
+        "departureDate": "2026-09-10",
+        "arrivalDate": "2026-09-11",
+        "airline": "Etihad",
+        "flightNumber": "EY289",
+        "departTime": "19:45",
+        "arriveTime": "10:25",
+        "durationMin": 940,
+        "stops": 1,
+        "baggageKg": 30,
+        "cabin": "economy",
+        "priceMinor": 11602000,
+        "currency": "PKR",
+        "supplier": "Travelport",
+        "tags": [
+          "live",
+          "travelport",
+          "gds"
+        ],
+        "returnDate": null,
+        "audit": []
+      },
+      {
+        "id": "TP-o1_j2_p1_s1-s2",
+        "origin": "LHE",
+        "destination": "DXB",
+        "departureDate": "2026-09-10",
+        "arrivalDate": "2026-09-10",
+        "airline": "SriLankan",
+        "flightNumber": "UL154",
+        "departTime": "12:00",
+        "arriveTime": "21:40",
+        "durationMin": 640,
+        "stops": 1,
+        "baggageKg": 30,
+        "cabin": "economy",
+        "priceMinor": 14277000,
+        "currency": "PKR",
+        "supplier": "Travelport",
+        "tags": [
+          "live",
+          "travelport",
+          "gds"
+        ],
+        "returnDate": null,
+        "audit": []
+      },
+      {
+        "id": "TP-o1_j3_p2_s1-s2",
+        "origin": "LHE",
+        "destination": "DXB",
+        "departureDate": "2026-09-10",
+        "arrivalDate": "2026-09-10",
+        "airline": "SriLankan",
+        "flightNumber": "UL154",
+        "departTime": "12:00",
+        "arriveTime": "21:40",
+        "durationMin": 640,
+        "stops": 1,
+        "baggageKg": 30,
+        "cabin": "economy",
+        "priceMinor": 23720000,
+        "currency": "PKR",
+        "supplier": "Travelport",
+        "tags": [
+          "live",
+          "travelport",
+          "gds"
+        ],
+        "returnDate": null,
+        "audit": []
+      }
+    ],
+    "failures": [],
+    "mockFallbackReachable": false
+  },
+  {
+    "testId": "2",
+    "rawUserRequest": "I want to fly from Lahore to Karachi on September 10, 2026.",
+    "extractionSource": "llm",
+    "llmError": null,
+    "extractedPlan": {
+      "action": "search",
+      "searches": [
+        {
+          "product": "FLIGHT",
+          "query": {
+            "origin": "LHE",
+            "destination": "KHI",
+            "departureDate": "2026-09-10",
+            "passengers": 1,
+            "cabinClass": "ECONOMY"
+          }
+        }
+      ]
+    },
+    "validation": {
+      "ok": true
+    },
+    "normalized": {
+      "origin": "LHE",
+      "destination": "KHI",
+      "departureDate": "2026-09-10",
+      "returnDate": null,
+      "passengers": 1,
+      "cabin": "ECONOMY"
+    },
+    "travelport": {
+      "status": "OK",
+      "rawOfferCount": 0,
+      "auditRawOfferCount": 0,
+      "discoveryProbes": [
+        "PK",
+        "TG",
+        "EK",
+        "QR",
+        "SQ"
+      ],
+      "ms": 677,
+      "request": {
+        "product": "FLIGHT",
+        "query": {
+          "origin": "LHE",
+          "destination": "KHI",
+          "departureDate": "2026-09-10",
+          "passengers": 1,
+          "cabinClass": "ECONOMY"
+        }
+      },
+      "error": null,
+      "searchFailure": null,
+      "liveSearchEmpty": false
+    },
+    "counts": {
+      "rawTravelport": 0,
+      "auditTravelport": 0,
+      "normalizedPipeline": 6,
+      "scoredPool": 6,
+      "displayed": 6,
+      "seedInNormalized": 0,
+      "stubInNormalized": 0
+    },
+    "displayedOffers": [
+      {
+        "id": "stitch-TP-o1_j1_p0_s1__TP-o1_j1_p0_s1",
+        "origin": "LHE",
+        "destination": "KHI",
+        "departureDate": "2026-09-10",
+        "arrivalDate": "2026-09-10",
+        "airline": "Etihad",
+        "flightNumber": "EY289",
+        "departTime": "19:45",
+        "arriveTime": "11:10",
+        "durationMin": 335,
+        "stops": 1,
+        "baggageKg": null,
+        "cabin": "economy",
+        "priceMinor": 13466200,
+        "currency": "PKR",
+        "supplier": "Travelport",
+        "tags": [
+          "live",
+          "travelport",
+          "gds",
+          "hub-stitched",
+          "via-AUH",
+          "requested-KHI"
+        ],
+        "returnDate": null,
+        "audit": []
+      },
+      {
+        "id": "stitch-TP-o1_j1_p0_s1__TP-o1_j1_p1_s2",
+        "origin": "LHE",
+        "destination": "KHI",
+        "departureDate": "2026-09-10",
+        "arrivalDate": "2026-09-10",
+        "airline": "Etihad",
+        "flightNumber": "EY289",
+        "departTime": "19:45",
+        "arriveTime": "05:40",
+        "durationMin": 340,
+        "stops": 1,
+        "baggageKg": null,
+        "cabin": "economy",
+        "priceMinor": 13466200,
+        "currency": "PKR",
+        "supplier": "Travelport",
+        "tags": [
+          "live",
+          "travelport",
+          "gds",
+          "hub-stitched",
+          "via-AUH",
+          "requested-KHI"
+        ],
+        "returnDate": null,
+        "audit": []
+      },
+      {
+        "id": "stitch-TP-o1_j1_p0_s1__TP-o2_j4_p6_s4",
+        "origin": "LHE",
+        "destination": "KHI",
+        "departureDate": "2026-09-10",
+        "arrivalDate": "2026-09-11",
+        "airline": "Etihad",
+        "flightNumber": "EY289",
+        "departTime": "19:45",
+        "arriveTime": "03:00",
+        "durationMin": 340,
+        "stops": 1,
+        "baggageKg": null,
+        "cabin": "economy",
+        "priceMinor": 13617200,
+        "currency": "PKR",
+        "supplier": "Travelport",
+        "tags": [
+          "live",
+          "travelport",
+          "gds",
+          "hub-stitched",
+          "via-AUH",
+          "requested-KHI"
+        ],
+        "returnDate": null,
+        "audit": []
+      },
+      {
+        "id": "stitch-TP-o1_j2_p1_s1__TP-o1_j1_p0_s1",
+        "origin": "LHE",
+        "destination": "KHI",
+        "departureDate": "2026-09-10",
+        "arrivalDate": "2026-09-10",
+        "airline": "Etihad",
+        "flightNumber": "EY289",
+        "departTime": "19:45",
+        "arriveTime": "11:10",
+        "durationMin": 335,
+        "stops": 1,
+        "baggageKg": 25,
+        "cabin": "economy",
+        "priceMinor": 13828200,
+        "currency": "PKR",
+        "supplier": "Travelport",
+        "tags": [
+          "live",
+          "travelport",
+          "gds",
+          "hub-stitched",
+          "via-AUH",
+          "requested-KHI"
+        ],
+        "returnDate": null,
+        "audit": []
+      },
+      {
+        "id": "stitch-TP-o1_j2_p1_s1__TP-o1_j1_p1_s2",
+        "origin": "LHE",
+        "destination": "KHI",
+        "departureDate": "2026-09-10",
+        "arrivalDate": "2026-09-10",
+        "airline": "Etihad",
+        "flightNumber": "EY289",
+        "departTime": "19:45",
+        "arriveTime": "05:40",
+        "durationMin": 340,
+        "stops": 1,
+        "baggageKg": 25,
+        "cabin": "economy",
+        "priceMinor": 13828200,
+        "currency": "PKR",
+        "supplier": "Travelport",
+        "tags": [
+          "live",
+          "travelport",
+          "gds",
+          "hub-stitched",
+          "via-AUH",
+          "requested-KHI"
+        ],
+        "returnDate": null,
+        "audit": []
+      },
+      {
+        "id": "stitch-TP-o1_j2_p1_s1__TP-o2_j4_p6_s4",
+        "origin": "LHE",
+        "destination": "KHI",
+        "departureDate": "2026-09-10",
+        "arrivalDate": "2026-09-11",
+        "airline": "Etihad",
+        "flightNumber": "EY289",
+        "departTime": "19:45",
+        "arriveTime": "03:00",
+        "durationMin": 340,
+        "stops": 1,
+        "baggageKg": 25,
+        "cabin": "economy",
+        "priceMinor": 13979200,
+        "currency": "PKR",
+        "supplier": "Travelport",
+        "tags": [
+          "live",
+          "travelport",
+          "gds",
+          "hub-stitched",
+          "via-AUH",
+          "requested-KHI"
+        ],
+        "returnDate": null,
+        "audit": []
+      }
+    ],
+    "failures": [],
+    "mockFallbackReachable": false
+  },
+  {
+    "testId": "3",
+    "rawUserRequest": "I want to fly from Lahore to Istanbul on September 11, 2026.",
+    "extractionSource": "llm",
+    "llmError": null,
+    "extractedPlan": {
+      "action": "search",
+      "searches": [
+        {
+          "product": "FLIGHT",
+          "query": {
+            "origin": "LHE",
+            "destination": "IST",
+            "departureDate": "2026-09-11",
+            "passengers": 1,
+            "cabinClass": "ECONOMY"
+          }
+        }
+      ]
+    },
+    "validation": {
+      "ok": true
+    },
+    "normalized": {
+      "origin": "LHE",
+      "destination": "IST",
+      "departureDate": "2026-09-11",
+      "returnDate": null,
+      "passengers": 1,
+      "cabin": "ECONOMY"
+    },
+    "travelport": {
+      "status": "OK",
+      "rawOfferCount": 12,
+      "auditRawOfferCount": 12,
+      "discoveryProbes": [
+        "PK",
+        "TG",
+        "EK",
+        "QR",
+        "SQ"
+      ],
+      "ms": 760,
+      "request": {
+        "product": "FLIGHT",
+        "query": {
+          "origin": "LHE",
+          "destination": "IST",
+          "departureDate": "2026-09-11",
+          "passengers": 1,
+          "cabinClass": "ECONOMY"
+        }
+      },
+      "error": null,
+      "searchFailure": null,
+      "liveSearchEmpty": false
+    },
+    "counts": {
+      "rawTravelport": 12,
+      "auditTravelport": 12,
+      "normalizedPipeline": 12,
+      "scoredPool": 12,
+      "displayed": 12,
+      "seedInNormalized": 0,
+      "stubInNormalized": 0
+    },
+    "displayedOffers": [
+      {
+        "id": "TP-o1_j1_p0_s1-s2",
+        "origin": "LHE",
+        "destination": "IST",
+        "departureDate": "2026-09-11",
+        "arrivalDate": "2026-09-11",
+        "airline": "Etihad",
+        "flightNumber": "EY285",
+        "departTime": "04:15",
+        "arriveTime": "12:35",
+        "durationMin": 620,
+        "stops": 1,
+        "baggageKg": null,
+        "cabin": "economy",
+        "priceMinor": 16996300,
+        "currency": "PKR",
+        "supplier": "Travelport",
+        "tags": [
+          "live",
+          "travelport",
+          "gds"
+        ],
+        "returnDate": null,
+        "audit": []
+      },
+      {
+        "id": "TP-o1_j2_p2_s1-s2",
+        "origin": "LHE",
+        "destination": "IST",
+        "departureDate": "2026-09-11",
+        "arrivalDate": "2026-09-11",
+        "airline": "Etihad",
+        "flightNumber": "EY285",
+        "departTime": "04:15",
+        "arriveTime": "12:35",
+        "durationMin": 620,
+        "stops": 1,
+        "baggageKg": 25,
+        "cabin": "economy",
+        "priceMinor": 17636300,
+        "currency": "PKR",
+        "supplier": "Travelport",
+        "tags": [
+          "live",
+          "travelport",
+          "gds"
+        ],
+        "returnDate": null,
+        "audit": []
+      },
+      {
+        "id": "TP-o1_j3_p4_s1-s2",
+        "origin": "LHE",
+        "destination": "IST",
+        "departureDate": "2026-09-11",
+        "arrivalDate": "2026-09-11",
+        "airline": "Etihad",
+        "flightNumber": "EY285",
+        "departTime": "04:15",
+        "arriveTime": "12:35",
+        "durationMin": 620,
+        "stops": 1,
+        "baggageKg": 30,
+        "cabin": "economy",
+        "priceMinor": 18110300,
+        "currency": "PKR",
+        "supplier": "Travelport",
+        "tags": [
+          "live",
+          "travelport",
+          "gds"
+        ],
+        "returnDate": null,
+        "audit": []
+      },
+      {
+        "id": "TP-o1_j1_p1_s5-s6",
+        "origin": "LHE",
+        "destination": "IST",
+        "departureDate": "2026-09-11",
+        "arrivalDate": "2026-09-12",
+        "airline": "Etihad",
+        "flightNumber": "EY289",
+        "departTime": "19:45",
+        "arriveTime": "12:35",
+        "durationMin": 1130,
+        "stops": 1,
+        "baggageKg": null,
+        "cabin": "economy",
+        "priceMinor": 16996300,
+        "currency": "PKR",
+        "supplier": "Travelport",
+        "tags": [
+          "live",
+          "travelport",
+          "gds"
+        ],
+        "returnDate": null,
+        "audit": []
+      },
+      {
+        "id": "TP-o1_j2_p3_s5-s6",
+        "origin": "LHE",
+        "destination": "IST",
+        "departureDate": "2026-09-11",
+        "arrivalDate": "2026-09-12",
+        "airline": "Etihad",
+        "flightNumber": "EY289",
+        "departTime": "19:45",
+        "arriveTime": "12:35",
+        "durationMin": 1130,
+        "stops": 1,
+        "baggageKg": 25,
+        "cabin": "economy",
+        "priceMinor": 17636300,
+        "currency": "PKR",
+        "supplier": "Travelport",
+        "tags": [
+          "live",
+          "travelport",
+          "gds"
+        ],
+        "returnDate": null,
+        "audit": []
+      },
+      {
+        "id": "TP-o1_j3_p5_s5-s6",
+        "origin": "LHE",
+        "destination": "IST",
+        "departureDate": "2026-09-11",
+        "arrivalDate": "2026-09-12",
+        "airline": "Etihad",
+        "flightNumber": "EY289",
+        "departTime": "19:45",
+        "arriveTime": "12:35",
+        "durationMin": 1130,
+        "stops": 1,
+        "baggageKg": 30,
+        "cabin": "economy",
+        "priceMinor": 18110300,
+        "currency": "PKR",
+        "supplier": "Travelport",
+        "tags": [
+          "live",
+          "travelport",
+          "gds"
+        ],
+        "returnDate": null,
+        "audit": []
+      },
+      {
+        "id": "TP-o2_j4_p6_s3-s4",
+        "origin": "LHE",
+        "destination": "IST",
+        "departureDate": "2026-09-11",
+        "arrivalDate": "2026-09-12",
+        "airline": "Etihad",
+        "flightNumber": "EY289",
+        "departTime": "19:45",
+        "arriveTime": "05:25",
+        "durationMin": 700,
+        "stops": 1,
+        "baggageKg": null,
+        "cabin": "economy",
+        "priceMinor": 48057300,
+        "currency": "PKR",
+        "supplier": "Travelport",
+        "tags": [
+          "live",
+          "travelport",
+          "gds"
+        ],
+        "returnDate": null,
+        "audit": []
+      },
+      {
+        "id": "TP-o2_j5_p8_s3-s4",
+        "origin": "LHE",
+        "destination": "IST",
+        "departureDate": "2026-09-11",
+        "arrivalDate": "2026-09-12",
+        "airline": "Etihad",
+        "flightNumber": "EY289",
+        "departTime": "19:45",
+        "arriveTime": "05:25",
+        "durationMin": 700,
+        "stops": 1,
+        "baggageKg": 25,
+        "cabin": "economy",
+        "priceMinor": 48865300,
+        "currency": "PKR",
+        "supplier": "Travelport",
+        "tags": [
+          "live",
+          "travelport",
+          "gds"
+        ],
+        "returnDate": null,
+        "audit": []
+      },
+      {
+        "id": "TP-o2_j6_p10_s3-s4",
+        "origin": "LHE",
+        "destination": "IST",
+        "departureDate": "2026-09-11",
+        "arrivalDate": "2026-09-12",
+        "airline": "Etihad",
+        "flightNumber": "EY289",
+        "departTime": "19:45",
+        "arriveTime": "05:25",
+        "durationMin": 700,
+        "stops": 1,
+        "baggageKg": 30,
+        "cabin": "economy",
+        "priceMinor": 49951300,
+        "currency": "PKR",
+        "supplier": "Travelport",
+        "tags": [
+          "live",
+          "travelport",
+          "gds"
+        ],
+        "returnDate": null,
+        "audit": []
+      },
+      {
+        "id": "TP-o2_j4_p7_s7-s8",
+        "origin": "LHE",
+        "destination": "IST",
+        "departureDate": "2026-09-11",
+        "arrivalDate": "2026-09-12",
+        "airline": "Etihad",
+        "flightNumber": "EY285",
+        "departTime": "04:15",
+        "arriveTime": "05:25",
+        "durationMin": 1630,
+        "stops": 1,
+        "baggageKg": null,
+        "cabin": "economy",
+        "priceMinor": 48057300,
+        "currency": "PKR",
+        "supplier": "Travelport",
+        "tags": [
+          "live",
+          "travelport",
+          "gds"
+        ],
+        "returnDate": null,
+        "audit": []
+      },
+      {
+        "id": "TP-o2_j5_p9_s7-s8",
+        "origin": "LHE",
+        "destination": "IST",
+        "departureDate": "2026-09-11",
+        "arrivalDate": "2026-09-12",
+        "airline": "Etihad",
+        "flightNumber": "EY285",
+        "departTime": "04:15",
+        "arriveTime": "05:25",
+        "durationMin": 1630,
+        "stops": 1,
+        "baggageKg": 25,
+        "cabin": "economy",
+        "priceMinor": 48865300,
+        "currency": "PKR",
+        "supplier": "Travelport",
+        "tags": [
+          "live",
+          "travelport",
+          "gds"
+        ],
+        "returnDate": null,
+        "audit": []
+      },
+      {
+        "id": "TP-o2_j6_p11_s7-s8",
+        "origin": "LHE",
+        "destination": "IST",
+        "departureDate": "2026-09-11",
+        "arrivalDate": "2026-09-12",
+        "airline": "Etihad",
+        "flightNumber": "EY285",
+        "departTime": "04:15",
+        "arriveTime": "05:25",
+        "durationMin": 1630,
+        "stops": 1,
+        "baggageKg": 30,
+        "cabin": "economy",
+        "priceMinor": 49951300,
+        "currency": "PKR",
+        "supplier": "Travelport",
+        "tags": [
+          "live",
+          "travelport",
+          "gds"
+        ],
+        "returnDate": null,
+        "audit": []
+      }
+    ],
+    "failures": [],
+    "mockFallbackReachable": false
+  },
+  {
+    "testId": "4",
+    "rawUserRequest": "I need a return flight from Lahore to Dubai from September 10 to September 15, 2026.",
+    "extractionSource": "llm",
+    "llmError": null,
+    "extractedPlan": {
+      "action": "search",
+      "searches": [
+        {
+          "product": "FLIGHT",
+          "query": {
+            "origin": "LHE",
+            "destination": "DXB",
+            "departureDate": "2026-09-10",
+            "returnDate": "2026-09-15",
+            "passengers": 1,
+            "cabinClass": "ECONOMY"
+          }
+        }
+      ]
+    },
+    "validation": {
+      "ok": true
+    },
+    "normalized": {
+      "origin": "LHE",
+      "destination": "DXB",
+      "departureDate": "2026-09-10",
+      "returnDate": "2026-09-15",
+      "passengers": 1,
+      "cabin": "ECONOMY"
+    },
+    "travelport": {
+      "status": "OK",
+      "rawOfferCount": 12,
+      "auditRawOfferCount": 12,
+      "discoveryProbes": [
+        "PK",
+        "TG",
+        "EK",
+        "QR",
+        "SQ"
+      ],
+      "ms": 759,
+      "request": {
+        "product": "FLIGHT",
+        "query": {
+          "origin": "LHE",
+          "destination": "DXB",
+          "departureDate": "2026-09-10",
+          "returnDate": "2026-09-15",
+          "passengers": 1,
+          "cabinClass": "ECONOMY"
+        }
+      },
+      "error": null,
+      "searchFailure": null,
+      "liveSearchEmpty": false
+    },
+    "counts": {
+      "rawTravelport": 12,
+      "auditTravelport": 12,
+      "normalizedPipeline": 12,
+      "scoredPool": 12,
+      "displayed": 12,
+      "seedInNormalized": 0,
+      "stubInNormalized": 0
+    },
+    "displayedOffers": [
+      {
+        "id": "TP-o1_j1_p0_s1-s2_s5-s6",
+        "origin": "LHE",
+        "destination": "DXB",
+        "departureDate": "2026-09-10",
+        "arrivalDate": "2026-09-11",
+        "airline": "Etihad",
+        "flightNumber": "EY289",
+        "departTime": "19:45",
+        "arriveTime": "03:10",
+        "durationMin": 505,
+        "stops": 1,
+        "baggageKg": null,
+        "cabin": "economy",
+        "priceMinor": 14047200,
+        "currency": "PKR",
+        "supplier": "Travelport",
+        "tags": [
+          "live",
+          "travelport",
+          "gds"
+        ],
+        "returnDate": "2026-09-15",
+        "audit": []
+      },
+      {
+        "id": "TP-o1_j1_p1_s3-s4_s5-s6",
+        "origin": "LHE",
+        "destination": "DXB",
+        "departureDate": "2026-09-10",
+        "arrivalDate": "2026-09-11",
+        "airline": "Etihad",
+        "flightNumber": "EY289",
+        "departTime": "19:45",
+        "arriveTime": "04:45",
+        "durationMin": 600,
+        "stops": 1,
+        "baggageKg": null,
+        "cabin": "economy",
+        "priceMinor": 14047200,
+        "currency": "PKR",
+        "supplier": "Travelport",
+        "tags": [
+          "live",
+          "travelport",
+          "gds"
+        ],
+        "returnDate": "2026-09-15",
+        "audit": []
+      },
+      {
+        "id": "TP-o3_j4_p21_s1-s2_s9-s10",
+        "origin": "LHE",
+        "destination": "DXB",
+        "departureDate": "2026-09-10",
+        "arrivalDate": "2026-09-11",
+        "airline": "Etihad",
+        "flightNumber": "EY289",
+        "departTime": "19:45",
+        "arriveTime": "03:10",
+        "durationMin": 505,
+        "stops": 1,
+        "baggageKg": null,
+        "cabin": "economy",
+        "priceMinor": 14186200,
+        "currency": "PKR",
+        "supplier": "Travelport",
+        "tags": [
+          "live",
+          "travelport",
+          "gds"
+        ],
+        "returnDate": "2026-09-15",
+        "audit": []
+      },
+      {
+        "id": "TP-o3_j4_p22_s3-s4_s9-s10",
+        "origin": "LHE",
+        "destination": "DXB",
+        "departureDate": "2026-09-10",
+        "arrivalDate": "2026-09-11",
+        "airline": "Etihad",
+        "flightNumber": "EY289",
+        "departTime": "19:45",
+        "arriveTime": "04:45",
+        "durationMin": 600,
+        "stops": 1,
+        "baggageKg": null,
+        "cabin": "economy",
+        "priceMinor": 14186200,
+        "currency": "PKR",
+        "supplier": "Travelport",
+        "tags": [
+          "live",
+          "travelport",
+          "gds"
+        ],
+        "returnDate": "2026-09-15",
+        "audit": []
+      },
+      {
+        "id": "TP-o1_j2_p2_s1-s2_s5-s6",
+        "origin": "LHE",
+        "destination": "DXB",
+        "departureDate": "2026-09-10",
+        "arrivalDate": "2026-09-11",
+        "airline": "Etihad",
+        "flightNumber": "EY289",
+        "departTime": "19:45",
+        "arriveTime": "03:10",
+        "durationMin": 505,
+        "stops": 1,
+        "baggageKg": 25,
+        "cabin": "economy",
+        "priceMinor": 14771200,
+        "currency": "PKR",
+        "supplier": "Travelport",
+        "tags": [
+          "live",
+          "travelport",
+          "gds"
+        ],
+        "returnDate": "2026-09-15",
+        "audit": []
+      },
+      {
+        "id": "TP-o1_j2_p3_s3-s4_s5-s6",
+        "origin": "LHE",
+        "destination": "DXB",
+        "departureDate": "2026-09-10",
+        "arrivalDate": "2026-09-11",
+        "airline": "Etihad",
+        "flightNumber": "EY289",
+        "departTime": "19:45",
+        "arriveTime": "04:45",
+        "durationMin": 600,
+        "stops": 1,
+        "baggageKg": 25,
+        "cabin": "economy",
+        "priceMinor": 14771200,
+        "currency": "PKR",
+        "supplier": "Travelport",
+        "tags": [
+          "live",
+          "travelport",
+          "gds"
+        ],
+        "returnDate": "2026-09-15",
+        "audit": []
+      },
+      {
+        "id": "TP-o3_j5_p23_s1-s2_s9-s10",
+        "origin": "LHE",
+        "destination": "DXB",
+        "departureDate": "2026-09-10",
+        "arrivalDate": "2026-09-11",
+        "airline": "Etihad",
+        "flightNumber": "EY289",
+        "departTime": "19:45",
+        "arriveTime": "03:10",
+        "durationMin": 505,
+        "stops": 1,
+        "baggageKg": 25,
+        "cabin": "economy",
+        "priceMinor": 14911200,
+        "currency": "PKR",
+        "supplier": "Travelport",
+        "tags": [
+          "live",
+          "travelport",
+          "gds"
+        ],
+        "returnDate": "2026-09-15",
+        "audit": []
+      },
+      {
+        "id": "TP-o3_j5_p24_s3-s4_s9-s10",
+        "origin": "LHE",
+        "destination": "DXB",
+        "departureDate": "2026-09-10",
+        "arrivalDate": "2026-09-11",
+        "airline": "Etihad",
+        "flightNumber": "EY289",
+        "departTime": "19:45",
+        "arriveTime": "04:45",
+        "durationMin": 600,
+        "stops": 1,
+        "baggageKg": 25,
+        "cabin": "economy",
+        "priceMinor": 14911200,
+        "currency": "PKR",
+        "supplier": "Travelport",
+        "tags": [
+          "live",
+          "travelport",
+          "gds"
+        ],
+        "returnDate": "2026-09-15",
+        "audit": []
+      },
+      {
+        "id": "TP-o1_j3_p4_s1-s2_s5-s6",
+        "origin": "LHE",
+        "destination": "DXB",
+        "departureDate": "2026-09-10",
+        "arrivalDate": "2026-09-11",
+        "airline": "Etihad",
+        "flightNumber": "EY289",
+        "departTime": "19:45",
+        "arriveTime": "03:10",
+        "durationMin": 505,
+        "stops": 1,
+        "baggageKg": 30,
+        "cabin": "economy",
+        "priceMinor": 17223200,
+        "currency": "PKR",
+        "supplier": "Travelport",
+        "tags": [
+          "live",
+          "travelport",
+          "gds"
+        ],
+        "returnDate": "2026-09-15",
+        "audit": []
+      },
+      {
+        "id": "TP-o1_j3_p5_s3-s4_s5-s6",
+        "origin": "LHE",
+        "destination": "DXB",
+        "departureDate": "2026-09-10",
+        "arrivalDate": "2026-09-11",
+        "airline": "Etihad",
+        "flightNumber": "EY289",
+        "departTime": "19:45",
+        "arriveTime": "04:45",
+        "durationMin": 600,
+        "stops": 1,
+        "baggageKg": 30,
+        "cabin": "economy",
+        "priceMinor": 17223200,
+        "currency": "PKR",
+        "supplier": "Travelport",
+        "tags": [
+          "live",
+          "travelport",
+          "gds"
+        ],
+        "returnDate": "2026-09-15",
+        "audit": []
+      },
+      {
+        "id": "TP-o3_j6_p25_s1-s2_s9-s10",
+        "origin": "LHE",
+        "destination": "DXB",
+        "departureDate": "2026-09-10",
+        "arrivalDate": "2026-09-11",
+        "airline": "Etihad",
+        "flightNumber": "EY289",
+        "departTime": "19:45",
+        "arriveTime": "03:10",
+        "durationMin": 505,
+        "stops": 1,
+        "baggageKg": 30,
+        "cabin": "economy",
+        "priceMinor": 17362200,
+        "currency": "PKR",
+        "supplier": "Travelport",
+        "tags": [
+          "live",
+          "travelport",
+          "gds"
+        ],
+        "returnDate": "2026-09-15",
+        "audit": []
+      },
+      {
+        "id": "TP-o3_j6_p26_s3-s4_s9-s10",
+        "origin": "LHE",
+        "destination": "DXB",
+        "departureDate": "2026-09-10",
+        "arrivalDate": "2026-09-11",
+        "airline": "Etihad",
+        "flightNumber": "EY289",
+        "departTime": "19:45",
+        "arriveTime": "04:45",
+        "durationMin": 600,
+        "stops": 1,
+        "baggageKg": 30,
+        "cabin": "economy",
+        "priceMinor": 17362200,
+        "currency": "PKR",
+        "supplier": "Travelport",
+        "tags": [
+          "live",
+          "travelport",
+          "gds"
+        ],
+        "returnDate": "2026-09-15",
+        "audit": []
+      }
+    ],
+    "failures": [],
+    "mockFallbackReachable": false
+  }
+]

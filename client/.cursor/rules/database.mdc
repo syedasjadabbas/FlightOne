@@ -1,0 +1,59 @@
+---
+description: Modeling, indexing, migrations, integrity constraints, operations — for SQL, migrations, and ORM schema files.
+globs: ["**/*.sql", "**/migrations/**", "**/prisma/**", "**/*.prisma", "**/drizzle/**", "**/*.schema.*"]
+alwaysApply: false
+---
+
+# Database Standard
+
+Default to **PostgreSQL**. The schema is the most expensive thing to change — design it with care.
+
+## Modeling
+
+- **Normalize until it hurts, denormalize until it works.** Start normalized (3NF); denormalize
+  deliberately for measured read performance, documenting the tradeoff.
+- **Constraints in the database,** not just the app: `NOT NULL`, `UNIQUE`, `CHECK`, foreign keys.
+  The DB is the last line of integrity defense and outlives any single service.
+- **Use the right types:** `uuid`/`bigint` keys, `timestamptz` (never naive `timestamp`),
+  `numeric` for money (never float), `jsonb` for flexible/semi-structured data, enums or lookup
+  tables for closed sets, `text` over arbitrary `varchar(n)`.
+- **Every table:** a primary key, `created_at`, and (where mutable) `updated_at`.
+- Prefer surrogate keys for identity; add natural unique constraints for business rules.
+
+## Indexing
+
+- Index for your **actual query patterns** — `WHERE`, `JOIN`, `ORDER BY`, foreign keys.
+- Composite index column order matches query predicates (equality first, range last).
+- Use partial and covering indexes where they pay off. Watch write amplification — every index
+  costs on insert/update.
+- Verify with `EXPLAIN (ANALYZE, BUFFERS)`. Kill sequential scans on large hot tables.
+
+## Queries & performance
+
+- **Eliminate N+1:** batch, join, or use the ORM's eager loading / DataLoader.
+- **Never `SELECT *`** in application/hot paths — select the columns you use.
+- **Always paginate** unbounded result sets (keyset/cursor pagination for scale).
+- Keep transactions short; be explicit about isolation levels; understand your locking.
+- Use connection pooling (PgBouncer). Set statement timeouts.
+
+## Migrations
+
+- **Versioned, forward-only, reviewed, and reversible.** One change per migration.
+- **Expand → migrate → contract** for zero-downtime: add nullable/new → backfill in batches →
+  switch reads/writes → drop old. Never a blocking change on a large hot table.
+- Backfills run in batches, off the request path, resumable.
+- Test migrations on production-like data volumes before shipping.
+- Never edit a migration that has run in any shared environment — add a new one.
+
+## Operations & safety
+
+- Automated, tested backups with a known, rehearsed restore (RPO/RTO defined).
+- Least-privilege DB roles per service; no shared superuser.
+- Read replicas for read-heavy loads; be explicit about replication lag in reads.
+- Soft-delete (`deleted_at`) where audit/recovery matters; hard-delete only with intent.
+- Monitor slow queries, cache hit ratio, replication lag, connection saturation, and bloat.
+
+## Redis / caching (companion)
+
+- Cache with intent: set TTLs, define invalidation, guard against stampedes (locks/jitter).
+- Never treat the cache as a source of truth. Design for cache-miss and cache-down.

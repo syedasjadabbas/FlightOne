@@ -1,0 +1,51 @@
+{
+  "api": "http://localhost:8084/api/v1",
+  "email": "fo.auth.1788347696348@example.com",
+  "steps": [
+    {
+      "step": "signup",
+      "status": 201
+    },
+    {
+      "step": "duplicate",
+      "status": 409
+    },
+    {
+      "step": "invalid-email",
+      "status": 400
+    },
+    {
+      "step": "weak-password",
+      "status": 400
+    },
+    {
+      "step": "login-wrong",
+      "status": 401
+    },
+    {
+      "step": "login-ok",
+      "status": 200
+    },
+    {
+      "step": "me",
+      "status": 200
+    },
+    {
+      "step": "create-conversation",
+      "status": 201
+    },
+    {
+      "step": "record-messages",
+      "status": 201
+    },
+    {
+      "step": "unauthorized-get",
+      "status": 401
+    },
+    {
+      "step": "logout",
+      "status": 200
+    }
+  ],
+  "status": "PASS"
+}

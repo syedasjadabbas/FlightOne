@@ -1,0 +1,70 @@
+---
+description: REST/GraphQL contracts, consistent errors, pagination, versioning — for API/route/controller/resolver files.
+globs: ["**/api/**", "**/routes/**", "**/*.controller.*", "**/*.resolver.*", "**/*.route.*", "**/graphql/**"]
+alwaysApply: false
+---
+
+# API Design Standard
+
+APIs are contracts. They are hard to change once consumed, so design them deliberately and
+version them honestly.
+
+## General principles
+
+- **Design for the consumer.** Model the client's use cases, not your database tables.
+- **Consistency over cleverness.** Same conventions for naming, errors, pagination, and dates
+  across every endpoint.
+- **Predictable & least-surprising.** A developer should guess the next endpoint correctly.
+- **Backward compatibility is sacred** once published. Additive changes only; breaking changes
+  get a new version.
+
+## REST conventions
+
+- **Resources are nouns, plural:** `/orders`, `/orders/{id}`, `/orders/{id}/items`.
+- **HTTP verbs carry semantics:** `GET` (safe, cacheable), `POST` (create/action),
+  `PUT` (full replace, idempotent), `PATCH` (partial), `DELETE` (idempotent).
+- **Status codes mean what they say:** 200/201/204, 400/401/403/404/409/422/429, 500/503.
+  Never return 200 with an error body.
+- **Filtering/sorting/pagination via query params;** cursor pagination for large/most sets.
+- **Idempotency keys** for unsafe retries (`Idempotency-Key` header on POST).
+- **HATEOAS optional**, but include stable IDs and relationship links where useful.
+
+## Errors (consistent envelope)
+
+```jsonc
+{
+  "error": {
+    "code": "ORDER_NOT_FOUND",      // stable machine string
+    "message": "Order 123 was not found.",
+    "details": [{ "field": "id", "issue": "not_found" }],
+    "traceId": "abc-123"            // for support/correlation
+  }
+}
+```
+
+Return field-level validation errors together, not one at a time.
+
+## Contracts & docs
+
+- **Spec-first with OpenAPI** (REST) or SDL (GraphQL). The spec is the source of truth; generate
+  types/clients/server stubs from it.
+- Every endpoint documents: purpose, auth, params, request/response schema, error cases, examples.
+- Publish and version the docs alongside the API.
+
+## GraphQL specifics
+
+- Schema-first; nullable-by-default is intentional. Design for the graph, avoid over-fetching.
+- **Solve N+1 with DataLoader** batching. Enforce query depth/complexity limits and cost analysis.
+- Errors via the `errors` array with typed extensions; mutations return a payload with `userErrors`.
+- Paginate with the Relay connection spec (`edges`/`pageInfo`/cursors).
+
+## Versioning & evolution
+
+- Version in the URL (`/v1`) or header. Additive-first; deprecate with sunset headers and a timeline.
+- Never repurpose a field's meaning. Add a new field; deprecate the old.
+
+## Cross-cutting
+
+- AuthZ on every endpoint; rate limits; request size limits; sensible timeouts.
+- Pagination limits with a hard cap. Compression. `ETag`/conditional requests where cacheable.
+- Structured request logging with a correlation/trace ID returned to the client.

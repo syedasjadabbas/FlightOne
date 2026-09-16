@@ -1,0 +1,52 @@
+// Module 01 — AI Travel Consultant: conversation persistence.
+// Owned by modules/conversations/. See docs/modules/01-ai-travel-consultant.md
+// ("Conversation core" checklist — persistent, resumable threads).
+//
+// This file lives alongside prisma/schema.prisma (multi-file schema, GA since
+// Prisma 6.7 — no preview flag needed). The `generator`/`datasource` blocks stay
+// in schema.prisma; relations across files just work.
+
+enum ConversationStatus {
+  ACTIVE
+  ARCHIVED
+  ESCALATED
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+  AGENT
+}
+
+model Conversation {
+  id        String             @id @default(cuid())
+  // Nullable so anonymous/pre-auth conversations can be supported later
+  // (see module doc). Today every route requires auth, so this is always set.
+  userId    String?
+  user      User?              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String?
+  status    ConversationStatus @default(ACTIVE)
+  // Free-form bag for escalation notes, extraction slots, etc. Opaque on purpose.
+  metadata  Json?
+  messages  Message[]
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+
+  @@index([userId])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role           MessageRole
+  content        String
+  // Opaque OfferCard[]-shaped payload (Module 03/04 will define the real shape).
+  offers         Json?
+  // e.g. "stub", "openai", "human-agent" — who/what produced this message.
+  provider       String?
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId])
+}

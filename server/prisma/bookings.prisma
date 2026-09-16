@@ -1,0 +1,138 @@
+// Module 03 — AI Booking Engine: booking state machine + supplier pricing
+// records. Owned by modules/bookings/ (state machine API) and
+// modules/suppliers/ (adapter layer). See docs/modules/03-ai-booking-engine.md
+// and docs/modules/05-pricing-margin-engine.md (server is the sole pricing
+// authority — dev guide §7: "AI never has unilateral authority over money").
+//
+// This file lives alongside prisma/schema.prisma (multi-file schema, GA since
+// Prisma 6.7 — no preview flag needed). The `generator`/`datasource` blocks
+// stay in schema.prisma; relations across files just work.
+
+enum BookingStatus {
+  QUOTED
+  RESERVED
+  TICKETED
+  ACTIVE
+  COMPLETED
+  CANCELLED
+  REFUNDED
+}
+
+enum BookingProduct {
+  FLIGHT
+  HOTEL
+  PACKAGE
+}
+
+/// Who/what caused a state transition — every transition is attributable
+/// (dev guide §7: "every state change is attributable to an actor").
+enum BookingActor {
+  AI
+  CUSTOMER
+  AGENT
+  SYSTEM
+}
+
+/// The transactional core booking record. Money is integer minor units with
+/// an explicit currency (dev guide §5, lib/money.js) — never floats.
+/// `amountMinor` is the customer-facing price, `netMinor` the supplier net
+/// cost, `marginMinor` the derived spread. All three are re-derived/re-checked
+/// at every state transition, never trusted from a stale client value
+/// (dev guide §7 — "server is the real authority"; Module 05 owns the real
+/// pricing engine, this module calls a stub re-check until that lands).
+model Booking {
+  id      String         @id @default(cuid())
+  userId  String
+  user    User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status  BookingStatus  @default(QUOTED)
+  product BookingProduct
+
+  currency    String // ISO 4217, e.g. "USD" — see lib/money.js
+  amountMinor Int // customer-facing price (integer minor units)
+  netMinor    Int // supplier net fare (integer minor units)
+  marginMinor Int // amountMinor - netMinor, derived at quote/reprice time
+
+  supplierCode String? // e.g. "GALILEO", "RATEHAWK" — see modules/suppliers/
+  // Module 03 — persisted supplier offer references for live revalidation.
+  supplierOfferSnapshotId String? // FK-ish pointer (denormalized; no relation needed)
+  supplierOfferId          String?
+  supplierOfferCreatedAt  DateTime?
+  supplierOfferTtlMs       Int?
+  supplierOfferExpiresAt   DateTime?
+  supplierBookingRefs     Json? // itinerary/fare reference payload (SupplierBookingRefs-shaped)
+  externalRef  String? // supplier PNR / hotel confirmation number, set at ticketing
+
+  idempotencyKey String? @unique // one booking attempt per key (dev guide §7)
+
+  quoteExpiresAt DateTime? // supplier quote TTL — reprice required once past this
+  reservedUntil  DateTime? // hold expiry between RESERVED and TICKETED
+
+  travellerSnapshot Json? // traveller details at time of booking (Module 02 copy)
+  fareRules         Json? // supplier fare rules / cancellation policy snapshot
+  // Freeform bag; also holds `clientAmountMinor`, the last price the customer
+  // saw client-side — persisted by the reprice-check so a mismatch is visible
+  // to pricing/ops even when the transition it was attempted on is rejected.
+  metadata          Json?
+
+  payments Payment[]
+  reservationAttemptId String? @unique
+  /// Mutex for live ticketing retries — cleared on failure or after TICKETED.
+  ticketAttemptId String? @unique
+
+  transitions BookingTransition[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  /// Hot path: supplier reliability groupBy (supplierCode, status).
+  @@index([supplierCode, status])
+}
+
+/// Append-only audit of every booking state change — never updated or
+/// deleted, mirrors AuditLog's immutability invariant (dev guide §7: "all
+/// financial actions are audit-logged, immutable, and attributable").
+/// `fromStatus` is null for the initial QUOTED-on-create row (there is no
+/// prior state to transition from).
+model BookingTransition {
+  id        String  @id @default(cuid())
+  bookingId String
+  booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  fromStatus  BookingStatus?
+  toStatus    BookingStatus
+  actor       BookingActor
+  actorUserId String?
+  reason      String?
+
+  createdAt DateTime @default(now())
+
+  @@index([bookingId])
+}
+
+/// Module 03 — persisted supplier offer snapshot (quote-time reference).
+/// Stored by the supplier search normalization layer (or seeded in tests).
+/// Booking creation references this snapshot by ID and copies its TTL + refs
+/// into the booking row.
+model SupplierOfferSnapshot {
+  id String @id @default(cuid())
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  supplierCode String // e.g. GALILEO / RATEHAWK
+  supplierOfferId String // supplier-side offer/rate identifier
+  product BookingProduct
+  currency String
+  netMinor Int
+
+  supplierBookingRefs Json? // itinerary/fare reference payload (SupplierBookingRefs-shaped)
+
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  ttlMs Int
+
+  @@index([userId])
+  @@index([supplierCode, supplierOfferId])
+  @@index([expiresAt])
+}

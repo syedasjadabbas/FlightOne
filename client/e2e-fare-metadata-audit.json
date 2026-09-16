@@ -1,0 +1,518 @@
+{
+  "runs": [
+    {
+      "label": "LHE-DXB",
+      "offerCount": 12,
+      "uniqueItineraries": 5,
+      "withFareBrand": 12,
+      "withBaggage": 12,
+      "withFareRules": 12,
+      "withPriceBreakdown": 12,
+      "sampleFares": [
+        {
+          "id": "TP-o1_j1_p0_s1-s2",
+          "itineraryKey": "LHE::DXB::2026-09-10::::direct::OB:LHE|AUH|2026-09-10|19:45|2026-09-10|22:05|EY|EY289>AUH|XNB|2026-09-11|01:10|2026-09-11|03:10|EY|EY5412",
+          "price": "PKR 109,153",
+          "priceMinor": 10915260,
+          "fareBrandName": "Economy Basic",
+          "cabin": "economy",
+          "baggageAllowance": {
+            "checked": {
+              "included": false,
+              "weightKg": 0,
+              "text": "CHGS MAY APPLY IF BAGS EXCEED TTL WT ALLOWANCE"
+            },
+            "carryOn": {
+              "included": true,
+              "pieces": 1,
+              "text": "UPTO15LB/7KG AND UPTO45LI/115LCM"
+            }
+          },
+          "baggageKg": null,
+          "fareRulesSummary": {
+            "changes": "Changes not permitted",
+            "cancellation": "Non-refundable",
+            "refund": "Non-refundable"
+          },
+          "refundable": false,
+          "fareBasisCode": "LNN00H6K",
+          "bookingClass": "L",
+          "validatingCarrier": "EY",
+          "paymentTimeLimit": "2026-09-10T23:59:00Z",
+          "supplierPriceBreakdown": {
+            "currency": "PKR",
+            "baseMinor": 8246000,
+            "taxesMinor": 1768000,
+            "feesMinor": 0,
+            "totalMinor": 10014000
+          },
+          "validationStatus": "search_only",
+          "connectionWarnings": [
+            {
+              "kind": "overnight_connection",
+              "message": "Overnight connection in AUH",
+              "atAirportCode": "AUH",
+              "layoverMinutes": 185
+            }
+          ],
+          "hubStitched": false,
+          "roundTrip": false,
+          "returnSegments": 0
+        },
+        {
+          "id": "TP-o1_j2_p3_s1-s2",
+          "itineraryKey": "LHE::DXB::2026-09-10::::direct::OB:LHE|AUH|2026-09-10|19:45|2026-09-10|22:05|EY|EY289>AUH|XNB|2026-09-11|01:10|2026-09-11|03:10|EY|EY5412",
+          "price": "PKR 113,098",
+          "priceMinor": 11309840,
+          "fareBrandName": "Economy Value",
+          "cabin": "economy",
+          "baggageAllowance": {
+            "checked": {
+              "included": true,
+              "weightKg": 25,
+              "text": "CHGS MAY APPLY IF BAGS EXCEED TTL WT ALLOWANCE"
+            },
+            "carryOn": {
+              "included": true,
+              "pieces": 1,
+              "text": "UPTO15LB/7KG AND UPTO45LI/115LCM"
+            }
+          },
+          "baggageKg": 25,
+          "fareRulesSummary": {
+            "changes": "Fee may apply ([object Object])",
+            "cancellation": "Non-refundable",
+            "refund": "Non-refundable"
+          },
+          "refundable": false,
+          "fareBasisCode": "LNN00V6K",
+          "bookingClass": "L",
+          "validatingCarrier": "EY",
+          "paymentTimeLimit": "2026-09-10T23:59:00Z",
+          "supplierPriceBreakdown": {
+            "currency": "PKR",
+            "baseMinor": 8608000,
+            "taxesMinor": 1768000,
+            "feesMinor": 0,
+            "totalMinor": 10376000
+          },
+          "validationStatus": "search_only",
+          "connectionWarnings": [
+            {
+              "kind": "overnight_connection",
+              "message": "Overnight connection in AUH",
+              "atAirportCode": "AUH",
+              "layoverMinutes": 185
+            }
+          ],
+          "hubStitched": false,
+          "roundTrip": false,
+          "returnSegments": 0
+        },
+        {
+          "id": "TP-o1_j3_p6_s1-s2",
+          "itineraryKey": "LHE::DXB::2026-09-10::::direct::OB:LHE|AUH|2026-09-10|19:45|2026-09-10|22:05|EY|EY289>AUH|XNB|2026-09-11|01:10|2026-09-11|03:10|EY|EY5412",
+          "price": "PKR 126,462",
+          "priceMinor": 12646180,
+          "fareBrandName": "Economy Comfort",
+          "cabin": "economy",
+          "baggageAllowance": {
+            "checked": {
+              "included": true,
+              "weightKg": 30,
+              "text": "CHGS MAY APPLY IF BAGS EXCEED TTL WT ALLOWANCE"
+            },
+            "carryOn": {
+              "included": true,
+              "pieces": 1,
+              "text": "UPTO15LB/7KG AND UPTO45LI/115LCM"
+            }
+          },
+          "baggageKg": 30,
+          "fareRulesSummary": {
+            "changes": "Fee may apply ([object Object])",
+            "cancellation": "Fee may apply ([object Object])",
+            "refund": "Fee may apply ([object Object])"
+          },
+          "refundable": null,
+          "fareBasisCode": "LNN00C6K",
+          "bookingClass": "L",
+          "validatingCarrier": "EY",
+          "paymentTimeLimit": "2026-09-10T23:59:00Z",
+          "supplierPriceBreakdown": {
+            "currency": "PKR",
+            "baseMinor": 9834000,
+            "taxesMinor": 1768000,
+            "feesMinor": 0,
+            "totalMinor": 11602000
+          },
+          "validationStatus": "search_only",
+          "connectionWarnings": [
+            {
+              "kind": "overnight_connection",
+              "message": "Overnight connection in AUH",
+              "atAirportCode": "AUH",
+              "layoverMinutes": 185
+            }
+          ],
+          "hubStitched": false,
+          "roundTrip": false,
+          "returnSegments": 0
+        }
+      ],
+      "sameItineraryFareDiff": {
+        "ids": [
+          "TP-o1_j1_p0_s1-s2",
+          "TP-o1_j2_p3_s1-s2",
+          "TP-o1_j3_p6_s1-s2"
+        ],
+        "prices": [
+          "PKR 109,153",
+          "PKR 113,098",
+          "PKR 126,462"
+        ],
+        "brands": [
+          "Economy Basic",
+          "Economy Value",
+          "Economy Comfort"
+        ]
+      }
+    },
+    {
+      "label": "LHE-IST",
+      "offerCount": 12,
+      "uniqueItineraries": 4,
+      "withFareBrand": 12,
+      "withBaggage": 12,
+      "withFareRules": 12,
+      "withPriceBreakdown": 12,
+      "sampleFares": [
+        {
+          "id": "TP-o1_j1_p0_s1-s2",
+          "itineraryKey": "LHE::IST::2026-09-11::::direct::OB:LHE|AUH|2026-09-11|04:15|2026-09-11|06:35|EY|EY285>AUH|IST|2026-09-11|08:40|2026-09-11|12:35|EY|EY541",
+          "price": "PKR 185,260",
+          "priceMinor": 18525967,
+          "fareBrandName": "Economy Basic",
+          "cabin": "economy",
+          "baggageAllowance": {
+            "checked": {
+              "included": false,
+              "weightKg": 0,
+              "text": "CHGS MAY APPLY IF BAGS EXCEED TTL WT ALLOWANCE"
+            },
+            "carryOn": {
+              "included": true,
+              "pieces": 1,
+              "text": "UPTO15LB/7KG AND UPTO45LI/115LCM"
+            }
+          },
+          "baggageKg": null,
+          "fareRulesSummary": {
+            "changes": "Changes not permitted",
+            "cancellation": "Non-refundable",
+            "refund": "Non-refundable"
+          },
+          "refundable": false,
+          "fareBasisCode": "VN900H6R",
+          "bookingClass": "V",
+          "validatingCarrier": "EY",
+          "paymentTimeLimit": "2026-09-11T23:59:00Z",
+          "supplierPriceBreakdown": {
+            "currency": "PKR",
+            "baseMinor": 14849000,
+            "taxesMinor": 2147300,
+            "feesMinor": 0,
+            "totalMinor": 16996300
+          },
+          "validationStatus": "search_only",
+          "connectionWarnings": [],
+          "hubStitched": false,
+          "roundTrip": false,
+          "returnSegments": 0
+        },
+        {
+          "id": "TP-o1_j2_p2_s1-s2",
+          "itineraryKey": "LHE::IST::2026-09-11::::direct::OB:LHE|AUH|2026-09-11|04:15|2026-09-11|06:35|EY|EY285>AUH|IST|2026-09-11|08:40|2026-09-11|12:35|EY|EY541",
+          "price": "PKR 192,236",
+          "priceMinor": 19223567,
+          "fareBrandName": "Economy Value",
+          "cabin": "economy",
+          "baggageAllowance": {
+            "checked": {
+              "included": true,
+              "weightKg": 25,
+              "text": "CHGS MAY APPLY IF BAGS EXCEED TTL WT ALLOWANCE"
+            },
+            "carryOn": {
+              "included": true,
+              "pieces": 1,
+              "text": "UPTO15LB/7KG AND UPTO45LI/115LCM"
+            }
+          },
+          "baggageKg": 25,
+          "fareRulesSummary": {
+            "changes": "Fee may apply ([object Object])",
+            "cancellation": "Non-refundable",
+            "refund": "Non-refundable"
+          },
+          "refundable": false,
+          "fareBasisCode": "VN900V6R",
+          "bookingClass": "V",
+          "validatingCarrier": "EY",
+          "paymentTimeLimit": "2026-09-11T23:59:00Z",
+          "supplierPriceBreakdown": {
+            "currency": "PKR",
+            "baseMinor": 15489000,
+            "taxesMinor": 2147300,
+            "feesMinor": 0,
+            "totalMinor": 17636300
+          },
+          "validationStatus": "search_only",
+          "connectionWarnings": [],
+          "hubStitched": false,
+          "roundTrip": false,
+          "returnSegments": 0
+        },
+        {
+          "id": "TP-o1_j3_p4_s1-s2",
+          "itineraryKey": "LHE::IST::2026-09-11::::direct::OB:LHE|AUH|2026-09-11|04:15|2026-09-11|06:35|EY|EY285>AUH|IST|2026-09-11|08:40|2026-09-11|12:35|EY|EY541",
+          "price": "PKR 197,402",
+          "priceMinor": 19740227,
+          "fareBrandName": "Economy Comfort",
+          "cabin": "economy",
+          "baggageAllowance": {
+            "checked": {
+              "included": true,
+              "weightKg": 30,
+              "text": "CHGS MAY APPLY IF BAGS EXCEED TTL WT ALLOWANCE"
+            },
+            "carryOn": {
+              "included": true,
+              "pieces": 1,
+              "text": "UPTO15LB/7KG AND UPTO45LI/115LCM"
+            }
+          },
+          "baggageKg": 30,
+          "fareRulesSummary": {
+            "changes": "Fee may apply ([object Object])",
+            "cancellation": "Fee may apply ([object Object])",
+            "refund": "Fee may apply ([object Object])"
+          },
+          "refundable": null,
+          "fareBasisCode": "VN900C6R",
+          "bookingClass": "V",
+          "validatingCarrier": "EY",
+          "paymentTimeLimit": "2026-09-11T23:59:00Z",
+          "supplierPriceBreakdown": {
+            "currency": "PKR",
+            "baseMinor": 15963000,
+            "taxesMinor": 2147300,
+            "feesMinor": 0,
+            "totalMinor": 18110300
+          },
+          "validationStatus": "search_only",
+          "connectionWarnings": [],
+          "hubStitched": false,
+          "roundTrip": false,
+          "returnSegments": 0
+        }
+      ],
+      "sameItineraryFareDiff": {
+        "ids": [
+          "TP-o1_j1_p0_s1-s2",
+          "TP-o1_j2_p2_s1-s2",
+          "TP-o1_j3_p4_s1-s2"
+        ],
+        "prices": [
+          "PKR 185,260",
+          "PKR 192,236",
+          "PKR 197,402"
+        ],
+        "brands": [
+          "Economy Basic",
+          "Economy Value",
+          "Economy Comfort"
+        ]
+      }
+    },
+    {
+      "label": "LHE-DXB-RT",
+      "offerCount": 12,
+      "uniqueItineraries": 4,
+      "withFareBrand": 12,
+      "withBaggage": 12,
+      "withFareRules": 12,
+      "withPriceBreakdown": 12,
+      "sampleFares": [
+        {
+          "id": "TP-o1_j1_p0_s1-s2_s5-s6",
+          "itineraryKey": "LHE::DXB::2026-09-10::2026-09-15::direct::OB:LHE|AUH|2026-09-10|19:45|2026-09-10|22:05|EY|EY289>AUH|XNB|2026-09-11|01:10|2026-09-11|03:10|EY|EY5412::RT:XNB|AUH|2026-09-15|10:20|2026-09-15|12:20|EY|EY5417>AUH|LHE|2026-09-15|14:10|2026-09-15|18:25|EY|EY288",
+          "price": "PKR 153,114",
+          "priceMinor": 15311448,
+          "fareBrandName": "Economy Basic",
+          "cabin": "economy",
+          "baggageAllowance": {
+            "checked": {
+              "included": false,
+              "weightKg": 0,
+              "text": "CHGS MAY APPLY IF BAGS EXCEED TTL WT ALLOWANCE"
+            },
+            "carryOn": {
+              "included": true,
+              "pieces": 1,
+              "text": "UPTO15LB/7KG AND UPTO45LI/115LCM"
+            }
+          },
+          "baggageKg": null,
+          "fareRulesSummary": {
+            "changes": "Changes not permitted",
+            "cancellation": "Non-refundable",
+            "refund": "Non-refundable"
+          },
+          "refundable": false,
+          "fareBasisCode": "LNN07H6K",
+          "bookingClass": "L",
+          "validatingCarrier": "EY",
+          "paymentTimeLimit": "2026-09-10T23:59:00Z",
+          "supplierPriceBreakdown": {
+            "currency": "PKR",
+            "baseMinor": 11255000,
+            "taxesMinor": 2792200,
+            "feesMinor": 0,
+            "totalMinor": 14047200
+          },
+          "validationStatus": "search_only",
+          "connectionWarnings": [
+            {
+              "kind": "overnight_connection",
+              "message": "Overnight connection in AUH",
+              "atAirportCode": "AUH",
+              "layoverMinutes": 185
+            }
+          ],
+          "hubStitched": false,
+          "roundTrip": true,
+          "returnSegments": 2
+        },
+        {
+          "id": "TP-o1_j2_p2_s1-s2_s5-s6",
+          "itineraryKey": "LHE::DXB::2026-09-10::2026-09-15::direct::OB:LHE|AUH|2026-09-10|19:45|2026-09-10|22:05|EY|EY289>AUH|XNB|2026-09-11|01:10|2026-09-11|03:10|EY|EY5412::RT:XNB|AUH|2026-09-15|10:20|2026-09-15|12:20|EY|EY5417>AUH|LHE|2026-09-15|14:10|2026-09-15|18:25|EY|EY288",
+          "price": "PKR 161,006",
+          "priceMinor": 16100608,
+          "fareBrandName": "Economy Value",
+          "cabin": "economy",
+          "baggageAllowance": {
+            "checked": {
+              "included": true,
+              "weightKg": 25,
+              "text": "CHGS MAY APPLY IF BAGS EXCEED TTL WT ALLOWANCE"
+            },
+            "carryOn": {
+              "included": true,
+              "pieces": 1,
+              "text": "UPTO15LB/7KG AND UPTO45LI/115LCM"
+            }
+          },
+          "baggageKg": 25,
+          "fareRulesSummary": {
+            "changes": "Fee may apply ([object Object])",
+            "cancellation": "Non-refundable",
+            "refund": "Non-refundable"
+          },
+          "refundable": false,
+          "fareBasisCode": "LNN07V6K",
+          "bookingClass": "L",
+          "validatingCarrier": "EY",
+          "paymentTimeLimit": "2026-09-10T23:59:00Z",
+          "supplierPriceBreakdown": {
+            "currency": "PKR",
+            "baseMinor": 11979000,
+            "taxesMinor": 2792200,
+            "feesMinor": 0,
+            "totalMinor": 14771200
+          },
+          "validationStatus": "search_only",
+          "connectionWarnings": [
+            {
+              "kind": "overnight_connection",
+              "message": "Overnight connection in AUH",
+              "atAirportCode": "AUH",
+              "layoverMinutes": 185
+            }
+          ],
+          "hubStitched": false,
+          "roundTrip": true,
+          "returnSegments": 2
+        },
+        {
+          "id": "TP-o1_j3_p4_s1-s2_s5-s6",
+          "itineraryKey": "LHE::DXB::2026-09-10::2026-09-15::direct::OB:LHE|AUH|2026-09-10|19:45|2026-09-10|22:05|EY|EY289>AUH|XNB|2026-09-11|01:10|2026-09-11|03:10|EY|EY5412::RT:XNB|AUH|2026-09-15|10:20|2026-09-15|12:20|EY|EY5417>AUH|LHE|2026-09-15|14:10|2026-09-15|18:25|EY|EY288",
+          "price": "PKR 187,733",
+          "priceMinor": 18773288,
+          "fareBrandName": "Economy Comfort",
+          "cabin": "economy",
+          "baggageAllowance": {
+            "checked": {
+              "included": true,
+              "weightKg": 30,
+              "text": "CHGS MAY APPLY IF BAGS EXCEED TTL WT ALLOWANCE"
+            },
+            "carryOn": {
+              "included": true,
+              "pieces": 1,
+              "text": "UPTO15LB/7KG AND UPTO45LI/115LCM"
+            }
+          },
+          "baggageKg": 30,
+          "fareRulesSummary": {
+            "changes": "Fee may apply ([object Object])",
+            "cancellation": "Fee may apply ([object Object])",
+            "refund": "Fee may apply ([object Object])"
+          },
+          "refundable": null,
+          "fareBasisCode": "LNN07C6K",
+          "bookingClass": "L",
+          "validatingCarrier": "EY",
+          "paymentTimeLimit": "2026-09-10T23:59:00Z",
+          "supplierPriceBreakdown": {
+            "currency": "PKR",
+            "baseMinor": 14431000,
+            "taxesMinor": 2792200,
+            "feesMinor": 0,
+            "totalMinor": 17223200
+          },
+          "validationStatus": "search_only",
+          "connectionWarnings": [
+            {
+              "kind": "overnight_connection",
+              "message": "Overnight connection in AUH",
+              "atAirportCode": "AUH",
+              "layoverMinutes": 185
+            }
+          ],
+          "hubStitched": false,
+          "roundTrip": true,
+          "returnSegments": 2
+        }
+      ],
+      "sameItineraryFareDiff": {
+        "ids": [
+          "TP-o1_j1_p0_s1-s2_s5-s6",
+          "TP-o1_j2_p2_s1-s2_s5-s6",
+          "TP-o1_j3_p4_s1-s2_s5-s6"
+        ],
+        "prices": [
+          "PKR 153,114",
+          "PKR 161,006",
+          "PKR 187,733"
+        ],
+        "brands": [
+          "Economy Basic",
+          "Economy Value",
+          "Economy Comfort"
+        ]
+      }
+    }
+  ],
+  "status": "PASS"
+}

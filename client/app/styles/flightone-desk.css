@@ -1,0 +1,828 @@
+/**
+ * FlightOne desk — corporate / dashboard / checkout / ops.
+ * Dense-but-calm ops/finance clarity. Navy + cyan. No glass KPI grids.
+ */
+
+:root {
+  --fo-desk-max: 56rem;
+  --fo-desk-max-wide: 64rem;
+  --fo-desk-max-checkout: 32rem;
+  --fo-desk-gap: 1.25rem;
+  --fo-desk-radius: 0.5rem;
+  --fo-desk-line: color-mix(in oklab, var(--navy) 12%, transparent);
+  --fo-desk-line-strong: color-mix(in oklab, var(--navy) 22%, transparent);
+  --fo-desk-wash: color-mix(in oklab, var(--cyan) 5%, var(--white));
+  --fo-desk-muted: var(--ink-soft);
+  --fo-desk-faint: var(--ink-faint);
+}
+
+/* ── Stage + shell ─────────────────────────────────────────── */
+
+.fo-stage--desk {
+  background:
+    linear-gradient(180deg, var(--white) 0%, var(--fo-sky-soft) 72%, var(--fo-sky-mist) 100%);
+}
+
+.fo-desk-shell {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  width: 100%;
+  padding: 1.25rem var(--fo-page-gutter, clamp(1rem, 2.5vw, 3rem)) 1.5rem;
+  box-sizing: border-box;
+}
+
+@media (min-width: 640px) {
+  .fo-desk-shell {
+    padding-block: 1.5rem 1.75rem;
+  }
+}
+
+.fo-desk {
+  width: 100%;
+  max-width: var(--fo-desk-max);
+  display: flex;
+  flex-direction: column;
+  gap: var(--fo-desk-gap);
+}
+
+.fo-desk--wide {
+  max-width: var(--fo-desk-max-wide);
+}
+
+.fo-desk--checkout {
+  max-width: var(--fo-desk-max-checkout);
+}
+
+/* ── Header ────────────────────────────────────────────────── */
+
+.fo-desk__header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--fo-desk-line);
+}
+
+.fo-desk__title {
+  margin: 0;
+  font-family: var(--font-hero);
+  font-size: clamp(1.35rem, 2.2vw, 1.65rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+  color: var(--navy);
+}
+
+.fo-desk__lede {
+  margin: 0;
+  max-width: 42rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--fo-desk-muted);
+}
+
+.fo-desk__lede a {
+  color: var(--cyan);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.fo-desk__meta {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--fo-desk-faint);
+}
+
+.fo-desk__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  font-size: 0.8125rem;
+}
+
+.fo-desk__links a {
+  color: var(--cyan);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.fo-desk__links a:hover {
+  color: var(--navy);
+}
+
+/* ── Toolbar / chips ───────────────────────────────────────── */
+
+.fo-desk__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.fo-desk__chip {
+  appearance: none;
+  border: 1px solid var(--fo-desk-line);
+  background: var(--white);
+  color: var(--fo-desk-muted);
+  border-radius: 0.375rem;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.8125rem;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.fo-desk__chip:hover {
+  border-color: var(--fo-desk-line-strong);
+  color: var(--navy);
+}
+
+.fo-desk__chip:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--cyan) 55%, transparent);
+  outline-offset: 2px;
+}
+
+.fo-desk__chip--active {
+  border-color: color-mix(in oklab, var(--cyan) 45%, var(--navy));
+  background: var(--fo-desk-wash);
+  color: var(--navy);
+  font-weight: 600;
+}
+
+.fo-desk__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  border-bottom: 1px solid var(--fo-desk-line);
+}
+
+.fo-desk__tab {
+  appearance: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--fo-desk-muted);
+  padding: 0.55rem 0.85rem;
+  margin-bottom: -1px;
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.fo-desk__tab:hover {
+  color: var(--navy);
+}
+
+.fo-desk__tab:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--cyan) 55%, transparent);
+  outline-offset: 2px;
+}
+
+.fo-desk__tab--active {
+  color: var(--navy);
+  border-bottom-color: var(--cyan);
+  font-weight: 600;
+}
+
+/* ── Panels (flat, not glass) ──────────────────────────────── */
+
+.fo-desk__panel {
+  border: 1px solid var(--fo-desk-line);
+  border-radius: var(--fo-desk-radius);
+  background: var(--white);
+  padding: 0.9rem 1rem;
+}
+
+.fo-desk__panel--flush {
+  padding: 0;
+  overflow: hidden;
+}
+
+.fo-desk__panel-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.35rem 0.75rem;
+  margin-bottom: 0.65rem;
+}
+
+.fo-desk__section-label {
+  margin: 0;
+  font-family: var(--font-hero);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fo-desk-faint);
+}
+
+.fo-desk__status {
+  display: inline-block;
+  border: 1px solid var(--fo-desk-line);
+  border-radius: 0.25rem;
+  padding: 0.1rem 0.4rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fo-desk-muted);
+  background: color-mix(in oklab, var(--navy) 3%, var(--white));
+}
+
+.fo-desk__status--ok {
+  border-color: color-mix(in oklab, var(--cyan) 35%, var(--fo-desk-line));
+  color: var(--navy);
+  background: var(--fo-desk-wash);
+}
+
+.fo-desk__status--warn {
+  border-color: color-mix(in oklab, var(--danger) 35%, var(--fo-desk-line));
+  color: var(--danger);
+  background: color-mix(in oklab, var(--danger) 6%, var(--white));
+}
+
+/* ── KPI strip (scannable, not rainbow cards) ──────────────── */
+
+.fo-desk__kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  border: 1px solid var(--fo-desk-line);
+  border-radius: var(--fo-desk-radius);
+  background: var(--white);
+  overflow: hidden;
+}
+
+@media (min-width: 720px) {
+  .fo-desk__kpi-strip {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.fo-desk__kpi {
+  padding: 0.85rem 1rem;
+  border-right: 1px solid var(--fo-desk-line);
+  border-bottom: 1px solid var(--fo-desk-line);
+  min-width: 0;
+}
+
+.fo-desk__kpi-strip > .fo-desk__kpi:nth-child(2n) {
+  border-right: 0;
+}
+
+@media (min-width: 720px) {
+  .fo-desk__kpi-strip > .fo-desk__kpi {
+    border-bottom: 0;
+  }
+
+  .fo-desk__kpi-strip > .fo-desk__kpi:nth-child(2n) {
+    border-right: 1px solid var(--fo-desk-line);
+  }
+
+  .fo-desk__kpi-strip > .fo-desk__kpi:nth-child(4n),
+  .fo-desk__kpi-strip > .fo-desk__kpi:last-child {
+    border-right: 0;
+  }
+}
+
+.fo-desk__kpi-label {
+  margin: 0 0 0.25rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fo-desk-faint);
+}
+
+.fo-desk__kpi-value {
+  margin: 0;
+  font-family: var(--font-hero);
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--navy);
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+.fo-desk__kpi-note {
+  margin: 0.3rem 0 0;
+  font-size: 0.75rem;
+  color: var(--fo-desk-faint);
+  line-height: 1.35;
+}
+
+/* ── Tables ────────────────────────────────────────────────── */
+
+.fo-desk__table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.fo-desk__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+
+.fo-desk__table th {
+  text-align: left;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fo-desk-faint);
+  padding: 0.55rem 0.75rem;
+  border-bottom: 1px solid var(--fo-desk-line-strong);
+  background: color-mix(in oklab, var(--navy) 2.5%, var(--white));
+  white-space: nowrap;
+}
+
+.fo-desk__table td {
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid var(--fo-desk-line);
+  color: var(--ink);
+  vertical-align: top;
+}
+
+.fo-desk__table tr:last-child td {
+  border-bottom: 0;
+}
+
+.fo-desk__table a {
+  color: var(--cyan);
+  text-decoration: underline;
+  text-underline-offset: 0.12em;
+}
+
+.fo-desk__table a:hover {
+  color: var(--navy);
+}
+
+.fo-desk__mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.75rem;
+}
+
+.fo-desk__empty {
+  margin: 0;
+  padding: 0.85rem 1rem;
+  font-size: 0.875rem;
+  color: var(--fo-desk-muted);
+}
+
+.fo-desk__stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.fo-desk__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--fo-desk-line);
+}
+
+.fo-desk__row:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.fo-desk__row:first-child {
+  padding-top: 0;
+}
+
+/* ── Checkout focus ────────────────────────────────────────── */
+
+.fo-checkout {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.fo-checkout__steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.35rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.fo-checkout__step {
+  border-top: 2px solid var(--fo-desk-line);
+  padding-top: 0.45rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--fo-desk-faint);
+}
+
+.fo-checkout__step--active {
+  border-top-color: var(--cyan);
+  color: var(--navy);
+}
+
+.fo-checkout__step--done {
+  border-top-color: color-mix(in oklab, var(--navy) 55%, var(--cyan));
+  color: var(--fo-desk-muted);
+}
+
+.fo-checkout__amount {
+  margin: 0;
+  font-family: var(--font-hero);
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--navy);
+  line-height: 1.1;
+}
+
+.fo-checkout__dl {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.fo-checkout__dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.fo-checkout__dl dt {
+  color: var(--fo-desk-muted);
+}
+
+.fo-checkout__dl dd {
+  margin: 0;
+  text-align: right;
+  color: var(--navy);
+  font-weight: 500;
+}
+
+.fo-checkout__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding-top: 0.25rem;
+  border-top: 1px solid var(--fo-desk-line);
+}
+
+.fo-checkout__cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.fo-checkout__note {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--fo-desk-faint);
+  line-height: 1.4;
+}
+
+.fo-checkout__alert {
+  border: 1px solid color-mix(in oklab, var(--danger) 28%, var(--fo-desk-line));
+  background: color-mix(in oklab, var(--danger) 5%, var(--white));
+  border-radius: var(--fo-desk-radius);
+  padding: 0.75rem 0.9rem;
+}
+
+.fo-checkout__notice {
+  border: 1px solid var(--fo-desk-line);
+  background: var(--fo-desk-wash);
+  border-radius: var(--fo-desk-radius);
+  padding: 0.75rem 0.9rem;
+  font-size: 0.875rem;
+  color: var(--navy);
+}
+
+/* ── Profile strip (corporate) ─────────────────────────────── */
+
+.fo-desk__profile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  border: 1px solid var(--fo-desk-line);
+  border-left: 3px solid var(--cyan);
+  border-radius: var(--fo-desk-radius);
+  background: var(--white);
+  padding: 0.9rem 1rem;
+}
+
+.fo-desk__profile-facts {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.8125rem;
+  color: var(--fo-desk-muted);
+}
+
+.fo-desk__profile-facts strong {
+  color: var(--navy);
+  font-weight: 600;
+}
+
+/* ── Queue links ───────────────────────────────────────────── */
+
+.fo-desk__queue-link {
+  display: block;
+  padding: 0.7rem 0.85rem;
+  border-bottom: 1px solid var(--fo-desk-line);
+  color: inherit;
+  text-decoration: none;
+}
+
+.fo-desk__queue-link:hover {
+  background: var(--fo-desk-wash);
+}
+
+.fo-desk__queue-link:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--cyan) 55%, transparent);
+  outline-offset: -2px;
+}
+
+.fo-desk__queue-link:last-child {
+  border-bottom: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fo-desk__chip,
+  .fo-desk__tab,
+  .fo-desk__queue-link {
+    transition: none;
+  }
+}
+
+/* ── SearchableSelect ──────────────────────────────────────── */
+
+.fo-select {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.fo-select__label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+.fo-select__control {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: 0.25rem;
+}
+
+.fo-select__trigger {
+  appearance: none;
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-width: 0;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--fo-desk-line, var(--line));
+  border-radius: 0.65rem;
+  background: var(--white);
+  color: var(--ink);
+  font-size: 0.8125rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.fo-select__trigger:hover:not(:disabled) {
+  border-color: var(--fo-desk-line-strong, color-mix(in oklab, var(--navy) 22%, transparent));
+}
+
+.fo-select__trigger:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--cyan, var(--sky)) 55%, transparent);
+  outline-offset: 1px;
+}
+
+.fo-select__trigger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.fo-select__trigger--open {
+  border-color: color-mix(in oklab, var(--cyan, var(--sky)) 45%, var(--navy));
+}
+
+.fo-select__value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fo-select__value--placeholder {
+  color: var(--ink-faint);
+}
+
+.fo-select__chevron {
+  flex-shrink: 0;
+  font-size: 0.65rem;
+  color: var(--ink-faint);
+}
+
+.fo-select__clear {
+  appearance: none;
+  border: 1px solid var(--fo-desk-line, var(--line));
+  border-radius: 0.5rem;
+  background: var(--white);
+  color: var(--ink-faint);
+  padding: 0 0.55rem;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.fo-select__clear:hover {
+  color: var(--navy);
+}
+
+.fo-select__clear:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--cyan, var(--sky)) 55%, transparent);
+  outline-offset: 1px;
+}
+
+.fo-select__panel {
+  position: absolute;
+  z-index: 40;
+  top: calc(100% + 0.25rem);
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  max-height: 16rem;
+  border: 1px solid var(--fo-desk-line, var(--line));
+  border-radius: 0.65rem;
+  background: var(--white);
+  box-shadow: 0 8px 24px color-mix(in oklab, var(--navy) 10%, transparent);
+  overflow: hidden;
+}
+
+.fo-select__search {
+  appearance: none;
+  border: 0;
+  border-bottom: 1px solid var(--fo-desk-line, var(--line));
+  padding: 0.55rem 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--ink);
+  background: var(--fo-desk-wash, color-mix(in oklab, var(--cyan) 5%, var(--white)));
+  outline: none;
+}
+
+.fo-select__search:focus-visible {
+  box-shadow: inset 0 0 0 2px color-mix(in oklab, var(--cyan, var(--sky)) 35%, transparent);
+}
+
+.fo-select__list {
+  list-style: none;
+  margin: 0;
+  padding: 0.25rem;
+  overflow-y: auto;
+}
+
+.fo-select__option {
+  appearance: none;
+  display: block;
+  width: 100%;
+  border: 0;
+  border-radius: 0.4rem;
+  background: transparent;
+  color: var(--ink);
+  padding: 0.45rem 0.6rem;
+  font-size: 0.8125rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.fo-select__option:hover,
+.fo-select__option--active {
+  background: var(--fo-desk-wash, color-mix(in oklab, var(--cyan) 8%, var(--white)));
+}
+
+.fo-select__option--selected {
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.fo-select__option:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.fo-select__empty {
+  padding: 0.65rem 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--ink-faint);
+}
+
+/* ── Pagination ────────────────────────────────────────────── */
+
+.fo-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem 1rem;
+  padding: 0.65rem 0.85rem;
+  border-top: 1px solid var(--fo-desk-line);
+  background: color-mix(in oklab, var(--navy) 1.5%, var(--white));
+  font-size: 0.75rem;
+  color: var(--fo-desk-muted);
+}
+
+.fo-pagination__meta {
+  min-width: 0;
+}
+
+.fo-pagination__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.fo-pagination__pages {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 0.2rem;
+}
+
+.fo-pagination__btn {
+  appearance: none;
+  border: 1px solid var(--fo-desk-line);
+  border-radius: 0.35rem;
+  background: var(--white);
+  color: var(--fo-desk-muted);
+  padding: 0.3rem 0.55rem;
+  font-size: 0.75rem;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.fo-pagination__btn:hover:not(:disabled) {
+  border-color: var(--fo-desk-line-strong);
+  color: var(--navy);
+}
+
+.fo-pagination__btn:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--cyan) 55%, transparent);
+  outline-offset: 1px;
+}
+
+.fo-pagination__btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.fo-pagination__btn--active {
+  border-color: color-mix(in oklab, var(--cyan) 45%, var(--navy));
+  background: var(--fo-desk-wash);
+  color: var(--navy);
+  font-weight: 600;
+}
+
+.fo-pagination__ellipsis {
+  padding: 0.3rem 0.2rem;
+  color: var(--fo-desk-faint);
+}
+
+.fo-pagination__size-select {
+  appearance: none;
+  border: 1px solid var(--fo-desk-line);
+  border-radius: 0.35rem;
+  background: var(--white);
+  color: var(--fo-desk-muted);
+  padding: 0.3rem 0.5rem;
+  font-size: 0.75rem;
+}
+
+.fo-pagination__size-select:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--cyan) 55%, transparent);
+  outline-offset: 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fo-select__trigger,
+  .fo-select__option,
+  .fo-pagination__btn {
+    transition: none;
+  }
+}

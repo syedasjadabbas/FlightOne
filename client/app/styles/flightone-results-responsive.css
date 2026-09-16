@@ -1,0 +1,608 @@
+/**
+ * Results page — fixed-left + scrollable-right workspace + zoom-safe fluid layout.
+ * Browser zoom changes effective CSS viewport; use clamp/min/container queries.
+ * No fixed pixel heights for major sections.
+ */
+
+:root {
+  --fo-results-max: min(var(--fo-page-max, 87.5rem), 100%);
+  --fo-results-gutter: clamp(1rem, 2.5vw, 3rem);
+  --fo-results-sidebar: clamp(18.75rem, 24vw, 21.25rem); /* 300–340px */
+}
+
+/* ── Shell containment (no page-level scroll) ───────────────── */
+
+.ask-ai-shell--results,
+.results-page-host,
+.results-page {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.results-page {
+  margin-inline: 0;
+}
+
+/* ── Fixed left + scrollable right ──────────────────────────── */
+
+.results-shell {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--fo-atmosphere);
+}
+
+.results-sidebar {
+  flex: 0 0 auto;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-bottom: 1px solid color-mix(in oklab, var(--line) 70%, transparent);
+  background: color-mix(in oklab, var(--horizon-cool) 35%, white);
+  scrollbar-width: thin;
+}
+
+.results-sidebar__inner {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+
+.results-sidebar__filters {
+  border-top: 1px solid color-mix(in oklab, var(--line) 65%, transparent);
+  background: color-mix(in oklab, white 92%, var(--horizon-cool));
+}
+
+.results-sidebar__filters--desktop {
+  display: none;
+}
+
+.results-summary--sidebar {
+  border-bottom: none;
+  padding: 0.85rem clamp(0.85rem, 2vw, 1.15rem) 1rem;
+}
+
+.results-summary--sidebar .results-summary__nav {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.45rem;
+}
+
+.results-summary--sidebar .results-refine-btn {
+  align-self: flex-start;
+}
+
+.results-content {
+  flex: 1 1 0%;
+  min-width: 0;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--fo-atmosphere);
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklab, var(--sky) 45%, var(--ink-soft))
+    color-mix(in oklab, var(--paper-elevated) 88%, transparent);
+}
+
+.results-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.results-content::-webkit-scrollbar-thumb {
+  background: color-mix(in oklab, var(--sky) 40%, var(--ink-soft));
+  border-radius: 999px;
+}
+
+.results-content__sticky {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  background: var(--white);
+  box-shadow: 0 4px 12px -8px color-mix(in oklab, var(--navy) 10%, transparent);
+  border-bottom: 1px solid color-mix(in oklab, var(--cyan) 14%, var(--line));
+}
+
+.results-content__sticky .results-filter-bar {
+  border-bottom: none;
+}
+
+.results-content__sticky .results-toolbar {
+  border-top: 1px solid color-mix(in oklab, var(--line) 70%, transparent);
+}
+
+/* Mobile / tablet: stacked — top summary, bottom scrolls */
+@media (max-width: 1023px) {
+  .results-sidebar {
+    max-height: min(40vh, 20rem);
+  }
+
+  .results-sidebar__filters--desktop {
+    display: none !important;
+  }
+}
+
+/* Desktop: fixed left column + scrollable right */
+@media (min-width: 1024px) {
+  .results-shell {
+    display: grid;
+    grid-template-columns: var(--fo-results-sidebar) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+    align-items: stretch;
+  }
+
+  .results-sidebar {
+    grid-column: 1;
+    grid-row: 1;
+    height: 100%;
+    max-height: none;
+    border-bottom: none;
+    border-right: 1px solid color-mix(in oklab, var(--navy) 14%, var(--line));
+  }
+
+  .results-sidebar__filters--desktop {
+    display: block;
+  }
+
+  .results-content {
+    grid-column: 2;
+    grid-row: 1;
+    height: 100%;
+  }
+
+  .results-summary--sidebar .results-summary__nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+@media (min-width: 1280px) {
+  :root {
+    --fo-results-sidebar: clamp(20rem, 22vw, 22.5rem); /* ~320–360px */
+  }
+}
+
+.results-workspace,
+.results-list,
+.results-sticky-controls,
+.results-summary,
+.results-market,
+.results-flight-list {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* ── Shared fluid gutter (overrides large 4rem gutters at zoom) ─ */
+
+.results-summary,
+.results-filter-bar,
+.results-sticky-controls .results-filter-bar,
+.results-toolbar,
+.flight-result-row,
+.results-flight-continue,
+.results-search-status,
+.results-market {
+  padding-inline: var(--fo-results-gutter);
+}
+
+.results-page .results-summary {
+  padding-inline: var(--fo-results-gutter);
+}
+
+/* ── Header — wrap, no squeeze ─────────────────────────────── */
+
+.results-summary__nav {
+  gap: clamp(0.5rem, 2vw, 1rem);
+}
+
+.results-summary__route {
+  min-width: 0;
+}
+
+.results-route-editorial,
+.results-route-headline {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.results-eyebrow {
+  position: relative;
+  max-width: 100%;
+  padding-right: 0;
+}
+
+.results-eyebrow__route {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  width: min(5rem, 28vw);
+  max-width: 5rem;
+  opacity: 0.22;
+  pointer-events: none;
+}
+
+.results-summary-chips,
+.results-summary__tools,
+.results-summary__chips,
+.results-origin-tabs {
+  max-width: 100%;
+}
+
+.results-route-path {
+  max-width: min(20rem, 100%);
+}
+
+/* ── Filter bar — scroll inside container only ─────────────── */
+
+.results-filter-bar {
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.results-filter-bar__scroll {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.4rem;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.results-filter-btn {
+  flex-shrink: 0;
+  max-width: min(100%, 18rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Toolbar — multi-row wrap ──────────────────────────────── */
+
+.results-sticky-controls {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.results-toolbar {
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: clamp(0.5rem, 2vw, 1rem);
+  min-width: 0;
+}
+
+.results-toolbar__left {
+  flex: 1 1 14rem;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: clamp(0.35rem, 1.5vw, 0.85rem);
+}
+
+.results-count {
+  flex: 1 1 auto;
+  min-width: min(100%, 10rem);
+  overflow-wrap: anywhere;
+}
+
+.results-sort-segmented {
+  flex: 0 1 auto;
+  max-width: 100%;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  row-gap: 0.25rem;
+}
+
+.results-sort-segmented__btn {
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: center;
+  white-space: normal;
+  line-height: 1.25;
+}
+
+/* ── Workspace grid — shrink sidebar before overflow ─────────── */
+
+@media (max-width: 1024px) {
+  .results-workspace--with-filters {
+    grid-template-columns: minmax(0, 13.75rem) minmax(0, 1fr);
+  }
+}
+
+/* ── Flight rows — container queries (zoom-aware) ───────────── */
+
+.flight-result-row {
+  container-type: inline-size;
+  container-name: fo-flight-row;
+  align-items: start;
+  gap: clamp(0.5rem, 2vw, 1rem);
+}
+
+.flight-result-row__main,
+.flight-result-row__expand-hit,
+.flight-result-row__scan {
+  min-width: 0;
+}
+
+.flight-result-row__scan {
+  display: grid;
+  gap: clamp(0.25rem, 1.5vw, 0.85rem);
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-areas:
+    "airline airline airline"
+    "dep mid arr"
+    "meta meta meta";
+  align-items: center;
+}
+
+.flight-result-row__col--airline {
+  grid-area: airline;
+  min-width: 0;
+}
+
+.flight-result-row__col--dep {
+  grid-area: dep;
+  min-width: 0;
+}
+
+.flight-result-row__col--arr {
+  grid-area: arr;
+  min-width: 0;
+  text-align: right;
+}
+
+.flight-result-row__col--mid {
+  grid-area: mid;
+  min-width: 0;
+}
+
+.flight-result-row__col--meta {
+  grid-area: meta;
+  min-width: 0;
+}
+
+.flight-result-row__dur,
+.flight-result-row__stops {
+  white-space: normal;
+  text-align: center;
+  line-height: 1.3;
+}
+
+.flight-result-row__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.15rem 0.35rem;
+  overflow-wrap: anywhere;
+}
+
+.flight-result-row__airline {
+  overflow-wrap: anywhere;
+}
+
+.flight-result-row__aside {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: clamp(0.35rem, 2vw, 0.75rem);
+  min-width: 0;
+  max-width: 100%;
+}
+
+.flight-result-row__price {
+  flex: 1 1 auto;
+  min-width: min(100%, 6rem);
+  text-align: right;
+}
+
+.flight-result-row__cta {
+  flex: 0 0 auto;
+  max-width: 100%;
+}
+
+.flight-result-row__expand-panel {
+  grid-column: 1 / -1;
+  width: 100%;
+  min-width: 0;
+}
+
+/* Wide row — desktop scan + side-by-side price */
+@container fo-flight-row (min-width: 44rem) {
+  .flight-result-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .flight-result-row__scan {
+    grid-template-columns:
+      minmax(0, 1.15fr)
+      minmax(0, auto)
+      minmax(2.75rem, 1fr)
+      minmax(0, auto)
+      minmax(0, 1fr);
+    grid-template-areas: "airline dep mid arr meta";
+  }
+
+  .flight-result-row__col--dep,
+  .flight-result-row__col--arr {
+    display: flex;
+    flex-direction: column;
+    gap: 0.08rem;
+    text-align: left;
+  }
+
+  .flight-result-row__col--arr {
+    text-align: left;
+  }
+
+  .flight-result-row__col--meta .flight-result-row__meta {
+    justify-content: flex-end;
+    text-align: right;
+  }
+
+  .flight-result-row__aside {
+    flex-direction: column;
+    align-items: flex-end;
+    flex-wrap: nowrap;
+    min-width: min(100%, 9.5rem);
+  }
+}
+
+/* Narrow row — stack price row under scan (zoom / tablet) */
+@container fo-flight-row (max-width: 43.99rem) {
+  .flight-result-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .flight-result-row__aside {
+    width: 100%;
+    justify-content: space-between;
+    padding-top: 0.65rem;
+    border-top: 1px solid color-mix(in oklab, var(--line) 65%, transparent);
+  }
+
+  .flight-result-row__price {
+    text-align: left;
+  }
+}
+
+/* ── Marketplace — fluid cards, no page overflow ───────────── */
+
+.results-market {
+  width: 100%;
+  max-width: 100%;
+  margin-inline: 0;
+  overflow-x: clip;
+}
+
+.results-market__strip-head {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.results-market__strip-title-row {
+  gap: clamp(0.5rem, 2vw, 1.25rem);
+}
+
+.results-market__carousel-wrap {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.results-market__carousel {
+  max-width: 100%;
+}
+
+.results-market__tile--stay {
+  width: clamp(11.5rem, 28vw, 15.5rem);
+}
+
+.results-market__tile--drive {
+  width: clamp(9.5rem, 22vw, 12.5rem);
+}
+
+.results-market__tile--explore {
+  width: clamp(10rem, 24vw, 13.5rem);
+}
+
+.results-market__footer {
+  width: 100%;
+  max-width: 100%;
+  margin-inline: 0;
+  box-sizing: border-box;
+}
+
+.results-content .results-market__footer {
+  margin-inline: 0;
+}
+
+.results-content .results-list {
+  overflow: visible;
+  padding-bottom: 2rem;
+}
+
+.results-sidebar .results-filter-sidebar {
+  padding: 0.75rem 0.85rem 1.25rem;
+}
+
+.results-sidebar .results-tool-panel {
+  background: color-mix(in oklab, white 88%, var(--horizon-cool));
+}
+
+.results-sidebar .fo-results-header-scene {
+  opacity: 0.4;
+  width: min(100%, 9rem);
+}
+
+.results-market__footer-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 9.5rem), 1fr));
+  gap: clamp(1rem, 3vw, 2rem);
+}
+
+.results-market__footer-legal {
+  flex-wrap: wrap;
+  gap: clamp(0.5rem, 2vw, 1.25rem);
+}
+
+.results-market__footer-legal-links {
+  flex-wrap: wrap;
+}
+
+.results-market__related-row {
+  flex-wrap: wrap;
+}
+
+/* ── Viewport helpers (mobile + zoomed-narrow desktop) ─────── */
+
+@media (max-width: 640px) {
+  :root {
+    --fo-results-gutter: clamp(0.875rem, 4vw, 1.25rem);
+  }
+
+  .results-sort-segmented {
+    width: 100%;
+  }
+
+  .results-market__strip-action {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .results-market__carousel-nav--prev {
+    left: 0;
+  }
+
+  .results-market__carousel-nav--next {
+    right: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .results-eyebrow__route {
+    display: none;
+  }
+
+  .results-refine-btn,
+  .results-back-link {
+    max-width: 100%;
+  }
+}

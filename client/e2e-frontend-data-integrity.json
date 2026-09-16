@@ -1,0 +1,431 @@
+{
+  "route": "LHE→DXB 2026-09-10",
+  "timestamp": "2026-09-01T10:12:21.507Z",
+  "mismatches": [],
+  "samples": [
+    {
+      "travelport": {
+        "offerId": "TP-o1_j1_p0_s3-s4",
+        "origin": "LHE",
+        "destination": "DXB",
+        "departureDate": "2026-09-10",
+        "arrivalDate": "2026-09-11",
+        "departTimeLocal": "19:45",
+        "arriveTimeLocal": "03:10",
+        "carrier": "EY",
+        "flightNumber": "EY289",
+        "durationMinutes": 445,
+        "stops": 1,
+        "cabin": "economy",
+        "baggageKg": null,
+        "amountMinor": 10014000,
+        "currency": "PKR",
+        "supplierCode": "GALILEO",
+        "segmentCount": 2,
+        "segments": [
+          {
+            "origin": "LHE",
+            "destination": "AUH",
+            "departureDate": "2026-09-10",
+            "arrivalDate": "2026-09-10",
+            "departTime": "19:45",
+            "arriveTime": "22:05",
+            "flightNumber": "EY289",
+            "carrier": "EY",
+            "durationMinutes": 200,
+            "layoverMinutesAfter": 185
+          },
+          {
+            "origin": "AUH",
+            "destination": "XNB",
+            "departureDate": "2026-09-11",
+            "arrivalDate": "2026-09-11",
+            "departTime": "01:10",
+            "arriveTime": "03:10",
+            "flightNumber": "EY5412",
+            "carrier": "EY",
+            "durationMinutes": 120,
+            "layoverMinutesAfter": null
+          }
+        ]
+      },
+      "api": {
+        "id": "TP-o1_j1_p0_s3-s4",
+        "originCode": "LHE",
+        "destinationCode": "DXB",
+        "departureDate": "2026-09-10",
+        "arrivalDate": "2026-09-11",
+        "departTimeLocal": "19:45",
+        "arriveTimeLocal": "03:10",
+        "airline": "Etihad",
+        "airlineCode": "EY",
+        "flightNumber": "EY289",
+        "durationMinutes": 505,
+        "stops": 1,
+        "cabin": "economy",
+        "baggageKg": null,
+        "priceMinor": 10915260,
+        "currency": "PKR",
+        "price": "PKR 109,153",
+        "badges": [
+          "Economy Basic",
+          "Non-refundable",
+          "Live fare"
+        ],
+        "segmentCount": 2,
+        "segments": [
+          {
+            "origin": "LHE",
+            "destination": "AUH",
+            "departureDate": "2026-09-10",
+            "arrivalDate": "2026-09-10",
+            "departTime": "19:45",
+            "arriveTime": "22:05",
+            "flightNumber": "EY289",
+            "carrier": "EY",
+            "durationMinutes": 200,
+            "layoverMinutesAfter": 185
+          },
+          {
+            "origin": "AUH",
+            "destination": "XNB",
+            "departureDate": "2026-09-11",
+            "arrivalDate": "2026-09-11",
+            "departTime": "01:10",
+            "arriveTime": "03:10",
+            "flightNumber": "EY5412",
+            "carrier": "EY",
+            "durationMinutes": 120,
+            "layoverMinutesAfter": null
+          }
+        ]
+      },
+      "compactRow": {
+        "airline": "Etihad",
+        "flightNumber": "EY289",
+        "originCode": "LHE",
+        "departTimeLocal": "19:45",
+        "durationMinutes": 505,
+        "stops": 1,
+        "destinationCode": "DXB",
+        "arriveTimeLocal": "03:10",
+        "cabin": "economy",
+        "baggage": "Baggage information unavailable",
+        "priceMinor": 10915260,
+        "price": "PKR 109,153"
+      },
+      "modal": {
+        "airline": "Etihad",
+        "airlineCode": "EY",
+        "flightNumber": "EY289",
+        "originCode": "LHE",
+        "destinationCode": "DXB",
+        "departTimeLocal": "19:45",
+        "arriveTimeLocal": "03:10",
+        "durationMinutes": 505,
+        "stops": 1,
+        "cabin": "economy",
+        "baggageKg": null,
+        "priceMinor": 10915260,
+        "price": "PKR 109,153",
+        "segmentCount": 2
+      },
+      "rowModalMatch": true
+    },
+    {
+      "travelport": {
+        "offerId": "TP-o1_j1_p1_s7-s8",
+        "origin": "LHE",
+        "destination": "DXB",
+        "departureDate": "2026-09-10",
+        "arrivalDate": "2026-09-11",
+        "departTimeLocal": "19:45",
+        "arriveTimeLocal": "04:45",
+        "carrier": "EY",
+        "flightNumber": "EY289",
+        "durationMinutes": 540,
+        "stops": 1,
+        "cabin": "economy",
+        "baggageKg": null,
+        "amountMinor": 10014000,
+        "currency": "PKR",
+        "supplierCode": "GALILEO",
+        "segmentCount": 2,
+        "segments": [
+          {
+            "origin": "LHE",
+            "destination": "AUH",
+            "departureDate": "2026-09-10",
+            "arrivalDate": "2026-09-10",
+            "departTime": "19:45",
+            "arriveTime": "22:05",
+            "flightNumber": "EY289",
+            "carrier": "EY",
+            "durationMinutes": 200,
+            "layoverMinutesAfter": 280
+          },
+          {
+            "origin": "AUH",
+            "destination": "XNB",
+            "departureDate": "2026-09-11",
+            "arrivalDate": "2026-09-11",
+            "departTime": "02:45",
+            "arriveTime": "04:45",
+            "flightNumber": "EY5414",
+            "carrier": "EY",
+            "durationMinutes": 120,
+            "layoverMinutesAfter": null
+          }
+        ]
+      },
+      "api": {
+        "id": "TP-o1_j1_p1_s7-s8",
+        "originCode": "LHE",
+        "destinationCode": "DXB",
+        "departureDate": "2026-09-10",
+        "arrivalDate": "2026-09-11",
+        "departTimeLocal": "19:45",
+        "arriveTimeLocal": "04:45",
+        "airline": "Etihad",
+        "airlineCode": "EY",
+        "flightNumber": "EY289",
+        "durationMinutes": 600,
+        "stops": 1,
+        "cabin": "economy",
+        "baggageKg": null,
+        "priceMinor": 10915260,
+        "currency": "PKR",
+        "price": "PKR 109,153",
+        "badges": [
+          "Economy Basic",
+          "Non-refundable",
+          "Live fare"
+        ],
+        "segmentCount": 2,
+        "segments": [
+          {
+            "origin": "LHE",
+            "destination": "AUH",
+            "departureDate": "2026-09-10",
+            "arrivalDate": "2026-09-10",
+            "departTime": "19:45",
+            "arriveTime": "22:05",
+            "flightNumber": "EY289",
+            "carrier": "EY",
+            "durationMinutes": 200,
+            "layoverMinutesAfter": 280
+          },
+          {
+            "origin": "AUH",
+            "destination": "XNB",
+            "departureDate": "2026-09-11",
+            "arrivalDate": "2026-09-11",
+            "departTime": "02:45",
+            "arriveTime": "04:45",
+            "flightNumber": "EY5414",
+            "carrier": "EY",
+            "durationMinutes": 120,
+            "layoverMinutesAfter": null
+          }
+        ]
+      },
+      "compactRow": {
+        "airline": "Etihad",
+        "flightNumber": "EY289",
+        "originCode": "LHE",
+        "departTimeLocal": "19:45",
+        "durationMinutes": 600,
+        "stops": 1,
+        "destinationCode": "DXB",
+        "arriveTimeLocal": "04:45",
+        "cabin": "economy",
+        "baggage": "Baggage information unavailable",
+        "priceMinor": 10915260,
+        "price": "PKR 109,153"
+      },
+      "modal": {
+        "airline": "Etihad",
+        "airlineCode": "EY",
+        "flightNumber": "EY289",
+        "originCode": "LHE",
+        "destinationCode": "DXB",
+        "departTimeLocal": "19:45",
+        "arriveTimeLocal": "04:45",
+        "durationMinutes": 600,
+        "stops": 1,
+        "cabin": "economy",
+        "baggageKg": null,
+        "priceMinor": 10915260,
+        "price": "PKR 109,153",
+        "segmentCount": 2
+      },
+      "rowModalMatch": true
+    },
+    {
+      "travelport": {
+        "offerId": "TP-o1_j2_p3_s3-s4",
+        "origin": "LHE",
+        "destination": "DXB",
+        "departureDate": "2026-09-10",
+        "arrivalDate": "2026-09-11",
+        "departTimeLocal": "19:45",
+        "arriveTimeLocal": "03:10",
+        "carrier": "EY",
+        "flightNumber": "EY289",
+        "durationMinutes": 445,
+        "stops": 1,
+        "cabin": "economy",
+        "baggageKg": 25,
+        "amountMinor": 10376000,
+        "currency": "PKR",
+        "supplierCode": "GALILEO",
+        "segmentCount": 2,
+        "segments": [
+          {
+            "origin": "LHE",
+            "destination": "AUH",
+            "departureDate": "2026-09-10",
+            "arrivalDate": "2026-09-10",
+            "departTime": "19:45",
+            "arriveTime": "22:05",
+            "flightNumber": "EY289",
+            "carrier": "EY",
+            "durationMinutes": 200,
+            "layoverMinutesAfter": 185
+          },
+          {
+            "origin": "AUH",
+            "destination": "XNB",
+            "departureDate": "2026-09-11",
+            "arrivalDate": "2026-09-11",
+            "departTime": "01:10",
+            "arriveTime": "03:10",
+            "flightNumber": "EY5412",
+            "carrier": "EY",
+            "durationMinutes": 120,
+            "layoverMinutesAfter": null
+          }
+        ]
+      },
+      "api": {
+        "id": "TP-o1_j2_p3_s3-s4",
+        "originCode": "LHE",
+        "destinationCode": "DXB",
+        "departureDate": "2026-09-10",
+        "arrivalDate": "2026-09-11",
+        "departTimeLocal": "19:45",
+        "arriveTimeLocal": "03:10",
+        "airline": "Etihad",
+        "airlineCode": "EY",
+        "flightNumber": "EY289",
+        "durationMinutes": 505,
+        "stops": 1,
+        "cabin": "economy",
+        "baggageKg": 25,
+        "priceMinor": 11309840,
+        "currency": "PKR",
+        "price": "PKR 113,098",
+        "badges": [
+          "Economy Value",
+          "Non-refundable",
+          "Live fare",
+          "25kg bag"
+        ],
+        "segmentCount": 2,
+        "segments": [
+          {
+            "origin": "LHE",
+            "destination": "AUH",
+            "departureDate": "2026-09-10",
+            "arrivalDate": "2026-09-10",
+            "departTime": "19:45",
+            "arriveTime": "22:05",
+            "flightNumber": "EY289",
+            "carrier": "EY",
+            "durationMinutes": 200,
+            "layoverMinutesAfter": 185
+          },
+          {
+            "origin": "AUH",
+            "destination": "XNB",
+            "departureDate": "2026-09-11",
+            "arrivalDate": "2026-09-11",
+            "departTime": "01:10",
+            "arriveTime": "03:10",
+            "flightNumber": "EY5412",
+            "carrier": "EY",
+            "durationMinutes": 120,
+            "layoverMinutesAfter": null
+          }
+        ]
+      },
+      "compactRow": {
+        "airline": "Etihad",
+        "flightNumber": "EY289",
+        "originCode": "LHE",
+        "departTimeLocal": "19:45",
+        "durationMinutes": 505,
+        "stops": 1,
+        "destinationCode": "DXB",
+        "arriveTimeLocal": "03:10",
+        "cabin": "economy",
+        "baggage": "25kg bag",
+        "priceMinor": 11309840,
+        "price": "PKR 113,098"
+      },
+      "modal": {
+        "airline": "Etihad",
+        "airlineCode": "EY",
+        "flightNumber": "EY289",
+        "originCode": "LHE",
+        "destinationCode": "DXB",
+        "departTimeLocal": "19:45",
+        "arriveTimeLocal": "03:10",
+        "durationMinutes": 505,
+        "stops": 1,
+        "cabin": "economy",
+        "baggageKg": 25,
+        "priceMinor": 11309840,
+        "price": "PKR 113,098",
+        "segmentCount": 2
+      },
+      "rowModalMatch": true
+    }
+  ],
+  "stateTransitions": {
+    "searchA": {
+      "count": 15,
+      "destinations": [
+        "DXB"
+      ]
+    },
+    "searchB": {
+      "count": 6,
+      "destinations": [
+        "IST"
+      ],
+      "dxbLeaked": false
+    },
+    "searchC": {
+      "count": 0,
+      "destinations": [],
+      "allDxb": false,
+      "idsMatchSearchA": false
+    }
+  },
+  "mockSeedCheck": {
+    "seedIdsInResults": 0,
+    "stubIdsInResults": 0,
+    "allHaveLiveBadge": true
+  },
+  "sortingCheck": {
+    "clientSortMonotonic": true,
+    "firstPrice": 10915260,
+    "lastPrice": 25854800,
+    "uniqueIds": 15,
+    "totalIds": 15
+  },
+  "chatPageStatus": 200,
+  "pricingNote": "Travelport amountMinor = net fare (1:1 in supplierSearch). Display priceMinor = net × 1.09 (DEFAULT_PRICING flight markup). Row and modal share the same OfferCard object — identical by construction.",
+  "status": "PASS"
+}

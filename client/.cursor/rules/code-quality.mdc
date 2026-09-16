@@ -1,0 +1,58 @@
+---
+description: Functions, naming, structure, comments, and the definition of "done" — applies to all code, always.
+alwaysApply: true
+---
+
+# Code Quality Standard
+
+**Applies to:** all code, all languages.
+
+## The bar
+
+Code is correct, clear, consistent, and covered. In that order.
+
+## Functions
+
+- **One responsibility, one level of abstraction.** If you need a comment to explain *what* a
+  block does, extract it into a well-named function.
+- **Short.** If a function doesn't fit on a screen, it's probably doing too much.
+- **Few parameters.** More than 3–4 → pass an options object. Booleans as params are a smell
+  (`create(true)` — true what?); prefer named options or an enum.
+- **Return early.** Guard clauses over nested `if`. Keep the happy path at the left margin.
+- **No side effects hidden behind innocent names.** `getUser` must not write to the DB.
+
+## Naming
+
+- Names reveal intent and are pronounceable, searchable, and unambiguous.
+- Length scales with scope: loop index `i` is fine; a module-level export is not `d`.
+- Consistent vocabulary: pick `fetch`/`get`/`load` and mean one thing by each.
+- No encodings (`strName`, `iCount`), no noise words (`data`, `info`, `manager`, `helper`).
+
+## Structure
+
+- **Group by feature/domain** as projects grow; colocate what changes together.
+- **Dependencies point inward:** UI → application → domain; domain depends on nothing.
+- **No circular dependencies.** They signal a missing abstraction or a wrong boundary.
+- **Keep modules cohesive and loosely coupled.** High fan-in for stable utilities; low fan-out.
+
+## Comments
+
+- Explain **why**, invariants, tradeoffs, and links to context. Never restate the code.
+- Delete commented-out code. Git remembers.
+- `TODO`/`FIXME` include an owner/issue and a reason, or they don't ship.
+
+## Hygiene
+
+- No dead code, unused exports, or unreachable branches.
+- No magic numbers/strings — name them.
+- Consistent formatting via an automated formatter (Prettier/Black/gofmt) — never argue about it.
+- Lint clean. Warnings are errors that haven't been prioritized yet; keep the count at zero.
+
+## Definition of "done"
+
+- [ ] Solves the actual problem, including edge and failure cases.
+- [ ] Reads clearly to someone who didn't write it.
+- [ ] Matches existing patterns and conventions.
+- [ ] Tested; the suite is green.
+- [ ] No new lint/type warnings; formatter applied.
+- [ ] No secrets, no debug logs, no leftover scaffolding.

@@ -1,0 +1,190 @@
+// Module 06 — Corporate Travel (Phase 1): companies, memberships, travel
+// policies, and the approval workflow that gates corporate spend before a
+// booking reaches RESERVED (dev guide §7: "corporate spend is policy- and
+// budget-gated before commitment, not after"). Owned by modules/corporate/.
+// See docs/modules/06-corporate-travel.md.
+//
+// This file lives alongside prisma/schema.prisma (multi-file schema, GA
+// since Prisma 6.7 — no preview flag needed). The `generator`/`datasource`
+// blocks stay in schema.prisma; relations across files just work.
+//
+// Deliberately has NO foreign keys into Booking/User — same pattern already
+// established by prisma/pricing.prisma. `CompanyMembership.userId` and
+// `ApprovalRequest.{bookingId,requesterUserId,approverUserId}` are plain
+// scalar ids; modules/corporate/corporate.service.js looks up Booking/User
+// rows by id via Prisma at the application layer when it needs them (e.g.
+// to read a booking's amountMinor/currency/userId), rather than this
+// schema growing a relation into another module's table.
+// `UserRole.companyId` (prisma/foundation.prisma) references this module's
+// Company id as an intentional plain scalar for the same reason — no Prisma
+// FK across module schema files.
+
+enum CompanyMembershipRole {
+  MEMBER
+  APPROVER
+  ADMIN
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CHANGES_REQUESTED
+}
+
+/// A corporate tenant: its own credit terms, billing cycle, members, and
+/// travel policies. `creditUsedMinor` is incremented by
+/// `corporate.service.js#consumeCredit` on a successful RESERVE transition
+/// and decremented by `releaseCreditForBooking` on CANCELLED / REFUNDED
+/// (idempotent per booking via Booking.metadata.corporateCredit).
+model Company {
+  id               String   @id @default(cuid())
+  name             String   @unique
+  creditLimitMinor Int // integer minor units — see lib/money.js
+  creditUsedMinor  Int      @default(0)
+  currency         String   @default("USD") // ISO 4217
+  isActive         Boolean  @default(true)
+  billingCycle     String? // e.g. "MONTHLY" — free text in Phase 1
+  /// Optional Module 05 company markup override (bps). Null = no corporate
+  /// override — MarkupRule / product defaults apply. Not a negotiated-rate
+  /// table; just the single company-level hook Module 05 already supports.
+  markupBps        Int?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  memberships      CompanyMembership[]
+  policies         TravelPolicy[]
+  approvalRequests ApprovalRequest[]
+  projectCodes     ProjectCode[]
+  invoices         CorporateInvoice[]
+  invoiceSequence  CorporateInvoiceSequence?
+}
+
+/// Per-company invoice number sequence (concurrency-safe increment).
+model CorporateInvoiceSequence {
+  companyId String  @id
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  nextValue Int     @default(1)
+}
+
+enum CorporateInvoiceStatus {
+  ISSUED
+  PAID
+  VOID
+}
+
+/// Customer-facing corporate invoice for a committed booking.
+/// Amounts are snapshotted from Booking at issue time (Module 05 authority).
+/// No Booking FK — same scalar pattern as ApprovalRequest.bookingId.
+model CorporateInvoice {
+  id              String                 @id @default(cuid())
+  companyId       String
+  company         Company                @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  /// Globally unique human-readable number, e.g. INV-A1B2C3-000042
+  invoiceNumber   String                 @unique
+  bookingId       String
+  status          CorporateInvoiceStatus @default(ISSUED)
+  currency        String
+  netMinor        Int
+  amountMinor     Int
+  marginMinor     Int
+  /// Informational copy of Company.billingCycle at issue (not a billing engine).
+  billingCycle    String?
+  companyName     String
+  projectCode     String?
+  projectCodeName String?
+  product         String?
+  externalRef     String?
+  travellerName   String?
+  issuedAt        DateTime               @default(now())
+  issuedByUserId  String?
+  paidAt          DateTime?
+  voidedAt        DateTime?
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
+
+  @@unique([companyId, bookingId])
+  @@index([companyId])
+  @@index([bookingId])
+  @@index([status])
+  @@index([issuedAt])
+}
+
+/// Company-scoped project code for corporate booking attribution (PRD Module 6).
+/// Unique per company — not globally unique. Soft-deactivated via `isActive`.
+model ProjectCode {
+  id        String   @id @default(cuid())
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  /// Stable identifier within the company (e.g. "PROJ-1042").
+  code      String
+  /// Human-readable label.
+  name      String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([companyId, code])
+  @@index([companyId])
+  @@index([companyId, isActive])
+}
+
+/// A user's membership in a company. A user may belong to multiple
+/// companies (module doc: "a traveller can belong to multiple companies").
+model CompanyMembership {
+  id         String                @id @default(cuid())
+  companyId  String
+  company    Company               @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  userId     String // scalar — see file header; no relation into User
+  role       CompanyMembershipRole @default(MEMBER)
+  department String?
+  costCentre String?
+  createdAt  DateTime              @default(now())
+
+  @@unique([companyId, userId])
+  @@index([companyId])
+  @@index([userId])
+}
+
+/// Travel policy per company (Phase 1: one flat policy shape, no
+/// department/role scoping yet — that is a Phase-2 extension per the
+/// module doc's checklist). `corporate.service.js` treats the
+/// most-recently-created policy for a company as the effective one.
+model TravelPolicy {
+  id                 String   @id @default(cuid())
+  companyId          String
+  company            Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  name               String
+  maxCabin           String? // e.g. "ECONOMY" | "PREMIUM_ECONOMY" | "BUSINESS" | "FIRST"
+  maxAmountMinor     Int? // integer minor units — booking above this needs approval
+  preferredAirlines  Json? // e.g. ["PK", "EK"] — IATA airline codes
+  advanceBookingDays Int?
+  createdAt          DateTime @default(now())
+
+  @@index([companyId])
+}
+
+/// Approval workflow gate. Created either auto-APPROVED (booking under the
+/// policy threshold) or PENDING (over threshold / cabin above policy max) by
+/// `corporate.service.js#createApprovalRequest`, and later decided by an
+/// approver via `POST /approvals/:id/decide`. `bookingId` is a plain scalar
+/// (see file header).
+model ApprovalRequest {
+  id              String         @id @default(cuid())
+  companyId       String
+  company         Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  bookingId       String
+  requesterUserId String
+  status          ApprovalStatus @default(PENDING)
+  policyViolation Json?
+  amountMinor     Int
+  currency        String
+  approverUserId  String?
+  decisionNote    String?
+  createdAt       DateTime       @default(now())
+  decidedAt       DateTime?
+
+  @@index([status])
+  @@index([companyId])
+  @@index([bookingId])
+}

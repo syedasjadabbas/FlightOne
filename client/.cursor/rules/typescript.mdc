@@ -1,0 +1,66 @@
+---
+description: Strict compiler config, no `any`, domain modeling, exhaustive unions — for TypeScript/JavaScript code.
+globs: ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx", "**/*.mjs", "**/*.cjs"]
+alwaysApply: false
+---
+
+# TypeScript Standard
+
+**Applies to:** all TypeScript and JavaScript code.
+
+## Compiler configuration (baseline)
+
+```jsonc
+{
+  "compilerOptions": {
+    "strict": true,                          // the whole strict family, on
+    "noUncheckedIndexedAccess": true,        // arr[i] is T | undefined
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "exactOptionalPropertyTypes": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "moduleResolution": "bundler",           // or "nodenext" for Node libraries
+    "target": "ES2022",
+    "skipLibCheck": true
+  }
+}
+```
+
+## Rules
+
+- **`strict: true` is mandatory.** No project turns it off. No `// @ts-nocheck`.
+- **No `any`.** Use `unknown` and narrow. `any` disables the compiler — the one tool you're
+  paying for. `// @ts-expect-error` (with a reason) over `// @ts-ignore`, and only at true
+  library-gap boundaries.
+- **Prefer `type` for unions/functions/utilities, `interface` for extensible object shapes.**
+  Be consistent within a file.
+- **Model the domain with types.** Make illegal states unrepresentable: discriminated unions
+  over boolean flags, branded types for IDs, `Result<T, E>` over throwing for expected failures.
+- **Parse, don't validate.** Turn `unknown` external data into typed data at the boundary with
+  a schema (Zod). Inside the app, trust the types.
+- **No non-null `!`** except where you can prove nullability is impossible and a comment says why.
+- **Exhaustive `switch`** on unions with a `never` default:
+  ```ts
+  function assertNever(x: never): never { throw new Error(`Unhandled: ${JSON.stringify(x)}`); }
+  ```
+- **Readonly by default.** `readonly` fields, `ReadonlyArray`, `as const` for literals.
+- **Narrow return types.** Return the most specific type you can; accept the most general
+  you can (`Iterable` over `Array` when you only iterate).
+- **Enums:** prefer `as const` object maps or string literal unions over `enum` (fewer surprises).
+- **No default exports** in libraries — named exports refactor and autocomplete better.
+
+## Functional preferences
+
+- Pure functions where practical; isolate side effects at the edges.
+- Immutable data flow; derive rather than mutate.
+- Small, composable utilities over deep class hierarchies.
+- `map`/`filter`/`reduce` for transformation, but a plain loop when it's clearer or faster.
+
+## Verification
+
+- `tsc --noEmit` is clean. ESLint (`@typescript-eslint`, `strict-type-checked`) is clean.
+- No new `any`, `!`, or `@ts-ignore` introduced without an inline justification.

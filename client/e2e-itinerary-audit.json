@@ -1,0 +1,1022 @@
+{
+  "runs": [
+    {
+      "label": "LHE-DXB",
+      "totalOffers": 15,
+      "flightOffers": 15,
+      "uniqueItineraries": 7,
+      "multiFareItineraries": 4,
+      "groups": [
+        {
+          "itineraryKey": "LHE::DXB::2026-09-10::::direct::OB:LHE|AUH|2026-09-10|19:45|2026-09-10|22:05|EY|EY289>AUH|XNB|2026-09-11|01:10|2026-09-11|03:10|EY|EY5412",
+          "fareCount": 3,
+          "prices": [
+            "PKR 109,153",
+            "PKR 113,098",
+            "PKR 126,462"
+          ],
+          "offerIds": [
+            "TP-o1_j1_p0_s3-s4",
+            "TP-o1_j2_p3_s3-s4",
+            "TP-o1_j3_p6_s3-s4"
+          ],
+          "carriers": [
+            "EY",
+            "EY"
+          ],
+          "flightNumbers": [
+            "EY289",
+            "EY5412"
+          ]
+        },
+        {
+          "itineraryKey": "LHE::DXB::2026-09-10::::direct::OB:LHE|AUH|2026-09-10|19:45|2026-09-10|22:05|EY|EY289>AUH|XNB|2026-09-11|02:45|2026-09-11|04:45|EY|EY5414",
+          "fareCount": 3,
+          "prices": [
+            "PKR 109,153",
+            "PKR 113,098",
+            "PKR 126,462"
+          ],
+          "offerIds": [
+            "TP-o1_j1_p1_s7-s8",
+            "TP-o1_j2_p4_s7-s8",
+            "TP-o1_j3_p7_s7-s8"
+          ],
+          "carriers": [
+            "EY",
+            "EY"
+          ],
+          "flightNumbers": [
+            "EY289",
+            "EY5414"
+          ]
+        },
+        {
+          "itineraryKey": "LHE::DXB::2026-09-10::::direct::OB:LHE|AUH|2026-09-10|19:45|2026-09-10|22:05|EY|EY289>AUH|XNB|2026-09-11|08:25|2026-09-11|10:25|EY|EY5416",
+          "fareCount": 3,
+          "prices": [
+            "PKR 109,153",
+            "PKR 113,098",
+            "PKR 126,462"
+          ],
+          "offerIds": [
+            "TP-o1_j1_p2_s20-s21",
+            "TP-o1_j2_p5_s20-s21",
+            "TP-o1_j3_p8_s20-s21"
+          ],
+          "carriers": [
+            "EY",
+            "EY"
+          ],
+          "flightNumbers": [
+            "EY289",
+            "EY5416"
+          ]
+        },
+        {
+          "itineraryKey": "LHE::DXB::2026-09-10::::direct::OB:LHE|CMB|2026-09-10|12:00|2026-09-10|16:25|UL|UL154>CMB|DXB|2026-09-10|18:30|2026-09-10|21:40|UL|UL225",
+          "fareCount": 3,
+          "prices": [
+            "PKR 139,825",
+            "PKR 155,619",
+            "PKR 258,548"
+          ],
+          "offerIds": [
+            "TP-o1_j1_p0_s1-s2",
+            "TP-o1_j2_p1_s1-s2",
+            "TP-o1_j3_p2_s1-s2"
+          ],
+          "carriers": [
+            "UL",
+            "UL"
+          ],
+          "flightNumbers": [
+            "UL154",
+            "UL225"
+          ]
+        },
+        {
+          "itineraryKey": "LHE::DXB::2026-09-10::::direct::OB:LHE|DOH|2026-09-10|03:10|2026-09-10|04:40|QR|QR621>DOH|DXB|2026-09-10|07:55|2026-09-10|10:15|QR|QR1006",
+          "fareCount": 1,
+          "prices": [
+            "PKR 137,759"
+          ],
+          "offerIds": [
+            "TP-o2_j4_p9_s1-s2"
+          ],
+          "carriers": [
+            "QR",
+            "QR"
+          ],
+          "flightNumbers": [
+            "QR621",
+            "QR1006"
+          ]
+        },
+        {
+          "itineraryKey": "LHE::DXB::2026-09-10::::direct::OB:LHE|DOH|2026-09-10|03:10|2026-09-10|04:40|QR|QR621>DOH|DXB|2026-09-10|09:20|2026-09-10|11:40|QR|QR1022",
+          "fareCount": 1,
+          "prices": [
+            "PKR 137,759"
+          ],
+          "offerIds": [
+            "TP-o2_j4_p10_s5-s6"
+          ],
+          "carriers": [
+            "QR",
+            "QR"
+          ],
+          "flightNumbers": [
+            "QR621",
+            "QR1022"
+          ]
+        },
+        {
+          "itineraryKey": "LHE::DXB::2026-09-10::::direct::OB:LHE|DOH|2026-09-10|11:35|2026-09-10|13:05|QR|QR629>DOH|DXB|2026-09-10|19:05|2026-09-10|21:25|QR|QR1014",
+          "fareCount": 1,
+          "prices": [
+            "PKR 137,759"
+          ],
+          "offerIds": [
+            "TP-o2_j4_p11_s11-s12"
+          ],
+          "carriers": [
+            "QR",
+            "QR"
+          ],
+          "flightNumbers": [
+            "QR629",
+            "QR1014"
+          ]
+        }
+      ],
+      "enriched": [
+        {
+          "id": "TP-o1_j1_p0_s3-s4",
+          "itineraryKey": "LHE::DXB::2026-09-10::::direct::OB:LHE|AUH|2026-09-10|19:45|2026-09-10|22:05|EY|EY289>AUH|XNB|2026-09-11|01:10|2026-09-11|03:10|EY|EY5412",
+          "priceMinor": 10915260,
+          "price": "PKR 109,153",
+          "faresOnItinerary": 3,
+          "carriers": [
+            "EY",
+            "EY"
+          ],
+          "flightNumbers": [
+            "EY289",
+            "EY5412"
+          ],
+          "route": "LHE→DXB",
+          "hubStitched": false
+        },
+        {
+          "id": "TP-o1_j1_p1_s7-s8",
+          "itineraryKey": "LHE::DXB::2026-09-10::::direct::OB:LHE|AUH|2026-09-10|19:45|2026-09-10|22:05|EY|EY289>AUH|XNB|2026-09-11|02:45|2026-09-11|04:45|EY|EY5414",
+          "priceMinor": 10915260,
+          "price": "PKR 109,153",
+          "faresOnItinerary": 3,
+          "carriers": [
+            "EY",
+            "EY"
+          ],
+          "flightNumbers": [
+            "EY289",
+            "EY5414"
+          ],
+          "route": "LHE→DXB",
+          "hubStitched": false
+        },
+        {
+          "id": "TP-o1_j2_p3_s3-s4",
+          "itineraryKey": "LHE::DXB::2026-09-10::::direct::OB:LHE|AUH|2026-09-10|19:45|2026-09-10|22:05|EY|EY289>AUH|XNB|2026-09-11|01:10|2026-09-11|03:10|EY|EY5412",
+          "priceMinor": 11309840,
+          "price": "PKR 113,098",
+          "faresOnItinerary": 3,
+          "carriers": [
+            "EY",
+            "EY"
+          ],
+          "flightNumbers": [
+            "EY289",
+            "EY5412"
+          ],
+          "route": "LHE→DXB",
+          "hubStitched": false
+        },
+        {
+          "id": "TP-o1_j2_p4_s7-s8",
+          "itineraryKey": "LHE::DXB::2026-09-10::::direct::OB:LHE|AUH|2026-09-10|19:45|2026-09-10|22:05|EY|EY289>AUH|XNB|2026-09-11|02:45|2026-09-11|04:45|EY|EY5414",
+          "priceMinor": 11309840,
+          "price": "PKR 113,098",
+          "faresOnItinerary": 3,
+          "carriers": [
+            "EY",
+            "EY"
+          ],
+          "flightNumbers": [
+            "EY289",
+            "EY5414"
+          ],
+          "route": "LHE→DXB",
+          "hubStitched": false
+        },
+        {
+          "id": "TP-o1_j3_p6_s3-s4",
+          "itineraryKey": "LHE::DXB::2026-09-10::::direct::OB:LHE|AUH|2026-09-10|19:45|2026-09-10|22:05|EY|EY289>AUH|XNB|2026-09-11|01:10|2026-09-11|03:10|EY|EY5412",
+          "priceMinor": 12646180,
+          "price": "PKR 126,462",
+          "faresOnItinerary": 3,
+          "carriers": [
+            "EY",
+            "EY"
+          ],
+          "flightNumbers": [
+            "EY289",
+            "EY5412"
+          ],
+          "route": "LHE→DXB",
+          "hubStitched": false
+        },
+        {
+          "id": "TP-o1_j3_p7_s7-s8",
+          "itineraryKey": "LHE::DXB::2026-09-10::::direct::OB:LHE|AUH|2026-09-10|19:45|2026-09-10|22:05|EY|EY289>AUH|XNB|2026-09-11|02:45|2026-09-11|04:45|EY|EY5414",
+          "priceMinor": 12646180,
+          "price": "PKR 126,462",
+          "faresOnItinerary": 3,
+          "carriers": [
+            "EY",
+            "EY"
+          ],
+          "flightNumbers": [
+            "EY289",
+            "EY5414"
+          ],
+          "route": "LHE→DXB",
+          "hubStitched": false
+        },
+        {
+          "id": "TP-o1_j1_p2_s20-s21",
+          "itineraryKey": "LHE::DXB::2026-09-10::::direct::OB:LHE|AUH|2026-09-10|19:45|2026-09-10|22:05|EY|EY289>AUH|XNB|2026-09-11|08:25|2026-09-11|10:25|EY|EY5416",
+          "priceMinor": 10915260,
+          "price": "PKR 109,153",
+          "faresOnItinerary": 3,
+          "carriers": [
+            "EY",
+            "EY"
+          ],
+          "flightNumbers": [
+            "EY289",
+            "EY5416"
+          ],
+          "route": "LHE→DXB",
+          "hubStitched": false
+        },
+        {
+          "id": "TP-o2_j4_p9_s1-s2",
+          "itineraryKey": "LHE::DXB::2026-09-10::::direct::OB:LHE|DOH|2026-09-10|03:10|2026-09-10|04:40|QR|QR621>DOH|DXB|2026-09-10|07:55|2026-09-10|10:15|QR|QR1006",
+          "priceMinor": 13775856,
+          "price": "PKR 137,759",
+          "faresOnItinerary": 1,
+          "carriers": [
+            "QR",
+            "QR"
+          ],
+          "flightNumbers": [
+            "QR621",
+            "QR1006"
+          ],
+          "route": "LHE→DXB",
+          "hubStitched": false
+        },
+        {
+          "id": "TP-o1_j2_p5_s20-s21",
+          "itineraryKey": "LHE::DXB::2026-09-10::::direct::OB:LHE|AUH|2026-09-10|19:45|2026-09-10|22:05|EY|EY289>AUH|XNB|2026-09-11|08:25|2026-09-11|10:25|EY|EY5416",
+          "priceMinor": 11309840,
+          "price": "PKR 113,098",
+          "faresOnItinerary": 3,
+          "carriers": [
+            "EY",
+            "EY"
+          ],
+          "flightNumbers": [
+            "EY289",
+            "EY5416"
+          ],
+          "route": "LHE→DXB",
+          "hubStitched": false
+        },
+        {
+          "id": "TP-o2_j4_p10_s5-s6",
+          "itineraryKey": "LHE::DXB::2026-09-10::::direct::OB:LHE|DOH|2026-09-10|03:10|2026-09-10|04:40|QR|QR621>DOH|DXB|2026-09-10|09:20|2026-09-10|11:40|QR|QR1022",
+          "priceMinor": 13775856,
+          "price": "PKR 137,759",
+          "faresOnItinerary": 1,
+          "carriers": [
+            "QR",
+            "QR"
+          ],
+          "flightNumbers": [
+            "QR621",
+            "QR1022"
+          ],
+          "route": "LHE→DXB",
+          "hubStitched": false
+        },
+        {
+          "id": "TP-o2_j4_p11_s11-s12",
+          "itineraryKey": "LHE::DXB::2026-09-10::::direct::OB:LHE|DOH|2026-09-10|11:35|2026-09-10|13:05|QR|QR629>DOH|DXB|2026-09-10|19:05|2026-09-10|21:25|QR|QR1014",
+          "priceMinor": 13775856,
+          "price": "PKR 137,759",
+          "faresOnItinerary": 1,
+          "carriers": [
+            "QR",
+            "QR"
+          ],
+          "flightNumbers": [
+            "QR629",
+            "QR1014"
+          ],
+          "route": "LHE→DXB",
+          "hubStitched": false
+        },
+        {
+          "id": "TP-o1_j1_p0_s1-s2",
+          "itineraryKey": "LHE::DXB::2026-09-10::::direct::OB:LHE|CMB|2026-09-10|12:00|2026-09-10|16:25|UL|UL154>CMB|DXB|2026-09-10|18:30|2026-09-10|21:40|UL|UL225",
+          "priceMinor": 13982520,
+          "price": "PKR 139,825",
+          "faresOnItinerary": 3,
+          "carriers": [
+            "UL",
+            "UL"
+          ],
+          "flightNumbers": [
+            "UL154",
+            "UL225"
+          ],
+          "route": "LHE→DXB",
+          "hubStitched": false
+        },
+        {
+          "id": "TP-o1_j3_p8_s20-s21",
+          "itineraryKey": "LHE::DXB::2026-09-10::::direct::OB:LHE|AUH|2026-09-10|19:45|2026-09-10|22:05|EY|EY289>AUH|XNB|2026-09-11|08:25|2026-09-11|10:25|EY|EY5416",
+          "priceMinor": 12646180,
+          "price": "PKR 126,462",
+          "faresOnItinerary": 3,
+          "carriers": [
+            "EY",
+            "EY"
+          ],
+          "flightNumbers": [
+            "EY289",
+            "EY5416"
+          ],
+          "route": "LHE→DXB",
+          "hubStitched": false
+        },
+        {
+          "id": "TP-o1_j2_p1_s1-s2",
+          "itineraryKey": "LHE::DXB::2026-09-10::::direct::OB:LHE|CMB|2026-09-10|12:00|2026-09-10|16:25|UL|UL154>CMB|DXB|2026-09-10|18:30|2026-09-10|21:40|UL|UL225",
+          "priceMinor": 15561930,
+          "price": "PKR 155,619",
+          "faresOnItinerary": 3,
+          "carriers": [
+            "UL",
+            "UL"
+          ],
+          "flightNumbers": [
+            "UL154",
+            "UL225"
+          ],
+          "route": "LHE→DXB",
+          "hubStitched": false
+        },
+        {
+          "id": "TP-o1_j3_p2_s1-s2",
+          "itineraryKey": "LHE::DXB::2026-09-10::::direct::OB:LHE|CMB|2026-09-10|12:00|2026-09-10|16:25|UL|UL154>CMB|DXB|2026-09-10|18:30|2026-09-10|21:40|UL|UL225",
+          "priceMinor": 25854800,
+          "price": "PKR 258,548",
+          "faresOnItinerary": 3,
+          "carriers": [
+            "UL",
+            "UL"
+          ],
+          "flightNumbers": [
+            "UL154",
+            "UL225"
+          ],
+          "route": "LHE→DXB",
+          "hubStitched": false
+        }
+      ],
+      "liveFlights": true
+    },
+    {
+      "label": "LHE-IST",
+      "totalOffers": 12,
+      "flightOffers": 12,
+      "uniqueItineraries": 4,
+      "multiFareItineraries": 4,
+      "groups": [
+        {
+          "itineraryKey": "LHE::IST::2026-09-11::::direct::OB:LHE|AUH|2026-09-11|04:15|2026-09-11|06:35|EY|EY285>AUH|IST|2026-09-11|08:40|2026-09-11|12:35|EY|EY541",
+          "fareCount": 3,
+          "prices": [
+            "PKR 185,260",
+            "PKR 192,236",
+            "PKR 197,402"
+          ],
+          "offerIds": [
+            "TP-o1_j1_p0_s1-s2",
+            "TP-o1_j2_p2_s1-s2",
+            "TP-o1_j3_p4_s1-s2"
+          ],
+          "carriers": [
+            "EY",
+            "EY"
+          ],
+          "flightNumbers": [
+            "EY285",
+            "EY541"
+          ]
+        },
+        {
+          "itineraryKey": "LHE::IST::2026-09-11::::direct::OB:LHE|AUH|2026-09-11|19:45|2026-09-11|22:05|EY|EY289>AUH|IST|2026-09-12|08:40|2026-09-12|12:35|EY|EY541",
+          "fareCount": 3,
+          "prices": [
+            "PKR 185,260",
+            "PKR 192,236",
+            "PKR 197,402"
+          ],
+          "offerIds": [
+            "TP-o1_j1_p1_s5-s6",
+            "TP-o1_j2_p3_s5-s6",
+            "TP-o1_j3_p5_s5-s6"
+          ],
+          "carriers": [
+            "EY",
+            "EY"
+          ],
+          "flightNumbers": [
+            "EY289",
+            "EY541"
+          ]
+        },
+        {
+          "itineraryKey": "LHE::IST::2026-09-11::::direct::OB:LHE|AUH|2026-09-11|19:45|2026-09-11|22:05|EY|EY289>AUH|IST|2026-09-12|01:30|2026-09-12|05:25|EY|EY4151",
+          "fareCount": 3,
+          "prices": [
+            "PKR 523,825",
+            "PKR 532,632",
+            "PKR 544,469"
+          ],
+          "offerIds": [
+            "TP-o2_j4_p6_s3-s4",
+            "TP-o2_j5_p8_s3-s4",
+            "TP-o2_j6_p10_s3-s4"
+          ],
+          "carriers": [
+            "EY",
+            "EY"
+          ],
+          "flightNumbers": [
+            "EY289",
+            "EY4151"
+          ]
+        },
+        {
+          "itineraryKey": "LHE::IST::2026-09-11::::direct::OB:LHE|AUH|2026-09-11|04:15|2026-09-11|06:35|EY|EY285>AUH|IST|2026-09-12|01:30|2026-09-12|05:25|EY|EY4151",
+          "fareCount": 3,
+          "prices": [
+            "PKR 523,825",
+            "PKR 532,632",
+            "PKR 544,469"
+          ],
+          "offerIds": [
+            "TP-o2_j4_p7_s7-s8",
+            "TP-o2_j5_p9_s7-s8",
+            "TP-o2_j6_p11_s7-s8"
+          ],
+          "carriers": [
+            "EY",
+            "EY"
+          ],
+          "flightNumbers": [
+            "EY285",
+            "EY4151"
+          ]
+        }
+      ],
+      "enriched": [
+        {
+          "id": "TP-o1_j1_p0_s1-s2",
+          "itineraryKey": "LHE::IST::2026-09-11::::direct::OB:LHE|AUH|2026-09-11|04:15|2026-09-11|06:35|EY|EY285>AUH|IST|2026-09-11|08:40|2026-09-11|12:35|EY|EY541",
+          "priceMinor": 18525967,
+          "price": "PKR 185,260",
+          "faresOnItinerary": 3,
+          "carriers": [
+            "EY",
+            "EY"
+          ],
+          "flightNumbers": [
+            "EY285",
+            "EY541"
+          ],
+          "route": "LHE→IST",
+          "hubStitched": false
+        },
+        {
+          "id": "TP-o1_j2_p2_s1-s2",
+          "itineraryKey": "LHE::IST::2026-09-11::::direct::OB:LHE|AUH|2026-09-11|04:15|2026-09-11|06:35|EY|EY285>AUH|IST|2026-09-11|08:40|2026-09-11|12:35|EY|EY541",
+          "priceMinor": 19223567,
+          "price": "PKR 192,236",
+          "faresOnItinerary": 3,
+          "carriers": [
+            "EY",
+            "EY"
+          ],
+          "flightNumbers": [
+            "EY285",
+            "EY541"
+          ],
+          "route": "LHE→IST",
+          "hubStitched": false
+        },
+        {
+          "id": "TP-o1_j3_p4_s1-s2",
+          "itineraryKey": "LHE::IST::2026-09-11::::direct::OB:LHE|AUH|2026-09-11|04:15|2026-09-11|06:35|EY|EY285>AUH|IST|2026-09-11|08:40|2026-09-11|12:35|EY|EY541",
+          "priceMinor": 19740227,
+          "price": "PKR 197,402",
+          "faresOnItinerary": 3,
+          "carriers": [
+            "EY",
+            "EY"
+          ],
+          "flightNumbers": [
+            "EY285",
+            "EY541"
+          ],
+          "route": "LHE→IST",
+          "hubStitched": false
+        },
+        {
+          "id": "TP-o1_j1_p1_s5-s6",
+          "itineraryKey": "LHE::IST::2026-09-11::::direct::OB:LHE|AUH|2026-09-11|19:45|2026-09-11|22:05|EY|EY289>AUH|IST|2026-09-12|08:40|2026-09-12|12:35|EY|EY541",
+          "priceMinor": 18525967,
+          "price": "PKR 185,260",
+          "faresOnItinerary": 3,
+          "carriers": [
+            "EY",
+            "EY"
+          ],
+          "flightNumbers": [
+            "EY289",
+            "EY541"
+          ],
+          "route": "LHE→IST",
+          "hubStitched": false
+        },
+        {
+          "id": "TP-o1_j2_p3_s5-s6",
+          "itineraryKey": "LHE::IST::2026-09-11::::direct::OB:LHE|AUH|2026-09-11|19:45|2026-09-11|22:05|EY|EY289>AUH|IST|2026-09-12|08:40|2026-09-12|12:35|EY|EY541",
+          "priceMinor": 19223567,
+          "price": "PKR 192,236",
+          "faresOnItinerary": 3,
+          "carriers": [
+            "EY",
+            "EY"
+          ],
+          "flightNumbers": [
+            "EY289",
+            "EY541"
+          ],
+          "route": "LHE→IST",
+          "hubStitched": false
+        },
+        {
+          "id": "TP-o1_j3_p5_s5-s6",
+          "itineraryKey": "LHE::IST::2026-09-11::::direct::OB:LHE|AUH|2026-09-11|19:45|2026-09-11|22:05|EY|EY289>AUH|IST|2026-09-12|08:40|2026-09-12|12:35|EY|EY541",
+          "priceMinor": 19740227,
+          "price": "PKR 197,402",
+          "faresOnItinerary": 3,
+          "carriers": [
+            "EY",
+            "EY"
+          ],
+          "flightNumbers": [
+            "EY289",
+            "EY541"
+          ],
+          "route": "LHE→IST",
+          "hubStitched": false
+        },
+        {
+          "id": "TP-o2_j4_p6_s3-s4",
+          "itineraryKey": "LHE::IST::2026-09-11::::direct::OB:LHE|AUH|2026-09-11|19:45|2026-09-11|22:05|EY|EY289>AUH|IST|2026-09-12|01:30|2026-09-12|05:25|EY|EY4151",
+          "priceMinor": 52382457,
+          "price": "PKR 523,825",
+          "faresOnItinerary": 3,
+          "carriers": [
+            "EY",
+            "EY"
+          ],
+          "flightNumbers": [
+            "EY289",
+            "EY4151"
+          ],
+          "route": "LHE→IST",
+          "hubStitched": false
+        },
+        {
+          "id": "TP-o2_j5_p8_s3-s4",
+          "itineraryKey": "LHE::IST::2026-09-11::::direct::OB:LHE|AUH|2026-09-11|19:45|2026-09-11|22:05|EY|EY289>AUH|IST|2026-09-12|01:30|2026-09-12|05:25|EY|EY4151",
+          "priceMinor": 53263177,
+          "price": "PKR 532,632",
+          "faresOnItinerary": 3,
+          "carriers": [
+            "EY",
+            "EY"
+          ],
+          "flightNumbers": [
+            "EY289",
+            "EY4151"
+          ],
+          "route": "LHE→IST",
+          "hubStitched": false
+        },
+        {
+          "id": "TP-o2_j6_p10_s3-s4",
+          "itineraryKey": "LHE::IST::2026-09-11::::direct::OB:LHE|AUH|2026-09-11|19:45|2026-09-11|22:05|EY|EY289>AUH|IST|2026-09-12|01:30|2026-09-12|05:25|EY|EY4151",
+          "priceMinor": 54446917,
+          "price": "PKR 544,469",
+          "faresOnItinerary": 3,
+          "carriers": [
+            "EY",
+            "EY"
+          ],
+          "flightNumbers": [
+            "EY289",
+            "EY4151"
+          ],
+          "route": "LHE→IST",
+          "hubStitched": false
+        },
+        {
+          "id": "TP-o2_j4_p7_s7-s8",
+          "itineraryKey": "LHE::IST::2026-09-11::::direct::OB:LHE|AUH|2026-09-11|04:15|2026-09-11|06:35|EY|EY285>AUH|IST|2026-09-12|01:30|2026-09-12|05:25|EY|EY4151",
+          "priceMinor": 52382457,
+          "price": "PKR 523,825",
+          "faresOnItinerary": 3,
+          "carriers": [
+            "EY",
+            "EY"
+          ],
+          "flightNumbers": [
+            "EY285",
+            "EY4151"
+          ],
+          "route": "LHE→IST",
+          "hubStitched": false
+        },
+        {
+          "id": "TP-o2_j5_p9_s7-s8",
+          "itineraryKey": "LHE::IST::2026-09-11::::direct::OB:LHE|AUH|2026-09-11|04:15|2026-09-11|06:35|EY|EY285>AUH|IST|2026-09-12|01:30|2026-09-12|05:25|EY|EY4151",
+          "priceMinor": 53263177,
+          "price": "PKR 532,632",
+          "faresOnItinerary": 3,
+          "carriers": [
+            "EY",
+            "EY"
+          ],
+          "flightNumbers": [
+            "EY285",
+            "EY4151"
+          ],
+          "route": "LHE→IST",
+          "hubStitched": false
+        },
+        {
+          "id": "TP-o2_j6_p11_s7-s8",
+          "itineraryKey": "LHE::IST::2026-09-11::::direct::OB:LHE|AUH|2026-09-11|04:15|2026-09-11|06:35|EY|EY285>AUH|IST|2026-09-12|01:30|2026-09-12|05:25|EY|EY4151",
+          "priceMinor": 54446917,
+          "price": "PKR 544,469",
+          "faresOnItinerary": 3,
+          "carriers": [
+            "EY",
+            "EY"
+          ],
+          "flightNumbers": [
+            "EY285",
+            "EY4151"
+          ],
+          "route": "LHE→IST",
+          "hubStitched": false
+        }
+      ],
+      "liveFlights": true
+    },
+    {
+      "label": "LHE-DXB-RT",
+      "totalOffers": 12,
+      "flightOffers": 12,
+      "uniqueItineraries": 4,
+      "multiFareItineraries": 4,
+      "groups": [
+        {
+          "itineraryKey": "LHE::DXB::2026-09-10::2026-09-15::direct::OB:LHE|AUH|2026-09-10|19:45|2026-09-10|22:05|EY|EY289>AUH|XNB|2026-09-11|01:10|2026-09-11|03:10|EY|EY5412::RT:XNB|AUH|2026-09-15|10:20|2026-09-15|12:20|EY|EY5417>AUH|LHE|2026-09-15|14:10|2026-09-15|18:25|EY|EY288",
+          "fareCount": 3,
+          "prices": [
+            "PKR 153,114",
+            "PKR 161,006",
+            "PKR 187,733"
+          ],
+          "offerIds": [
+            "TP-o1_j1_p0_s1-s2_s5-s6",
+            "TP-o1_j2_p2_s1-s2_s5-s6",
+            "TP-o1_j3_p4_s1-s2_s5-s6"
+          ],
+          "carriers": [
+            "EY",
+            "EY"
+          ],
+          "flightNumbers": [
+            "EY289",
+            "EY5412"
+          ]
+        },
+        {
+          "itineraryKey": "LHE::DXB::2026-09-10::2026-09-15::direct::OB:LHE|AUH|2026-09-10|19:45|2026-09-10|22:05|EY|EY289>AUH|XNB|2026-09-11|02:45|2026-09-11|04:45|EY|EY5414::RT:XNB|AUH|2026-09-15|10:20|2026-09-15|12:20|EY|EY5417>AUH|LHE|2026-09-15|14:10|2026-09-15|18:25|EY|EY288",
+          "fareCount": 3,
+          "prices": [
+            "PKR 153,114",
+            "PKR 161,006",
+            "PKR 187,733"
+          ],
+          "offerIds": [
+            "TP-o1_j1_p1_s3-s4_s5-s6",
+            "TP-o1_j2_p3_s3-s4_s5-s6",
+            "TP-o1_j3_p5_s3-s4_s5-s6"
+          ],
+          "carriers": [
+            "EY",
+            "EY"
+          ],
+          "flightNumbers": [
+            "EY289",
+            "EY5414"
+          ]
+        },
+        {
+          "itineraryKey": "LHE::DXB::2026-09-10::2026-09-15::direct::OB:LHE|AUH|2026-09-10|19:45|2026-09-10|22:05|EY|EY289>AUH|XNB|2026-09-11|01:10|2026-09-11|03:10|EY|EY5412::RT:XNB|AUH|2026-09-15|18:45|2026-09-15|20:45|EY|EY5423>AUH|LHE|2026-09-15|22:45|2026-09-16|03:10|EY|EY284",
+          "fareCount": 3,
+          "prices": [
+            "PKR 154,630",
+            "PKR 162,532",
+            "PKR 189,248"
+          ],
+          "offerIds": [
+            "TP-o3_j4_p21_s1-s2_s9-s10",
+            "TP-o3_j5_p23_s1-s2_s9-s10",
+            "TP-o3_j6_p25_s1-s2_s9-s10"
+          ],
+          "carriers": [
+            "EY",
+            "EY"
+          ],
+          "flightNumbers": [
+            "EY289",
+            "EY5412"
+          ]
+        },
+        {
+          "itineraryKey": "LHE::DXB::2026-09-10::2026-09-15::direct::OB:LHE|AUH|2026-09-10|19:45|2026-09-10|22:05|EY|EY289>AUH|XNB|2026-09-11|02:45|2026-09-11|04:45|EY|EY5414::RT:XNB|AUH|2026-09-15|18:45|2026-09-15|20:45|EY|EY5423>AUH|LHE|2026-09-15|22:45|2026-09-16|03:10|EY|EY284",
+          "fareCount": 3,
+          "prices": [
+            "PKR 154,630",
+            "PKR 162,532",
+            "PKR 189,248"
+          ],
+          "offerIds": [
+            "TP-o3_j4_p22_s3-s4_s9-s10",
+            "TP-o3_j5_p24_s3-s4_s9-s10",
+            "TP-o3_j6_p26_s3-s4_s9-s10"
+          ],
+          "carriers": [
+            "EY",
+            "EY"
+          ],
+          "flightNumbers": [
+            "EY289",
+            "EY5414"
+          ]
+        }
+      ],
+      "enriched": [
+        {
+          "id": "TP-o1_j1_p0_s1-s2_s5-s6",
+          "itineraryKey": "LHE::DXB::2026-09-10::2026-09-15::direct::OB:LHE|AUH|2026-09-10|19:45|2026-09-10|22:05|EY|EY289>AUH|XNB|2026-09-11|01:10|2026-09-11|03:10|EY|EY5412::RT:XNB|AUH|2026-09-15|10:20|2026-09-15|12:20|EY|EY5417>AUH|LHE|2026-09-15|14:10|2026-09-15|18:25|EY|EY288",
+          "priceMinor": 15311448,
+          "price": "PKR 153,114",
+          "faresOnItinerary": 3,
+          "carriers": [
+            "EY",
+            "EY"
+          ],
+          "flightNumbers": [
+            "EY289",
+            "EY5412"
+          ],
+          "route": "LHE→DXB",
+          "hubStitched": false
+        },
+        {
+          "id": "TP-o1_j1_p1_s3-s4_s5-s6",
+          "itineraryKey": "LHE::DXB::2026-09-10::2026-09-15::direct::OB:LHE|AUH|2026-09-10|19:45|2026-09-10|22:05|EY|EY289>AUH|XNB|2026-09-11|02:45|2026-09-11|04:45|EY|EY5414::RT:XNB|AUH|2026-09-15|10:20|2026-09-15|12:20|EY|EY5417>AUH|LHE|2026-09-15|14:10|2026-09-15|18:25|EY|EY288",
+          "priceMinor": 15311448,
+          "price": "PKR 153,114",
+          "faresOnItinerary": 3,
+          "carriers": [
+            "EY",
+            "EY"
+          ],
+          "flightNumbers": [
+            "EY289",
+            "EY5414"
+          ],
+          "route": "LHE→DXB",
+          "hubStitched": false
+        },
+        {
+          "id": "TP-o3_j4_p21_s1-s2_s9-s10",
+          "itineraryKey": "LHE::DXB::2026-09-10::2026-09-15::direct::OB:LHE|AUH|2026-09-10|19:45|2026-09-10|22:05|EY|EY289>AUH|XNB|2026-09-11|01:10|2026-09-11|03:10|EY|EY5412::RT:XNB|AUH|2026-09-15|18:45|2026-09-15|20:45|EY|EY5423>AUH|LHE|2026-09-15|22:45|2026-09-16|03:10|EY|EY284",
+          "priceMinor": 15462958,
+          "price": "PKR 154,630",
+          "faresOnItinerary": 3,
+          "carriers": [
+            "EY",
+            "EY"
+          ],
+          "flightNumbers": [
+            "EY289",
+            "EY5412"
+          ],
+          "route": "LHE→DXB",
+          "hubStitched": false
+        },
+        {
+          "id": "TP-o3_j4_p22_s3-s4_s9-s10",
+          "itineraryKey": "LHE::DXB::2026-09-10::2026-09-15::direct::OB:LHE|AUH|2026-09-10|19:45|2026-09-10|22:05|EY|EY289>AUH|XNB|2026-09-11|02:45|2026-09-11|04:45|EY|EY5414::RT:XNB|AUH|2026-09-15|18:45|2026-09-15|20:45|EY|EY5423>AUH|LHE|2026-09-15|22:45|2026-09-16|03:10|EY|EY284",
+          "priceMinor": 15462958,
+          "price": "PKR 154,630",
+          "faresOnItinerary": 3,
+          "carriers": [
+            "EY",
+            "EY"
+          ],
+          "flightNumbers": [
+            "EY289",
+            "EY5414"
+          ],
+          "route": "LHE→DXB",
+          "hubStitched": false
+        },
+        {
+          "id": "TP-o1_j2_p2_s1-s2_s5-s6",
+          "itineraryKey": "LHE::DXB::2026-09-10::2026-09-15::direct::OB:LHE|AUH|2026-09-10|19:45|2026-09-10|22:05|EY|EY289>AUH|XNB|2026-09-11|01:10|2026-09-11|03:10|EY|EY5412::RT:XNB|AUH|2026-09-15|10:20|2026-09-15|12:20|EY|EY5417>AUH|LHE|2026-09-15|14:10|2026-09-15|18:25|EY|EY288",
+          "priceMinor": 16100608,
+          "price": "PKR 161,006",
+          "faresOnItinerary": 3,
+          "carriers": [
+            "EY",
+            "EY"
+          ],
+          "flightNumbers": [
+            "EY289",
+            "EY5412"
+          ],
+          "route": "LHE→DXB",
+          "hubStitched": false
+        },
+        {
+          "id": "TP-o1_j2_p3_s3-s4_s5-s6",
+          "itineraryKey": "LHE::DXB::2026-09-10::2026-09-15::direct::OB:LHE|AUH|2026-09-10|19:45|2026-09-10|22:05|EY|EY289>AUH|XNB|2026-09-11|02:45|2026-09-11|04:45|EY|EY5414::RT:XNB|AUH|2026-09-15|10:20|2026-09-15|12:20|EY|EY5417>AUH|LHE|2026-09-15|14:10|2026-09-15|18:25|EY|EY288",
+          "priceMinor": 16100608,
+          "price": "PKR 161,006",
+          "faresOnItinerary": 3,
+          "carriers": [
+            "EY",
+            "EY"
+          ],
+          "flightNumbers": [
+            "EY289",
+            "EY5414"
+          ],
+          "route": "LHE→DXB",
+          "hubStitched": false
+        },
+        {
+          "id": "TP-o3_j5_p23_s1-s2_s9-s10",
+          "itineraryKey": "LHE::DXB::2026-09-10::2026-09-15::direct::OB:LHE|AUH|2026-09-10|19:45|2026-09-10|22:05|EY|EY289>AUH|XNB|2026-09-11|01:10|2026-09-11|03:10|EY|EY5412::RT:XNB|AUH|2026-09-15|18:45|2026-09-15|20:45|EY|EY5423>AUH|LHE|2026-09-15|22:45|2026-09-16|03:10|EY|EY284",
+          "priceMinor": 16253208,
+          "price": "PKR 162,532",
+          "faresOnItinerary": 3,
+          "carriers": [
+            "EY",
+            "EY"
+          ],
+          "flightNumbers": [
+            "EY289",
+            "EY5412"
+          ],
+          "route": "LHE→DXB",
+          "hubStitched": false
+        },
+        {
+          "id": "TP-o3_j5_p24_s3-s4_s9-s10",
+          "itineraryKey": "LHE::DXB::2026-09-10::2026-09-15::direct::OB:LHE|AUH|2026-09-10|19:45|2026-09-10|22:05|EY|EY289>AUH|XNB|2026-09-11|02:45|2026-09-11|04:45|EY|EY5414::RT:XNB|AUH|2026-09-15|18:45|2026-09-15|20:45|EY|EY5423>AUH|LHE|2026-09-15|22:45|2026-09-16|03:10|EY|EY284",
+          "priceMinor": 16253208,
+          "price": "PKR 162,532",
+          "faresOnItinerary": 3,
+          "carriers": [
+            "EY",
+            "EY"
+          ],
+          "flightNumbers": [
+            "EY289",
+            "EY5414"
+          ],
+          "route": "LHE→DXB",
+          "hubStitched": false
+        },
+        {
+          "id": "TP-o1_j3_p4_s1-s2_s5-s6",
+          "itineraryKey": "LHE::DXB::2026-09-10::2026-09-15::direct::OB:LHE|AUH|2026-09-10|19:45|2026-09-10|22:05|EY|EY289>AUH|XNB|2026-09-11|01:10|2026-09-11|03:10|EY|EY5412::RT:XNB|AUH|2026-09-15|10:20|2026-09-15|12:20|EY|EY5417>AUH|LHE|2026-09-15|14:10|2026-09-15|18:25|EY|EY288",
+          "priceMinor": 18773288,
+          "price": "PKR 187,733",
+          "faresOnItinerary": 3,
+          "carriers": [
+            "EY",
+            "EY"
+          ],
+          "flightNumbers": [
+            "EY289",
+            "EY5412"
+          ],
+          "route": "LHE→DXB",
+          "hubStitched": false
+        },
+        {
+          "id": "TP-o1_j3_p5_s3-s4_s5-s6",
+          "itineraryKey": "LHE::DXB::2026-09-10::2026-09-15::direct::OB:LHE|AUH|2026-09-10|19:45|2026-09-10|22:05|EY|EY289>AUH|XNB|2026-09-11|02:45|2026-09-11|04:45|EY|EY5414::RT:XNB|AUH|2026-09-15|10:20|2026-09-15|12:20|EY|EY5417>AUH|LHE|2026-09-15|14:10|2026-09-15|18:25|EY|EY288",
+          "priceMinor": 18773288,
+          "price": "PKR 187,733",
+          "faresOnItinerary": 3,
+          "carriers": [
+            "EY",
+            "EY"
+          ],
+          "flightNumbers": [
+            "EY289",
+            "EY5414"
+          ],
+          "route": "LHE→DXB",
+          "hubStitched": false
+        },
+        {
+          "id": "TP-o3_j6_p25_s1-s2_s9-s10",
+          "itineraryKey": "LHE::DXB::2026-09-10::2026-09-15::direct::OB:LHE|AUH|2026-09-10|19:45|2026-09-10|22:05|EY|EY289>AUH|XNB|2026-09-11|01:10|2026-09-11|03:10|EY|EY5412::RT:XNB|AUH|2026-09-15|18:45|2026-09-15|20:45|EY|EY5423>AUH|LHE|2026-09-15|22:45|2026-09-16|03:10|EY|EY284",
+          "priceMinor": 18924798,
+          "price": "PKR 189,248",
+          "faresOnItinerary": 3,
+          "carriers": [
+            "EY",
+            "EY"
+          ],
+          "flightNumbers": [
+            "EY289",
+            "EY5412"
+          ],
+          "route": "LHE→DXB",
+          "hubStitched": false
+        },
+        {
+          "id": "TP-o3_j6_p26_s3-s4_s9-s10",
+          "itineraryKey": "LHE::DXB::2026-09-10::2026-09-15::direct::OB:LHE|AUH|2026-09-10|19:45|2026-09-10|22:05|EY|EY289>AUH|XNB|2026-09-11|02:45|2026-09-11|04:45|EY|EY5414::RT:XNB|AUH|2026-09-15|18:45|2026-09-15|20:45|EY|EY5423>AUH|LHE|2026-09-15|22:45|2026-09-16|03:10|EY|EY284",
+          "priceMinor": 18924798,
+          "price": "PKR 189,248",
+          "faresOnItinerary": 3,
+          "carriers": [
+            "EY",
+            "EY"
+          ],
+          "flightNumbers": [
+            "EY289",
+            "EY5414"
+          ],
+          "route": "LHE→DXB",
+          "hubStitched": false
+        }
+      ],
+      "liveFlights": true
+    }
+  ],
+  "status": "PASS"
+}

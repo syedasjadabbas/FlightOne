@@ -1,0 +1,59 @@
+---
+description: Branching, Conventional Commits, PR shape, review etiquette — applies whenever committing or opening a PR.
+alwaysApply: true
+---
+
+# Git Standard
+
+## Branching
+
+- Branch off the up-to-date default branch. Never work directly on `main`/`master`.
+- Naming: `type/short-description` — `feat/oauth-login`, `fix/n1-orders-query`,
+  `chore/bump-deps`. Include a ticket when one exists: `feat/PROJ-123-oauth-login`.
+- Short-lived branches. Rebase on the default branch frequently to avoid drift.
+
+## Commits (Conventional Commits)
+
+```
+type(scope): imperative summary ≤ 72 chars
+
+Optional body: explain WHY this change, what it enables, and any tradeoffs.
+Reference issues: Refs #123 / Closes #123.
+```
+
+**Types:** `feat`, `fix`, `refactor`, `perf`, `docs`, `test`, `style`, `chore`, `build`, `ci`, `revert`.
+
+- **Atomic:** one logical change per commit. It should build and pass tests on its own.
+- **Imperative mood:** "add", not "added"/"adds".
+- **Body explains why,** not what — the diff already shows what.
+- Never mix formatting-only churn with logic changes; separate commits.
+
+## What never gets committed
+
+Secrets, `.env*`, credentials, tokens, private keys, large binaries, build output,
+`node_modules`, IDE files, and generated code that belongs in `.gitignore`.
+
+## Pull requests
+
+- Small and focused — a reviewer should hold the whole change in their head.
+- Description covers: **what**, **why**, **how** (approach + notable tradeoffs), **testing**
+  evidence, and **risk/rollback**.
+- Link the issue. Screenshots/recordings for UI. Migration notes for schema changes.
+- CI green before requesting review. Self-review the diff first.
+
+## Review etiquette
+
+- Distinguish **blocking** (correctness, security, data loss) from `nit:` (preference).
+- Comment on the code, not the person. Suggest, explain, and offer the fix where you can.
+- Approve when it's *good enough and safe*, not when it's *how you'd have written it*.
+
+## History
+
+- Prefer rebase for a clean, linear feature history; merge commits at integration points.
+- Never force-push a shared branch others are building on.
+- `git revert` in shared history; `reset` only on local, unpushed work.
+
+## Agent-specific
+
+- Only commit/push when the user asks. Confirm the branch and message first.
+- Use a co-author trailer for AI-assisted commits.

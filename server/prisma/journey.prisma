@@ -1,0 +1,157 @@
+// Module 09 — Live Journey Management (Phase 2 slice)
+// Owned by modules/journey/. See docs/modules/09-live-journey-management.md
+// and dev guide §6.7 ("Journey monitoring ... share the same DB — be a
+// gentle citizen: only process active rows, skip DB writes on idle ticks,
+// ... pace polling against supplier APIs").
+//
+// `bookingId` / `userId` are plain scalar columns, not Prisma relations —
+// mirrors the "stub field, no relation" pattern already used in
+// prisma/escalations.prisma and prisma/operations.prisma for cross-module
+// references. Keeps this migration scoped to journey tables only (no ALTER
+// on User/Booking) and means modules/journey/ doesn't need to touch
+// schema.prisma or bookings.prisma to ship.
+//
+// This file lives alongside prisma/schema.prisma (multi-file schema, GA
+// since Prisma 6.7 — no preview flag needed). The `generator`/`datasource`
+// blocks stay in schema.prisma.
+
+/// What kind of thing happened during a monitored journey. `OTHER` is the
+/// catch-all for stub/unclassified events (module doc's "Disruption
+/// awareness" / "Ground journey" checklist items not yet backed by a real
+/// supplier feed in this Phase-2 slice).
+enum JourneyEventType {
+  DELAY
+  CANCELLED
+  GATE_CHANGE
+  TERMINAL_CHANGE
+  BOARDING
+  WEATHER
+  IMMIGRATION
+  HOTEL_CHECKIN
+  TRANSFER
+  OTHER
+}
+
+/// A watch is ACTIVE while the journey is upcoming/in-progress, PAUSED if
+/// monitoring is temporarily suspended (not used by this Phase-2 slice but
+/// reserved so ops can pause a noisy/misbehaving watch without deleting it),
+/// and COMPLETED once the journey window has passed — the worker never polls
+/// PAUSED/COMPLETED watches (module doc's "Worker hygiene": "never runs
+/// indefinitely on a stale booking").
+enum JourneyWatchStatus {
+  ACTIVE
+  PAUSED
+  COMPLETED
+}
+
+enum NotificationChannel {
+  APP
+  EMAIL
+  WHATSAPP
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+/// One row per booking under live-journey monitoring. Created by
+/// `ensureWatchForBooking` on ticketing (see the `bookings.service.js` hook)
+/// and polled by `workers/journey-monitor.js` / `POST /watches/:id/poll`.
+model JourneyWatch {
+  id        String @id @default(cuid())
+  // Booking being monitored (Booking.id, no FK — see file header).
+  // One watch per booking — concurrent ensureWatch upserts safely.
+  bookingId String @unique
+  // Customer who owns the booking/watch (User.id, no FK — see file header).
+  userId    String
+
+  status JourneyWatchStatus @default(ACTIVE)
+
+  flightNumber String?
+  departAt     DateTime?
+  arriveAt     DateTime?
+
+  // Last time the worker/manual trigger actually polled this watch — drives
+  // the worker's "skip if polled < 5 min ago" pacing rule, independent of
+  // whether that poll produced an event (dev guide §6.7 idle-tick rule).
+  lastPolledAt DateTime?
+
+  // Freeform bag for supplier feed identifiers, poll-provider state, etc.
+  metadata Json?
+
+  events JourneyEvent[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([userId])
+  @@index([departAt])
+}
+
+/// Append-only log of things detected during a poll (delay, gate change,
+/// ...). Written only when something actually changed — an idle poll tick
+/// touches `JourneyWatch.lastPolledAt` only, never this table (dev guide
+/// §6.7: "skip DB writes when nothing changed since the last poll").
+model JourneyEvent {
+  id      String       @id @default(cuid())
+  watchId String
+  watch   JourneyWatch @relation(fields: [watchId], references: [id], onDelete: Cascade)
+
+  type     JourneyEventType
+  // Higher = more disruptive. 0 = informational (e.g. boarding reminder),
+  // higher values reserved for cancellation/missed-connection-risk cases
+  // that the module doc says should also trigger a Module 13 escalation
+  // (not wired in this Phase-2 slice, left as a documented follow-up below).
+  severity Int              @default(0)
+
+  title String
+  body  String?
+
+  // Change fingerprint for concurrent-poll idempotency (null = legacy rows).
+  fingerprint String?
+
+  // Raw provider payload / poll-time snapshot, kept verbatim for debugging
+  // and future escalation-context use.
+  payload Json?
+
+  // Set once the notification fan-out for this event has actually been
+  // enqueued (see journey.service.js#pollWatch) — null means "detected but
+  // not yet notified", useful if that step is ever split from detection.
+  notifiedAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([watchId])
+  @@unique([watchId, fingerprint])
+}
+
+/// Multi-channel notification fan-out queue. One `JourneyEvent` can produce
+/// several rows here (one per channel) but each channel gets exactly one row
+/// per event — `@@unique([dedupeKey, channel])` is the dedupe guarantee
+/// (module doc: "one event, one coherent notification across channels, not
+/// a spam burst"). `dedupeKey` is `event:{eventId}` for journey events; other
+/// producers can use their own prefix without colliding.
+model NotificationOutbox {
+  id String @id @default(cuid())
+
+  // Recipient (User.id, no FK — see file header).
+  userId String
+
+  channel   NotificationChannel
+  dedupeKey String
+
+  title   String
+  body    String
+  payload Json?
+
+  status NotificationStatus @default(PENDING)
+
+  createdAt DateTime  @default(now())
+  sentAt    DateTime?
+
+  @@unique([dedupeKey, channel])
+  @@index([status])
+}

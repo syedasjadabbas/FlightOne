@@ -1,0 +1,190 @@
+// Module 02 — Customer Identity & Profile
+// Owned by modules/profile/. Scanned document binaries live in Module 07
+// (Traveller Vault); this module stores structured identity metadata and
+// optional vaultDocumentId links so OCR / re-upload / expiry jobs fit later.
+
+enum LoyaltyProgramType {
+  AIRLINE
+  HOTEL
+}
+
+enum CompanionKind {
+  COMPANION
+  FAMILY
+}
+
+enum IdentityDocumentType {
+  PASSPORT
+  NATIONAL_ID
+  VISA
+  RESIDENCE_PERMIT
+}
+
+enum IdentityDocumentStatus {
+  ACTIVE
+  SUPERSEDED
+  EXPIRED
+}
+
+enum IdentityVerificationStatus {
+  UNVERIFIED
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+/// One-to-one with User. Auto-created (empty) on first GET /api/v1/profile.
+/// Conversation state stays in Module 01 — never mirror chat slots here.
+model TravellerProfile {
+  userId String @id
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  displayName String
+  phone       String?
+  /// ISO 3166-1 alpha-2 when known (feeds visa checks later).
+  nationality String?
+
+  seatPref String? // e.g. "aisle" | "window" | "front" | "back"
+  mealPref String? // dietary/religious meal restriction, free text
+
+  /// Travel preferences (PRD): preferred airlines, cabin/class, layover tolerance.
+  preferredAirlines   Json? // e.g. ["PK", "EK"] — IATA airline codes
+  preferredCabin      String? // e.g. "ECONOMY" | "PREMIUM_ECONOMY" | "BUSINESS" | "FIRST"
+  maxLayoverMinutes   Int?
+
+  metadata Json? // freeform extension bag (never conversation transcripts)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  loyaltyMemberships LoyaltyMembership[]
+  emergencyContacts  EmergencyContact[]
+  identityDocuments  TravellerIdentityDocument[] @relation("ProfileIdentityDocuments")
+
+  @@map("TravellerProfile")
+}
+
+/// Saved companion / family member on an account holder's profile.
+/// Not required to have their own User account (PRD: "saved companions").
+model TravellerCompanion {
+  id          String @id @default(cuid())
+  ownerUserId String
+  owner       User   @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
+
+  kind         CompanionKind @default(COMPANION)
+  fullName     String
+  relationship String? // e.g. "spouse", "child", "friend"
+  dateOfBirth  DateTime?
+
+  // PII — passport number stored via lib/fieldEncryption.js (AES-GCM).
+  // Access-log document reads in modules/profile when decrypted for API.
+  passportNumber String?
+  passportExpiry DateTime?
+
+  metadata Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  identityDocuments TravellerIdentityDocument[]
+
+  @@index([ownerUserId])
+  @@index([ownerUserId, kind])
+  @@map("TravellerCompanion")
+}
+
+/// Structured identity document metadata for the account holder or a companion.
+/// Scanned copies → Module 07 VaultDocument via vaultDocumentId (optional).
+/// Renewals create a new ACTIVE row and mark the prior SUPERSEDED (supersedesId).
+model TravellerIdentityDocument {
+  id          String @id @default(cuid())
+  ownerUserId String
+  owner       User   @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
+
+  /// Set for account-holder docs (denormalized for queries); null for companion-only.
+  profileUserId String?
+  profile       TravellerProfile? @relation("ProfileIdentityDocuments", fields: [profileUserId], references: [userId], onDelete: Cascade)
+
+  companionId String?
+  companion   TravellerCompanion? @relation(fields: [companionId], references: [id], onDelete: Cascade)
+
+  type IdentityDocumentType
+
+  /// Encrypted document number (passport / CNIC / visa / permit). Never return raw enc.
+  documentNumberEnc String?
+
+  /// Passport/CNIC issuing country, visa destination, or residence country (ISO alpha-2).
+  countryCode     String?
+  /// Visa type / residence permit type / national-ID label when applicable.
+  documentSubtype String?
+
+  issuedAt  DateTime?
+  expiresAt DateTime?
+
+  /// Optional Module 07 vault file link (OCR / re-upload / scan later).
+  vaultDocumentId String?
+
+  status             IdentityDocumentStatus       @default(ACTIVE)
+  /// Prior version this renewal replaces (audit trail; do not delete old rows).
+  supersedesId       String?
+  verificationStatus IdentityVerificationStatus   @default(UNVERIFIED)
+
+  /// Explicit verification audit (who/when). Null until a verify decision is recorded.
+  verifiedAt       DateTime?
+  verifiedByUserId String?
+  verificationNote String?
+
+  /// Last OCR extraction — reviewable only; never auto-applied to VERIFIED rows.
+  ocrExtract     Json?
+  ocrExtractedAt DateTime?
+  ocrProvider    String?
+
+  metadata Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([ownerUserId])
+  @@index([profileUserId])
+  @@index([companionId])
+  @@index([type])
+  @@index([expiresAt])
+  @@index([status])
+  @@index([verificationStatus])
+  @@map("TravellerIdentityDocument")
+}
+
+/// Emergency contact(s) on the traveller profile (PRD).
+model EmergencyContact {
+  id            String           @id @default(cuid())
+  profileUserId String
+  profile       TravellerProfile @relation(fields: [profileUserId], references: [userId], onDelete: Cascade)
+
+  fullName     String
+  relationship String?
+  phone        String
+  email        String?
+  isPrimary    Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([profileUserId])
+  @@map("EmergencyContact")
+}
+
+/// Frequent flyer / hotel loyalty membership attached to a traveller profile.
+model LoyaltyMembership {
+  id            String           @id @default(cuid())
+  profileUserId String
+  profile       TravellerProfile @relation(fields: [profileUserId], references: [userId], onDelete: Cascade)
+
+  type         LoyaltyProgramType
+  programCode  String // airline/alliance or hotel chain code, e.g. "PK", "EK", "MARRIOTT"
+  memberNumber String
+
+  createdAt DateTime @default(now())
+
+  @@index([profileUserId])
+  @@map("LoyaltyMembership")
+}

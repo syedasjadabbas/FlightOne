@@ -1,0 +1,207 @@
+// Module 14 — Refund & Reissue Engine.
+// Owned by modules/refunds/. See docs/modules/14-refund-reissue-engine.md.
+// Financial values are fail-closed: never invent penalties, fees, or timelines.
+
+enum RefundCaseStatus {
+  DRAFT
+  QUOTED
+  ELIGIBLE
+  SUBMITTED
+  PROCESSING
+  COMPLETED
+  FAILED
+  REQUIRES_HUMAN
+  REJECTED
+  NOT_ELIGIBLE
+}
+
+enum ServicingKind {
+  REFUND
+  PARTIAL_REFUND
+  EXCHANGE
+  REISSUE
+  CANCELLATION
+  SCHEDULE_CHANGE
+}
+
+enum ServicingRequestStatus {
+  DRAFT
+  CALCULATED
+  REQUESTED
+  PROCESSING
+  COMPLETED
+  FAILED
+  REQUIRES_HUMAN
+  REJECTED
+  NOT_ELIGIBLE
+}
+
+enum PaymentRefundStatus {
+  NONE
+  PENDING_MANUAL
+  VOIDED
+  PROVIDER_REFUNDED
+  FAILED
+  UNSUPPORTED
+}
+
+enum TravelCreditStatus {
+  ISSUED
+  PARTIALLY_USED
+  USED
+  EXPIRED
+  REVERSED
+}
+
+enum DataAvailabilityStatus {
+  OK
+  DATA_UNAVAILABLE
+  UNSUPPORTED
+  PROVIDER_UNCONFIGURED
+  REQUIRES_HUMAN
+}
+
+model RefundCalculation {
+  id String @id @default(cuid())
+
+  bookingId String
+
+  currency String
+
+  grossPaidMinor       Int
+  supplierPenaltyMinor Int
+  agencyFeeMinor       Int
+  refundableMinor      Int
+  nonRefundableMinor   Int                   @default(0)
+  travelCreditMinor    Int                   @default(0)
+
+  dataStatus                 DataAvailabilityStatus @default(OK)
+  processingTimelineStatus   DataAvailabilityStatus @default(DATA_UNAVAILABLE)
+  processingTimelineNote     String?
+  product                    String?
+  kind                       ServicingKind          @default(REFUND)
+
+  formula Json
+
+  createdByUserId String
+
+  createdAt DateTime @default(now())
+
+  cases RefundCase[]
+
+  @@index([bookingId])
+}
+
+model RefundCase {
+  id String @id @default(cuid())
+
+  bookingId     String
+  calculationId String?
+  calculation   RefundCalculation? @relation(fields: [calculationId], references: [id], onDelete: SetNull)
+
+  status  RefundCaseStatus @default(DRAFT)
+  kind    ServicingKind    @default(REFUND)
+  reason  String?
+  partial Boolean          @default(false)
+
+  idempotencyKey String?
+
+  paymentRefundStatus PaymentRefundStatus @default(NONE)
+  paymentRefundRef    String?
+
+  supplierOperationStatus DataAvailabilityStatus?
+  supplierOperationNote   String?
+
+  escalationId  String?
+  failureReason String?
+
+  createdByUserId String
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  completedAt DateTime?
+
+  @@unique([idempotencyKey])
+  @@index([bookingId])
+  @@index([calculationId])
+  @@index([status])
+  @@index([kind])
+  @@index([createdByUserId])
+}
+
+model TravelCredit {
+  id String @id @default(cuid())
+
+  userId          String
+  sourceBookingId String
+  refundCaseId    String?
+
+  currency       String
+  amountMinor    Int
+  remainingMinor Int
+  status         TravelCreditStatus @default(ISSUED)
+  expiresAt      DateTime?
+
+  idempotencyKey String @unique
+  formula        Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([sourceBookingId])
+}
+
+model ServicingRequest {
+  id String @id @default(cuid())
+
+  bookingId String
+  userId    String
+  kind      ServicingKind
+  status    ServicingRequestStatus @default(DRAFT)
+
+  calculationId String?
+  refundCaseId  String?
+  journeyEventId String?
+
+  idempotencyKey String? @unique
+
+  currency             String?
+  fareDifferenceMinor  Int?
+  changePenaltyMinor   Int?
+  agencyFeeMinor       Int?
+  customerDueMinor     Int?
+  customerRefundMinor  Int?
+
+  dataStatus        DataAvailabilityStatus @default(DATA_UNAVAILABLE)
+  formula           Json?
+  supplierResponse  Json?
+  reason            String?
+  escalationId      String?
+  failureReason     String?
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  completedAt DateTime?
+
+  @@index([bookingId])
+  @@index([userId])
+  @@index([status])
+  @@index([kind])
+}
+
+model ServicingAuditEvent {
+  id String @id @default(cuid())
+
+  bookingId          String
+  refundCaseId       String?
+  servicingRequestId String?
+  actorUserId        String?
+  action             String
+  payload            Json?
+  createdAt          DateTime @default(now())
+
+  @@index([bookingId])
+  @@index([refundCaseId])
+  @@index([servicingRequestId])
+}

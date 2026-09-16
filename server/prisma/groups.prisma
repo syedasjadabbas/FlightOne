@@ -1,0 +1,468 @@
+// Module 11 — Group Travel + Module 12 — MICE Platform (Phase 2).
+// Owned by modules/groups/ (Group Travel primitives) and modules/mice/
+// (MICE extension). See docs/modules/11-group-travel.md and
+// docs/modules/12-mice-platform.md.
+//
+// Module 12's core concept ("build it as an extension over Module 11's
+// group primitives, not a parallel group system") is why this is ONE
+// schema family in one file: MiceEvent optionally links to a TravelGroup
+// (`MiceEvent.groupId`) instead of duplicating membership/announcement/poll
+// concepts. `modules/mice/mice.service.js` imports
+// `modules/groups/groups.service.js` to create that linked group so the
+// "creator becomes ORGANIZER" invariant is defined in exactly one place.
+//
+// Deliberately scalar (no relation) User references (`createdByUserId`,
+// `userId`, etc.) — same pattern as prisma/corporate.prisma: this module
+// looks up User rows by id via Prisma at the application layer when it
+// needs email/name, rather than growing a cross-module relation.
+
+enum GroupType {
+  CORPORATE_TOUR
+  STUDENT
+  UMRAH_HAJJ
+  LEISURE
+  SPORTS
+  FAMILY
+  OTHER
+}
+
+enum GroupMemberRole {
+  ORGANIZER
+  ADMIN
+  MEMBER
+}
+
+/// INVITED = pending invitation (accept/decline). ACTIVE = member.
+/// LEFT = revoked access going forward (shared content access ends).
+enum GroupMemberStatus {
+  INVITED
+  ACTIVE
+  LEFT
+  DECLINED
+}
+
+enum GroupAttendanceStatus {
+  PRESENT
+  ABSENT
+  EXCUSED
+}
+
+enum GroupTripMemoryStatus {
+  GROUNDED
+  INSUFFICIENT_DATA
+}
+
+/// A collaboration layer over individually-booked travellers (module doc's
+/// "Core concepts" — a group does NOT replace each member's own
+/// booking/profile record). `inviteCode` is the link/code invite mechanism.
+model TravelGroup {
+  id              String   @id @default(cuid())
+  name            String
+  type            GroupType
+  createdByUserId String
+  inviteCode      String   @unique
+  metadata        Json?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  members         GroupMember[]
+  announcements   GroupAnnouncement[]
+  polls           GroupPoll[]
+  miceEvents      MiceEvent[]
+  bookingShares   GroupBookingShare[]
+  documentShares  GroupDocumentShare[]
+  attendanceWaypoints GroupAttendanceWaypoint[]
+  photos          GroupPhoto[]
+  tripMemories    GroupTripMemory[]
+
+  @@index([createdByUserId])
+}
+
+/// One row per (group, user). Role model: ORGANIZER/ADMIN vs MEMBER
+/// permissions within the group (module doc's "Group setup" checklist) —
+/// enforced in modules/groups/groups.service.js, not at the DB layer.
+model GroupMember {
+  id        String            @id @default(cuid())
+  groupId   String
+  group     TravelGroup       @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  userId    String
+  role      GroupMemberRole   @default(MEMBER)
+  status    GroupMemberStatus @default(ACTIVE)
+  joinedAt  DateTime?
+  createdAt DateTime          @default(now())
+
+  @@unique([groupId, userId])
+  @@index([groupId])
+  @@index([userId])
+}
+
+/// Organizer -> group broadcast. priority >= 100 = emergency (multi-channel
+/// NotificationOutbox override; clearly distinguished from normal announcements).
+model GroupAnnouncement {
+  id           String      @id @default(cuid())
+  groupId      String
+  group        TravelGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  authorUserId String
+  body         String
+  priority     Int         @default(0)
+  isEmergency  Boolean     @default(false)
+  createdAt    DateTime    @default(now())
+
+  @@index([groupId])
+  @@index([createdAt])
+}
+
+/// Member explicitly shares their own booking into the group itinerary.
+/// Never duplicates Booking rows — references existing Module 03 bookings only.
+model GroupBookingShare {
+  id             String      @id @default(cuid())
+  groupId        String
+  group          TravelGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  bookingId      String
+  sharedByUserId String
+  createdAt      DateTime    @default(now())
+
+  @@unique([groupId, bookingId])
+  @@index([groupId])
+  @@index([bookingId])
+  @@index([sharedByUserId])
+}
+
+/// Explicit Vault document share into the group. Private vault docs are never
+/// auto-exposed — only rows here are visible to active members.
+model GroupDocumentShare {
+  id              String      @id @default(cuid())
+  groupId         String
+  group           TravelGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  vaultDocumentId String
+  sharedByUserId  String
+  label           String?
+  createdAt       DateTime    @default(now())
+
+  @@unique([groupId, vaultDocumentId])
+  @@index([groupId])
+  @@index([vaultDocumentId])
+}
+
+model GroupAttendanceWaypoint {
+  id              String      @id @default(cuid())
+  groupId         String
+  group           TravelGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  label           String
+  scheduledAt     DateTime?
+  createdByUserId String
+  createdAt       DateTime    @default(now())
+
+  records GroupAttendanceRecord[]
+
+  @@index([groupId])
+}
+
+model GroupAttendanceRecord {
+  id             String                @id @default(cuid())
+  waypointId     String
+  waypoint       GroupAttendanceWaypoint @relation(fields: [waypointId], references: [id], onDelete: Cascade)
+  groupId        String
+  userId         String
+  status         GroupAttendanceStatus @default(PRESENT)
+  notedByUserId  String
+  note           String?
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+
+  @@unique([waypointId, userId])
+  @@index([groupId])
+  @@index([userId])
+}
+
+/// Group photo gallery — separate from personal Vault; uses same storage provider.
+model GroupPhoto {
+  id               String      @id @default(cuid())
+  groupId          String
+  group            TravelGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  uploadedByUserId String
+  caption          String?
+  contentType      String
+  byteSize         Int
+  storageKey       String
+  contentSha256    String?
+  createdAt        DateTime    @default(now())
+
+  @@index([groupId])
+}
+
+/// AI/template trip memory grounded only in real group itinerary/activity data.
+model GroupTripMemory {
+  id              String                 @id @default(cuid())
+  groupId         String
+  group           TravelGroup            @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  createdByUserId String
+  title           String
+  body            String
+  sourceSnapshot  Json
+  status          GroupTripMemoryStatus  @default(GROUNDED)
+  createdAt       DateTime               @default(now())
+
+  @@index([groupId])
+}
+
+/// Organizer creates, members respond (e.g. excursion choice). `options` is
+/// a JSON array of option labels; `optionIndex` on the vote is validated
+/// against this array's length at the service layer (schema can't enforce
+/// that constraint).
+model GroupPoll {
+  id              String    @id @default(cuid())
+  groupId         String
+  group           TravelGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  question        String
+  options         Json
+  createdByUserId String
+  closesAt        DateTime?
+  createdAt       DateTime  @default(now())
+
+  votes GroupPollVote[]
+
+  @@index([groupId])
+}
+
+/// One vote per (poll, user) — re-voting is an upsert (change of mind),
+/// never a second row.
+model GroupPollVote {
+  id          String    @id @default(cuid())
+  pollId      String
+  poll        GroupPoll @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  userId      String
+  optionIndex Int
+  createdAt   DateTime  @default(now())
+
+  @@unique([pollId, userId])
+  @@index([pollId])
+}
+
+enum MiceEventType {
+  MEETING
+  INCENTIVE
+  CONFERENCE
+  EXHIBITION
+}
+
+enum MiceRegistrationStatus {
+  PENDING
+  REGISTERED
+  CHECKED_IN
+  CANCELLED
+}
+
+/// A MICE event is a superset of Group Travel (module doc's "Core
+/// concepts") — `groupId` optionally links to a TravelGroup created either
+/// by the caller ahead of time or auto-created by
+/// `modules/mice/mice.service.js#createEvent` (via
+/// `modules/groups/groups.service.js#createGroup`) when the event needs
+/// group-style announcements/polls for its delegates. `companyId` is a
+/// plain scalar (Module 06 cost-centre mapping — module doc's
+/// "Dependencies") — no relation, same rationale as prisma/corporate.prisma.
+model MiceEvent {
+  id              String        @id @default(cuid())
+  groupId         String?
+  group           TravelGroup?  @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  name            String
+  type            MiceEventType
+  venue           String?
+  startsAt        DateTime
+  endsAt          DateTime
+  companyId       String?
+  budgetMinor     Int?
+  currency        String?
+  createdByUserId String
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  delegates MiceDelegate[]
+  sessions  MiceSession[]
+  checkIns  MiceCheckIn[]
+  bookingShares MiceBookingShare[]
+  transfers MiceTransfer[]
+  sponsors  MiceSponsor[]
+  budgetLines MiceBudgetLine[]
+
+  @@index([groupId])
+  @@index([createdByUserId])
+}
+
+/// `userId` is optional — a delegate need not be a platform User (module
+/// doc's "self-service or organizer-added" registration flow can add
+/// delegates who only have a name/email on file). `badgeCode` is globally
+/// unique (printed/QR badge, module doc's "Badge generation") and is the
+/// lookup key for check-in.
+model MiceDelegate {
+  id                 String                 @id @default(cuid())
+  eventId            String
+  event              MiceEvent              @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId             String?
+  fullName           String
+  email              String
+  registrationStatus MiceRegistrationStatus @default(PENDING)
+  badgeCode          String                 @unique
+  dietary            String?
+  createdAt          DateTime               @default(now())
+
+  checkIns MiceCheckIn[]
+
+  @@unique([eventId, email])
+  @@index([eventId])
+  @@index([email])
+  @@index([userId])
+}
+
+/// Agenda item (module doc's "Event agenda — sessions, tracks, speakers,
+/// timing"). Per-session QR check-in (`MiceCheckIn.sessionId`) derives
+/// per-session attendance without a separate attendance table.
+model MiceSession {
+  id        String   @id @default(cuid())
+  eventId   String
+  event     MiceEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  title     String
+  track     String?
+  speakers  String?
+  startsAt  DateTime
+  endsAt    DateTime
+  location  String?
+  createdAt DateTime @default(now())
+
+  @@index([eventId])
+}
+
+/// QR-code check-in per delegate, per event or per session (module doc's
+/// "QR-code check-in per delegate per session/event").
+///
+/// `sessionId` is a plain scalar — deliberately NOT a `@relation` into
+/// MiceSession — defaulted to `""` (rather than nullable) so the uniqueness
+/// constraint below is reliably enforced by Postgres: a nullable FK column
+/// would make `@@unique([delegateId, eventId, sessionId])` useless for the
+/// event-level case, since Postgres treats every NULL as distinct and would
+/// happily allow unlimited duplicate event-level check-ins for the same
+/// delegate. `""` means "event-level check-in (no specific session)";
+/// `mice.service.js` validates any non-empty `sessionId` against
+/// `MiceSession` (and that it belongs to the same event) at the application
+/// layer before writing.
+model MiceCheckIn {
+  id          String       @id @default(cuid())
+  eventId     String
+  event       MiceEvent    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  sessionId   String       @default("")
+  delegateId  String
+  delegate    MiceDelegate @relation(fields: [delegateId], references: [id], onDelete: Cascade)
+  checkedInAt DateTime     @default(now())
+  method      String       @default("QR")
+
+  @@unique([delegateId, eventId, sessionId])
+  @@index([eventId])
+  @@index([sessionId])
+}
+
+enum MiceBookingKind {
+  FLIGHT
+  HOTEL
+  TRANSFER
+  OTHER
+}
+
+/// Links a real Module 03 booking to a MICE event — never duplicates Booking rows.
+model MiceBookingShare {
+  id             String          @id @default(cuid())
+  eventId        String
+  event          MiceEvent       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  bookingId      String
+  delegateId     String?
+  sharedByUserId String
+  kind           MiceBookingKind @default(OTHER)
+  createdAt      DateTime        @default(now())
+
+  @@unique([eventId, bookingId])
+  @@index([eventId])
+  @@index([bookingId])
+  @@index([delegateId])
+}
+
+/// Ground transfer requirements for MICE events.
+/// Live inventory/booking only via configured provider — never invented.
+/// Status CONFIRMED requires an attributed provider confirmation ref.
+enum MiceTransferDirection {
+  AIRPORT_PICKUP
+  AIRPORT_DROPOFF
+}
+
+enum MiceTransferStatus {
+  REQUESTED
+  PROVIDER_UNCONFIGURED
+  DATA_UNAVAILABLE
+  CONFIRMED
+  FAILED
+}
+
+model MiceTransfer {
+  id              String                @id @default(cuid())
+  eventId         String
+  event           MiceEvent             @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  delegateId      String?
+  label           String
+  direction       MiceTransferDirection @default(AIRPORT_PICKUP)
+  passengerCount  Int                   @default(1)
+  airportCode     String?
+  flightRef       String?
+  /// Module 03 flight booking linked to this event (validated at write time).
+  flightBookingId String?
+  pickupAt        DateTime?
+  pickupLocation  String?
+  dropoffLocation String?
+  notes           String?
+  /// Optional Module 03 booking id for a confirmed transfer product (if one exists).
+  bookingId       String?
+  status          MiceTransferStatus    @default(REQUESTED)
+  providerStatus  String?
+  providerReason  String?
+  /// Provider confirmation reference — set only when status=CONFIRMED.
+  transferRef     String?
+  confirmedAt     DateTime?
+  idempotencyKey  String?
+  createdByUserId String
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+
+  @@unique([eventId, idempotencyKey])
+  @@index([eventId])
+  @@index([delegateId])
+  @@index([flightBookingId])
+  @@index([status])
+}
+
+model MiceSponsor {
+  id            String   @id @default(cuid())
+  eventId       String
+  event         MiceEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  name          String
+  tier          String?
+  contactEmail  String?
+  deliverables  String?
+  note          String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([eventId])
+}
+
+/// Planned/actual budget line items. Travel actuals also derived from linked bookings in reports.
+model MiceBudgetLine {
+  id           String   @id @default(cuid())
+  eventId      String
+  event        MiceEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  category     String
+  label        String
+  plannedMinor Int      @default(0)
+  actualMinor  Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([eventId])
+}
+

@@ -1,0 +1,44 @@
+{
+  "chat": "http://localhost:3000/api/chat",
+  "cases": [
+    {
+      "name": "lhe-dxb-curated",
+      "query": {
+        "origin": "LHE",
+        "destination": "DXB",
+        "departureDate": "2026-09-18",
+        "passengers": 1,
+        "cabinClass": "ECONOMY",
+        "requestedCurrency": "PKR"
+      },
+      "curated": [
+        {
+          "id": "TP-o1_j1_p0_s1-s2",
+          "angle": "best_value",
+          "price": "PKR 89,718",
+          "reasons": [
+            "Best overall at PKR 89,718"
+          ]
+        }
+      ],
+      "panelCount": 12,
+      "reply": "Based on your preferences, these are the strongest options: Best overall: PKR 89,718 — Best overall at PKR 89,718 I recommend the best overall option because at PKR 89,718. Compare the full list in the results panel when you're ready."
+    },
+    {
+      "name": "stale-destination",
+      "query": {
+        "origin": "LHE",
+        "destination": "IST",
+        "departureDate": "2026-09-20",
+        "passengers": 1,
+        "cabinClass": "ECONOMY"
+      },
+      "panelDests": [
+        "IST"
+      ],
+      "curatedDests": [
+        "IST"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "turns": [
+    {
+      "user": "Lahore to Dubai",
+      "action": "clarify",
+      "query": {
+        "origin": "LHE",
+        "destination": "DXB",
+        "departureDate": "",
+        "passengers": 1,
+        "cabinClass": "ECONOMY"
+      },
+      "reply": "What date would you like to depart?",
+      "offerRoutes": []
+    },
+    {
+      "user": "I want to go to China from Lahore on 15 sept",
+      "action": "clarify",
+      "query": {
+        "origin": "LHE",
+        "destination": "",
+        "departureDate": "2026-09-15",
+        "passengers": 1,
+        "cabinClass": "ECONOMY"
+      },
+      "reply": "Which city in China would you like to fly to? Beijing, Shanghai, or another city?",
+      "offerRoutes": [],
+      "offerCount": 0
+    },
+    {
+      "user": "beijing on 10 sept",
+      "action": "search",
+      "query": {
+        "origin": "LHE",
+        "destination": "PEK",
+        "departureDate": "2026-09-10",
+        "passengers": 1,
+        "cabinClass": "ECONOMY"
+      },
+      "reply": "I found 3 live options for Beijing from PKR 219,867. Browse the results panel to compare, filter, and View deal — tell me if you'd like to refine.",
+      "offerRoutes": [
+        "LHE→PEK"
+      ],
+      "offerCount": 3,
+      "liveFlights": true,
+      "hasDxb": false,
+      "finalTravelportRequest": {
+        "origin": "LHE",
+        "destination": "PEK",
+        "departureDate": "2026-09-10",
+        "passengers": 1,
+        "cabinClass": "ECONOMY"
+      }
+    }
+  ],
+  "stalePreviousPlanSim": {
+    "previousWas": "LHE→DXB search",
+    "query": {
+      "origin": "LHE",
+      "destination": "PEK",
+      "departureDate": "2026-09-10",
+      "passengers": 1,
+      "cabinClass": "ECONOMY"
+    },
+    "reply": "I found 3 live options for Beijing from PKR 219,867. Browse the results panel to compare, filter, and View deal — tell me if you'd like to refine.",
+    "offerRoutes": [
+      "LHE→PEK"
+    ]
+  }
+}

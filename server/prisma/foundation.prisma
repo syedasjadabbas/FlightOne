@@ -1,0 +1,78 @@
+// Module 00 — Foundation & Security
+// RBAC/entitlement model (`resource:action` permission keys) + immutable audit log.
+// Owned by modules/me/, lib/permissions.service.js, lib/audit.js, middlewares/permission.js.
+//
+// Roles may be global (`companyId` null) or scoped to a Module 06 Company via the
+// optional `UserRole.companyId` scalar. That field is intentionally a plain String
+// with no Prisma `@relation` into `Company` (see prisma/corporate.prisma) — same
+// cross-module scalar pattern used elsewhere so foundation migrations stay
+// independent of corporate schema shape.
+
+model Role {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  permissions RolePermission[]
+  userRoles   UserRole[]
+}
+
+model Permission {
+  id        String   @id @default(cuid())
+  key       String   @unique // "resource:action", e.g. "booking:create"
+  label     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  roles RolePermission[]
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+}
+
+model UserRole {
+  id     String @id @default(cuid())
+  userId String
+  roleId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  // When set, this role assignment is scoped to that Module 06 Company instead of
+  // being global. Intentional scalar (no Prisma FK) — Company lives in
+  // corporate.prisma; application code resolves/validates the id at the service layer.
+  companyId String?
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, roleId, companyId])
+  @@index([userId])
+  @@index([roleId])
+}
+
+/// Immutable, append-only. Never update or delete rows — write-once audit trail for
+/// security-sensitive actions (login, permission change, document access, financial
+/// actions). See lib/audit.js.
+model AuditLog {
+  id           String   @id @default(cuid())
+  userId       String?
+  user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action       String
+  resourceType String
+  resourceId   String?
+  metadata     Json?
+  ip           String?
+  userAgent    String?
+  createdAt    DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([userId, createdAt])
+  @@index([resourceType, resourceId])
+}

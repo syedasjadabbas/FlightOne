@@ -1,0 +1,1075 @@
+{
+  "refListTypes": [
+    "ReferenceListFlight",
+    "ReferenceListProduct",
+    "ReferenceListTermsAndConditions",
+    "ReferenceListBrand"
+  ],
+  "brandBlocks": [
+    {
+      "@type": "ReferenceListBrand",
+      "Brand": [
+        {
+          "@type": "Brand",
+          "name": "Economy Basic",
+          "tier": 8,
+          "shelfNumbers": [],
+          "code": "YBASIC",
+          "id": "b0",
+          "Identifier": {
+            "value": "2094163"
+          },
+          "BrandAttribute": [
+            {
+              "@type": "BrandAttribute",
+              "classification": "Rebooking",
+              "inclusion": "Not Offered",
+              "groupCode": "BF",
+              "subGroupCode": "VC",
+              "subCode": "059"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "Meals",
+              "inclusion": "Included",
+              "groupCode": "ML",
+              "subCode": "0B3"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "CarryOn",
+              "inclusion": "Included",
+              "groupCode": "BG",
+              "subGroupCode": "CY",
+              "subCode": "010"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "Refund",
+              "inclusion": "Not Offered",
+              "groupCode": "TS",
+              "subGroupCode": "NS",
+              "subCode": "0NN"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "CheckedBag",
+              "inclusion": "Not Offered",
+              "groupCode": "BF",
+              "subCode": "P01"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "SeatAssignment",
+              "inclusion": "Chargeable",
+              "groupCode": "BF",
+              "subGroupCode": "SE",
+              "subCode": "05Z"
+            }
+          ],
+          "AdditionalBrandAttribute": [
+            {
+              "@type": "AdditionalBrandAttribute",
+              "groupCode": "TS",
+              "subGroupCode": "PO",
+              "subCode": "03P",
+              "Classification": "Priority CheckIn",
+              "Inclusion": "Chargeable"
+            },
+            {
+              "@type": "AdditionalBrandAttribute",
+              "groupCode": "LG",
+              "subCode": "0BX",
+              "Classification": "Lounge Access",
+              "Inclusion": "Chargeable"
+            },
+            {
+              "@type": "AdditionalBrandAttribute",
+              "groupCode": "BF",
+              "subGroupCode": "FR",
+              "subCode": "09C",
+              "Classification": "Mileage Accrual",
+              "Inclusion": "Included"
+            },
+            {
+              "@type": "AdditionalBrandAttribute",
+              "groupCode": "UP",
+              "subCode": "UYC",
+              "Classification": "Upgrade",
+              "Inclusion": "Not Offered"
+            }
+          ],
+          "ImageURL": [
+            "https://cdn.travelport.com/etihad/EY_general_small_637393.png"
+          ]
+        },
+        {
+          "@type": "Brand",
+          "name": "Economy Value",
+          "tier": 9,
+          "shelfNumbers": [],
+          "code": "YVALUE",
+          "id": "b1",
+          "Identifier": {
+            "value": "2094162"
+          },
+          "BrandAttribute": [
+            {
+              "@type": "BrandAttribute",
+              "classification": "Rebooking",
+              "inclusion": "Chargeable",
+              "groupCode": "BF",
+              "subGroupCode": "VC",
+              "subCode": "059"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "Meals",
+              "inclusion": "Included",
+              "groupCode": "ML",
+              "subCode": "0B3"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "CarryOn",
+              "inclusion": "Included",
+              "groupCode": "BG",
+              "subGroupCode": "CY",
+              "subCode": "010"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "Refund",
+              "inclusion": "Chargeable",
+              "groupCode": "TS",
+              "subGroupCode": "NS",
+              "subCode": "0NN"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "CheckedBag",
+              "inclusion": "Included",
+              "groupCode": "BF",
+              "subCode": "P01"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "SeatAssignment",
+              "inclusion": "Chargeable",
+              "groupCode": "BF",
+              "subGroupCode": "SE",
+              "subCode": "05Z"
+            }
+          ],
+          "AdditionalBrandAttribute": [
+            {
+              "@type": "AdditionalBrandAttribute",
+              "groupCode": "TS",
+              "subGroupCode": "PO",
+              "subCode": "03P",
+              "Classification": "Priority CheckIn",
+              "Inclusion": "Chargeable"
+            },
+            {
+              "@type": "AdditionalBrandAttribute",
+              "groupCode": "LG",
+              "subCode": "0BX",
+              "Classification": "Lounge Access",
+              "Inclusion": "Chargeable"
+            },
+            {
+              "@type": "AdditionalBrandAttribute",
+              "groupCode": "BF",
+              "subGroupCode": "FR",
+              "subCode": "05U",
+              "Classification": "Mileage Accrual",
+              "Inclusion": "Included"
+            },
+            {
+              "@type": "AdditionalBrandAttribute",
+              "groupCode": "BF",
+              "subGroupCode": "UE",
+              "subCode": "058",
+              "Classification": "Upgrade",
+              "Inclusion": "Chargeable"
+            }
+          ],
+          "ImageURL": [
+            "https://cdn.travelport.com/etihad/EY_general_small_637395.png"
+          ]
+        },
+        {
+          "@type": "Brand",
+          "name": "Economy Flex",
+          "tier": 2,
+          "shelfNumbers": [],
+          "code": "ECOFLEX",
+          "id": "b10",
+          "Identifier": {
+            "value": "2070941"
+          },
+          "BrandAttribute": [
+            {
+              "@type": "BrandAttribute",
+              "classification": "Refund",
+              "inclusion": "Chargeable",
+              "groupCode": "BF",
+              "subGroupCode": "RF",
+              "subCode": "056"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "SeatAssignment",
+              "inclusion": "Included",
+              "groupCode": "BF",
+              "subGroupCode": "SE",
+              "subCode": "05Z"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "Rebooking",
+              "inclusion": "Included",
+              "groupCode": "BF",
+              "subGroupCode": "VC",
+              "subCode": "055"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "Meals",
+              "inclusion": "Included",
+              "groupCode": "ML",
+              "subCode": "0B3"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "CarryOn",
+              "inclusion": "Included",
+              "groupCode": "BG",
+              "subGroupCode": "CY",
+              "subCode": "0MJ"
+            }
+          ],
+          "AdditionalBrandAttribute": [
+            {
+              "@type": "AdditionalBrandAttribute",
+              "groupCode": "TS",
+              "subGroupCode": "PO",
+              "subCode": "03P",
+              "Classification": "Priority CheckIn",
+              "Inclusion": "Chargeable"
+            },
+            {
+              "@type": "AdditionalBrandAttribute",
+              "groupCode": "BF",
+              "subGroupCode": "FR",
+              "subCode": "06A",
+              "Classification": "Mileage Accrual",
+              "Inclusion": "Included"
+            },
+            {
+              "@type": "AdditionalBrandAttribute",
+              "groupCode": "LG",
+              "subCode": "0BX",
+              "Classification": "Lounge Access",
+              "Inclusion": "Chargeable"
+            },
+            {
+              "@type": "AdditionalBrandAttribute",
+              "groupCode": "TS",
+              "subGroupCode": "SY",
+              "subCode": "0LW",
+              "Classification": "Priority Security",
+              "Inclusion": "Chargeable"
+            }
+          ]
+        },
+        {
+          "@type": "Brand",
+          "name": "Economy Comfort",
+          "tier": 10,
+          "shelfNumbers": [],
+          "code": "YCOMFORT",
+          "id": "b2",
+          "Identifier": {
+            "value": "2094161"
+          },
+          "BrandAttribute": [
+            {
+              "@type": "BrandAttribute",
+              "classification": "Rebooking",
+              "inclusion": "Chargeable",
+              "groupCode": "BF",
+              "subGroupCode": "VC",
+              "subCode": "059"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "Meals",
+              "inclusion": "Included",
+              "groupCode": "ML",
+              "subCode": "0B3"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "CarryOn",
+              "inclusion": "Included",
+              "groupCode": "BG",
+              "subGroupCode": "CY",
+              "subCode": "010"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "Refund",
+              "inclusion": "Chargeable",
+              "groupCode": "BF",
+              "subGroupCode": "RF",
+              "subCode": "056"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "CheckedBag",
+              "inclusion": "Included",
+              "groupCode": "BF",
+              "subCode": "P01"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "SeatAssignment",
+              "inclusion": "Chargeable",
+              "groupCode": "BF",
+              "subGroupCode": "SE",
+              "subCode": "05Z"
+            }
+          ],
+          "AdditionalBrandAttribute": [
+            {
+              "@type": "AdditionalBrandAttribute",
+              "groupCode": "TS",
+              "subGroupCode": "PO",
+              "subCode": "03P",
+              "Classification": "Priority CheckIn",
+              "Inclusion": "Chargeable"
+            },
+            {
+              "@type": "AdditionalBrandAttribute",
+              "groupCode": "LG",
+              "subCode": "0BX",
+              "Classification": "Lounge Access",
+              "Inclusion": "Chargeable"
+            },
+            {
+              "@type": "AdditionalBrandAttribute",
+              "groupCode": "BF",
+              "subGroupCode": "FR",
+              "subCode": "06C",
+              "Classification": "Mileage Accrual",
+              "Inclusion": "Included"
+            },
+            {
+              "@type": "AdditionalBrandAttribute",
+              "groupCode": "BF",
+              "subGroupCode": "UE",
+              "subCode": "058",
+              "Classification": "Upgrade",
+              "Inclusion": "Chargeable"
+            }
+          ],
+          "ImageURL": [
+            "https://cdn.travelport.com/etihad/EY_general_small_637389.jpg"
+          ]
+        },
+        {
+          "@type": "Brand",
+          "name": "Econ Value",
+          "tier": 4,
+          "shelfNumbers": [],
+          "code": "Econ Value",
+          "id": "b3",
+          "Identifier": {
+            "value": "1308417"
+          },
+          "BrandAttribute": [
+            {
+              "@type": "BrandAttribute",
+              "classification": "CarryOn",
+              "inclusion": "Included",
+              "groupCode": "BG",
+              "subGroupCode": "CY"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "Refund",
+              "inclusion": "Included",
+              "groupCode": "BF",
+              "subGroupCode": "RF"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "Rebooking",
+              "inclusion": "Included",
+              "groupCode": "BF",
+              "subGroupCode": "VC"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "SeatAssignment",
+              "inclusion": "Chargeable",
+              "groupCode": "SA"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "WiFi",
+              "inclusion": "Chargeable",
+              "groupCode": "IE",
+              "subGroupCode": "IT"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "Meals",
+              "inclusion": "Included",
+              "groupCode": "ML"
+            }
+          ],
+          "AdditionalBrandAttribute": [
+            {
+              "@type": "AdditionalBrandAttribute",
+              "groupCode": "TS",
+              "subGroupCode": "CI",
+              "Classification": "Priority CheckIn",
+              "Inclusion": "Not Offered"
+            },
+            {
+              "@type": "AdditionalBrandAttribute",
+              "groupCode": "LG",
+              "Classification": "Lounge Access",
+              "Inclusion": "Not Offered"
+            }
+          ],
+          "ImageURL": [
+            "https://cdn.travelport.com/srilankanairlines/UL_general_small_537470.jpg"
+          ]
+        },
+        {
+          "@type": "Brand",
+          "name": "Econ Semi Flex",
+          "tier": 5,
+          "shelfNumbers": [],
+          "code": "Econ Semi",
+          "id": "b4",
+          "Identifier": {
+            "value": "1308418"
+          },
+          "BrandAttribute": [
+            {
+              "@type": "BrandAttribute",
+              "classification": "CarryOn",
+              "inclusion": "Included",
+              "groupCode": "BG",
+              "subGroupCode": "CY"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "Refund",
+              "inclusion": "Included",
+              "groupCode": "BF",
+              "subGroupCode": "RF"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "Rebooking",
+              "inclusion": "Included",
+              "groupCode": "BF",
+              "subGroupCode": "VC"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "SeatAssignment",
+              "inclusion": "Included",
+              "groupCode": "SA"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "WiFi",
+              "inclusion": "Chargeable",
+              "groupCode": "IE",
+              "subGroupCode": "IT"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "Meals",
+              "inclusion": "Included",
+              "groupCode": "ML"
+            }
+          ],
+          "AdditionalBrandAttribute": [
+            {
+              "@type": "AdditionalBrandAttribute",
+              "groupCode": "TS",
+              "subGroupCode": "CI",
+              "Classification": "Priority CheckIn",
+              "Inclusion": "Not Offered"
+            },
+            {
+              "@type": "AdditionalBrandAttribute",
+              "groupCode": "LG",
+              "Classification": "Lounge Access",
+              "Inclusion": "Not Offered"
+            }
+          ],
+          "ImageURL": [
+            "https://cdn.travelport.com/srilankanairlines/UL_general_small_537462.jpg"
+          ]
+        },
+        {
+          "@type": "Brand",
+          "name": "Economy Flex",
+          "tier": 6,
+          "shelfNumbers": [],
+          "code": "Economy Fl",
+          "id": "b5",
+          "Identifier": {
+            "value": "1308413"
+          },
+          "BrandAttribute": [
+            {
+              "@type": "BrandAttribute",
+              "classification": "CarryOn",
+              "inclusion": "Included",
+              "groupCode": "BG",
+              "subGroupCode": "CY"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "Refund",
+              "inclusion": "Included",
+              "groupCode": "BF",
+              "subGroupCode": "RF"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "Rebooking",
+              "inclusion": "Included",
+              "groupCode": "BF",
+              "subGroupCode": "VC"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "SeatAssignment",
+              "inclusion": "Included",
+              "groupCode": "SA"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "WiFi",
+              "inclusion": "Chargeable",
+              "groupCode": "IE",
+              "subGroupCode": "IT"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "Meals",
+              "inclusion": "Included",
+              "groupCode": "ML"
+            }
+          ],
+          "AdditionalBrandAttribute": [
+            {
+              "@type": "AdditionalBrandAttribute",
+              "groupCode": "TS",
+              "subGroupCode": "CI",
+              "Classification": "Priority CheckIn",
+              "Inclusion": "Not Offered"
+            },
+            {
+              "@type": "AdditionalBrandAttribute",
+              "groupCode": "LG",
+              "Classification": "Lounge Access",
+              "Inclusion": "Not Offered"
+            }
+          ],
+          "ImageURL": [
+            "https://cdn.travelport.com/srilankanairlines/UL_general_small_537470.jpg"
+          ]
+        },
+        {
+          "@type": "Brand",
+          "name": "Economy Comfort",
+          "tier": 1,
+          "shelfNumbers": [],
+          "code": "ECOCOMFORT",
+          "id": "b6",
+          "Identifier": {
+            "value": "2070942"
+          },
+          "BrandAttribute": [
+            {
+              "@type": "BrandAttribute",
+              "classification": "Refund",
+              "inclusion": "Chargeable",
+              "groupCode": "BF",
+              "subGroupCode": "RF",
+              "subCode": "056"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "SeatAssignment",
+              "inclusion": "Not Offered",
+              "groupCode": "BF",
+              "subGroupCode": "SE",
+              "subCode": "05Z"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "Rebooking",
+              "inclusion": "Chargeable",
+              "groupCode": "BF",
+              "subGroupCode": "VC",
+              "subCode": "055"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "Meals",
+              "inclusion": "Included",
+              "groupCode": "ML",
+              "subCode": "0B3"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "CarryOn",
+              "inclusion": "Included",
+              "groupCode": "BG",
+              "subGroupCode": "CY",
+              "subCode": "0MJ"
+            }
+          ],
+          "AdditionalBrandAttribute": [
+            {
+              "@type": "AdditionalBrandAttribute",
+              "groupCode": "TS",
+              "subGroupCode": "PO",
+              "subCode": "03P",
+              "Classification": "Priority CheckIn",
+              "Inclusion": "Chargeable"
+            },
+            {
+              "@type": "AdditionalBrandAttribute",
+              "groupCode": "BF",
+              "subGroupCode": "FR",
+              "subCode": "06A",
+              "Classification": "Mileage Accrual",
+              "Inclusion": "Included"
+            },
+            {
+              "@type": "AdditionalBrandAttribute",
+              "groupCode": "LG",
+              "subCode": "0BX",
+              "Classification": "Lounge Access",
+              "Inclusion": "Chargeable"
+            },
+            {
+              "@type": "AdditionalBrandAttribute",
+              "groupCode": "TS",
+              "subGroupCode": "SY",
+              "subCode": "0LW",
+              "Classification": "Priority Security",
+              "Inclusion": "Chargeable"
+            }
+          ]
+        },
+        {
+          "@type": "Brand",
+          "name": "Business Studio",
+          "tier": 5,
+          "shelfNumbers": [],
+          "code": "BIZSTUDIO",
+          "id": "b7",
+          "Identifier": {
+            "value": "2070938"
+          },
+          "BrandAttribute": [
+            {
+              "@type": "BrandAttribute",
+              "classification": "Refund",
+              "inclusion": "Chargeable",
+              "groupCode": "BF",
+              "subGroupCode": "RF",
+              "subCode": "056"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "SeatAssignment",
+              "inclusion": "Included",
+              "groupCode": "BF",
+              "subGroupCode": "SE",
+              "subCode": "05Z"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "Rebooking",
+              "inclusion": "Included",
+              "groupCode": "BF",
+              "subGroupCode": "VC",
+              "subCode": "055"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "Meals",
+              "inclusion": "Included",
+              "groupCode": "ML",
+              "subCode": "0B3"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "CarryOn",
+              "inclusion": "Included",
+              "groupCode": "BG",
+              "subGroupCode": "CY",
+              "subCode": "0L5"
+            }
+          ],
+          "AdditionalBrandAttribute": [
+            {
+              "@type": "AdditionalBrandAttribute",
+              "groupCode": "TS",
+              "subGroupCode": "PO",
+              "subCode": "03P",
+              "Classification": "Priority CheckIn",
+              "Inclusion": "Included"
+            },
+            {
+              "@type": "AdditionalBrandAttribute",
+              "groupCode": "BF",
+              "subGroupCode": "FR",
+              "subCode": "06A",
+              "Classification": "Mileage Accrual",
+              "Inclusion": "Included"
+            },
+            {
+              "@type": "AdditionalBrandAttribute",
+              "groupCode": "LG",
+              "subCode": "0BX",
+              "Classification": "Lounge Access",
+              "Inclusion": "Included"
+            },
+            {
+              "@type": "AdditionalBrandAttribute",
+              "groupCode": "TS",
+              "subGroupCode": "SY",
+              "subCode": "0LW",
+              "Classification": "Priority Security",
+              "Inclusion": "Included"
+            }
+          ]
+        },
+        {
+          "@type": "Brand",
+          "name": "Business Flex",
+          "tier": 4,
+          "shelfNumbers": [],
+          "code": "BIZFLEX",
+          "id": "b8",
+          "Identifier": {
+            "value": "2070939"
+          },
+          "BrandAttribute": [
+            {
+              "@type": "BrandAttribute",
+              "classification": "Refund",
+              "inclusion": "Chargeable",
+              "groupCode": "BF",
+              "subGroupCode": "RF",
+              "subCode": "056"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "SeatAssignment",
+              "inclusion": "Included",
+              "groupCode": "BF",
+              "subGroupCode": "SE",
+              "subCode": "05Z"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "Rebooking",
+              "inclusion": "Included",
+              "groupCode": "BF",
+              "subGroupCode": "VC",
+              "subCode": "055"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "Meals",
+              "inclusion": "Included",
+              "groupCode": "ML",
+              "subCode": "0B3"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "CarryOn",
+              "inclusion": "Included",
+              "groupCode": "BG",
+              "subGroupCode": "CY",
+              "subCode": "0L5"
+            }
+          ],
+          "AdditionalBrandAttribute": [
+            {
+              "@type": "AdditionalBrandAttribute",
+              "groupCode": "TS",
+              "subGroupCode": "PO",
+              "subCode": "03P",
+              "Classification": "Priority CheckIn",
+              "Inclusion": "Included"
+            },
+            {
+              "@type": "AdditionalBrandAttribute",
+              "groupCode": "BF",
+              "subGroupCode": "FR",
+              "subCode": "06A",
+              "Classification": "Mileage Accrual",
+              "Inclusion": "Included"
+            },
+            {
+              "@type": "AdditionalBrandAttribute",
+              "groupCode": "LG",
+              "subCode": "0BX",
+              "Classification": "Lounge Access",
+              "Inclusion": "Included"
+            },
+            {
+              "@type": "AdditionalBrandAttribute",
+              "groupCode": "TS",
+              "subGroupCode": "SY",
+              "subCode": "0LW",
+              "Classification": "Priority Security",
+              "Inclusion": "Included"
+            }
+          ]
+        },
+        {
+          "@type": "Brand",
+          "name": "Business Comfort",
+          "tier": 3,
+          "shelfNumbers": [],
+          "code": "BIZCOMFORT",
+          "id": "b9",
+          "Identifier": {
+            "value": "2070940"
+          },
+          "BrandAttribute": [
+            {
+              "@type": "BrandAttribute",
+              "classification": "Refund",
+              "inclusion": "Chargeable",
+              "groupCode": "BF",
+              "subGroupCode": "RF",
+              "subCode": "056"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "SeatAssignment",
+              "inclusion": "Included",
+              "groupCode": "BF",
+              "subGroupCode": "SE",
+              "subCode": "05Z"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "Rebooking",
+              "inclusion": "Chargeable",
+              "groupCode": "BF",
+              "subGroupCode": "VC",
+              "subCode": "055"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "Meals",
+              "inclusion": "Included",
+              "groupCode": "ML",
+              "subCode": "0B3"
+            },
+            {
+              "@type": "BrandAttribute",
+              "classification": "CarryOn",
+              "inclusion": "Included",
+              "groupCode": "BG",
+              "subGroupCode": "CY",
+              "subCode": "0L5"
+            }
+          ],
+          "AdditionalBrandAttribute": [
+            {
+              "@type": "AdditionalBrandAttribute",
+              "groupCode": "TS",
+              "subGroupCode": "PO",
+              "subCode": "03P",
+              "Classification": "Priority CheckIn",
+              "Inclusion": "Included"
+            },
+            {
+              "@type": "AdditionalBrandAttribute",
+              "groupCode": "BF",
+              "subGroupCode": "FR",
+              "subCode": "06A",
+              "Classification": "Mileage Accrual",
+              "Inclusion": "Included"
+            },
+            {
+              "@type": "AdditionalBrandAttribute",
+              "groupCode": "LG",
+              "subCode": "0BX",
+              "Classification": "Lounge Access",
+              "Inclusion": "Included"
+            },
+            {
+              "@type": "AdditionalBrandAttribute",
+              "groupCode": "TS",
+              "subGroupCode": "SY",
+              "subCode": "0LW",
+              "Classification": "Priority Security",
+              "Inclusion": "Included"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "firstPBO": {
+    "@type": "ProductBrandOffering",
+    "Brand": {
+      "@type": "BrandID",
+      "BrandRef": "b0"
+    },
+    "Product": [
+      {
+        "@type": "ProductID",
+        "productRef": "p0"
+      }
+    ],
+    "TermsAndConditions": {
+      "@type": "TermsAndConditionsID",
+      "termsAndConditionsRef": "T0"
+    },
+    "CombinabilityCode": [
+      "j1"
+    ],
+    "BestCombinablePrice": {
+      "@type": "BestCombinablePriceDetail",
+      "CurrencyCode": {
+        "decimalPlace": 0,
+        "value": "PKR"
+      },
+      "Base": 82460,
+      "TotalTaxes": 17680,
+      "TotalFees": 0,
+      "TotalPrice": 100140,
+      "PriceBreakdown": [
+        {
+          "@type": "PriceBreakdownAir",
+          "quantity": 1,
+          "requestedPassengerType": "ADT",
+          "Amount": {
+            "@type": "Amount",
+            "CurrencyCode": {
+              "decimalPlace": 0,
+              "value": "PKR"
+            },
+            "Base": 82460,
+            "Taxes": {
+              "@type": "TaxesDetail",
+              "TotalTaxes": 17680,
+              "Tax": [
+                {
+                  "taxCode": "RG",
+                  "value": 12500
+                },
+                {
+                  "taxCode": "SP",
+                  "value": 2000
+                },
+                {
+                  "taxCode": "YD",
+                  "value": 2800
+                },
+                {
+                  "taxCode": "ZR",
+                  "value": 380
+                }
+              ]
+            },
+            "Fees": {
+              "@type": "FeesDetail",
+              "TotalFees": 0
+            },
+            "Total": 100140
+          },
+          "Surcharges": {
+            "@type": "SurchargesDetail",
+            "approximateInd": true,
+            "TotalSurcharges": 1400,
+            "Surcharge": [
+              {
+                "currencyCode": "PKR",
+                "purpose": "Other",
+                "decimalPlace": 0,
+                "value": 1400
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "ContentSource": "GDS"
+  },
+  "firstProduct": {
+    "@type": "ProductAir",
+    "totalDuration": "PT8H25M",
+    "id": "p0",
+    "Quantity": 9,
+    "FlightSegment": [
+      {
+        "@type": "FlightSegment",
+        "sequence": 1,
+        "connectionDuration": "PT3H5M",
+        "boundFlightsInd": true,
+        "Flight": {
+          "@type": "FlightID",
+          "FlightRef": "s1"
+        }
+      },
+      {
+        "@type": "FlightSegment",
+        "sequence": 2,
+        "Flight": {
+          "@type": "FlightID",
+          "FlightRef": "s2"
+        }
+      }
+    ],
+    "PassengerFlight": [
+      {
+        "@type": "PassengerFlight",
+        "passengerQuantity": 1,
+        "passengerTypeCode": "ADT",
+        "FlightProduct": [
+          {
+            "@type": "FlightProduct",
+            "segmentSequence": [
+              1,
+              2
+            ],
+            "classOfService": "L",
+            "cabin": "Economy",
+            "fareBasisCode": "LNN00H6K",
+            "fareType": "PublicFare",
+            "fareTypeCode": "ERT",
+            "Brand": {
+              "@type": "BrandID",
+              "BrandRef": "b0"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

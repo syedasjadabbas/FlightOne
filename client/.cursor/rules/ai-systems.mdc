@@ -1,0 +1,61 @@
+---
+description: LLM features, RAG, agents/MCP, evals, safety — treated as engineering, not magic — for AI/LLM/agent/prompt files.
+globs: ["**/*llm*", "**/*agent*", "**/*prompt*", "**/*rag*", "**/*embedding*"]
+alwaysApply: false
+---
+
+# AI Systems Standard
+
+For building LLM-powered features, agents, and RAG systems. Default to the latest, most capable
+Claude models. Treat the LLM as a powerful but non-deterministic component — engineer around that.
+
+## Core principles
+
+- **The model is a dependency, not the product.** Wrap it in deterministic scaffolding:
+  validation, retries, guardrails, evals, and fallbacks.
+- **Structure the output.** Use tool calling / JSON schema and *validate* every response (Zod).
+  Never trust free-form text where you need structured data.
+- **RAG before fine-tuning.** Retrieval solves "the model doesn't know our data." Fine-tune only
+  for behavior/format at scale, with proof it's needed.
+- **Evaluate, don't vibe-check.** Build an eval set with golden cases; measure changes against it.
+  Prompts are code — version them, test them, review them.
+
+## Prompting
+
+- Clear role, explicit task, relevant context, constraints, and desired output format.
+- Provide examples (few-shot) for format/edge cases. Show, don't just tell.
+- Ask for reasoning before the answer on hard tasks; separate reasoning from the final structured
+  output. Prefer smaller, composed prompts over one mega-prompt.
+- Ground the model in retrieved context; instruct it to say "I don't know" rather than fabricate.
+
+## RAG
+
+- **Chunk with meaning** (semantic/structural boundaries), sized for the embedding model and
+  reranker. Store metadata for filtering and citation.
+- **Retrieve then rerank:** vector search (recall) + a reranker (precision). Hybrid with keyword
+  search for exact terms/IDs.
+- **Cite sources.** Return provenance so answers are verifiable and hallucinations are catchable.
+- Handle the empty-retrieval case explicitly (don't answer from parametric memory silently).
+
+## Agents & tools (incl. MCP)
+
+- **Tools are typed contracts:** precise schemas, validated inputs, bounded side effects, clear
+  error returns the model can recover from.
+- Keep the agent loop bounded (max steps, budget, timeouts). Make actions observable and, where
+  side-effecting, confirmable/idempotent.
+- Least privilege: give the agent only the tools and scopes it needs.
+- **Prompt injection is real:** treat all tool/retrieved content as untrusted data, not
+  instructions. Never let retrieved text escalate the agent's permissions.
+
+## Cost, latency, reliability
+
+- Cache where inputs repeat (prompt caching, embedding cache, response cache).
+- Stream responses for perceived latency. Set token budgets and timeouts. Degrade gracefully.
+- Pick the right model per task (small/fast for classification/routing; frontier for hard reasoning).
+
+## Safety & quality
+
+- Guardrails on input (injection, PII) and output (policy, format, factuality checks).
+- Log prompts/responses (redacted) for debugging and eval — with privacy controls.
+- Human-in-the-loop for high-stakes actions. Never auto-execute irreversible actions on model output
+  alone.

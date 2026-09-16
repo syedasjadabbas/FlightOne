@@ -1,0 +1,133 @@
+// Module 10 — Rewards & Referrals. Owned by modules/rewards/.
+// See docs/modules/10-rewards-referrals.md.
+//
+// Deliberately has NO foreign keys into User/Booking/Company (same precedent
+// as refunds/pricing) — ids are plain indexed String columns.
+
+enum RewardLedgerType {
+  EARN
+  REDEEM
+  EXPIRE
+  REVERSE
+  REFERRAL_BONUS
+}
+
+enum LoyaltyTier {
+  BRONZE
+  SILVER
+  GOLD
+  PLATINUM
+}
+
+enum CorporateRewardLedgerType {
+  EARN
+  REDEEM
+  EXPIRE
+  REVERSE
+}
+
+model RewardAccount {
+  id String @id @default(cuid())
+
+  userId String @unique
+
+  referralCode String @unique
+
+  referredByUserId String?
+
+  tier LoyaltyTier @default(BRONZE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  ledgerEntries RewardLedgerEntry[]
+
+  @@index([referredByUserId])
+}
+
+model RewardLedgerEntry {
+  id String @id @default(cuid())
+
+  accountId String
+  account   RewardAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  type RewardLedgerType
+
+  points Int
+
+  bookingId String?
+
+  idempotencyKey String?
+
+  note     String?
+  metadata Json?
+
+  expiresAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([accountId])
+  @@index([bookingId])
+  @@index([type])
+  @@index([createdAt])
+  @@index([expiresAt])
+  @@unique([idempotencyKey])
+  @@unique([bookingId, type])
+}
+
+model ReferralAttribution {
+  id String @id @default(cuid())
+
+  referrerUserId String
+  referredUserId String @unique
+
+  signupAt DateTime
+
+  firstBookingId String?
+  rewardedAt     DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([referrerUserId])
+}
+
+model CorporateRewardProgram {
+  id        String @id @default(cuid())
+  companyId String @unique
+
+  isActive Boolean @default(true)
+
+  companyEarnPointsPerHundredMinor Int @default(0)
+
+  personalEarnEnabled Boolean @default(true)
+
+  note String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  ledgerEntries CorporateRewardLedgerEntry[]
+}
+
+model CorporateRewardLedgerEntry {
+  id String @id @default(cuid())
+
+  programId String
+  program   CorporateRewardProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
+
+  companyId String
+
+  type   CorporateRewardLedgerType
+  points Int
+
+  bookingId String?
+  note      String?
+  metadata  Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([programId])
+  @@index([companyId])
+  @@index([bookingId])
+  @@unique([bookingId, type])
+}

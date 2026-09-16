@@ -1,0 +1,55 @@
+{
+  "api": "http://localhost:8084/api/v1",
+  "email": "fo.crossdevice.1788437117162@example.com",
+  "steps": [
+    {
+      "step": "signup",
+      "status": 201
+    },
+    {
+      "step": "create-conversation",
+      "status": 201
+    },
+    {
+      "step": "record-messages",
+      "status": 201
+    },
+    {
+      "step": "login-b",
+      "status": 200
+    },
+    {
+      "step": "list-b",
+      "status": 200
+    },
+    {
+      "step": "get-b",
+      "status": 200
+    }
+  ],
+  "detail": {
+    "conversationId": "cmtlha87w000qv7sg4vo0g7lb",
+    "messageCount": 2,
+    "travelPlan": {
+      "action": "search",
+      "filters": {
+        "preferredAirlines": [
+          "EY"
+        ]
+      },
+      "searches": [
+        {
+          "query": {
+            "origin": "LHE",
+            "cabinClass": "ECONOMY",
+            "passengers": 1,
+            "destination": "DXB",
+            "departureDate": "2026-09-18"
+          },
+          "product": "FLIGHT"
+        }
+      ],
+      "datesAssumed": false
+    }
+  }
+}

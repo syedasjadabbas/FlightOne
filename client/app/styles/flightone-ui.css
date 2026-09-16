@@ -1,0 +1,285 @@
+/**
+ * Shared form controls — SearchableSelect (fo-select) + Pagination (fo-pagination).
+ * FlightOne navy/cyan; matches Input focus language.
+ */
+
+/* ── SearchableSelect ───────────────────────────────────────── */
+
+.fo-select {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  width: 100%;
+}
+
+.fo-select__label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+.fo-select__control {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+}
+
+.fo-select__trigger {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-height: 2.65rem;
+  padding: 0.55rem 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 0.65rem;
+  background: white;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.fo-select__trigger:hover:not(:disabled) {
+  border-color: color-mix(in oklab, var(--cyan) 35%, var(--line));
+}
+
+.fo-select__trigger:focus-visible,
+.fo-select__trigger--open {
+  border-color: var(--sky);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--sky) 28%, transparent);
+  outline: none;
+}
+
+.fo-select__trigger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.fo-select__value--placeholder {
+  color: var(--ink-faint);
+}
+
+.fo-select__chevron {
+  flex-shrink: 0;
+  color: var(--ink-faint);
+  font-size: 0.7rem;
+  line-height: 1;
+}
+
+.fo-select__clear {
+  position: absolute;
+  right: 2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  border: none;
+  border-radius: 0.25rem;
+  background: transparent;
+  color: var(--ink-faint);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.fo-select__clear:hover {
+  color: var(--navy);
+  background: color-mix(in oklab, var(--horizon-cool) 70%, white);
+}
+
+.fo-select__panel {
+  position: absolute;
+  z-index: 40;
+  top: calc(100% + 0.25rem);
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  max-height: 16rem;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 0.65rem;
+  background: white;
+  box-shadow: var(--shadow-soft);
+}
+
+.fo-select__search {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in oklab, var(--horizon-cool) 35%, white);
+  font-size: 0.8125rem;
+  color: var(--ink);
+  outline: none;
+}
+
+.fo-select__search:focus {
+  background: white;
+}
+
+.fo-select__list {
+  margin: 0;
+  padding: 0.25rem;
+  list-style: none;
+  overflow: auto;
+}
+
+.fo-select__option {
+  display: block;
+  width: 100%;
+  padding: 0.45rem 0.65rem;
+  border: none;
+  border-radius: 0.35rem;
+  background: transparent;
+  font-size: 0.8125rem;
+  text-align: left;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.fo-select__option:hover,
+.fo-select__option--active {
+  background: color-mix(in oklab, var(--horizon-cool) 70%, white);
+}
+
+.fo-select__option--selected {
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.fo-select__option:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.fo-select__empty {
+  padding: 0.65rem;
+  font-size: 0.8125rem;
+  color: var(--ink-faint);
+}
+
+/* Compact inline variant (filters) */
+.fo-select--inline {
+  width: auto;
+  min-width: 10.5rem;
+}
+
+.fo-select--inline .fo-select__trigger {
+  min-height: 2.25rem;
+  padding-top: 0.35rem;
+  padding-bottom: 0.35rem;
+  font-size: 0.8125rem;
+}
+
+/* ── Pagination ─────────────────────────────────────────────── */
+
+.fo-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  padding-top: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--ink-faint);
+}
+
+.fo-pagination__meta {
+  min-width: 0;
+}
+
+.fo-pagination__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.fo-pagination__pages {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fo-pagination__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  min-height: 2rem;
+  padding: 0.25rem 0.55rem;
+  border: 1px solid var(--line);
+  border-radius: 0.35rem;
+  background: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition:
+    background 0.12s ease,
+    border-color 0.12s ease,
+    color 0.12s ease;
+}
+
+.fo-pagination__btn:hover:not(:disabled) {
+  border-color: color-mix(in oklab, var(--cyan) 35%, var(--line));
+  color: var(--navy);
+}
+
+.fo-pagination__btn:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--sky) 45%, transparent);
+  outline-offset: 2px;
+}
+
+.fo-pagination__btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.fo-pagination__btn--active {
+  border-color: color-mix(in oklab, var(--cyan) 40%, var(--line));
+  background: color-mix(in oklab, var(--horizon-cool) 70%, white);
+  color: var(--navy);
+}
+
+.fo-pagination__ellipsis {
+  padding: 0 0.15rem;
+  color: var(--ink-faint);
+}
+
+.fo-pagination__size-select {
+  min-height: 2rem;
+  padding: 0.25rem 1.75rem 0.25rem 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: 0.35rem;
+  background: white;
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.fo-pagination__size-select:disabled {
+  cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fo-select__trigger,
+  .fo-pagination__btn {
+    transition: none;
+  }
+}
