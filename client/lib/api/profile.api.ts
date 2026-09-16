@@ -146,12 +146,26 @@ export const profileApi = baseApi.injectEndpoints({
       invalidatesTags: ["Profile"],
     }),
 
-    listCompanions: builder.query<Companion[], { kind?: "COMPANION" | "FAMILY" } | void>({
+    listCompanions: builder.query<
+      Companion[],
+      { kind?: "COMPANION" | "FAMILY"; includePassport?: boolean } | void
+    >({
       query: (arg) => ({
         url: "/profile/companions",
-        params: arg?.kind ? { kind: arg.kind } : undefined,
+        params: {
+          ...(arg?.kind ? { kind: arg.kind } : {}),
+          ...(arg?.includePassport ? { includePassport: "true" } : {}),
+        },
       }),
       providesTags: ["ProfileCompanions"],
+    }),
+
+    getDocument: builder.query<IdentityDocument, { id: string; includeNumber?: boolean }>({
+      query: ({ id, includeNumber }) => ({
+        url: `/profile/documents/${id}`,
+        params: includeNumber ? { includeNumber: "true" } : undefined,
+      }),
+      providesTags: (_result, _error, { id }) => [{ type: "ProfileDocuments", id }],
     }),
 
     createCompanion: builder.mutation<
@@ -434,6 +448,7 @@ export const {
   useCreateEmergencyContactMutation,
   useDeleteEmergencyContactMutation,
   useListDocumentsQuery,
+  useGetDocumentQuery,
   useCreateDocumentMutation,
   useReuploadDocumentMutation,
   useUpdateDocumentMutation,

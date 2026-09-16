@@ -44,6 +44,28 @@ function sanitizeLocation(input: unknown): TravellerLocation | null {
   };
 }
 
+import { withSearchUser } from "@/lib/inventory/searchUserContext";
+
+function extractUserIdFromAuth(authHeader: string | null): string | undefined {
+  if (!authHeader?.toLowerCase().startsWith("bearer ")) return undefined;
+  const token = authHeader.slice(7).trim();
+  try {
+    const parts = token.split(".");
+    if (parts.length < 2) return undefined;
+    const payloadJson = Buffer.from(parts[1], "base64url").toString("utf8");
+    const parsed = JSON.parse(payloadJson);
+    return typeof parsed?.id === "string"
+      ? parsed.id
+      : typeof parsed?.userId === "string"
+        ? parsed.userId
+        : typeof parsed?.sub === "string"
+          ? parsed.sub
+          : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export async function POST(request: Request) {
   let body: unknown;
   try {
@@ -60,6 +82,7 @@ export async function POST(request: Request) {
   const history = sanitizeHistory((body as { history?: unknown })?.history);
   const location = sanitizeLocation((body as { location?: unknown })?.location);
   const stream = (body as { stream?: unknown })?.stream === true;
+  const userId = extractUserIdFromAuth(request.headers.get("authorization"));
   const payload = {
     message: message.slice(0, MAX_MESSAGE),
     history,
@@ -68,7 +91,7 @@ export async function POST(request: Request) {
 
   if (!stream) {
     try {
-      const result = await runAskAi(payload);
+      const result = await withSearchUser(userId, () => runAskAi(payload));
       return Response.json(result);
     } catch (err) {
       console.error("[/api/chat] error:", err);
@@ -86,9 +109,11 @@ export async function POST(request: Request) {
         controller.enqueue(encoder.encode(`data: ${JSON.stringify(obj)}\n\n`));
       };
       try {
-        for await (const event of runAskAiStream(payload)) {
-          send(event);
-        }
+        await withSearchUser(userId, async () => {
+          for await (const event of runAskAiStream(payload)) {
+            send(event);
+          }
+        });
       } catch (err) {
         console.error("[/api/chat] stream error:", err);
         send({

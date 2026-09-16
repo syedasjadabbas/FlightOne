@@ -30,12 +30,12 @@ function extraction(
 describe("classifyOcrOutcome", () => {
   it("reports processing while request is in flight", () => {
     expect(classifyOcrOutcome({ processing: true })).toBe("processing");
-    expect(ocrStatusMessage("processing")).toMatch(/Running OCR/i);
+    expect(ocrStatusMessage("processing")).toMatch(/Scanning your document/i);
   });
 
   it("reports failure when the API call fails — never success", () => {
     expect(classifyOcrOutcome({ apiError: true })).toBe("failure");
-    expect(ocrStatusMessage("failure")).toMatch(/failed/i);
+    expect(ocrStatusMessage("failure")).toMatch(/Could not read the document/i);
     expect(ocrStatusMessage("failure")).not.toMatch(/extracted fields for review/i);
   });
 
@@ -56,7 +56,7 @@ describe("classifyOcrOutcome", () => {
         }),
       }),
     ).toBe("unconfigured");
-    expect(ocrStatusMessage("unconfigured")).toMatch(/not configured/i);
+    expect(ocrStatusMessage("unconfigured")).toMatch(/Automatic scanning is unavailable/i);
     expect(ocrStatusMessage("unconfigured")).not.toMatch(/extracted fields for review/i);
   });
 

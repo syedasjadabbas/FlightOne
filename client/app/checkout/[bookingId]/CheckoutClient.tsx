@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Button, Spinner } from "@/components/ui";
 import {
@@ -19,6 +19,12 @@ import {
   useTicketBookingMutation,
 } from "@/lib/api/bookings.api";
 import {
+  useGetProfileQuery,
+  useListDocumentsQuery,
+  useListCompanionsQuery,
+  type Companion,
+} from "@/lib/api/profile.api";
+import {
   useApplyCheckoutCreditMutation,
   useGetRewardsSummaryQuery,
 } from "@/lib/api/rewards.api";
@@ -27,6 +33,13 @@ import {
   useGetBookingApprovalGateQuery,
 } from "@/lib/api/corporate.api";
 import { useCorporateProfileStore } from "@/store/corporateProfile.store";
+import {
+  buildTravellerSnapshot,
+  resolveCompanionTraveller,
+  resolvePrimaryTraveller,
+  validateTravellerFormData,
+  type TravellerFormData,
+} from "@/lib/bookings/travellerAutoFill";
 import { apiErrorMessage } from "./_components/apiErrorMessage";
 import { CheckoutBookingSummary } from "./_components/CheckoutBookingSummary";
 import { CheckoutCorporateSection } from "./_components/CheckoutCorporateSection";
@@ -41,22 +54,65 @@ import {
 export function CheckoutClient({ bookingId }: { bookingId: string }) {
   const hasHydrated = useAuthStore((s) => s.hasHydrated);
   const accessToken = useAuthStore((s) => s.accessToken);
+  const user = useAuthStore((s) => s.user);
+
   const { data: booking, isLoading, isError, refetch, error } = useGetBookingQuery(bookingId, {
     skip: !hasHydrated || !accessToken,
   });
+
+  const { data: profile } = useGetProfileQuery(undefined, {
+    skip: !hasHydrated || !accessToken,
+  });
+
+  const { data: documents } = useListDocumentsQuery(undefined, {
+    skip: !hasHydrated || !accessToken,
+  });
+
+  const { data: companions } = useListCompanionsQuery(
+    { includePassport: true },
+    { skip: !hasHydrated || !accessToken },
+  );
+
   const [pay, payState] = usePayBookingMutation();
   const [reserve, reserveState] = useReserveBookingMutation();
   const [ticket, ticketState] = useTicketBookingMutation();
   const [acceptPrice, acceptState] = useAcceptPriceChangeMutation();
-  const [givenName, setGivenName] = useState("");
-  const [surname, setSurname] = useState("");
+
+  const [formData, setFormData] = useState<TravellerFormData>({
+    givenName: "",
+    surname: "",
+    nationality: "",
+    dateOfBirth: "",
+    passportNumber: "",
+    passportExpiry: "",
+    phone: "",
+    email: "",
+    companionId: null,
+    isAutoFilled: false,
+  });
+
+  const [hasInitializedAutoFill, setHasInitializedAutoFill] = useState(false);
+
+  // Auto-fill primary traveller from Profile & Vault once loaded
+  useEffect(() => {
+    if (!hasInitializedAutoFill && (profile || documents || user)) {
+      const primary = resolvePrimaryTraveller(profile, documents, user);
+      if (primary.givenName || primary.surname || primary.passportNumber || primary.nationality) {
+        setFormData(primary);
+        setHasInitializedAutoFill(true);
+      }
+    }
+  }, [profile, documents, user, hasInitializedAutoFill]);
+
   const [paymentToken, setPaymentToken] = useState("");
   const [rewardPoints, setRewardPoints] = useState("");
   const [localError, setLocalError] = useState<string | null>(null);
   const [priceChange, setPriceChange] = useState<PriceChangedDetails | null>(null);
+
   const { data: rewardsSummary } = useGetRewardsSummaryQuery(undefined, {
     skip: !hasHydrated || !accessToken,
   });
+
   const [applyCredit, creditState] = useApplyCheckoutCreditMutation();
   const corpMode = useCorporateProfileStore((s) => s.mode);
   const corpCompanyId = useCorporateProfileStore((s) => s.companyId);
@@ -78,6 +134,7 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
     () => visaWarningFromMetadata(booking?.metadata ?? null),
     [booking],
   );
+
   const busy =
     payState.isLoading ||
     reserveState.isLoading ||
@@ -160,10 +217,25 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
     return false;
   }
 
+  function handleSelectPrimary() {
+    const primary = resolvePrimaryTraveller(profile, documents, user);
+    setFormData(primary);
+  }
+
+  function handleSelectCompanion(companion: Companion) {
+    const compData = resolveCompanionTraveller(companion, documents);
+    setFormData(compData);
+  }
+
   async function onPay() {
     setLocalError(null);
     if (priceChange) {
       setLocalError("Accept the updated price before continuing checkout");
+      return;
+    }
+    const validation = validateTravellerFormData(formData);
+    if (!validation.isValid) {
+      setLocalError("Traveller given name and surname are required before payment");
       return;
     }
     if (!payCap?.canCapture) {
@@ -199,7 +271,8 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
       setLocalError("Accept the updated price before continuing checkout");
       return;
     }
-    if (!givenName.trim() || !surname.trim()) {
+    const validation = validateTravellerFormData(formData);
+    if (!validation.isValid) {
       setLocalError("Traveller given name and surname are required before reservation");
       return;
     }
@@ -211,11 +284,14 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
       setLocalError(supplierCap?.reasons?.join("; ") || "Supplier reservation is unavailable");
       return;
     }
+
+    const travellerSnapshot = buildTravellerSnapshot(formData);
+
     try {
       await reserve({
         id: bookingId,
         clientAmountMinor: serverAmountMinor,
-        travellerSnapshot: { givenName: givenName.trim(), surname: surname.trim() },
+        travellerSnapshot,
       }).unwrap();
       await refetch();
       await refetchGate();
@@ -333,10 +409,11 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
 
       {booking.status === "QUOTED" ? (
         <CheckoutQuotedActions
-          givenName={givenName}
-          setGivenName={setGivenName}
-          surname={surname}
-          setSurname={setSurname}
+          formData={formData}
+          setFormData={setFormData}
+          savedCompanions={companions || []}
+          onSelectPrimary={handleSelectPrimary}
+          onSelectCompanion={handleSelectCompanion}
           paymentToken={paymentToken}
           setPaymentToken={setPaymentToken}
           payMethod={payMethod}
