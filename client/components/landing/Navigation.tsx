@@ -80,8 +80,18 @@ export default function Navigation() {
 
   /* ── lock body scroll when mobile menu open ── */
   useEffect(() => {
-    document.body.style.overflow = mobileOpen ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
+    const lenis = (window as unknown as { __lenis?: { stop: () => void; start: () => void } }).__lenis;
+    if (mobileOpen) {
+      document.body.style.overflow = 'hidden';
+      lenis?.stop();
+    } else {
+      document.body.style.overflow = '';
+      lenis?.start();
+    }
+    return () => {
+      document.body.style.overflow = '';
+      lenis?.start();
+    };
   }, [mobileOpen]);
 
   /* ── derived colours ── */
@@ -297,6 +307,7 @@ export default function Navigation() {
         {/* ── LEFT: Explore + Services ── */}
         <nav
           aria-label="Primary navigation"
+          className="nav-desktop-left"
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -697,6 +708,7 @@ export default function Navigation() {
           to   { opacity: 1; }
         }
         @media (max-width: 768px) {
+          .nav-desktop-left    { display: none !important; }
           .nav-desktop-right   { display: none !important; }
           .nav-mobile-hamburger { display: flex !important; }
         }

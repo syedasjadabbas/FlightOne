@@ -170,7 +170,7 @@ export default function HeroExperienceSequence() {
         // On first scroll (0.00 -> 0.035):
         const expandProgress = smoothstep(0.00, 0.035, p);
 
-        // Video exit (0.30 -> 0.38)
+        // Video exit (0.30 -> 0.38) — video lifts off and fades as ivory stage arrives
         const exitCurveProgress = smoothstep(0.30, 0.35, p);
         const videoExitProgress = smoothstep(0.30, 0.38, p);
         const videoTy = -videoExitProgress * 110;
@@ -306,7 +306,9 @@ export default function HeroExperienceSequence() {
         const rightY = (normalCardSize / 2 - thumbSize / 2); // Aligned to bottom edge of main card
 
         const rightTextLeft = normalCardSize / 2 + thumbGap;
-        const rightTextTop = -Math.min(75, normalCardSize * 0.1); // Centered vertically in the center-right of the main card
+        // Position copy near the top of the main card with comfortable margin,
+        // ensuring ample vertical headroom above the bottom-right thumbnail image
+        const rightTextTop = -(normalCardSize / 2 - Math.max(14, normalCardSize * 0.04));
 
         // Responsive floor/cap so the right-column copy always keeps a readable
         // width and never gets pushed past the right edge at narrow viewport
@@ -613,7 +615,9 @@ export default function HeroExperienceSequence() {
         position: 'relative',
         width: '100%',
         maxWidth: '100%',
-        overflow: 'hidden',
+        /* NOTE: Do NOT use overflow:hidden here — it breaks position:sticky on
+           the inner .joby-hero-sticky child. The inner container already clips
+           content with its own overflow:hidden. */
         backgroundColor: '#007AE5',
       }}
     >
@@ -1044,12 +1048,12 @@ export default function HeroExperienceSequence() {
               style={{
                 position: 'absolute',
                 left: 'calc(50% + clamp(160px, 22vw, 340px))',
-                top: 'calc(50% - 60px)',
+                top: 'calc(50% - 180px)',
                 width: 'clamp(240px, 20vw, 320px)',
                 display: 'none',
                 opacity: 0,
                 flexDirection: 'column',
-                gap: '1.25rem',
+                gap: '1rem',
                 willChange: 'transform, opacity',
                 zIndex: 15,
                 pointerEvents: 'auto',
