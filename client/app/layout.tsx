@@ -48,7 +48,7 @@ export default function RootLayout({
       lang="en"
       className={`${spaceGrotesk.variable} ${sora.variable} ${playfair.variable} w-full antialiased`}
     >
-      <body className="flex min-h-[100dvh] min-w-0 w-full flex-col font-sans">
+      <body className="flex min-h-[100dvh] min-w-0 w-full max-w-full overflow-x-hidden flex-col font-sans">
         <Providers>{children}</Providers>
       </body>
     </html>

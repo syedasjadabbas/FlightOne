@@ -17,6 +17,19 @@
   --whatsapp: #25d366;
   --danger: #c94444;
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-standard: cubic-bezier(0.25, 1, 0.5, 1);
+
+  /* Joby Theme Tokens */
+  --joby-bg: #FFFFFF;
+  --joby-surface: #F5F4DF;
+  --joby-navy: #0E1620;
+  --joby-blue: #007AE5;
+  --joby-gray-text: #55606E;
+  --joby-border: rgba(14, 22, 32, 0.12);
+
+  --font-display: var(--font-space-grotesk), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-sans: var(--font-space-grotesk), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-hero-heading: var(--font-sora), var(--font-display);
 
   /* Page geometry — overridden/extended in flightone-chat-layout.css */
   --fo-content-max: 80rem;
@@ -131,14 +144,316 @@
   box-sizing: border-box;
 }
 
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+
+/* ── Joby Typography Scale ── */
+.text-hero {
+  font-family: var(--font-display);
+  font-size: clamp(2.75rem, 6.5vw, 5.5rem);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+
+.text-h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2.25rem, 4.5vw, 4rem);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+  color: var(--joby-navy);
+}
+
+.text-h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.875rem, 3.5vw, 3rem);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--joby-navy);
+}
+
+.text-h3 {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+  color: var(--joby-navy);
+}
+
+.text-lead {
+  font-family: var(--font-sans);
+  font-size: clamp(1.125rem, 1.75vw, 1.375rem);
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.text-body-lg {
+  font-family: var(--font-sans);
+  font-size: clamp(1rem, 1.25vw, 1.125rem);
+  line-height: 1.55;
+  color: var(--joby-gray-text);
+}
+
+.text-caption {
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--joby-blue);
+}
+
+.text-stat {
+  font-family: var(--font-display);
+  font-size: clamp(2.375rem, 4vw, 3.5rem);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--joby-navy);
+}
+
+/* ── Container ── */
+.joby-container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 3rem;
+}
+
+@media (max-width: 1024px) { .joby-container { padding: 0 2rem; } }
+@media (max-width: 640px)  { .joby-container { padding: 0 1.25rem; } }
+
+/* ── Navigation ── */
+.joby-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 72px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  background: transparent;
+  color: #F5F4DF;
+  transition:
+    background-color 0.4s ease,
+    backdrop-filter 0.4s ease,
+    border-color 0.4s ease,
+    color 0.4s ease;
+  border-bottom: 1px solid transparent;
+}
+
+.joby-nav.scrolled.dark-mode {
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-bottom-color: transparent;
+  color: #F5F4DF;
+}
+
+.joby-nav.scrolled.light-mode {
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  color: var(--joby-navy);
+  border-bottom-color: transparent;
+}
+
+.joby-nav-link {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  color: inherit;
+  opacity: 0.85;
+  text-decoration: none;
+  letter-spacing: 0.01em;
+  transition: opacity 0.2s ease, color 0.2s ease;
+}
+
+.joby-nav-link:hover {
+  opacity: 1;
+  color: #74C9DD;
+}
+
+.joby-book-btn {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 9999px;
+  border: 1px solid currentColor;
+  background: transparent;
+  padding: 8px 18px;
+  color: inherit;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease, transform 0.2s ease;
+}
+
+.joby-book-btn:hover {
+  background-color: var(--joby-blue);
+  border-color: var(--joby-blue);
+  color: #ffffff !important;
+  transform: translateY(-1px);
+}
+
+.joby-mobile-drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+  background: #ffffff;
+  color: var(--joby-navy);
+  display: flex;
+  flex-direction: column;
+  padding: 5rem 2rem 3rem;
+  transform: translateY(-100%);
+  opacity: 0;
+  transition:
+    transform 0.4s var(--ease-out-expo),
+    opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.joby-mobile-drawer.open {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ── Hero Track ── */
+.joby-hero-track {
+  position: relative;
+  width: 100%;
+  height: 16000px;
+  background: #007AE5;
+}
+
+@media (max-width: 768px) {
+  .joby-hero-track { height: 9000px; }
+}
+
+.joby-hero-sticky {
+  position: sticky;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background: #007AE5;
+}
+
+.joby-hero-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  will-change: opacity, transform;
+}
+
+.joby-hero-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(to top, rgba(14,22,32,0.75) 0%, transparent 45%),
+    linear-gradient(to bottom, rgba(14,22,32,0.4) 0%, transparent 25%);
+}
+
+.joby-hero-slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 1.5rem;
+  pointer-events: none;
+  will-change: opacity, transform;
+}
+
+/* ── Experience Highlights Track ── */
+.joby-highlights-track {
+  position: relative;
+  width: 100%;
+  height: 2200px;
+  background: var(--joby-bg);
+}
+
+.joby-highlights-sticky {
+  position: sticky;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--joby-bg);
+}
+
+/* ── Marquee ── */
+@keyframes jobyMarquee {
+  0%   { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
+}
+
+.joby-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: jobyMarquee 35s linear infinite;
+  will-change: transform;
+}
+
+.joby-marquee-track:hover {
+  animation-play-state: paused;
+}
+
+@keyframes scrollBounce {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(8px); }
+}
+
+.joby-scroll-hint {
+  width: 1px;
+  height: 40px;
+  background: rgba(245, 244, 223, 0.4);
+  animation: scrollBounce 2s ease-in-out infinite;
+}
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+.joby-email-input {
+  background: transparent;
+  color: var(--joby-navy);
+  font-size: 0.875rem;
+  outline: none;
+  border: none;
+  flex: 1;
+  min-width: 0;
+  padding: 0.5rem 1rem;
+}
+.joby-email-input::placeholder {
+  color: rgba(14, 22, 32, 0.4);
+}
+
 html {
   height: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
   /* Zoom baseline: 1rem = 16px at 100% browser zoom */
   font-size: 16px;
 }
 
 body {
   min-height: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
   margin: 0;
   color: var(--ink);
   font-family: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
