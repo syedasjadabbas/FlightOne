@@ -1,0 +1,26 @@
+{
+  "name": "flightone-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "FlightOne Autonomous Travel Operating System (AI-TOS) Monorepo",
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "dev:client": "npm --prefix client run dev",
+    "dev:server": "npm --prefix server start",
+    "build:client": "npm --prefix client run build",
+    "test:client": "npm --prefix client test",
+    "test:server": "npm --prefix server test",
+    "test": "npm run test:server && npm run test:client"
+  },
+  "keywords": [
+    "travel",
+    "ai-tos",
+    "monorepo",
+    "flightone"
+  ],
+  "author": "FlightOne Team",
+  "license": "UNLICENSED"
+}

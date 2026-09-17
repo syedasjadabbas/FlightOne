@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { ChatConsole } from "@/app/components/ChatConsole";
 import { SiteNav } from "@/components/SiteNav";
 
@@ -15,8 +16,11 @@ export default function ChatPage() {
         <SiteNav />
       </div>
       <div className="fo-chat-app relative z-10 flex min-w-0 flex-col overflow-x-clip">
-        <ChatConsole />
+        <Suspense fallback={<div className="flex flex-1 items-center justify-center py-20 text-xs text-slate-400">Connecting to travel consultant…</div>}>
+          <ChatConsole />
+        </Suspense>
       </div>
     </main>
   );
 }
+

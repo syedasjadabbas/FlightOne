@@ -33,10 +33,9 @@ type NavGroup = {
 };
 
 const PRIMARY_LINKS: NavItem[] = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/chat", label: "Chat" },
-  { href: "/ops", label: "Operations" },
-  { href: "/corporate", label: "Corporate" },
+  { href: "/", label: "Search" },
+  { href: "/chat", label: "AI Consultant" },
+  { href: "/journey", label: "Journey" },
   { href: "/vault", label: "Vault" },
 ];
 
@@ -52,7 +51,7 @@ const SECONDARY_GROUPS: NavGroup[] = [
   {
     title: "Specialized Travel",
     items: [
-      { href: "/journey", label: "Journey Timeline", description: "Live itineraries & booking status" },
+      { href: "/corporate", label: "Corporate Desk", description: "Business policies & billing" },
       { href: "/groups", label: "Group Travel", description: "10+ passenger group bookings" },
       { href: "/mice", label: "MICE & Events", description: "Meetings & event logistics" },
     ],
@@ -60,9 +59,9 @@ const SECONDARY_GROUPS: NavGroup[] = [
   {
     title: "Platform & Support",
     items: [
+      { href: "/dashboard", label: "Management Dashboard", description: "Executive KPI & business analytics" },
+      { href: "/ops", label: "Operations Desk", description: "Supplier queues & revalidations" },
       { href: "/escalations", label: "Support & Help", description: "Human assistance & tickets", alsoMatch: ["/ops/escalations"] },
-      { href: "/profile", label: "User Profile", description: "Traveler preferences & account details" },
-      { href: "/more", label: "Platform Overview", description: "All FlightOne operational desks" },
     ],
   },
 ];
@@ -72,6 +71,7 @@ const SECONDARY_LINKS: NavItem[] = SECONDARY_GROUPS.flatMap((g) =>
 );
 
 function isCurrentPath(pathname: string, href: string, alsoMatch?: string[]): boolean {
+  if (href === "/") return pathname === "/";
   const prefixes = [href, ...(alsoMatch ?? [])];
   return prefixes.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 }
@@ -115,7 +115,7 @@ function InfinityMark({ className }: { className?: string }) {
 
 function BrandLink() {
   return (
-    <Link href="/dashboard" className="fo-site-nav__brand">
+    <Link href="/" className="fo-site-nav__brand">
       <span className="fo-site-nav__brand-mark">
         <InfinityMark />
       </span>
@@ -611,6 +611,16 @@ function AuthActions({
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                   </svg>
                   Travel Vault
+                </Link>
+                <Link
+                  href="/dashboard"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
+                >
+                  <svg className="h-3.5 w-3.5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                  Management Dashboard
                 </Link>
                 <button
                   type="button"

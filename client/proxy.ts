@@ -8,7 +8,16 @@ import { AUTH_PRESENCE_COOKIE } from "@/store/auth.store";
  * `fo_auth=1` is NOT a JWT and is not a credential — only a UX gate.
  */
 
-const PROTECTED_PREFIXES: string[] = ["/profile", "/checkout", "/vault", "/visa", "/rewards", "/groups", "/mice"];
+const PROTECTED_PREFIXES: string[] = [
+  "/dashboard",
+  "/profile",
+  "/checkout",
+  "/vault",
+  "/visa",
+  "/rewards",
+  "/groups",
+  "/mice",
+];
 
 function isProtectedPath(pathname: string): boolean {
   return PROTECTED_PREFIXES.some(
@@ -34,16 +43,12 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  if (pathname === "/") {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
-  }
-
   if (pathname === "/login" && isAuthenticated) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   if (pathname === "/signup" && isAuthenticated) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   return NextResponse.next();

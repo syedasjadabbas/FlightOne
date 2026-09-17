@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import { formatPriceMinor } from "@/lib/ask-ai/sidebarFilters";
 import {
   canShowResultsWorkspace,
@@ -26,6 +27,17 @@ export function ChatConsole() {
   const accessToken = useAuthStore((s) => s.accessToken);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [resumingId, setResumingId] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const initialQueryHandledRef = useRef(false);
+
+  // Auto-run query passed from public travel homepage search widget or trending card
+  useEffect(() => {
+    const q = searchParams.get("q");
+    if (q && !initialQueryHandledRef.current && !chat.busy) {
+      initialQueryHandledRef.current = true;
+      void chat.send(q);
+    }
+  }, [searchParams, chat.busy, chat.send]);
 
   // Default sidebar to open on desktop screens, close on tablet/mobile
   useEffect(() => {

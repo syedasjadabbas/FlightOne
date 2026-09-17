@@ -49,6 +49,3 @@ Thumbs.db
 *.tsbuildinfo
 next-env.d.ts
 
-# Legacy standalone repos (preserved outside consolidated tracking)
-/flight-one-main/
-/filght-one-server/
