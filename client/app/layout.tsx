@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, Sora } from "next/font/google";
+import { Space_Grotesk, Sora, Playfair_Display } from "next/font/google";
 import { Providers } from "./providers";
 import "./globals.css";
 import "./styles/flightone-visual.css";
@@ -26,6 +26,12 @@ const sora = Sora({
   display: "swap",
 });
 
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
+  subsets: ["latin"],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "FlightOne — Travel Consultant",
   description:
@@ -40,7 +46,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${spaceGrotesk.variable} ${sora.variable} w-full antialiased`}
+      className={`${spaceGrotesk.variable} ${sora.variable} ${playfair.variable} w-full antialiased`}
     >
       <body className="flex min-h-[100dvh] min-w-0 w-full flex-col font-sans">
         <Providers>{children}</Providers>
