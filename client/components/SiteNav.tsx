@@ -33,10 +33,11 @@ type NavGroup = {
 };
 
 const PRIMARY_LINKS: NavItem[] = [
+  { href: "/dashboard", label: "Dashboard" },
   { href: "/chat", label: "Chat" },
-  { href: "/journey", label: "Journey" },
+  { href: "/ops", label: "Operations" },
+  { href: "/corporate", label: "Corporate" },
   { href: "/vault", label: "Vault" },
-  { href: "/profile", label: "Profile" },
 ];
 
 const SECONDARY_GROUPS: NavGroup[] = [
@@ -51,17 +52,17 @@ const SECONDARY_GROUPS: NavGroup[] = [
   {
     title: "Specialized Travel",
     items: [
-      { href: "/corporate", label: "Corporate Desk", description: "Business policies & billing" },
+      { href: "/journey", label: "Journey Timeline", description: "Live itineraries & booking status" },
       { href: "/groups", label: "Group Travel", description: "10+ passenger group bookings" },
       { href: "/mice", label: "MICE & Events", description: "Meetings & event logistics" },
     ],
   },
   {
-    title: "Platform & Ops",
+    title: "Platform & Support",
     items: [
-      { href: "/dashboard", label: "Consultant Desk", description: "Live quotes & conversion metrics" },
-      { href: "/ops", label: "Operations Desk", description: "Supplier queues & revalidations" },
       { href: "/escalations", label: "Support & Help", description: "Human assistance & tickets", alsoMatch: ["/ops/escalations"] },
+      { href: "/profile", label: "User Profile", description: "Traveler preferences & account details" },
+      { href: "/more", label: "Platform Overview", description: "All FlightOne operational desks" },
     ],
   },
 ];
@@ -114,7 +115,7 @@ function InfinityMark({ className }: { className?: string }) {
 
 function BrandLink() {
   return (
-    <Link href="/chat" className="fo-site-nav__brand">
+    <Link href="/dashboard" className="fo-site-nav__brand">
       <span className="fo-site-nav__brand-mark">
         <InfinityMark />
       </span>
@@ -244,11 +245,13 @@ function MoreMenu({
 
 function MobileMenu({
   pathname,
+  isAuthenticated,
   userLabel,
   isLoggingOut,
   onLogout,
 }: {
   pathname: string;
+  isAuthenticated: boolean;
   userLabel: string | null;
   isLoggingOut: boolean;
   onLogout: () => void;
@@ -270,6 +273,14 @@ function MobileMenu({
 
   return (
     <div className="fo-site-nav__mobile" ref={rootRef}>
+      {!isAuthenticated && (
+        <Link
+          href="/login"
+          className="fo-site-nav__login fo-site-nav__login--ghost text-xs px-2.5 py-1 mr-2"
+        >
+          Log in
+        </Link>
+      )}
       <button
         ref={buttonRef}
         type="button"
@@ -288,7 +299,7 @@ function MobileMenu({
       {open ? (
         <div id={panelId} className="fo-site-nav__drawer anim-panel" role="dialog" aria-label="Site menu">
           <div className="fo-site-nav__drawer-section">
-            <p className="fo-site-nav__drawer-label">Core Travel</p>
+            <p className="fo-site-nav__drawer-label">Core Navigation</p>
             {PRIMARY_LINKS.map((item) => (
               <Link
                 key={item.href}
@@ -318,32 +329,53 @@ function MobileMenu({
           ))}
 
           <div className="fo-site-nav__drawer-section pt-1">
-            <p className="fo-site-nav__drawer-label">Account</p>
+            <p className="fo-site-nav__drawer-label">Platform</p>
             <Link
               href="/more"
               className={navLinkClass(pathname, { href: "/more", label: "Account Hub" }, "fo-site-nav__drawer-link font-semibold text-[var(--sky)]")}
               onClick={close}
             >
-              Account & Platform Hub →
+              Platform Overview & Hub →
             </Link>
           </div>
 
           <div className="fo-site-nav__drawer-section fo-site-nav__drawer-section--auth">
-            {userLabel ? (
-              <p className="fo-site-nav__user fo-site-nav__user--drawer">{userLabel}</p>
-            ) : null}
-            <Button
-              variant="ghost"
-              size="sm"
-              disabled={isLoggingOut}
-              onClick={() => {
-                onLogout();
-                close();
-              }}
-              className="fo-site-nav__logout fo-site-nav__logout--drawer"
-            >
-              {isLoggingOut ? "Logging out…" : "Log out"}
-            </Button>
+            {isAuthenticated ? (
+              <>
+                {userLabel ? (
+                  <p className="fo-site-nav__user fo-site-nav__user--drawer">{userLabel}</p>
+                ) : null}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  disabled={isLoggingOut}
+                  onClick={() => {
+                    onLogout();
+                    close();
+                  }}
+                  className="fo-site-nav__logout fo-site-nav__logout--drawer"
+                >
+                  {isLoggingOut ? "Logging out…" : "Log out"}
+                </Button>
+              </>
+            ) : (
+              <div className="fo-site-nav__auth fo-site-nav__auth--drawer flex flex-col gap-2">
+                <Link
+                  href="/login"
+                  className="fo-site-nav__login fo-site-nav__login--ghost text-center py-2 text-sm"
+                  onClick={close}
+                >
+                  Log in
+                </Link>
+                <Link
+                  href="/signup"
+                  className="fo-site-nav__signup text-center py-2 text-sm font-semibold rounded"
+                  onClick={close}
+                >
+                  Sign up
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       ) : null}
@@ -662,55 +694,33 @@ export function SiteNav({ variant = "bar" }: { variant?: "bar" | "compact" }) {
       <div className="fo-site-nav__inner">
         <BrandLink />
 
+        {/* Desktop navbar: always render primary links & more dropdown */}
         <div className="fo-site-nav__desktop">
-          {hasHydrated && isAuthenticated ? (
-            <>
-              <div className="fo-site-nav__links">
-                {PRIMARY_LINKS.map((item) => (
-                  <Link key={item.href} href={item.href} className={navLinkClass(pathname, item)}>
-                    {item.label}
-                  </Link>
-                ))}
-                <MoreMenu pathname={pathname} id={moreId} />
-              </div>
-              <AuthActions
-                hasHydrated={hasHydrated}
-                isAuthenticated={isAuthenticated}
-                userLabel={userLabel}
-                isLoggingOut={isLoggingOut}
-                onLogout={onLogout}
-              />
-            </>
-          ) : (
-            <AuthActions
-              hasHydrated={hasHydrated}
-              isAuthenticated={isAuthenticated}
-              userLabel={userLabel}
-              isLoggingOut={isLoggingOut}
-              onLogout={onLogout}
-            />
-          )}
-        </div>
-
-        {/* Guests: auth actions on all breakpoints. Authed mobile: menu toggle. */}
-        {hasHydrated && isAuthenticated ? (
-          <MobileMenu
-            pathname={pathname}
+          <div className="fo-site-nav__links">
+            {PRIMARY_LINKS.map((item) => (
+              <Link key={item.href} href={item.href} className={navLinkClass(pathname, item)}>
+                {item.label}
+              </Link>
+            ))}
+            <MoreMenu pathname={pathname} id={moreId} />
+          </div>
+          <AuthActions
+            hasHydrated={hasHydrated}
+            isAuthenticated={isAuthenticated}
             userLabel={userLabel}
             isLoggingOut={isLoggingOut}
             onLogout={onLogout}
           />
-        ) : (
-          <div className="fo-site-nav__mobile-guest">
-            <AuthActions
-              hasHydrated={hasHydrated}
-              isAuthenticated={false}
-              userLabel={null}
-              isLoggingOut={false}
-              onLogout={onLogout}
-            />
-          </div>
-        )}
+        </div>
+
+        {/* Mobile menu toggle & drawer */}
+        <MobileMenu
+          pathname={pathname}
+          isAuthenticated={isAuthenticated}
+          userLabel={userLabel}
+          isLoggingOut={isLoggingOut}
+          onLogout={onLogout}
+        />
       </div>
     </nav>
   );
