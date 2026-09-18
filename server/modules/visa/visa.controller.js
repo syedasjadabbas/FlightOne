@@ -29,7 +29,7 @@ export async function lookup(req, res, next) {
 
 export async function assess(req, res, next) {
   try {
-    const data = await visaService.assessVisaForTraveller(req.user.id, req.body);
+    const data = await visaService.assessVisaForTraveller(req.user?.id, req.body);
     return successResponse(res, "OK", data);
   } catch (e) {
     next(e);

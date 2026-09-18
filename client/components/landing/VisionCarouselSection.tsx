@@ -228,6 +228,7 @@ export default function VisionCarouselSection() {
         zIndex: 30,
         width: '100%',
         maxWidth: '100%',
+        boxSizing: 'border-box',
         height: '100dvh',
         marginTop: '-45vh',
         marginBottom: '-100vh',
@@ -450,6 +451,8 @@ export default function VisionCarouselSection() {
 
         .vision-narrative {
           width: clamp(14rem, 34vw, 31.25rem);
+          max-width: calc(100% - var(--left-d, 0%) - 1.5rem);
+          box-sizing: border-box;
         }
         .vision-caption {
           display: block;
@@ -489,6 +492,7 @@ export default function VisionCarouselSection() {
           }
           .vision-narrative {
             left: var(--left-m) !important;
+            max-width: calc(100% - var(--left-m, 0%) - 1.25rem) !important;
           }
         }
       `}</style>

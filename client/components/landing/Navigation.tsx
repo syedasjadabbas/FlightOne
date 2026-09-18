@@ -540,6 +540,10 @@ export default function Navigation() {
           style={{
             position: 'fixed',
             inset: 0,
+            width: '100%',
+            maxWidth: '100%',
+            boxSizing: 'border-box',
+            overflowX: 'hidden',
             zIndex: 199,
             backgroundColor: isLightSection
               ? 'rgba(252,251,245,0.98)'

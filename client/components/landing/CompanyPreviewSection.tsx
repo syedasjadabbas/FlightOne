@@ -17,7 +17,7 @@ export default function CompanyPreviewSection() {
       if (!trackRef.current) return;
       const rect = trackRef.current.getBoundingClientRect();
       const vh = window.innerHeight;
-      const vw = window.innerWidth;
+      const vw = document.documentElement.clientWidth || window.innerWidth;
       const scrollableDist = trackRef.current.offsetHeight - vh;
 
       if (scrollableDist <= 0) return;
@@ -47,6 +47,8 @@ export default function CompanyPreviewSection() {
         const cardY = (1 - easedGrowth) * 60;
 
         cardRef.current.style.width = `${currentW}px`;
+        cardRef.current.style.maxWidth = '100%';
+        cardRef.current.style.boxSizing = 'border-box';
         cardRef.current.style.height = `${currentH}px`;
         cardRef.current.style.borderRadius = `${currentRadius}px`;
         cardRef.current.style.transform = `translate3d(0, ${cardY}px, 0)`;
@@ -85,6 +87,8 @@ export default function CompanyPreviewSection() {
       style={{
         position: 'relative',
         width: '100%',
+        maxWidth: '100%',
+        boxSizing: 'border-box',
         height: '280vh',
         backgroundColor: '#0E1620',
         color: '#F5F4DF',
@@ -114,6 +118,8 @@ export default function CompanyPreviewSection() {
           style={{
             position: 'relative',
             width: '560px',
+            maxWidth: '100%',
+            boxSizing: 'border-box',
             height: '315px',
             borderRadius: '28px',
             overflow: 'hidden',
@@ -162,6 +168,8 @@ export default function CompanyPreviewSection() {
               bottom: 'clamp(2.5rem, 5vh, 4rem)',
               left: 0,
               right: 0,
+              maxWidth: '100%',
+              boxSizing: 'border-box',
               padding: '0 clamp(2rem, 4.5vw, 4.5rem)',
               display: 'flex',
               justifyContent: 'space-between',

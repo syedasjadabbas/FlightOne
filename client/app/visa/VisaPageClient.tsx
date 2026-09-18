@@ -19,6 +19,7 @@ import {
   type VisaAssessment,
   type VisaCategory,
 } from "@/lib/api/visa.api";
+import { useAuthStore } from "@/store/auth.store";
 
 function FactBadge({ isFact, dataStatus }: { isFact: boolean; dataStatus?: string | null }) {
   if (isFact) {
@@ -72,13 +73,38 @@ function VisaApplicationsSection({
   destination: string;
   category?: VisaCategory;
 }) {
-  const { data, isLoading, refetch } = useListVisaApplicationsQuery();
+  const hasHydrated = useAuthStore((s) => s.hasHydrated);
+  const isAuthenticated = useAuthStore((s) => Boolean(s.accessToken));
+  const { data, isLoading, refetch } = useListVisaApplicationsQuery(undefined, {
+    skip: !hasHydrated || !isAuthenticated,
+  });
   const [createApp, createState] = useCreateVisaApplicationMutation();
   const [updateApp, updateState] = useUpdateVisaApplicationMutation();
   const [apptAt, setApptAt] = useState("");
   const [apptLoc, setApptLoc] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [localMsg, setLocalMsg] = useState<string | null>(null);
+
+  if (hasHydrated && !isAuthenticated) {
+    return (
+      <TravellerSection
+        title="Appointment tracking"
+        note="Track embassy appointments and document requirements."
+        panel
+      >
+        <p className="text-[13px] text-ink-soft">
+          Sign in to save and manage your embassy appointments and visa tracking.
+        </p>
+        <div className="mt-3">
+          <Link href="/login?redirect=%2Fvisa">
+            <Button size="sm" variant="secondary">
+              Sign in to track applications
+            </Button>
+          </Link>
+        </div>
+      </TravellerSection>
+    );
+  }
 
   const items = Array.isArray(data)
     ? data
@@ -198,7 +224,9 @@ function VisaApplicationsSection({
 }
 
 export function VisaPageClient() {
+  const isAuthenticated = useAuthStore((s) => Boolean(s.accessToken));
   const [destination, setDestination] = useState("AE");
+  const [nationality, setNationality] = useState("PK");
   const [transit, setTransit] = useState("");
   const [purpose, setPurpose] = useState("");
   const [assessment, setAssessment] = useState<VisaAssessment | null>(null);
@@ -217,6 +245,11 @@ export function VisaPageClient() {
       setError("Destination must be an ISO country code (e.g. AE, TR, GB).");
       return;
     }
+    const nat = nationality.trim().toUpperCase();
+    if (nat && !/^[A-Z]{2}$/.test(nat)) {
+      setError("Nationality must be a 2-letter ISO country code (e.g. PK, US, GB).");
+      return;
+    }
     const transitCountries = transit
       .split(",")
       .map((s) => s.trim().toUpperCase())
@@ -224,6 +257,7 @@ export function VisaPageClient() {
     try {
       const data = await assess({
         destination: dest,
+        ...(nat ? { nationality: nat } : {}),
         ...(transitCountries.length ? { transitCountries } : {}),
         ...(purpose.trim() ? { purpose: purpose.trim() } : {}),
       }).unwrap();
@@ -279,13 +313,22 @@ export function VisaPageClient() {
 
       <TravellerSection title="Assess" panel>
         <form className="space-y-2.5" onSubmit={onAssess}>
-          <Input
-            label="Destination (ISO2)"
-            value={destination}
-            onChange={(e) => setDestination(e.target.value.toUpperCase())}
-            maxLength={2}
-            placeholder="AE"
-          />
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Input
+              label="Destination (ISO2)"
+              value={destination}
+              onChange={(e) => setDestination(e.target.value.toUpperCase())}
+              maxLength={2}
+              placeholder="AE"
+            />
+            <Input
+              label="Passport / Nationality (ISO2)"
+              value={nationality}
+              onChange={(e) => setNationality(e.target.value.toUpperCase())}
+              maxLength={2}
+              placeholder="PK"
+            />
+          </div>
           <Input
             label="Transit countries (optional, comma-separated ISO2)"
             value={transit}
@@ -485,15 +528,23 @@ export function VisaPageClient() {
                 Chat with a consultant.
               </p>
               <div className="flex flex-wrap gap-2">
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="secondary"
-                  disabled={escalating}
-                  onClick={() => void onEscalate()}
-                >
-                  {escalating ? "Recording…" : "Request consultant review"}
-                </Button>
+                {isAuthenticated ? (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="secondary"
+                    disabled={escalating}
+                    onClick={() => void onEscalate()}
+                  >
+                    {escalating ? "Recording…" : "Request consultant review"}
+                  </Button>
+                ) : (
+                  <Link href="/login?redirect=%2Fvisa">
+                    <Button type="button" size="sm" variant="secondary">
+                      Sign in for consultant review
+                    </Button>
+                  </Link>
+                )}
                 <Link href="/chat">
                   <Button type="button" size="sm" variant="ghost">
                     Open Chat

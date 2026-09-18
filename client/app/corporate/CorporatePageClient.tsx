@@ -121,13 +121,63 @@ export function CorporatePageClient() {
 
   if (!accessToken) {
     return (
-      <div className="fo-desk__panel fo-desk__stack">
-        <p className="fo-desk__empty" style={{ padding: 0 }}>
-          Sign in to manage corporate travel.
-        </p>
-        <Link href="/login?redirect=/corporate" className="text-[14px] text-[var(--cyan)] underline">
-          Log in
-        </Link>
+      <div className="space-y-8">
+        <header className="border-b border-slate-200/80 pb-6">
+          <p className="text-xs font-semibold uppercase tracking-wider text-cyan-600">Enterprise & Business Travel Management</p>
+          <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl font-[var(--font-sora)]">
+            FlightOne Corporate
+          </h1>
+          <p className="mt-2 text-sm text-slate-600 max-w-2xl leading-relaxed">
+            Centralized billing, credit facilities, multi-level booking approval workflows, and corporate travel policy compliance.
+          </p>
+          <div className="mt-4 flex gap-3">
+            <Link href="/login?redirect=/corporate">
+              <Button size="sm">Sign in to company desk</Button>
+            </Link>
+            <Link href="/chat">
+              <Button size="sm" variant="secondary">Book with Ava</Button>
+            </Link>
+          </div>
+        </header>
+
+        <div className="grid gap-4 sm:grid-cols-3">
+          <div className="rounded-xl border border-slate-200/80 bg-white/80 p-4 shadow-2xs">
+            <div className="text-lg mb-2">💼</div>
+            <p className="text-sm font-semibold text-slate-900">Credit Lines & Invoicing</p>
+            <p className="mt-1 text-xs text-slate-600 leading-relaxed">
+              Approved corporate credit limits with itemized monthly consolidated statements and instant GST/tax invoicing.
+            </p>
+          </div>
+          <div className="rounded-xl border border-slate-200/80 bg-white/80 p-4 shadow-2xs">
+            <div className="text-lg mb-2">🛡️</div>
+            <p className="text-sm font-semibold text-slate-900">Policy Compliance</p>
+            <p className="mt-1 text-xs text-slate-600 leading-relaxed">
+              Configurable travel policies with automatic budget capping, cabin class rules, and manager approval queues.
+            </p>
+          </div>
+          <div className="rounded-xl border border-slate-200/80 bg-white/80 p-4 shadow-2xs">
+            <div className="text-lg mb-2">⚡</div>
+            <p className="text-sm font-semibold text-slate-900">Duty of Care</p>
+            <p className="mt-1 text-xs text-slate-600 leading-relaxed">
+              Real-time traveler locator, automated delay protection, disruption rebooking, and priority 24/7 account manager support.
+            </p>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-xs">
+          <h2 className="text-base font-semibold text-slate-900">Corporate Administrator Access</h2>
+          <p className="mt-1 text-xs text-slate-600">
+            Sign in to switch company profiles, approve employee booking requests, review statement ledgers, and download invoices.
+          </p>
+          <div className="mt-4 flex gap-3">
+            <Link href="/login?redirect=/corporate">
+              <Button size="sm">Log in to company account</Button>
+            </Link>
+            <Link href="/signup">
+              <Button size="sm" variant="ghost">Register company</Button>
+            </Link>
+          </div>
+        </div>
       </div>
     );
   }

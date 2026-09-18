@@ -167,7 +167,7 @@ export async function assessVisaForTraveller(
   if (!nationality || nationality.length !== 2) {
     missingInputs.push("nationality");
   }
-  if (!context.hasPassport) {
+  if (userId && !context.hasPassport) {
     missingInputs.push("passport");
   }
 

@@ -1,6 +1,5 @@
 import { Router } from "express";
-import { validateBody, validateParams, validateQuery } from "../../lib/validate.js";
-import { requireAuth } from "../../middlewares/auth.js";
+import { optionalAuth, requireAuth } from "../../middlewares/auth.js";
 import * as rewardsController from "./rewards.controller.js";
 import {
   attachReferralSchema,
@@ -13,9 +12,9 @@ import {
 
 const router = Router();
 
-router.use(requireAuth);
+router.get("/policy", optionalAuth, rewardsController.getPolicy);
 
-router.get("/policy", rewardsController.getPolicy);
+router.use(requireAuth);
 router.get("/", rewardsController.getSummary);
 router.get("/ledger", validateQuery(listLedgerQuerySchema), rewardsController.listLedger);
 router.get("/referrals", rewardsController.listReferrals);

@@ -38,7 +38,7 @@ export default function Home() {
   return (
     <SmoothScroll>
       <Navigation />
-      <main style={{ background: '#FFFFFF', width: '100%', maxWidth: '100%' }}>
+      <main style={{ background: '#FFFFFF', width: '100%', maxWidth: '100%', overflowX: 'clip', boxSizing: 'border-box' }}>
         {/* 1. Unified Hero Video Playthrough -> Travel Styles showcase morph */}
         <HeroExperienceSequence />
 

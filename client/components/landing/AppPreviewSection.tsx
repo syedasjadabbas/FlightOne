@@ -96,6 +96,7 @@ export default function AppPreviewSection() {
         position: 'relative',
         width: '100%',
         maxWidth: '100%',
+        boxSizing: 'border-box',
         overflow: 'hidden',
         zIndex: 10,
       }}

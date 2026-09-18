@@ -11,7 +11,6 @@ import {
 import { useTravellerLocation } from "./useTravellerLocation";
 import { AskAiShell, useAskAiChat, type AskAiView } from "./ask-ai";
 import { ChatLayout } from "./ChatLayout";
-import { GuestBanner } from "./GuestBanner";
 import { useAuthStore } from "@/store/auth.store";
 import { useCorporateProfileStore } from "@/store/corporateProfile.store";
 import { offerHasQuoteSnapshot, quotePayloadFromOffer } from "@/lib/bookings/quoteFromOffer";
@@ -267,7 +266,6 @@ export function ChatConsole() {
               location={location}
               locationReady={locationReady}
               followUpSuggestions={chat.followUpSuggestions}
-              banner={<GuestBanner />}
               chatResultsState={chatResultsState}
               resultCount={resultCount}
               resultNoun={resultNoun}

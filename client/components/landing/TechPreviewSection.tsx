@@ -88,6 +88,7 @@ export default function TechPreviewSection() {
         position: 'relative',
         width: '100%',
         maxWidth: '100%',
+        boxSizing: 'border-box',
         height: '170vh',
         backgroundColor: '#F4F3DC',
         zIndex: 12,

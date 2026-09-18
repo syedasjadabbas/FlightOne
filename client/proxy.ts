@@ -11,12 +11,9 @@ import { AUTH_PRESENCE_COOKIE } from "@/store/auth.store";
 const PROTECTED_PREFIXES: string[] = [
   "/dashboard",
   "/profile",
-  "/checkout",
+  "/journey",
   "/vault",
-  "/visa",
-  "/rewards",
-  "/groups",
-  "/mice",
+  "/checkout",
 ];
 
 function isProtectedPath(pathname: string): boolean {

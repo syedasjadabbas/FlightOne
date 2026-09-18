@@ -71,7 +71,7 @@
 /* ── Global nav — background token only (styles live in visual.css) ── */
 
 .fo-site-nav {
-  background: var(--fo-nav-bg, #06596b);
+  background: var(--fo-nav-bg, rgba(10, 18, 30, 0.92));
 }
 
 /* ── Landing hero ───────────────────────────────────────────── */

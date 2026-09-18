@@ -32,6 +32,15 @@ function loadEnvLocal() {
 
 loadEnvLocal();
 
+function getFutureDate(daysAhead = 14): string {
+  const d = new Date();
+  d.setDate(d.getDate() + daysAhead);
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
 describe("live SerpAPI probe", () => {
   it("searchGoogleFlights returns options for LHR→SFO", async () => {
     expect(isSerpConfigured()).toBe(true);
@@ -40,7 +49,7 @@ describe("live SerpAPI probe", () => {
     const result = await searchGoogleFlights({
       origin: "LHR",
       destination: "SFO",
-      outboundDate: "2026-09-17",
+      outboundDate: getFutureDate(14),
       currency: "PKR",
     });
     const ms = Date.now() - started;
@@ -65,7 +74,7 @@ describe("live SerpAPI probe", () => {
           query: {
             origin: "LHR",
             destination: "SFO",
-            departureDate: "2026-09-17",
+            departureDate: getFutureDate(14),
             passengers: 1,
             cabinClass: "ECONOMY",
             requestedCurrency: "PKR",

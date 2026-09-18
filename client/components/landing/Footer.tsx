@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { COMPANY_INFO } from '@/data/company';
 
 /**
- * The four wavy ribbon paths in the footer graphic, as a pure function of
+ * The five wavy ribbon paths in the footer graphic, as a pure function of
  * scroll progress (0..1) through the footer. Used both for the static
  * initial-paint JSX (progress 0) and for the live per-frame update, so the
  * two can never drift apart.
@@ -37,13 +37,7 @@ export default function Footer() {
   const [isFocused, setIsFocused] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  // The 5 ribbon <path> elements: driven straight from the RAF loop below via
-  // setAttribute, not React state, since this scroll-linked value changes up
-  // to 60x/sec for as long as the footer exists on the page — routing it
-  // through useState previously forced a full component re-render every
-  // single frame (newsletter form, links, everything) regardless of whether
-  // the user was even scrolling. Same math, same visual output each frame;
-  // only the update mechanism changed.
+  // The 5 ribbon <path> elements driven from RAF loop
   const navyPathRef = useRef<SVGPathElement>(null);
   const orangePathRef = useRef<SVGPathElement>(null);
   const creamPathRef = useRef<SVGPathElement>(null);
@@ -109,325 +103,429 @@ export default function Footer() {
         width: '100%',
         maxWidth: '100%',
         boxSizing: 'border-box',
-        backgroundColor: '#007AE5',
+        backgroundColor: '#051122',
+        backgroundImage:
+          'radial-gradient(120% 90% at 50% 0%, #0A2244 0%, #06152B 45%, #020914 100%)',
         color: '#FFFFFF',
         overflow: 'hidden',
         zIndex: 20,
-        boxShadow: '0 -24px 60px rgba(14, 22, 32, 0.18)',
+        boxShadow: '0 -24px 60px rgba(14, 22, 32, 0.25)',
+        borderTop: '1px solid rgba(255, 255, 255, 0.12)',
       }}
     >
-      {/* ── 1. MAIN FULL-SCREEN FOOTER VIEWPORT CONTAINER (100vh / 100dvh) ── */}
+      {/* ── 1. MAIN FOOTER CONTENT CONTAINER (Generous navbar clearance + luxury editorial layout) ── */}
       <div
         ref={mainPanelRef}
         style={{
           position: 'relative',
           width: '100%',
-          minHeight: '100dvh',
-          backgroundColor: '#007AE5',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          padding: 'clamp(3.5rem, 6vh, 5.5rem) clamp(2rem, 4.5vw, 4.5rem) clamp(3rem, 5vh, 4.5rem)',
+          maxWidth: '1380px',
+          margin: '0 auto',
+          padding:
+            'clamp(6.5rem, 11vh, 8.5rem) clamp(1.75rem, 4.5vw, 4.5rem) clamp(3rem, 5vh, 4rem)',
           boxSizing: 'border-box',
           zIndex: 10,
         }}
       >
-        {/* TOP ROW: LEGAL META / SUBLINKS (LEFT) & 3-COLUMN DIRECTORY (RIGHT) */}
+        {/* ── TOP SHOWCASE: Brand Anchor & Direct Concierge Card ── */}
         <div
           style={{
-            width: '100%',
-            maxWidth: '100%',
-            display: 'grid',
-            gridTemplateColumns: 'minmax(280px, 1.15fr) minmax(360px, 2fr)',
-            gap: 'clamp(2.5rem, 5vw, 5rem)',
-            alignItems: 'start',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            gap: 'clamp(2rem, 4vw, 4rem)',
+            flexWrap: 'wrap',
           }}
-          className="footer-top-grid"
+          className="footer-hero-row"
         >
-          {/* Left Column: Legal, Copyright & Policy Sub-links */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              <p
-                style={{
-                  fontFamily: 'var(--font-sans)',
-                  fontSize: '0.875rem',
-                  fontWeight: 500,
-                  color: 'rgba(255, 255, 255, 0.95)',
-                  lineHeight: 1.5,
-                  margin: 0,
-                }}
-              >
-                © 2026 FlightOne. All rights reserved.
-              </p>
-              <p
-                style={{
-                  fontFamily: 'var(--font-sans)',
-                  fontSize: '0.8125rem',
-                  color: 'rgba(255, 255, 255, 0.75)',
-                  lineHeight: 1.5,
-                  margin: 0,
-                }}
-              >
-                {COMPANY_INFO.mission}
-              </p>
-            </div>
-
-            {/* Sub-links */}
+          {/* Left Column: Brand Headline & Vision */}
+          <div style={{ maxWidth: '640px', flex: '1 1 380px' }}>
+            {/* Trust badge with live pulse */}
             <div
               style={{
-                display: 'flex',
-                flexDirection: 'column',
+                display: 'inline-flex',
+                alignItems: 'center',
                 gap: '0.625rem',
+                backgroundColor: 'rgba(255, 255, 255, 0.06)',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+                borderRadius: '9999px',
+                padding: '6px 14px',
+                marginBottom: '1.25rem',
               }}
             >
-              {[
-                { label: 'FAQ', href: '/faq' },
-                { label: 'Honeymoon Packages', href: '/honeymoon-packages' },
-                { label: 'Family Holidays', href: '/family-holidays' },
-                { label: 'Group Tours', href: '/group-tours' },
-                { label: 'Travel E-SIMs', href: '/e-sim' },
-              ].map((subLink) => (
-                <Link
-                  key={subLink.label}
-                  href={subLink.href}
-                  style={{
-                    fontFamily: 'var(--font-sans)',
-                    fontSize: '0.8125rem',
-                    color: 'rgba(255, 255, 255, 0.78)',
-                    textDecoration: 'none',
-                    transition: 'color 0.2s ease, transform 0.2s ease',
-                    width: 'fit-content',
-                  }}
-                  className="hover:text-white hover:underline"
-                >
-                  {subLink.label}
-                </Link>
-              ))}
+              <span
+                style={{
+                  width: '7px',
+                  height: '7px',
+                  borderRadius: '50%',
+                  backgroundColor: '#25D366',
+                  boxShadow: '0 0 10px #25D366',
+                  flexShrink: 0,
+                }}
+              />
+              <span
+                style={{
+                  fontFamily: 'var(--font-sans)',
+                  fontSize: '0.6875rem',
+                  fontWeight: 600,
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                  color: '#74C9DD',
+                }}
+              >
+                Verified Travel Consultant · 24h Turnaround
+              </span>
             </div>
+
+            <h2
+              style={{
+                fontFamily: 'var(--font-display)',
+                fontSize: 'clamp(2.2rem, 3.8vw, 3.6rem)',
+                fontWeight: 600,
+                letterSpacing: '-0.035em',
+                color: '#F5F4DF',
+                lineHeight: 1.08,
+                margin: '0 0 1.1rem 0',
+              }}
+            >
+              Every journey, designed around you.
+            </h2>
+
+            <p
+              style={{
+                fontFamily: 'var(--font-sans)',
+                fontSize: 'clamp(0.95rem, 1.15vw, 1.0625rem)',
+                lineHeight: 1.6,
+                color: 'rgba(245, 244, 223, 0.78)',
+                margin: 0,
+                maxWidth: '560px',
+              }}
+            >
+              {COMPANY_INFO.mission}
+            </p>
           </div>
 
-          {/* Right Column: 3 Directory Columns (Explore, Company, Connect) */}
+          {/* Right Column: Direct WhatsApp Concierge Card */}
           <div
             style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-              gap: 'clamp(1.5rem, 3.5vw, 3.5rem)',
+              flex: '1 1 340px',
+              maxWidth: '440px',
+              background: 'rgba(255, 255, 255, 0.04)',
+              border: '1px solid rgba(255, 255, 255, 0.12)',
+              borderRadius: '22px',
+              padding: 'clamp(1.5rem, 2.5vw, 2rem)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              boxShadow: '0 20px 50px rgba(0, 0, 0, 0.25)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1rem',
             }}
-            className="footer-nav-columns"
           >
-            {/* Column 1: Explore */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              <h4
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span
                 style={{
-                  fontFamily: 'var(--font-display)',
-                  fontSize: '0.9375rem',
-                  fontWeight: 700,
-                  letterSpacing: '0.06em',
+                  fontFamily: 'var(--font-sans)',
+                  fontSize: '0.6875rem',
+                  fontWeight: 600,
+                  letterSpacing: '0.08em',
                   textTransform: 'uppercase',
-                  color: '#FFFFFF',
-                  margin: 0,
+                  color: '#74C9DD',
                 }}
               >
-                Destinations
-              </h4>
-              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
-                {[
-                  { label: 'Maldives', href: '/destinations/maldives' },
-                  { label: 'Sri Lanka', href: '/destinations/sri-lanka' },
-                  { label: 'Dubai', href: '/destinations/dubai' },
-                  { label: 'Thailand', href: '/destinations/thailand' },
-                  { label: 'Turkey', href: '/destinations/turkey' },
-                ].map((link) => (
-                  <li key={link.label}>
-                    <Link
-                      href={link.href}
-                      style={{
-                        fontFamily: 'var(--font-sans)',
-                        fontSize: '1rem',
-                        fontWeight: 450,
-                        color: 'rgba(255, 255, 255, 0.88)',
-                        textDecoration: 'none',
-                        transition: 'color 0.2s ease',
-                      }}
-                      className="hover:text-white hover:underline"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+                Direct Concierge
+              </span>
+              <span
+                style={{
+                  fontFamily: 'var(--font-sans)',
+                  fontSize: '0.75rem',
+                  color: 'rgba(245, 244, 223, 0.65)',
+                }}
+              >
+                Avg. response ~15 mins
+              </span>
             </div>
 
-            {/* Column 2: Company */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              <h4
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+              <span
                 style={{
                   fontFamily: 'var(--font-display)',
-                  fontSize: '0.9375rem',
-                  fontWeight: 700,
-                  letterSpacing: '0.06em',
-                  textTransform: 'uppercase',
+                  fontSize: '1.2rem',
+                  fontWeight: 600,
                   color: '#FFFFFF',
+                  letterSpacing: '-0.015em',
+                }}
+              >
+                Plan with a Travel Designer
+              </span>
+              <p
+                style={{
+                  fontFamily: 'var(--font-sans)',
+                  fontSize: '0.84rem',
+                  color: 'rgba(245, 244, 223, 0.72)',
+                  lineHeight: 1.45,
                   margin: 0,
                 }}
               >
-                Company
-              </h4>
-              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
-                {[
-                  { label: 'Home', href: '/' },
-                  { label: 'About', href: '/about' },
-                  { label: 'FAQ', href: '/faq' },
-                  { label: 'Visa Assistance', href: '/visa-assistance' },
-                  { label: 'Contact Us', href: '/contact-us' },
-                ].map((link) => (
-                  <li key={link.label}>
-                    <Link
-                      href={link.href}
-                      style={{
-                        fontFamily: 'var(--font-sans)',
-                        fontSize: '1rem',
-                        fontWeight: 450,
-                        color: 'rgba(255, 255, 255, 0.88)',
-                        textDecoration: 'none',
-                        transition: 'color 0.2s ease',
-                      }}
-                      className="hover:text-white hover:underline"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+                Tell us your destination, dates, and group size. We return flights, hotels, and visa advice in one chat.
+              </p>
             </div>
 
-            {/* Column 3: Connect */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              <h4
-                style={{
-                  fontFamily: 'var(--font-display)',
-                  fontSize: '0.9375rem',
-                  fontWeight: 700,
-                  letterSpacing: '0.06em',
-                  textTransform: 'uppercase',
-                  color: '#FFFFFF',
-                  margin: 0,
-                }}
-              >
-                Connect
-              </h4>
-              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
-                {[
-                  { label: 'Instagram ↗', href: COMPANY_INFO.social.instagram },
-                  { label: 'WhatsApp ↗', href: COMPANY_INFO.contact.whatsappUrl },
-                  { label: 'Call Us', href: `tel:${COMPANY_INFO.contact.phone}` },
-                  { label: 'Email Us', href: `mailto:${COMPANY_INFO.contact.email}` },
-                  { label: 'Get Directions ↗', href: COMPANY_INFO.address.mapsUrl },
-                ].map((link) => (
-                  <li key={link.label}>
-                    <a
-                      href={link.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        fontFamily: 'var(--font-sans)',
-                        fontSize: '1rem',
-                        fontWeight: 450,
-                        color: 'rgba(255, 255, 255, 0.88)',
-                        textDecoration: 'none',
-                        transition: 'color 0.2s ease',
-                      }}
-                      className="hover:text-white hover:underline"
-                    >
-                      {link.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <Link
+              href={COMPANY_INFO.contact.whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.625rem',
+                backgroundColor: '#007AE5',
+                color: '#FFFFFF',
+                borderRadius: '9999px',
+                padding: '12px 22px',
+                fontFamily: 'var(--font-sans)',
+                fontSize: '0.875rem',
+                fontWeight: 600,
+                textDecoration: 'none',
+                letterSpacing: '-0.01em',
+                boxShadow: '0 8px 24px rgba(0, 122, 229, 0.35)',
+                transition: 'background-color 0.25s ease, transform 0.25s ease',
+              }}
+              className="hover:bg-[#0066cc] hover:scale-[1.02]"
+            >
+              <span>Chat on WhatsApp</span>
+              <span style={{ fontSize: '1.1rem' }}>→</span>
+            </Link>
           </div>
         </div>
 
-        {/* BOTTOM ROW: FULL-WIDTH LOGO (LEFT) & HIGH-CONTRAST NEWSLETTER (RIGHT) */}
+        {/* ── DIVIDER LINE ── */}
         <div
           style={{
+            height: '1px',
             width: '100%',
-            maxWidth: '100%',
-            display: 'flex',
-            alignItems: 'flex-end',
-            justifyContent: 'space-between',
-            gap: 'clamp(2rem, 4vw, 4rem)',
-            flexWrap: 'wrap',
-            paddingTop: 'clamp(2rem, 4vh, 3.5rem)',
+            background:
+              'linear-gradient(90deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.06) 80%, transparent 100%)',
+            margin: 'clamp(2.5rem, 5vh, 3.75rem) 0 clamp(2.5rem, 5vh, 3.5rem)',
           }}
+        />
+
+        {/* ── MAIN 4-COLUMN NAVIGATION DIRECTORY ── */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+            gap: 'clamp(1.75rem, 3.5vw, 3.5rem)',
+            alignItems: 'start',
+          }}
+          className="footer-nav-grid"
         >
-          {/* Left: FlightOne Loop Logo & Wordmark */}
-          <Link
-            href="/"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '1.25rem',
-              textDecoration: 'none',
-              color: '#F5F4DF',
-            }}
-          >
-            <svg
-              width="60"
-              height="40"
-              viewBox="0 0 54 36"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              style={{ flexShrink: 0 }}
-            >
-              <path
-                d="M13.5 9C7.15 9 2 14.15 2 20.5C2 26.85 7.15 32 13.5 32C19.85 32 24.5 26.5 28.5 20.5C32.5 14.5 38.5 9 44.5 9C49.5 9 52 12.5 52 17C52 22.5 46.5 27 40.5 27C34.5 27 29 21.5 25 15.5C21 9.5 17 4 11 4C5 4 2 8 2 13"
-                stroke="#F5F4DF"
-                strokeWidth="4.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            <span
+          {/* Column 1: Destinations */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <h4
               style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: 'clamp(2.5rem, 4vw, 3.75rem)',
-                fontWeight: 700,
-                letterSpacing: '-0.03em',
-                color: '#F5F4DF',
-                lineHeight: 1,
+                fontFamily: 'var(--font-sans)',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                color: '#74C9DD',
+                margin: 0,
+              }}
+            >
+              Destinations
+            </h4>
+            <ul
+              style={{
+                listStyle: 'none',
+                padding: 0,
+                margin: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.75rem',
+              }}
+            >
+              {[
+                { label: 'Maldives', desc: 'Overwater villas', href: '/destinations/maldives' },
+                { label: 'Dubai', desc: 'Luxury city & desert', href: '/destinations/dubai' },
+                { label: 'Turkey', desc: 'Istanbul & Cappadocia', href: '/destinations/turkey' },
+                { label: 'Thailand', desc: 'Phuket & Krabi', href: '/destinations/thailand' },
+                { label: 'Sri Lanka', desc: 'Nature & culture', href: '/destinations/sri-lanka' },
+              ].map((link) => (
+                <li key={link.label}>
+                  <Link
+                    href={link.href}
+                    style={{
+                      fontFamily: 'var(--font-sans)',
+                      fontSize: '0.9375rem',
+                      color: 'rgba(245, 244, 223, 0.85)',
+                      textDecoration: 'none',
+                      display: 'inline-flex',
+                      alignItems: 'baseline',
+                      gap: '0.5rem',
+                      transition: 'color 0.2s ease, transform 0.2s ease',
+                    }}
+                    className="hover:text-white hover:translate-x-1"
+                  >
+                    <span style={{ fontWeight: 500 }}>{link.label}</span>
+                    <span style={{ fontSize: '0.75rem', color: 'rgba(245, 244, 223, 0.45)' }}>
+                      · {link.desc}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Column 2: Experiences & Services */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <h4
+              style={{
+                fontFamily: 'var(--font-sans)',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                color: '#74C9DD',
+                margin: 0,
+              }}
+            >
+              Experiences
+            </h4>
+            <ul
+              style={{
+                listStyle: 'none',
+                padding: 0,
+                margin: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.75rem',
+              }}
+            >
+              {[
+                { label: 'Honeymoon Packages', href: '/honeymoon-packages' },
+                { label: 'Family Holidays', href: '/family-holidays' },
+                { label: 'Group & MICE Tours', href: '/groups' },
+                { label: 'Corporate Travel', href: '/corporate' },
+                { label: 'Visa Assistance', href: '/visa' },
+                { label: 'Travel E-SIMs', href: '/e-sim' },
+              ].map((link) => (
+                <li key={link.label}>
+                  <Link
+                    href={link.href}
+                    style={{
+                      fontFamily: 'var(--font-sans)',
+                      fontSize: '0.9375rem',
+                      fontWeight: 450,
+                      color: 'rgba(245, 244, 223, 0.85)',
+                      textDecoration: 'none',
+                      transition: 'color 0.2s ease, transform 0.2s ease',
+                    }}
+                    className="hover:text-white hover:translate-x-1"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Column 3: Company & Trust */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <h4
+              style={{
+                fontFamily: 'var(--font-sans)',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                color: '#74C9DD',
+                margin: 0,
               }}
             >
               FlightOne
-            </span>
-          </Link>
-
-          {/* Right: Sign Up for Updates Form */}
-          <div style={{ maxWidth: '500px', width: '100%' }}>
-            <h3
+            </h4>
+            <ul
               style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: 'clamp(1.4rem, 2vw, 2rem)',
-                fontWeight: 600,
-                color: '#F5F4DF',
-                marginBottom: '0.875rem',
-                letterSpacing: '-0.02em',
+                listStyle: 'none',
+                padding: 0,
+                margin: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.75rem',
               }}
             >
-              Sign up for updates
-            </h3>
+              {[
+                { label: 'About FlightOne', href: '/about' },
+                { label: 'Why Choose Us', href: '/#why-choose-us' },
+                { label: 'Transparent Pricing', href: '/#itinerary' },
+                { label: 'Frequently Asked Questions', href: '/faq' },
+                { label: 'Customer Support', href: '/escalations' },
+                { label: 'Refund Policies', href: '/refunds' },
+              ].map((link) => (
+                <li key={link.label}>
+                  <Link
+                    href={link.href}
+                    style={{
+                      fontFamily: 'var(--font-sans)',
+                      fontSize: '0.9375rem',
+                      fontWeight: 450,
+                      color: 'rgba(245, 244, 223, 0.85)',
+                      textDecoration: 'none',
+                      transition: 'color 0.2s ease, transform 0.2s ease',
+                    }}
+                    className="hover:text-white hover:translate-x-1"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
 
+          {/* Column 4: Newsletter & Direct Contact */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <h4
+              style={{
+                fontFamily: 'var(--font-sans)',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                color: '#74C9DD',
+                margin: 0,
+              }}
+            >
+              Stay in Touch
+            </h4>
+
+            <p
+              style={{
+                fontFamily: 'var(--font-sans)',
+                fontSize: '0.84rem',
+                lineHeight: 1.45,
+                color: 'rgba(245, 244, 223, 0.72)',
+                margin: 0,
+              }}
+            >
+              Receive seasonal itinerary drops, private fare alerts, and visa updates from Pakistan.
+            </p>
+
+            {/* Newsletter Input Capsule */}
             <form
               onSubmit={handleSubmit}
               style={{
-                position: 'relative',
                 display: 'flex',
                 alignItems: 'center',
-                borderBottom: isFocused
-                  ? '2px solid #F5F4DF'
-                  : '1px solid rgba(245, 244, 223, 0.65)',
-                paddingBottom: '0.75rem',
-                transition: 'border-color 0.3s ease',
+                backgroundColor: 'rgba(255, 255, 255, 0.06)',
+                border: isFocused
+                  ? '1px solid #74C9DD'
+                  : '1px solid rgba(255, 255, 255, 0.16)',
+                borderRadius: '9999px',
+                padding: '4px 6px 4px 16px',
+                boxShadow: isFocused ? '0 0 16px rgba(116, 201, 221, 0.2)' : 'none',
+                transition: 'border-color 0.25s ease, box-shadow 0.25s ease',
               }}
             >
               <input
@@ -444,59 +542,117 @@ export default function Footer() {
                   border: 'none',
                   outline: 'none',
                   fontFamily: 'var(--font-sans)',
-                  fontSize: 'clamp(1rem, 1.2vw, 1.2rem)',
+                  fontSize: '0.875rem',
                   color: '#F5F4DF',
-                  paddingRight: '3rem',
                 }}
               />
               <button
                 type="submit"
                 aria-label="Submit email"
                 style={{
-                  position: 'absolute',
-                  right: 0,
-                  background: 'transparent',
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                  backgroundColor: '#007AE5',
                   border: 'none',
-                  color: '#F5F4DF',
-                  fontSize: '1.75rem',
+                  color: '#FFFFFF',
+                  fontSize: '1rem',
                   cursor: 'pointer',
-                  padding: 0,
                   display: 'flex',
                   alignItems: 'center',
-                  transition: 'transform 0.2s ease',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                  transition: 'background-color 0.2s ease, transform 0.2s ease',
                 }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.transform = 'translateX(6px)')
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.transform = 'translateX(0)')
-                }
+                className="hover:bg-[#0066cc] hover:scale-105"
               >
                 →
               </button>
             </form>
+
             {submitted ? (
-              <p style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: '#F5F4DF' }}>
+              <p style={{ margin: 0, fontSize: '0.8125rem', color: '#25D366' }}>
                 Thank you for subscribing!
               </p>
             ) : (
-              <p style={{ marginTop: '0.625rem', fontSize: '0.75rem', color: 'rgba(245, 244, 223, 0.65)', margin: '0.625rem 0 0 0' }}>
-                By signing up, you agree to receive communications from FlightOne.
-              </p>
+              <span style={{ fontSize: '0.72rem', color: 'rgba(245, 244, 223, 0.5)' }}>
+                No spam. Unsubscribe anytime.
+              </span>
             )}
+
+            {/* Direct Connect Quick Links */}
+            <div
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '0.85rem',
+                marginTop: '0.5rem',
+                paddingTop: '0.75rem',
+                borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+              }}
+            >
+              <a
+                href={COMPANY_INFO.contact.whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  fontFamily: 'var(--font-sans)',
+                  fontSize: '0.8125rem',
+                  color: 'rgba(245, 244, 223, 0.85)',
+                  textDecoration: 'none',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                }}
+                className="hover:text-[#25D366]"
+              >
+                WhatsApp ↗
+              </a>
+              <a
+                href={COMPANY_INFO.social.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  fontFamily: 'var(--font-sans)',
+                  fontSize: '0.8125rem',
+                  color: 'rgba(245, 244, 223, 0.85)',
+                  textDecoration: 'none',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                }}
+                className="hover:text-white"
+              >
+                Instagram ↗
+              </a>
+              <a
+                href={`mailto:${COMPANY_INFO.contact.email}`}
+                style={{
+                  fontFamily: 'var(--font-sans)',
+                  fontSize: '0.8125rem',
+                  color: 'rgba(245, 244, 223, 0.85)',
+                  textDecoration: 'none',
+                }}
+                className="hover:text-white"
+              >
+                Email Support ↗
+              </a>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* ── 2. BOTTOM SECTION: FULL-WIDTH MULTI-LAYER COLOR RIBBONS & GIANT WORDMARK ── */}
+      {/* ── 2. BOTTOM SECTION: INTEGRATED ANIMATED RIBBON HORIZON & ICONIC WORDMARK ── */}
       <div
         ref={graphicRef}
         style={{
           position: 'relative',
           width: '100%',
-          minHeight: '440px',
-          height: 'clamp(440px, 48vh, 560px)',
-          backgroundColor: '#1C3F99',
+          maxWidth: '100%',
+          boxSizing: 'border-box',
+          minHeight: '380px',
+          height: 'clamp(380px, 42vh, 500px)',
+          backgroundColor: '#051122',
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
@@ -539,8 +695,8 @@ export default function Footer() {
             position: 'relative',
             zIndex: 10,
             width: '100%',
-            maxWidth: '100%',
-            padding: '0 clamp(2rem, 4.5vw, 4.5rem) clamp(2rem, 4vh, 3.5rem)',
+            maxWidth: '1380px',
+            padding: '0 clamp(1.75rem, 4.5vw, 4.5rem) clamp(1rem, 2vh, 2rem)',
             margin: '0 auto',
             transformOrigin: 'bottom left',
             willChange: 'transform',
@@ -550,36 +706,96 @@ export default function Footer() {
           <div
             style={{
               fontFamily: 'var(--font-display)',
-              fontSize: 'clamp(4.5rem, 14vw, 12rem)',
+              fontSize: 'clamp(4.2rem, 13.5vw, 10.5rem)',
               fontWeight: 700,
               letterSpacing: '-0.04em',
               color: '#F5F4DF',
               lineHeight: 0.85,
-              textShadow: '0 8px 32px rgba(14, 22, 32, 0.4)',
+              textShadow: '0 8px 32px rgba(14, 22, 32, 0.45)',
               userSelect: 'none',
             }}
           >
             FlightOne
           </div>
         </div>
+
+        {/* ── 3. LEGAL & REGULATORY STRIP ── */}
+        <div
+          style={{
+            position: 'relative',
+            zIndex: 12,
+            width: '100%',
+            maxWidth: '1380px',
+            margin: '0 auto',
+            padding: '0 clamp(1.75rem, 4.5vw, 4.5rem) clamp(1.5rem, 3vh, 2.25rem)',
+            boxSizing: 'border-box',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: '1.5rem',
+            flexWrap: 'wrap',
+            borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+            paddingTop: '1.25rem',
+          }}
+        >
+          <div
+            style={{
+              fontFamily: 'var(--font-sans)',
+              fontSize: '0.78rem',
+              color: 'rgba(245, 244, 223, 0.72)',
+              lineHeight: 1.5,
+            }}
+          >
+            © {new Date().getFullYear()} {COMPANY_INFO.legalName}. All rights reserved. Department of Tourist Services License.
+          </div>
+
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1.25rem',
+              flexWrap: 'wrap',
+              fontFamily: 'var(--font-sans)',
+              fontSize: '0.78rem',
+            }}
+          >
+            <Link href="/faq" style={{ color: 'rgba(245, 244, 223, 0.75)', textDecoration: 'none' }} className="hover:text-white">
+              FAQ
+            </Link>
+            <Link href="/refunds" style={{ color: 'rgba(245, 244, 223, 0.75)', textDecoration: 'none' }} className="hover:text-white">
+              Refunds
+            </Link>
+            <Link href="/contact-us" style={{ color: 'rgba(245, 244, 223, 0.75)', textDecoration: 'none' }} className="hover:text-white">
+              Contact
+            </Link>
+            <span style={{ color: 'rgba(245, 244, 223, 0.45)' }}>·</span>
+            <span style={{ color: '#74C9DD', fontWeight: 500 }}>
+              Pakistan (PKR)
+            </span>
+          </div>
+        </div>
       </div>
 
       <style>{`
         footer ::placeholder {
-          color: rgba(245, 244, 223, 0.7) !important;
+          color: rgba(245, 244, 223, 0.55) !important;
         }
-        @media (max-width: 900px) {
-          .footer-top-grid {
-            grid-template-columns: 1fr !important;
-            gap: 3rem !important;
-          }
-          .footer-nav-columns {
+        @media (max-width: 1024px) {
+          .footer-nav-grid {
             grid-template-columns: repeat(2, 1fr) !important;
+            gap: 2.5rem !important;
+          }
+          .footer-hero-row {
+            flex-direction: column !important;
+          }
+          .footer-hero-row > div {
+            max-width: 100% !important;
           }
         }
-        @media (max-width: 600px) {
-          .footer-nav-columns {
+        @media (max-width: 640px) {
+          .footer-nav-grid {
             grid-template-columns: 1fr !important;
+            gap: 2.25rem !important;
           }
         }
       `}</style>

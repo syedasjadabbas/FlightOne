@@ -140,7 +140,9 @@
   }
 }
 
-* {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
@@ -445,7 +447,7 @@ html.lenis, html.lenis body { height: auto; }
 html {
   height: 100%;
   max-width: 100%;
-  overflow-x: hidden;
+  overflow-x: clip;
   /* Zoom baseline: 1rem = 16px at 100% browser zoom */
   font-size: 16px;
 }
@@ -453,7 +455,7 @@ html {
 body {
   min-height: 100%;
   max-width: 100%;
-  overflow-x: hidden;
+  overflow-x: clip;
   margin: 0;
   color: var(--ink);
   font-family: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;

@@ -78,14 +78,81 @@ export function RewardsPageClient() {
     return (
       <>
         <TravellerPageHeader
-          title="Rewards"
-          lede="Rewards are account-based. Sign in to see your balance, tier, and referral code."
+          title="Rewards & Loyalty"
+          lede="Earn FlightOne points across flights, stays, cars, and custom tours. Points are credited upon booking completion and reduce payable amounts at checkout."
           actions={
-            <Link href="/login?redirect=%2Frewards">
-              <Button size="sm">Log in</Button>
-            </Link>
+            <div className="flex gap-2">
+              <Link href="/login?redirect=%2Frewards">
+                <Button size="sm">Log in</Button>
+              </Link>
+              <Link href="/signup">
+                <Button size="sm" variant="secondary">Create account</Button>
+              </Link>
+            </div>
           }
         />
+
+        <TravellerSection title="How FlightOne Rewards works">
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div className="rounded-xl border border-slate-200/80 bg-white/70 p-4 shadow-2xs">
+              <p className="text-sm font-semibold text-slate-900">1. Earn on Every Trip</p>
+              <p className="mt-1 text-xs text-slate-600 leading-relaxed">
+                Earn 1 point per 100 minor units spent on all confirmed flights, hotels, and custom travel packages.
+              </p>
+            </div>
+            <div className="rounded-xl border border-slate-200/80 bg-white/70 p-4 shadow-2xs">
+              <p className="text-sm font-semibold text-slate-900">2. Apply at Checkout</p>
+              <p className="mt-1 text-xs text-slate-600 leading-relaxed">
+                Redeem your points directly during checkout to lower what you pay — no blackout dates or hidden fees.
+              </p>
+            </div>
+            <div className="rounded-xl border border-slate-200/80 bg-white/70 p-4 shadow-2xs">
+              <p className="text-sm font-semibold text-slate-900">3. Invite & Multiply</p>
+              <p className="mt-1 text-xs text-slate-600 leading-relaxed">
+                Share your personal referral code. Earn 250 bonus points when friends complete their first ticketed trip.
+              </p>
+            </div>
+          </div>
+        </TravellerSection>
+
+        <TravellerSection title="Membership Tiers">
+          <ul className="fo-traveller__list">
+            <li className="fo-traveller__row">
+              <p className="fo-traveller__row-title">Bronze Member</p>
+              <p className="fo-traveller__row-meta">Baseline tier · Standard 1x point accrual · Real-time price tracking</p>
+            </li>
+            <li className="fo-traveller__row">
+              <p className="fo-traveller__row-title">Silver Explorer · 10,000 pts</p>
+              <p className="fo-traveller__row-meta">1.25x point multiplier · Priority Ava assistant response time · Dedicated consultant review</p>
+            </li>
+            <li className="fo-traveller__row">
+              <p className="fo-traveller__row-title">Gold Voyager · 25,000 pts</p>
+              <p className="fo-traveller__row-meta">1.5x point multiplier · Waived administrative rebooking fees · Expedited visa reviews</p>
+            </li>
+            <li className="fo-traveller__row">
+              <p className="fo-traveller__row-title">Platinum Sovereign · 50,000 pts</p>
+              <p className="fo-traveller__row-meta">2x point multiplier · VIP lounge access vouchers · 24/7 dedicated executive travel manager</p>
+            </li>
+          </ul>
+        </TravellerSection>
+
+        <TravellerSection
+          title="Account Balance & Referrals"
+          note="Rewards balances, point ledgers, and referral codes are linked to your verified FlightOne account."
+          panel
+        >
+          <p className="text-sm text-slate-600">
+            Sign in to check your active points balance, track your tier progress, or share your referral link.
+          </p>
+          <div className="mt-3 flex gap-3">
+            <Link href="/login?redirect=%2Frewards">
+              <Button size="sm">Log in to view balance</Button>
+            </Link>
+            <Link href="/signup">
+              <Button size="sm" variant="ghost">Join FlightOne Rewards</Button>
+            </Link>
+          </div>
+        </TravellerSection>
       </>
     );
   }

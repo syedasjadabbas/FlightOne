@@ -24,47 +24,32 @@
 .fo-site-nav {
   position: relative;
   z-index: 50;
-  padding-block: 0.7rem;
-  border-bottom: none;
-  background:
-    linear-gradient(
-      180deg,
-      color-mix(in oklab, var(--fo-nav-bg) 92%, #12304a) 0%,
-      var(--fo-nav-bg-deep, #061018) 100%
-    );
-  box-shadow: 0 1px 0 color-mix(in oklab, black 35%, transparent);
+  height: 64px;
+  display: flex;
+  align-items: center;
+  background: rgba(10, 18, 30, 0.92);
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  border-bottom: 1px solid rgba(245, 244, 223, 0.08);
+  box-shadow: none;
 }
 
 .fo-site-nav::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 2px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    color-mix(in oklab, var(--cyan) 55%, transparent) 12%,
-    var(--fo-nav-runway, var(--cyan)) 50%,
-    color-mix(in oklab, var(--cyan) 55%, transparent) 88%,
-    transparent 100%
-  );
-  opacity: 0.9;
-  pointer-events: none;
+  display: none;
 }
 
 .fo-site-nav__inner {
   display: flex;
   min-width: 0;
   width: 100%;
-  max-width: var(--fo-page-max, 80rem);
+  max-width: 100%;
   margin-inline: auto;
-  padding-inline: var(--fo-page-gutter, clamp(1rem, 2.5vw, 2.5rem));
+  padding-inline: clamp(16px, 3vw, 40px);
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem 1.25rem;
   box-sizing: border-box;
+  height: 100%;
 }
 
 .fo-site-nav--compact {

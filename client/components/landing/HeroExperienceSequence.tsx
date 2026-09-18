@@ -136,7 +136,7 @@ export default function HeroExperienceSequence() {
         lerpedP += diffP * 0.12;
         const p = lerpedP;
 
-        const w = window.innerWidth;
+        const w = document.documentElement.clientWidth || window.innerWidth;
         const h = window.innerHeight;
 
         /* ────────────────────────────────────────────────
@@ -504,7 +504,8 @@ export default function HeroExperienceSequence() {
           } else {
             rightTextContainerRef.current.style.left = `calc(50% + ${safeRightTextLeft}px)`;
             rightTextContainerRef.current.style.top = `calc(50% + ${rightTextTop}px)`;
-            rightTextContainerRef.current.style.maxWidth = `max(${textBoxMinWidth}px, calc(50vw - ${safeRightTextLeft}px - ${textBoxMargin}px))`;
+            rightTextContainerRef.current.style.maxWidth = `max(${textBoxMinWidth}px, calc(50% - ${safeRightTextLeft}px - ${textBoxMargin}px))`;
+            rightTextContainerRef.current.style.boxSizing = 'border-box';
             rightTextContainerRef.current.style.transform = `translate3d(0, ${textEntranceY}px, 0)`;
           }
           rightTextContainerRef.current.style.display = textOp <= 0.001 ? 'none' : 'flex';
@@ -556,6 +557,7 @@ export default function HeroExperienceSequence() {
           editorialStageRef.current.style.left = `${contentLeftPos}px`;
           editorialStageRef.current.style.top = `calc(50% + ${card3Y + curCardSize / 2 + 28}px)`;
           editorialStageRef.current.style.maxWidth = `${maxAvailableW}px`;
+          editorialStageRef.current.style.boxSizing = 'border-box';
           editorialStageRef.current.style.width = '100%';
           editorialStageRef.current.style.transform = `translate3d(0, ${editEntranceY}px, 0)`;
           editorialStageRef.current.style.display = editOp <= 0.001 ? 'none' : 'flex';
@@ -867,6 +869,9 @@ export default function HeroExperienceSequence() {
             bottom: 'clamp(110px, 15vh, 160px)',
             left: 0,
             right: 0,
+            maxWidth: '100%',
+            overflow: 'hidden',
+            boxSizing: 'border-box',
             height: 'clamp(120px, 16vw, 220px)',
             pointerEvents: 'none',
             zIndex: 15,
@@ -908,6 +913,9 @@ export default function HeroExperienceSequence() {
             top: 'clamp(3.25rem, 6vh, 4.75rem)',
             left: 0,
             right: 0,
+            maxWidth: '100%',
+            overflow: 'hidden',
+            boxSizing: 'border-box',
             zIndex: 14,
             display: 'none',
             opacity: 0,
@@ -970,6 +978,8 @@ export default function HeroExperienceSequence() {
           style={{
             position: 'absolute',
             inset: 0,
+            maxWidth: '100%',
+            overflow: 'hidden',
             zIndex: 18,
             display: 'none',
             opacity: 0,
@@ -991,6 +1001,7 @@ export default function HeroExperienceSequence() {
               alignItems: 'center',
               justifyContent: 'center',
               pointerEvents: 'auto',
+              overflow: 'hidden',
             }}
           >
             {/* Morphing Cards for all 4 Slides */}
@@ -1050,6 +1061,8 @@ export default function HeroExperienceSequence() {
                 left: 'calc(50% + clamp(160px, 22vw, 340px))',
                 top: 'calc(50% - 180px)',
                 width: 'clamp(240px, 20vw, 320px)',
+                maxWidth: 'calc(50% - clamp(1rem, 2vw, 2.5rem))',
+                boxSizing: 'border-box',
                 display: 'none',
                 opacity: 0,
                 flexDirection: 'column',
@@ -1210,6 +1223,11 @@ export default function HeroExperienceSequence() {
             position: 'absolute',
             bottom: '1.875rem',
             left: 'clamp(2rem, 4.5vw, 4rem)',
+            maxWidth: 'calc(50% - clamp(2rem, 4.5vw, 4rem))',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            boxSizing: 'border-box',
             zIndex: 20,
             fontFamily: 'var(--font-sans)',
             fontSize: '0.8125rem',
@@ -1231,6 +1249,11 @@ export default function HeroExperienceSequence() {
             position: 'absolute',
             bottom: '1.875rem',
             right: 'clamp(2rem, 4.5vw, 4rem)',
+            maxWidth: 'calc(50% - clamp(2rem, 4.5vw, 4rem))',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            boxSizing: 'border-box',
             zIndex: 20,
             fontFamily: 'var(--font-sans)',
             fontSize: '0.8125rem',

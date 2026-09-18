@@ -166,6 +166,8 @@ export default function PartnersSection() {
       style={{
         position: 'relative',
         width: '100%',
+        maxWidth: '100%',
+        boxSizing: 'border-box',
         height: '420vh', // Extended pinned scroll track for small-to-big entrance and 6 categories
         backgroundColor: '#F4F3DC',
         color: '#0E1620',
@@ -197,6 +199,7 @@ export default function PartnersSection() {
             position: 'relative',
             width: '100%',
             maxWidth: '1360px',
+            boxSizing: 'border-box',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -232,6 +235,8 @@ export default function PartnersSection() {
               gap: 'clamp(2rem, 4vw, 4.5rem)',
               alignItems: 'center',
               width: '100%',
+              maxWidth: '100%',
+              boxSizing: 'border-box',
               marginTop: 'clamp(1rem, 2vh, 2.5rem)',
             }}
             className="partners-grid-responsive"

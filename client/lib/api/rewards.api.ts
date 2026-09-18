@@ -34,6 +34,10 @@ export type RewardLedgerEntry = {
 
 export const rewardsApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
+    getRewardsPolicy: build.query<RewardsSummary["policy"], void>({
+      query: () => "/rewards/policy",
+      providesTags: ["Rewards"],
+    }),
     getRewardsSummary: build.query<RewardsSummary, void>({
       query: () => "/rewards",
       providesTags: ["Rewards"],
@@ -99,6 +103,7 @@ export const rewardsApi = baseApi.injectEndpoints({
 });
 
 export const {
+  useGetRewardsPolicyQuery,
   useGetRewardsSummaryQuery,
   useGetRewardsLedgerQuery,
   useGetRewardsReferralsQuery,

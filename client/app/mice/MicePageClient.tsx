@@ -37,15 +37,63 @@ export function MicePageClient() {
   }
   if (!accessToken) {
     return (
-      <div className="fo-gm-status">
-        <p className="fo-gm-kicker">Events</p>
-        <h1 className="fo-gm-title">MICE</h1>
-        <p className="fo-gm-lede">
-          Sign in to manage meetings, incentives, conferences, and exhibitions.
-        </p>
-        <Link href="/login?redirect=%2Fmice" className="fo-gm-link">
-          Log in
-        </Link>
+      <div className="space-y-8">
+        <header className="border-b border-slate-200/80 pb-6">
+          <p className="text-xs font-semibold uppercase tracking-wider text-cyan-600">Conferences, Incentives & Exhibitions</p>
+          <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl font-[var(--font-sora)]">
+            FlightOne MICE Solutions
+          </h1>
+          <p className="mt-2 text-sm text-slate-600 max-w-2xl leading-relaxed">
+            End-to-end logistics for corporate summits, incentive retreats, international trade exhibitions, and executive conferences.
+          </p>
+          <div className="mt-4 flex gap-3">
+            <Link href="/login?redirect=%2Fmice">
+              <Button size="sm">Sign in to event desk</Button>
+            </Link>
+            <Link href="/chat">
+              <Button size="sm" variant="secondary">Consult with Ava</Button>
+            </Link>
+          </div>
+        </header>
+
+        <div className="grid gap-4 sm:grid-cols-3">
+          <div className="rounded-xl border border-slate-200/80 bg-white/80 p-4 shadow-2xs">
+            <div className="text-lg mb-2">🏢</div>
+            <p className="text-sm font-semibold text-slate-900">Meetings & Summits</p>
+            <p className="mt-1 text-xs text-slate-600 leading-relaxed">
+              Venue selection, block hotel rooms, presentation spaces, and multi-origin flight coordination for executive gatherings.
+            </p>
+          </div>
+          <div className="rounded-xl border border-slate-200/80 bg-white/80 p-4 shadow-2xs">
+            <div className="text-lg mb-2">🌴</div>
+            <p className="text-sm font-semibold text-slate-900">Incentive Travel</p>
+            <p className="mt-1 text-xs text-slate-600 leading-relaxed">
+              Curated luxury reward trips, bespoke cultural experiences, private charters, and high-touch hospitality.
+            </p>
+          </div>
+          <div className="rounded-xl border border-slate-200/80 bg-white/80 p-4 shadow-2xs">
+            <div className="text-lg mb-2">🌐</div>
+            <p className="text-sm font-semibold text-slate-900">Exhibitions & Conferences</p>
+            <p className="mt-1 text-xs text-slate-600 leading-relaxed">
+              Delegation tracking, airport meet-and-greet, ground transfers, and centralized invoicing for international attendee contingents.
+            </p>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-xs">
+          <h2 className="text-base font-semibold text-slate-900">Event Organizer Portal</h2>
+          <p className="mt-1 text-xs text-slate-600">
+            Sign in to register your company event, import attendee lists, generate airport transfer rosters, and monitor arrival statuses.
+          </p>
+          <div className="mt-4 flex gap-3">
+            <Link href="/login?redirect=%2Fmice">
+              <Button size="sm">Log in</Button>
+            </Link>
+            <Link href="/signup">
+              <Button size="sm" variant="ghost">Create account</Button>
+            </Link>
+          </div>
+        </div>
       </div>
     );
   }

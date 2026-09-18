@@ -12,7 +12,16 @@ import { computeExpiryStatus } from "../profile/documentExpiry.js";
  */
 export async function loadTravellerVisaContext(userId) {
   if (!userId) {
-    throw new AppError(401, "Authentication required");
+    return {
+      userId: null,
+      nationality: null,
+      hasPassport: false,
+      passports: [],
+      visasHeld: [],
+      residencePermits: [],
+      nationalIds: [],
+      vaultDocuments: [],
+    };
   }
 
   const [profile, identityDocs, vaultDocs] = await Promise.all([
