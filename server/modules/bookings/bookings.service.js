@@ -881,7 +881,12 @@ export async function reserveBooking(
   }
 
   const payment = await paymentsService.getSuccessfulPayment(booking.id, userId);
-  if (!payment) {
+  const pendingHold = !payment
+    ? await prisma.payment.findFirst({
+        where: { bookingId: booking.id, userId, status: "PENDING" },
+      })
+    : null;
+  if (!payment && !pendingHold) {
     const cap = paymentsService.getPaymentCapability();
     if (!companyId && !cap.canCapture) {
       const err = new AppError(503, "Payment gateway is not configured");
@@ -966,7 +971,13 @@ export async function reserveBooking(
       at: new Date().toISOString(),
       details: supplierHold.details ?? null,
     },
-    payment: { id: payment.id, status: payment.status, provider: payment.provider },
+    payment: (payment || pendingHold)
+      ? {
+          id: (payment || pendingHold).id,
+          status: (payment || pendingHold).status,
+          provider: (payment || pendingHold).provider,
+        }
+      : null,
   };
 
   const reserved = await applyTransition(booking, "RESERVED", {

@@ -1,9 +1,25 @@
 /**
- * Payment provider abstraction (Module 03).
- * Tokenized methods only — never accepts or stores PAN/CVV.
+ * Payment provider abstraction (Module 03 / Appendix A).
+ * Tokenized methods & local Pakistani gateways (JazzCash, Easypaisa, 1Link IBFT).
+ * Never accepts or stores raw PAN/CVV or MPINs/PINs.
  * Success is only reported from a real provider response (or explicit non-prod simulation).
  */
 import { AppError } from "../../lib/customError.js";
+import {
+  getJazzCashCapability,
+  isJazzCashConfigured,
+  jazzCashCharge,
+} from "./providers/jazzcash.provider.js";
+import {
+  getEasypaisaCapability,
+  isEasypaisaConfigured,
+  easypaisaCharge,
+} from "./providers/easypaisa.provider.js";
+import {
+  getOneLinkCapability,
+  isOneLinkConfigured,
+  oneLinkInitiate,
+} from "./providers/onelink.provider.js";
 
 export const PAYMENT_UNCONFIGURED = "PAYMENT_UNCONFIGURED";
 
@@ -23,31 +39,63 @@ export function isStripeConfigured() {
   return Boolean(process.env.STRIPE_SECRET_KEY);
 }
 
-export function getPaymentCapability() {
-  if (isStripeConfigured()) {
+export function getPaymentCapability(method) {
+  if (method === "jazzcash") return getJazzCashCapability();
+  if (method === "easypaisa") return getEasypaisaCapability();
+  if (method === "onelink_ibft") return getOneLinkCapability();
+
+  const stripeCap = isStripeConfigured();
+  const jcCap = isJazzCashConfigured();
+  const epCap = isEasypaisaConfigured();
+  const olCap = isOneLinkConfigured();
+  const sim = allowSimulatedPayment();
+
+  const hasAnyLive = stripeCap || jcCap || epCap || olCap;
+
+  if (hasAnyLive) {
     return {
       configured: true,
-      provider: "STRIPE",
+      provider: stripeCap ? "STRIPE" : jcCap ? "JAZZCASH" : epCap ? "EASYPAISA" : "ONELINK_IBFT",
       mode: "live",
       canCapture: true,
       reasons: [],
+      methods: {
+        card: stripeCap || sim,
+        jazzcash: jcCap || sim,
+        easypaisa: epCap || sim,
+        onelink_ibft: olCap || sim,
+      },
     };
   }
-  if (allowSimulatedPayment()) {
+
+  if (sim) {
     return {
       configured: true,
       provider: "SIMULATED",
       mode: "simulated",
       canCapture: true,
       reasons: ["ALLOW_SIMULATED_PAYMENT=true — test/dev only, never production"],
+      methods: {
+        card: true,
+        jazzcash: true,
+        easypaisa: true,
+        onelink_ibft: true,
+      },
     };
   }
+
   return {
     configured: false,
     provider: "UNCONFIGURED",
     mode: "unconfigured",
     canCapture: false,
-    reasons: ["No payment gateway credentials configured (STRIPE_SECRET_KEY)"],
+    reasons: ["No payment gateway credentials configured (STRIPE, JAZZCASH, EASYPAISA, ONELINK)"],
+    methods: {
+      card: false,
+      jazzcash: false,
+      easypaisa: false,
+      onelink_ibft: false,
+    },
   };
 }
 
@@ -67,12 +115,55 @@ export function assertTokenizedMethod(paymentMethodToken) {
 }
 
 /**
- * Charge a tokenized method. Never returns success without a provider response.
- * @returns {Promise<{ status: "CAPTURED"|"AUTHORIZED"|"FAILED", provider: string, providerPaymentId?: string, failureReason?: string, raw?: object }>}
+ * Charge with the appropriate provider based on method.
+ * Never returns success without a provider response.
+ * @returns {Promise<{ status: "CAPTURED"|"AUTHORIZED"|"PENDING"|"FAILED", provider: string, providerPaymentId?: string, failureReason?: string, metadata?: object, raw?: object }>}
  */
-export async function captureWithProvider({ amountMinor, currency, paymentMethodToken, idempotencyKey }) {
+export async function captureWithProvider({
+  amountMinor,
+  currency,
+  paymentMethodToken,
+  accountNumber,
+  method = "card",
+  idempotencyKey,
+  bookingId,
+  cnicLast6,
+  email,
+}) {
+  if (method === "jazzcash") {
+    return jazzCashCharge({
+      amountMinor,
+      currency,
+      accountNumber,
+      cnicLast6,
+      idempotencyKey,
+      bookingId,
+    });
+  }
+
+  if (method === "easypaisa") {
+    return easypaisaCharge({
+      amountMinor,
+      currency,
+      accountNumber,
+      email,
+      idempotencyKey,
+      bookingId,
+    });
+  }
+
+  if (method === "onelink_ibft") {
+    return oneLinkInitiate({
+      amountMinor,
+      currency,
+      bookingId,
+      idempotencyKey,
+    });
+  }
+
+  // Default: Card via Stripe / Simulated
   const token = assertTokenizedMethod(paymentMethodToken);
-  const cap = getPaymentCapability();
+  const cap = getPaymentCapability("card");
 
   if (cap.mode === "unconfigured") {
     const err = new AppError(503, "Payment gateway is not configured");
@@ -150,7 +241,14 @@ async function stripeCapture({ amountMinor, currency, paymentMethodToken, idempo
 
 export async function voidWithProvider({ provider, providerPaymentId }) {
   if (!providerPaymentId) return { status: "skipped", reason: "no provider payment id" };
-  if (provider === "SIMULATED" || provider === "CORPORATE_CREDIT") {
+  if (
+    provider === "SIMULATED" ||
+    provider === "CORPORATE_CREDIT" ||
+    provider === "REWARD_CREDIT" ||
+    provider === "ONELINK_IBFT" ||
+    provider === "JAZZCASH" ||
+    provider === "EASYPAISA"
+  ) {
     return { status: "VOIDED", provider };
   }
   if (provider === "STRIPE" && isStripeConfigured()) {

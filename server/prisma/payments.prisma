@@ -14,6 +14,10 @@ enum PaymentProvider {
   STRIPE
   CORPORATE_CREDIT
   SIMULATED
+  REWARD_CREDIT
+  JAZZCASH
+  EASYPAISA
+  ONELINK_IBFT
 }
 
 model Payment {
@@ -34,6 +38,7 @@ model Payment {
   paymentMethodToken String?
   failureReason String?
   idempotencyKey String?
+  metadata Json?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

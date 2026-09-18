@@ -501,3 +501,173 @@ describe("AirPrice → payment/approval → reservation", () => {
     }
   });
 });
+
+describe("local payments lifecycle (JazzCash, Easypaisa, 1Link IBFT)", () => {
+
+  it("JazzCash success captures with masked account and JAZZCASH provider", async () => {
+    const user = await createUser("jc-ok");
+    const booking = await quotePersonal(user);
+    const pay = await paymentsService.payBooking(user.id, booking.id, {
+      method: "jazzcash",
+      accountNumber: "03001234567",
+      idempotencyKey: `jc-pay-${suffix}`,
+    });
+    assert.equal(pay.status, "CAPTURED");
+    assert.equal(pay.provider, "JAZZCASH");
+    assert.ok(pay.providerPaymentId.startsWith("jc_sim_"));
+    assert.equal(pay.metadata?.accountNumberMasked, "0300****67");
+
+    // Idempotent retry returns identical payment record
+    const retry = await paymentsService.payBooking(user.id, booking.id, {
+      method: "jazzcash",
+      accountNumber: "03001234567",
+      idempotencyKey: `jc-pay-${suffix}`,
+    });
+    assert.equal(retry.id, pay.id);
+  });
+
+  it("JazzCash decline persists FAILED and does not trigger ticketing", async () => {
+    const user = await createUser("jc-fail");
+    const booking = await quotePersonal(user);
+    await assert.rejects(
+      () =>
+        paymentsService.payBooking(user.id, booking.id, {
+          method: "jazzcash",
+          accountNumber: "03009999999",
+        }),
+      (err) => err.statusCode === 402 && err.code === "PAYMENT_FAILED",
+    );
+    const row = await prisma.payment.findFirst({ where: { bookingId: booking.id } });
+    assert.equal(row.status, "FAILED");
+    assert.equal(row.provider, "JAZZCASH");
+    const check = await prisma.booking.findUnique({ where: { id: booking.id } });
+    assert.notEqual(check.status, "TICKETED");
+  });
+
+  it("Easypaisa success captures with masked account and EASYPAISA provider", async () => {
+    const user = await createUser("ep-ok");
+    const booking = await quotePersonal(user);
+    const pay = await paymentsService.payBooking(user.id, booking.id, {
+      method: "easypaisa",
+      accountNumber: "03451234567",
+      idempotencyKey: `ep-pay-${suffix}`,
+    });
+    assert.equal(pay.status, "CAPTURED");
+    assert.equal(pay.provider, "EASYPAISA");
+    assert.ok(pay.providerPaymentId.startsWith("ep_sim_"));
+    assert.equal(pay.metadata?.accountNumberMasked, "0345****67");
+  });
+
+  it("1Link IBFT initiates PENDING hold, enforces hold-before-ticketing, then Ops confirmation tickets", async () => {
+    const user = await createUser("1link-flow");
+    const booking = await quotePersonal(user);
+
+    setReserveSupplierInventoryOverrideForTests(() => ({
+      status: "ok",
+      externalRef: "PNR1LINK",
+      details: {},
+    }));
+    setTicketSupplierInventoryOverrideForTests(() => ({
+      status: "ok",
+      externalRef: "PNR1LINK",
+      ticketNumbers: ["1234567890999"],
+      details: { source: "test-1link" },
+    }));
+
+    try {
+      // Initiate 1Link IBFT payment — creates PENDING payment record
+      const pendingPay = await paymentsService.payBooking(user.id, booking.id, {
+        method: "onelink_ibft",
+        idempotencyKey: `1l-hold-${suffix}`,
+      });
+      assert.equal(pendingPay.status, "PENDING");
+      assert.equal(pendingPay.provider, "ONELINK_IBFT");
+      assert.ok(pendingPay.providerPaymentId.startsWith("ibft_"));
+      assert.ok(pendingPay.metadata?.consumerNumber);
+      assert.ok(pendingPay.metadata?.iban);
+
+      // Reserve seat with supplier while payment is in PENDING hold
+      await bookingsService.reserveBooking(user.id, booking.id, {
+        travellerSnapshot: { givenName: "Fatima", surname: "Khan" },
+      });
+      const reservedBooking = await prisma.booking.findUnique({ where: { id: booking.id } });
+      assert.equal(reservedBooking.status, "RESERVED");
+
+      // CRITICAL: Ensure ticketing was NOT triggered while in PENDING hold
+      await assert.rejects(
+        () => bookingsService.ticketBooking(user.id, booking.id, {}),
+        (err) => err.statusCode === 402 && err.code === "PAYMENT_REQUIRED",
+      );
+      const stillReserved = await prisma.booking.findUnique({ where: { id: booking.id } });
+      assert.equal(stillReserved.status, "RESERVED");
+
+      // Ops / Finance confirms bank clearance
+      const confirmed = await paymentsService.confirmBankTransferPayment(pendingPay.id, {
+        staffUserId: "ops_finance_agent_1",
+        bankReference: "HBL_FT_9928172",
+      });
+      assert.equal(confirmed.status, "CAPTURED");
+      assert.equal(confirmed.metadata?.manualOpsConfirmation?.bankReference, "HBL_FT_9928172");
+
+      // After confirmation on a RESERVED booking, ticketing is automatically triggered
+      const ticketed = await prisma.booking.findUnique({ where: { id: booking.id } });
+      assert.ok(["TICKETED", "ACTIVE"].includes(ticketed.status));
+    } finally {
+      setReserveSupplierInventoryOverrideForTests(null);
+      setTicketSupplierInventoryOverrideForTests(null);
+    }
+  });
+
+  it("duplicate 1Link callback is idempotent and does not re-ticket", async () => {
+    const user = await createUser("1link-dupe");
+    const booking = await quotePersonal(user);
+    const pay = await paymentsService.payBooking(user.id, booking.id, {
+      method: "onelink_ibft",
+      idempotencyKey: `1l-dupe-${suffix}`,
+    });
+
+    const consumerNumber = pay.metadata.consumerNumber;
+    const cbResult1 = await paymentsService.handleOneLinkCallback({
+      consumerNumber,
+      transactionId: "TXN_BANK_123",
+      amount: booking.amountMinor,
+      bankCode: "014",
+    });
+    assert.equal(cbResult1.status, "CAPTURED");
+
+    // Second duplicate callback
+    const cbResult2 = await paymentsService.handleOneLinkCallback({
+      consumerNumber,
+      transactionId: "TXN_BANK_123",
+      amount: booking.amountMinor,
+      bankCode: "014",
+    });
+    assert.equal(cbResult2.status, "CAPTURED");
+    assert.equal(cbResult2.alreadyProcessed, true);
+  });
+
+  it("local payments are compatible with refund/void lifecycle", async () => {
+    const { attemptPaymentRefundForBooking } = await import("../refunds/refunds.payment.js");
+    const user = await createUser("local-refund");
+    const booking = await quotePersonal(user);
+    await paymentsService.payBooking(user.id, booking.id, {
+      method: "jazzcash",
+      accountNumber: "03001234567",
+      idempotencyKey: `jc-ref-${suffix}`,
+    });
+
+    // Attempt refund via refunds.payment adapter
+    const refundRes = await attemptPaymentRefundForBooking(prisma, booking.id, {
+      amountMinor: booking.amountMinor,
+      idempotencyKey: `refund-jc-${suffix}`,
+    });
+    assert.ok(["PROVIDER_REFUNDED", "PENDING_MANUAL"].includes(refundRes.status));
+
+    // Verify payment was voided if simulated
+    if (refundRes.status === "PROVIDER_REFUNDED") {
+      const voidedPay = await prisma.payment.findFirst({ where: { bookingId: booking.id } });
+      assert.equal(voidedPay.status, "VOIDED");
+    }
+  });
+});
+

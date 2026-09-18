@@ -136,6 +136,17 @@ export async function attemptPaymentRefundForBooking(prisma, bookingId, { amount
     };
   }
 
+  const localProviders = ["JAZZCASH", "EASYPAISA", "ONELINK_IBFT"];
+  const hasLocal = captured.some((p) => localProviders.includes(p.provider));
+  if (hasLocal) {
+    return {
+      status: "PENDING_MANUAL",
+      refs,
+      note: `Local payment method (${captured[0].provider}) requires manual ops bank reversal / wallet refund`,
+      provider: captured[0].provider,
+    };
+  }
+
   return {
     status: "UNSUPPORTED",
     refs,

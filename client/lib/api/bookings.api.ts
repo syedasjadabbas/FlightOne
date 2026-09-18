@@ -56,6 +56,7 @@ export type PaymentRow = {
   amountMinor: number;
   currency: string;
   providerPaymentId: string | null;
+  metadata?: Record<string, any> | null;
 };
 
 export const bookingsApi = baseApi.injectEndpoints({
@@ -66,7 +67,12 @@ export const bookingsApi = baseApi.injectEndpoints({
     }),
     payBooking: build.mutation<
       PaymentRow,
-      { id: string; paymentMethodToken?: string; method?: "card" | "corporate_credit" }
+      {
+        id: string;
+        paymentMethodToken?: string;
+        accountNumber?: string;
+        method?: "card" | "corporate_credit" | "jazzcash" | "easypaisa" | "onelink_ibft";
+      }
     >({
       query: ({ id, ...body }) => ({
         url: `/bookings/${id}/pay`,

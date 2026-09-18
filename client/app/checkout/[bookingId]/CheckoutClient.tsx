@@ -49,6 +49,7 @@ import { CheckoutPriceChangeAlert } from "./_components/CheckoutPriceChangeAlert
 import {
   CheckoutQuotedActions,
   CheckoutReservedActions,
+  type PaymentMethodOption,
 } from "./_components/CheckoutQuotedActions";
 
 export function CheckoutClient({ bookingId }: { bookingId: string }) {
@@ -120,7 +121,8 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
     skip: !hasHydrated || !accessToken,
   });
   const [createApproval, approvalState] = useCreateApprovalMutation();
-  const [payMethod, setPayMethod] = useState<"card" | "corporate_credit">("card");
+  const [payMethod, setPayMethod] = useState<PaymentMethodOption>("card");
+  const [accountNumber, setAccountNumber] = useState("");
 
   const tickets = useMemo(
     () => ticketNumbersFromMetadata(booking?.metadata ?? null),
@@ -233,6 +235,8 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
     ),
   );
 
+  const pendingPayment = booking?.payments?.find((p) => p.status === "PENDING");
+
   async function onPay() {
     setLocalError(null);
     if (priceChange) {
@@ -256,14 +260,19 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
       setLocalError("Enter a tokenized payment method (never a raw card number)");
       return;
     }
+    if (["jazzcash", "easypaisa"].includes(payMethod) && !accountNumber.trim()) {
+      setLocalError("Enter your mobile account number (03XXXXXXXXX)");
+      return;
+    }
     if (corporateBlocked) {
       setLocalError("Corporate approval required before payment");
       return;
     }
     try {
-      await pay({
+      const payRes = await pay({
         id: bookingId,
         paymentMethodToken: payMethod === "card" ? paymentToken.trim() : undefined,
+        accountNumber: ["jazzcash", "easypaisa"].includes(payMethod) ? accountNumber.trim() : undefined,
         method: payMethod,
       }).unwrap();
 
@@ -275,7 +284,8 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
           travellerSnapshot,
         }).unwrap();
 
-        if (supplierCap?.canTicket) {
+        // 1Link IBFT creates a PENDING hold — ticketing is NOT triggered until bank confirmation
+        if (supplierCap?.canTicket && payRes.status !== "PENDING") {
           try {
             await ticket({ id: bookingId, clientAmountMinor: serverAmountMinor }).unwrap();
           } catch {
@@ -376,8 +386,8 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
           approvalGate={approvalGate}
           corpCompanyId={corpCompanyId}
           corpMode={corpMode}
-          payMethod={payMethod}
-          setPayMethod={setPayMethod}
+          payMethod={payMethod === "corporate_credit" ? "corporate_credit" : "card"}
+          setPayMethod={(m) => setPayMethod(m)}
           busy={busy}
           onRequestApproval={async () => {
             setLocalError(null);
@@ -442,7 +452,10 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
           onSelectCompanion={handleSelectCompanion}
           paymentToken={paymentToken}
           setPaymentToken={setPaymentToken}
+          accountNumber={accountNumber}
+          setAccountNumber={setAccountNumber}
           payMethod={payMethod}
+          setPayMethod={setPayMethod}
           busy={busy}
           checkoutBlockedByPriceChange={checkoutBlockedByPriceChange}
           corporateBlocked={corporateBlocked}
@@ -459,11 +472,15 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
           busy={busy}
           canTicket={Boolean(supplierCap?.canTicket)}
           hasPayment={hasSuccessfulPayment}
+          pendingPaymentDetails={pendingPayment?.metadata || null}
           checkoutBlockedByPriceChange={checkoutBlockedByPriceChange}
           corporateBlocked={corporateBlocked}
           payMethod={payMethod}
+          setPayMethod={setPayMethod}
           paymentToken={paymentToken}
           setPaymentToken={setPaymentToken}
+          accountNumber={accountNumber}
+          setAccountNumber={setAccountNumber}
           canCapture={Boolean(payCap?.canCapture)}
           paying={payState.isLoading}
           ticketing={ticketState.isLoading}
