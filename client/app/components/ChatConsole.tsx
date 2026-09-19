@@ -13,7 +13,6 @@ import { AskAiShell, useAskAiChat, type AskAiView } from "./ask-ai";
 import { ChatLayout } from "./ChatLayout";
 import { useAuthStore } from "@/store/auth.store";
 import { useCorporateProfileStore } from "@/store/corporateProfile.store";
-import { offerHasQuoteSnapshot, quotePayloadFromOffer } from "@/lib/bookings/quoteFromOffer";
 import {
   useListConversationsQuery,
   useDeleteConversationMutation,
@@ -198,12 +197,12 @@ export function ChatConsole() {
   const handleQuoteAndCheckout = async (offerToBook: OfferCard, token: string) => {
     try {
       const corp = useCorporateProfileStore.getState();
-      const payload = quotePayloadFromOffer(
-        offerToBook,
-        corp.mode === "CORPORATE" && corp.companyId
+      const payload = {
+        ...offerToBook,
+        ...(corp.mode === "CORPORATE" && corp.companyId
           ? { companyId: corp.companyId }
-          : undefined,
-      );
+          : {}),
+      };
       const res = await fetch("/api/bookings/quote", {
         method: "POST",
         headers: {
@@ -215,24 +214,17 @@ export function ChatConsole() {
       });
       const json = await res.json().catch(() => null);
       if (!res.ok) {
-        setView("chat");
-        chat.send(
-          `I couldn't start checkout for ${offerToBook.title}: ${json?.error || json?.message || "quote failed"}.`,
-        );
+        console.error("[checkout] quote failed:", json);
         return;
       }
       const bookingId = json?.data?.id;
       if (!bookingId) {
-        setView("chat");
-        chat.send(`Quote succeeded but no booking id was returned for ${offerToBook.title}.`);
+        console.error("[checkout] missing booking id in quote response:", json);
         return;
       }
       window.location.href = `/checkout/${bookingId}`;
     } catch (err) {
-      setView("chat");
-      chat.send(
-        `I couldn't start checkout for ${offerToBook.title}: ${err instanceof Error ? err.message : "quote failed"}.`,
-      );
+      console.error("[checkout] handleQuoteAndCheckout error:", err);
     }
   };
 
@@ -243,8 +235,8 @@ export function ChatConsole() {
       const pendingRaw = sessionStorage.getItem("flightone_pending_checkout_offer");
       if (pendingRaw) {
         sessionStorage.removeItem("flightone_pending_checkout_offer");
-        const pendingOffer = JSON.parse(pendingRaw);
-        if (pendingOffer && offerHasQuoteSnapshot(pendingOffer)) {
+        const pendingOffer = JSON.parse(pendingRaw) as OfferCard;
+        if (pendingOffer) {
           void handleQuoteAndCheckout(pendingOffer, accessToken);
         }
       }
@@ -307,13 +299,6 @@ export function ChatConsole() {
           resultsWorkspaceAvailable={resultsWorkspaceAvailable}
           conversationId={chat.conversationId}
           onBookOffer={(offer) => {
-            if (!offerHasQuoteSnapshot(offer)) {
-              setView("chat");
-              chat.send(
-                `I'd like to book ${offer.title} at ${offer.price}. This option isn't quote-ready yet — search while signed in so we can lock a live fare.`,
-              );
-              return;
-            }
             const currentToken = useAuthStore.getState().accessToken;
             if (!currentToken) {
               try {

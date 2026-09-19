@@ -23,6 +23,79 @@ export async function POST(request: Request) {
 
   const input = (body ?? {}) as Record<string, unknown>;
   try {
+    let snapshotId =
+      typeof input.supplierOfferSnapshotId === "string" && input.supplierOfferSnapshotId.trim()
+        ? input.supplierOfferSnapshotId.trim()
+        : null;
+
+    if (!snapshotId) {
+      // Resolve snapshot dynamically for the authenticated user
+      const flight = (input.flight as Record<string, any>) || {};
+      const origin = (flight.originCode || input.originCode || "").toString().toUpperCase();
+      const destination = (flight.destinationCode || input.destinationCode || "").toString().toUpperCase();
+      const departureDate = flight.departureDate || new Date().toISOString().slice(0, 10);
+      const returnDate = flight.returnDate || undefined;
+      const cabinClass = (flight.cabin || input.cabin || "ECONOMY").toString().toUpperCase();
+
+      if (origin && destination) {
+        const searchRes = await fetch(`${API_BASE_URL}/suppliers/search`, {
+          method: "POST",
+          headers: {
+            Authorization: auth,
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            product: input.type === "hotel" ? "HOTEL" : "FLIGHT",
+            query: {
+              origin,
+              destination,
+              departureDate,
+              ...(returnDate ? { returnDate } : {}),
+              cabinClass,
+              passengers: 1,
+            },
+          }),
+          cache: "no-store",
+        });
+
+        if (searchRes.ok) {
+          const searchJson = (await searchRes.json().catch(() => null)) as any;
+          const offers: any[] = searchJson?.data?.offers ?? searchJson?.offers ?? [];
+          const inputId = input.id;
+          const inputFlightNo = flight.flightNumber;
+          const inputCarrier = flight.airlineCode || flight.airline;
+
+          const matched =
+            offers.find((o) => o.offerId === inputId || o.id === inputId) ||
+            offers.find(
+              (o) =>
+                inputFlightNo &&
+                (o.details?.flightNumber === inputFlightNo ||
+                  o.details?.segments?.[0]?.flightNumber === inputFlightNo),
+            ) ||
+            offers.find(
+              (o) =>
+                inputCarrier &&
+                (o.details?.carrier === inputCarrier ||
+                  o.supplierCode === inputCarrier),
+            ) ||
+            offers[0];
+
+          if (matched) {
+            snapshotId =
+              matched.supplierOfferSnapshotId ||
+              matched.snapshotId ||
+              null;
+          }
+        }
+      }
+    }
+
+    if (snapshotId) {
+      input.supplierOfferSnapshotId = snapshotId;
+    }
+
     const meta =
       input.metadata && typeof input.metadata === "object" && !Array.isArray(input.metadata)
         ? (input.metadata as Record<string, unknown>)
