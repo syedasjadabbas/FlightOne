@@ -189,9 +189,9 @@ export async function addMessage(userId, conversationId, content) {
 /**
  * Append messages already produced by the FlightOne Next.js chat orchestrator.
  * Does NOT generate a stub assistant reply — ownership scoped to userId.
- * Optional travelPlan is merged into conversation.metadata for cross-device resume.
+ * Optional travelPlan and searchPanel are merged into conversation.metadata for cross-device resume.
  */
-export async function recordMessages(userId, conversationId, messages, travelPlan) {
+export async function recordMessages(userId, conversationId, messages, travelPlan, searchPanel) {
   await findOwnedConversationOrThrow(userId, conversationId, { id: true });
 
   const created = [];
@@ -221,15 +221,20 @@ export async function recordMessages(userId, conversationId, messages, travelPla
   await prisma.conversation.update({
     where: { id: conversationId },
     data: {
-      ...(travelPlan !== undefined
-        ? {
-            metadata: {
-              ...prevMeta,
+      metadata: {
+        ...prevMeta,
+        ...(travelPlan !== undefined
+          ? {
               travelPlan: travelPlan ?? null,
               travelPlanUpdatedAt: new Date().toISOString(),
-            },
-          }
-        : {}),
+            }
+          : {}),
+        ...(searchPanel !== undefined
+          ? {
+              searchPanel: searchPanel ?? null,
+            }
+          : {}),
+      },
     },
   });
 

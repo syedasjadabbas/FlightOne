@@ -485,4 +485,87 @@ describe("Module 00 — Staff Mandatory 2FA & User Two-Factor Authentication", (
     });
     assert.equal(failRefresh.status, 401);
   });
+
+  it("Authenticated B2C traveller can enable 2FA using session access token and disable it", async () => {
+    const email = `traveller.2fa.${suffix}@example.com`;
+    const password = "TravellerPassword123!";
+    const user = await createTestUser(email, password, { name: "2FA Traveller" });
+
+    // 1. Traveller logs in normally and receives standard access token
+    const loginRes = await apiRequest("POST", "/api/v1/auth/login", {
+      body: { email, password },
+    });
+    assert.equal(loginRes.status, 200);
+    assert.ok(loginRes.body.data.accessToken);
+    const accessToken = loginRes.body.data.accessToken;
+
+    // 2. Enable 2FA: Initiate setup with session Bearer token
+    const setupRes = await apiRequest("POST", "/api/v1/auth/2fa/setup", {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    assert.equal(setupRes.status, 200);
+    assert.ok(setupRes.body.data.secret);
+    assert.ok(setupRes.body.data.otpauthUrl);
+    assert.equal(setupRes.body.data.backupCodes.length, 10);
+
+    const secret = setupRes.body.data.secret;
+
+    // 3. Confirm 2FA setup with valid TOTP code and session Bearer token
+    const validCode = generateTotp(secret);
+    const confirmRes = await apiRequest("POST", "/api/v1/auth/2fa/confirm", {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      body: { code: validCode },
+    });
+    assert.equal(confirmRes.status, 200);
+    assert.equal(confirmRes.body.success, true);
+
+    const dbUser = await prisma.user.findUnique({ where: { id: user.id } });
+    assert.equal(dbUser.twoFactorEnabled, true);
+    assert.equal(dbUser.twoFactorPendingSecret, null);
+    assert.ok(dbUser.twoFactorSecret.startsWith("fo1:"));
+
+    // 4. Disable 2FA with session Bearer token and account password
+    const disableRes = await apiRequest("POST", "/api/v1/auth/2fa/disable", {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      body: { password },
+    });
+    assert.equal(disableRes.status, 200);
+    assert.equal(disableRes.body.success, true);
+
+    const disabledDb = await prisma.user.findUnique({ where: { id: user.id } });
+    assert.equal(disabledDb.twoFactorEnabled, false);
+    assert.equal(disabledDb.twoFactorSecret, null);
+  });
+
+  it("2FA setup and confirm reject invalid token purposes and unauthenticated calls", async () => {
+    const email = `token.purpose.${suffix}@example.com`;
+    const password = "Password123!";
+    const user = await createTestUser(email, password, { name: "Purpose Test" });
+
+    const { signTempToken } = await import("../../lib/jwt.js");
+    const challengeToken = signTempToken({
+      sub: user.id,
+      email: user.email,
+      purpose: "2fa_challenge",
+    });
+
+    // 1. Unauthenticated setup is rejected with 401
+    const unauthRes = await apiRequest("POST", "/api/v1/auth/2fa/setup");
+    assert.equal(unauthRes.status, 401);
+
+    // 2. Setup with wrong token purpose (2fa_challenge) in Bearer header is rejected with 401 Invalid token purpose
+    const badPurposeRes = await apiRequest("POST", "/api/v1/auth/2fa/setup", {
+      headers: { Authorization: `Bearer ${challengeToken}` },
+    });
+    assert.equal(badPurposeRes.status, 401);
+    assert.equal(badPurposeRes.body.message || badPurposeRes.body.error, "Invalid token purpose");
+
+    // 3. Confirm with wrong token purpose (2fa_challenge) is rejected with 401 Invalid token purpose
+    const badConfirmRes = await apiRequest("POST", "/api/v1/auth/2fa/confirm", {
+      headers: { Authorization: `Bearer ${challengeToken}` },
+      body: { code: "123456" },
+    });
+    assert.equal(badConfirmRes.status, 401);
+    assert.equal(badConfirmRes.body.message || badConfirmRes.body.error, "Invalid token purpose");
+  });
 });

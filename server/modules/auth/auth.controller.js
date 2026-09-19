@@ -1,3 +1,5 @@
+import { AppError } from "../../lib/customError.js";
+import { verifyAccessToken, verifyTempToken } from "../../lib/jwt.js";
 import { successResponse } from "../../lib/response.js";
 import * as authService from "./auth.service.js";
 import {
@@ -70,18 +72,52 @@ export async function login(req, res, next) {
   }
 }
 
+async function resolve2faEnrollmentIdentity(req) {
+  let userId = req.user?.id;
+  if (userId) {
+    return { userId, tempTokenUsed: false };
+  }
+
+  const bodyTempToken = req.body?.tempToken;
+  const authHeader = req.headers.authorization;
+  const rawBearerToken = authHeader?.startsWith("Bearer ")
+    ? authHeader.slice(7).trim()
+    : undefined;
+
+  try {
+    if (bodyTempToken) {
+      const payload = verifyTempToken(bodyTempToken, "2fa_enrollment");
+      return { userId: payload.sub, tempTokenUsed: true };
+    }
+
+    if (rawBearerToken) {
+      const payload = verifyAccessToken(rawBearerToken);
+      if (!payload?.sub) {
+        throw new AppError(401, "Invalid token");
+      }
+      if (payload.purpose) {
+        if (payload.purpose === "2fa_enrollment") {
+          return { userId: payload.sub, tempTokenUsed: true };
+        }
+        throw new AppError(401, "Invalid token purpose");
+      }
+      await authService.assertAccessTokenStillValid(payload.sub, payload);
+      return { userId: payload.sub, tempTokenUsed: false };
+    }
+  } catch (err) {
+    if (err instanceof AppError) throw err;
+    if (err.message === "Invalid token purpose") {
+      throw new AppError(401, "Invalid token purpose");
+    }
+    throw new AppError(401, "Invalid or expired token");
+  }
+
+  throw new AppError(401, "Authentication or enrollment token required");
+}
+
 export async function twoFactorSetup(req, res, next) {
   try {
-    const tempToken = req.body?.tempToken || req.headers.authorization?.replace(/^Bearer\s+/i, "");
-    let userId = req.user?.id;
-    if (!userId && tempToken) {
-      const { verifyTempToken } = await import("../../lib/jwt.js");
-      const payload = verifyTempToken(tempToken, "2fa_enrollment");
-      userId = payload.sub;
-    }
-    if (!userId) {
-      return res.status(401).json({ ok: false, error: "Authentication or enrollment token required" });
-    }
+    const { userId } = await resolve2faEnrollmentIdentity(req);
     const data = await authService.setupTwoFactor(userId, { req });
     return successResponse(res, "Two-factor authentication setup initiated", data);
   } catch (e) {
@@ -91,23 +127,24 @@ export async function twoFactorSetup(req, res, next) {
 
 export async function twoFactorConfirm(req, res, next) {
   try {
-    const tempToken = req.body?.tempToken || req.headers.authorization?.replace(/^Bearer\s+/i, "");
-    let userId = req.user?.id;
-    let tempTokenUsed = false;
-    if (!userId && tempToken) {
-      const { verifyTempToken } = await import("../../lib/jwt.js");
-      const payload = verifyTempToken(tempToken, "2fa_enrollment");
-      userId = payload.sub;
-      tempTokenUsed = true;
-    }
-    if (!userId) {
-      return res.status(401).json({ ok: false, error: "Authentication or enrollment token required" });
-    }
-    const data = await authService.confirmTwoFactor(userId, { code: req.body.code }, { req, tempTokenUsed });
+    const { userId, tempTokenUsed } = await resolve2faEnrollmentIdentity(req);
+    const data = await authService.confirmTwoFactor(
+      userId,
+      { code: req.body.code },
+      { req, tempTokenUsed },
+    );
     if (data?.accessToken) {
-      return successResponse(res, data.message || "Two-factor authentication enabled", attachSessionCookies(req, res, data));
+      return successResponse(
+        res,
+        data.message || "Two-factor authentication enabled",
+        attachSessionCookies(req, res, data),
+      );
     }
-    return successResponse(res, data.message || "Two-factor authentication enabled", data);
+    return successResponse(
+      res,
+      data.message || "Two-factor authentication enabled",
+      data,
+    );
   } catch (e) {
     next(e);
   }

@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
+import type { OfferCard } from "@/lib/consultant/types";
 import { formatPriceMinor } from "@/lib/ask-ai/sidebarFilters";
 import {
   canShowResultsWorkspace,

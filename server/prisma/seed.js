@@ -134,12 +134,18 @@ async function seedBootstrapAdmin() {
   if (!user) {
     const passwordHash = await hashPassword(password);
     user = await prisma.user.create({
-      data: { email, name, passwordHash },
-      select: { id: true, email: true, name: true },
+      data: { email, name, passwordHash, emailVerifiedAt: new Date() },
+      select: { id: true, email: true, name: true, emailVerifiedAt: true },
     });
     // Never log passwords. Email is an identifier, not a secret.
     console.log(`Seeded bootstrap admin: ${user.email}`);
   } else {
+    if (!user.emailVerifiedAt) {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { emailVerifiedAt: new Date() },
+      });
+    }
     console.log(`Bootstrap admin already exists: ${email}`);
   }
   return user;

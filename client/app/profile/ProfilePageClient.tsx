@@ -114,12 +114,49 @@ export function ProfilePageClient() {
     }
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const resizeImage = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (readerEvent) => {
+        const img = document.createElement("img");
+        img.onload = () => {
+          const maxDim = 512;
+          let width = img.width;
+          let height = img.height;
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) {
+            resolve(readerEvent.target?.result as string);
+            return;
+          }
+          ctx.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL("image/jpeg", 0.85));
+        };
+        img.onerror = () => resolve(readerEvent.target?.result as string);
+        img.src = readerEvent.target?.result as string;
+      };
+      reader.onerror = (err) => reject(err);
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) {
-      setAvatarError("Image file size must be under 5MB");
+    if (file.size > 10 * 1024 * 1024) {
+      setAvatarError("Image file size must be under 10MB");
       return;
     }
 
@@ -128,13 +165,16 @@ export function ProfilePageClient() {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === "string") {
-        void handleSaveAvatar(reader.result);
+    try {
+      const resizedDataUrl = await resizeImage(file);
+      await handleSaveAvatar(resizedDataUrl);
+    } catch {
+      setAvatarError("Failed to process the uploaded image");
+    } finally {
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
       }
-    };
-    reader.readAsDataURL(file);
+    }
   };
 
   return (
@@ -185,7 +225,7 @@ export function ProfilePageClient() {
                       fill
                       sizes="112px"
                       className="object-cover"
-                      unoptimized={avatarUrl.startsWith("data:")}
+                      unoptimized
                     />
                   ) : (
                     <span className="font-[var(--font-sora)]">{initials}</span>
@@ -417,6 +457,7 @@ export function ProfilePageClient() {
                         fill
                         sizes="56px"
                         className="object-cover"
+                        unoptimized
                       />
                     </div>
                     <span className="text-[10px] font-medium text-slate-600 truncate w-full text-center">

@@ -48,6 +48,7 @@ export async function recordMessages(req, res, next) {
       req.params.id,
       req.body.messages,
       req.body.travelPlan,
+      req.body.searchPanel,
     );
     return successResponse(res, "Messages recorded", data, 201);
   } catch (e) {

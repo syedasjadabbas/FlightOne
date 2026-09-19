@@ -60,14 +60,20 @@ export const conversationsApi = baseApi.injectEndpoints({
 
     recordConversationMessages: builder.mutation<
       { messages: unknown[] },
-      { conversationId: string; messages: RecordMessageInput[]; travelPlan?: unknown }
+      {
+        conversationId: string;
+        messages: RecordMessageInput[];
+        travelPlan?: unknown;
+        searchPanel?: unknown;
+      }
     >({
-      query: ({ conversationId, messages, travelPlan }) => ({
+      query: ({ conversationId, messages, travelPlan, searchPanel }) => ({
         url: `/conversations/${conversationId}/messages/record`,
         method: "POST",
         body: {
           messages,
           ...(travelPlan !== undefined ? { travelPlan } : {}),
+          ...(searchPanel !== undefined ? { searchPanel } : {}),
         },
       }),
       invalidatesTags: (_r, _e, arg) => [

@@ -20,6 +20,7 @@ import type {
   FilterPill,
   ResultsSortKey,
   SearchPhase,
+  SearchResultsPanel,
 } from "@/lib/ask-ai/types";
 import {
   previewLoadingRoute,
@@ -81,6 +82,7 @@ export function useAskAiChat(
   const [loadingRoute, setLoadingRoute] = useState<LoadingRouteCodes | null>(null);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const conversationIdRef = useRef<string | null>(null);
+  const searchPanelRef = useRef<SearchResultsPanel | null>(null);
   const previousTravelPlanRef = useRef<TravelPlan | null>(null);
   const sessionRestoredRef = useRef(false);
   const accessToken = useAuthStore((s) => s.accessToken);
@@ -93,6 +95,10 @@ export function useAskAiChat(
   useEffect(() => {
     previousTravelPlanRef.current = previousTravelPlan;
   }, [previousTravelPlan]);
+
+  useEffect(() => {
+    searchPanelRef.current = searchPanel;
+  }, [searchPanel]);
 
   // Restore guest handoff (login nav) OR authenticated server conversation (cross-device).
   // Guests who refresh /chat start fresh — do not restore sessionStorage handoff.
@@ -132,6 +138,18 @@ export function useAskAiChat(
         setConversationId(handoff.conversationId);
         conversationIdRef.current = handoff.conversationId;
       }
+      if (handoff.searchPanel) {
+        setSearchPanel(handoff.searchPanel);
+        if (handoff.searchResultMessageId) {
+          setSearchResultMessageId(handoff.searchResultMessageId);
+        }
+        if (handoff.searchPhase) {
+          setSearchPhase(handoff.searchPhase);
+        }
+        if (handoff.filterPills?.length) {
+          setFilterPills(handoff.filterPills);
+        }
+      }
       return;
     }
 
@@ -143,6 +161,24 @@ export function useAskAiChat(
         if (handoff.previousTravelPlan) {
           setPreviousTravelPlan(handoff.previousTravelPlan);
         }
+        if (handoff.searchPanel) {
+          setSearchPanel(handoff.searchPanel);
+          if (handoff.searchResultMessageId) {
+            setSearchResultMessageId(handoff.searchResultMessageId);
+          } else {
+            const lastAssistant = restored
+              .slice()
+              .reverse()
+              .find((m) => m.role === "assistant");
+            if (lastAssistant) setSearchResultMessageId(lastAssistant.id);
+          }
+          if (handoff.searchPhase) {
+            setSearchPhase(handoff.searchPhase);
+          }
+          if (handoff.filterPills?.length) {
+            setFilterPills(handoff.filterPills);
+          }
+        }
         const title =
           restored.find((m) => m.role === "user")?.content.slice(0, 80) ||
           "FlightOne chat";
@@ -151,7 +187,7 @@ export function useAskAiChat(
           setConversationId(id);
           conversationIdRef.current = id;
           if (!handoff.conversationId) {
-            await recordGuestHandoffMessages(id, restored);
+            await recordGuestHandoffMessages(id, restored, handoff.searchPanel);
           }
         }
         clearChatHandoff();
@@ -166,6 +202,17 @@ export function useAskAiChat(
       if (resume.travelPlan) {
         setPreviousTravelPlan(resume.travelPlan);
       }
+      if (resume.searchPanel) {
+        setSearchPanel(resume.searchPanel);
+        const lastAssistant = resume.messages
+          .slice()
+          .reverse()
+          .find((m) => m.role === "assistant");
+        if (lastAssistant) setSearchResultMessageId(lastAssistant.id);
+        if (resume.searchPanel.filterPills?.length) {
+          setFilterPills(resume.searchPanel.filterPills);
+        }
+      }
     })();
   }, [hasHydratedAuth, accessToken]);
 
@@ -176,8 +223,20 @@ export function useAskAiChat(
       messages,
       previousTravelPlan,
       conversationId,
+      searchPanel,
+      searchResultMessageId,
+      searchPhase,
+      filterPills,
     });
-  }, [messages, previousTravelPlan, conversationId]);
+  }, [
+    messages,
+    previousTravelPlan,
+    conversationId,
+    searchPanel,
+    searchResultMessageId,
+    searchPhase,
+    filterPills,
+  ]);
 
   useEffect(() => {
     if (!location) return;
@@ -286,6 +345,7 @@ export function useAskAiChat(
     assistantContent: string,
     replyProvider?: string | null,
     travelPlan?: TravelPlan | null,
+    searchPanelData?: SearchResultsPanel | null,
   ) {
     if (!useAuthStore.getState().accessToken) return;
     if (!userContent.trim() || !assistantContent.trim()) return;
@@ -302,6 +362,7 @@ export function useAskAiChat(
       assistantContent,
       replyProvider,
       travelPlan !== undefined ? travelPlan : previousTravelPlanRef.current,
+      searchPanelData !== undefined ? searchPanelData : searchPanelRef.current,
     );
   }
 
@@ -569,6 +630,7 @@ export function useAskAiChat(
           finalReply,
           data.meta.provider,
           data.meta.travelPlan ?? previousTravelPlanRef.current,
+          data.searchPanel ?? searchPanelRef.current,
         );
       }
       return prev.map((m) =>
@@ -614,7 +676,21 @@ export function useAskAiChat(
       conversationIdRef.current = resume.conversationId;
       setMessages(resume.messages);
       if (resume.travelPlan) setPreviousTravelPlan(resume.travelPlan);
-      setSearchPanel(null);
+      if (resume.searchPanel) {
+        setSearchPanel(resume.searchPanel);
+        const lastAssistant = resume.messages
+          .slice()
+          .reverse()
+          .find((m) => m.role === "assistant");
+        if (lastAssistant) setSearchResultMessageId(lastAssistant.id);
+        if (resume.searchPanel.filterPills?.length) {
+          setFilterPills(resume.searchPanel.filterPills);
+        }
+      } else {
+        setSearchPanel(null);
+        setSearchResultMessageId(null);
+        setFilterPills([]);
+      }
       return true;
     },
     startNewChat: () => {

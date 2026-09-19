@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  searchPanelFromConversationMetadata,
   travelPlanFromConversationMetadata,
   uiMessagesFromConversationDetail,
 } from "./persistConversation";
@@ -39,6 +40,25 @@ describe("conversation resume helpers", () => {
     expect(
       travelPlanFromConversationMetadata({ travelPlan: { action: "nope" } }),
     ).toBeNull();
+  });
+
+  it("parses searchPanel from conversation metadata", () => {
+    const panel = searchPanelFromConversationMetadata({
+      searchPanel: {
+        offers: [{ id: "off-1" }],
+        totalCount: 1,
+        liveFlights: true,
+      },
+    });
+    expect(panel?.offers).toHaveLength(1);
+    expect(panel?.liveFlights).toBe(true);
+  });
+
+  it("returns null for missing/invalid metadata searchPanel", () => {
+    expect(searchPanelFromConversationMetadata(null)).toBeNull();
+    expect(searchPanelFromConversationMetadata({})).toBeNull();
+    expect(searchPanelFromConversationMetadata({ searchPanel: null })).toBeNull();
+    expect(searchPanelFromConversationMetadata({ searchPanel: "invalid" })).toBeNull();
   });
 
   it("maps server messages to UiMessage roles", () => {

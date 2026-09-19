@@ -8,6 +8,7 @@ import { conversationsApi } from "@/lib/api/conversations.api";
 import { escalationsApi, type EscalationTrigger } from "@/lib/api/escalations.api";
 import type { UiMessage } from "@/app/components/chat.types";
 import { parseTravelPlan, type TravelPlan } from "@/lib/consultant/travelPlan";
+import type { SearchResultsPanel } from "./types";
 
 async function rtkSafe<T>(promise: Promise<T>): Promise<T | null> {
   try {
@@ -97,6 +98,7 @@ export async function recordTurnMessages(
   assistantContent: string,
   provider?: string | null,
   travelPlan?: unknown,
+  searchPanel?: unknown,
 ): Promise<boolean> {
   const messages = [
     { role: "USER" as const, content: userContent },
@@ -114,6 +116,7 @@ export async function recordTurnMessages(
             conversationId,
             messages,
             ...(travelPlan !== undefined ? { travelPlan } : {}),
+            ...(searchPanel !== undefined ? { searchPanel } : {}),
           },
           { track: false },
         ),
@@ -126,6 +129,7 @@ export async function recordTurnMessages(
 export async function recordGuestHandoffMessages(
   conversationId: string,
   messages: UiMessage[],
+  searchPanel?: unknown,
 ): Promise<boolean> {
   const payload = messages
     .filter((m) => m.id !== "greet" && m.content.trim())
@@ -139,7 +143,11 @@ export async function recordGuestHandoffMessages(
     store
       .dispatch(
         conversationsApi.endpoints.recordConversationMessages.initiate(
-          { conversationId, messages: payload },
+          {
+            conversationId,
+            messages: payload,
+            ...(searchPanel !== undefined ? { searchPanel } : {}),
+          },
           { track: false },
         ),
       )
@@ -169,6 +177,7 @@ export type ConversationResume = {
   conversationId: string;
   messages: UiMessage[];
   travelPlan: TravelPlan | null;
+  searchPanel?: SearchResultsPanel | null;
 };
 
 /** Coerce opaque conversation.metadata.travelPlan into a validated TravelPlan. */
@@ -185,6 +194,18 @@ export function travelPlanFromConversationMetadata(
   } catch {
     return null;
   }
+}
+
+/** Coerce opaque conversation.metadata.searchPanel into SearchResultsPanel if valid. */
+export function searchPanelFromConversationMetadata(
+  metadata: unknown,
+): SearchResultsPanel | null {
+  if (!metadata || typeof metadata !== "object" || Array.isArray(metadata)) {
+    return null;
+  }
+  const raw = (metadata as { searchPanel?: unknown }).searchPanel;
+  if (!raw || typeof raw !== "object") return null;
+  return raw as SearchResultsPanel;
 }
 
 export function uiMessagesFromConversationDetail(detail: {
@@ -246,5 +267,6 @@ export async function loadConversationResumeById(
     conversationId: detail.id,
     messages,
     travelPlan: travelPlanFromConversationMetadata(detail.metadata),
+    searchPanel: searchPanelFromConversationMetadata(detail.metadata),
   };
 }

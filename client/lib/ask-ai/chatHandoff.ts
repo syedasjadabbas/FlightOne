@@ -4,6 +4,7 @@
  */
 import type { TravelPlan } from "@/lib/consultant/travelPlan";
 import type { UiMessage } from "@/app/components/chat.types";
+import type { FilterPill, SearchPhase, SearchResultsPanel } from "./types";
 
 const KEY = "fo-chat-handoff";
 
@@ -11,6 +12,10 @@ export type ChatHandoff = {
   messages: UiMessage[];
   previousTravelPlan: TravelPlan | null;
   conversationId: string | null;
+  searchPanel?: SearchResultsPanel | null;
+  searchResultMessageId?: string | null;
+  searchPhase?: SearchPhase;
+  filterPills?: FilterPill[];
   savedAt: number;
 };
 

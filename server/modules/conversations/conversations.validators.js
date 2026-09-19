@@ -31,6 +31,8 @@ export const recordMessagesSchema = z.object({
     .max(40),
   /** Structured TravelPlan for cross-device continuity (Module 01). Opaque JSON. */
   travelPlan: z.unknown().optional().nullable(),
+  /** Cached SearchResultsPanel for resuming live results across sessions. */
+  searchPanel: z.unknown().optional().nullable(),
 });
 
 export const escalateConversationSchema = z.object({

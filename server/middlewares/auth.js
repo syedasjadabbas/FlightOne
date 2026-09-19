@@ -31,7 +31,7 @@ export function optionalAuth(req, _res, next) {
       return next();
     }
     const payload = verifyAccessToken(raw);
-    if (payload?.sub) {
+    if (payload?.sub && !payload.purpose) {
       req.user = {
         id: payload.sub,
         email: payload.email,
@@ -55,7 +55,7 @@ export async function requireAuth(req, _res, next) {
       return next(new AppError(503, "Authentication is not configured"));
     }
     const payload = verifyAccessToken(raw);
-    if (!payload?.sub) {
+    if (!payload?.sub || payload.purpose) {
       return next(new AppError(401, "Invalid token"));
     }
     await assertAccessTokenStillValid(payload.sub, payload);
