@@ -20,13 +20,14 @@ const EXPLORE_ITEMS = [
 ];
 
 const SERVICE_ITEMS = [
-  { label: 'Visa Assistance',  href: '/visa',        icon: '🛂', desc: 'End-to-end visa processing' },
+  { label: 'Visa Advisory',    href: '/visa',        icon: '🛂', desc: 'End-to-end visa processing' },
   { label: 'Corporate Travel', href: '/corporate',   icon: '💼', desc: 'Managed business trips' },
   { label: 'Group Bookings',   href: '/groups',      icon: '👥', desc: 'Parties of 10 or more' },
   { label: 'MICE & Events',    href: '/mice',        icon: '🎤', desc: 'Conferences & incentives' },
-  { label: 'Rewards',          href: '/rewards',     icon: '⭐', desc: 'Earn miles on every trip' },
-  { label: 'Support',          href: '/escalations', icon: '💬', desc: 'Live agent assistance' },
-  { label: 'Refunds',          href: '/refunds',     icon: '↩',  desc: 'Manage cancellations' },
+  { label: 'Rewards & Points', href: '/rewards',     icon: '⭐', desc: 'Earn miles on every trip' },
+  { label: 'Support & Help',   href: '/escalations', icon: '💬', desc: 'Live agent assistance' },
+  { label: 'Refunds & Claims', href: '/refunds',     icon: '↩',  desc: 'Manage cancellations' },
+  { label: 'Operations Desk',  href: '/ops',         icon: '⚡',  desc: 'Supplier queues & revalidations' },
 ];
 
 const ACCOUNT_ITEMS = [

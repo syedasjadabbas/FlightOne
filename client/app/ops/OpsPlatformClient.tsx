@@ -164,21 +164,47 @@ export function OpsPlatformClient() {
   }
   if (!accessToken) {
     return (
-      <div className="fo-desk__panel">
-        <p className="fo-desk__empty">Sign in required.</p>
+      <div className="rounded-2xl border border-slate-200/90 bg-white p-8 shadow-xs max-w-xl mx-auto my-8 text-center space-y-4">
+        <div className="text-3xl">🔒</div>
+        <h1 className="text-xl font-bold tracking-tight text-slate-900">
+          FlightOne Operations Desk
+        </h1>
+        <p className="text-xs text-slate-600 leading-relaxed max-w-md mx-auto">
+          This is a restricted operations area reserved for authenticated FlightOne staff. Access requires verified staff credentials and mandatory two-factor authentication (2FA).
+        </p>
+        <div className="pt-2 flex justify-center gap-3">
+          <Link href="/login?redirect=%2Fops">
+            <Button size="sm">Staff Sign In & 2FA</Button>
+          </Link>
+          <Link href="/">
+            <Button size="sm" variant="secondary">Return to Public Portal</Button>
+          </Link>
+        </div>
       </div>
     );
   }
   if (!canRead) {
     return (
-      <header className="fo-desk__header">
-        <h1 className="fo-desk__title">Operations</h1>
-        <p className="fo-desk__lede">Missing `ops:dashboard:read` permission.</p>
-        <div className="fo-desk__links">
-          <Link href="/ops/escalations">Escalations ops</Link>
-          <Link href="/ops/refunds">Refunds ops</Link>
+      <div className="rounded-2xl border border-amber-200/90 bg-amber-50/50 p-8 shadow-xs max-w-xl mx-auto my-8 text-center space-y-4">
+        <div className="text-3xl">🛡️</div>
+        <h1 className="text-xl font-bold tracking-tight text-slate-900">
+          Staff Role Authorization Required
+        </h1>
+        <p className="text-xs text-slate-700 leading-relaxed max-w-md mx-auto">
+          Your account is signed in but lacks the required <code className="bg-amber-100 px-1 py-0.5 rounded font-mono text-[11px]">ops:dashboard:read</code> staff permission. Access is granted to verified SuperAdmin, OpsManager, TravelConsultant, and FinanceOfficer roles.
+        </p>
+        <div className="pt-2 flex justify-center gap-3">
+          <Link href="/ops/escalations">
+            <Button size="sm" variant="secondary">Escalations Queue</Button>
+          </Link>
+          <Link href="/ops/refunds">
+            <Button size="sm" variant="secondary">Refunds Queue</Button>
+          </Link>
+          <Link href="/dashboard">
+            <Button size="sm" variant="ghost">Management Dashboard</Button>
+          </Link>
         </div>
-      </header>
+      </div>
     );
   }
 
