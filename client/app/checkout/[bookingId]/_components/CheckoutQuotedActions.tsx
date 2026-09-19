@@ -568,7 +568,167 @@ export function CheckoutQuotedActions({
                       <line x1="2" y1="10" x2="22" y2="10" />
                     </svg>
                   </div>
-      </div>
+                  <span className="text-[13px] font-bold text-slate-900">Card</span>
+                  <span className="text-[10px] text-slate-500 mt-0.5">Visa / Mastercard</span>
+                </button>
+
+                {/* JazzCash */}
+                <button
+                  type="button"
+                  disabled={busy || corporateBlocked}
+                  onClick={() => setPayMethod("jazzcash")}
+                  className={`flex flex-col items-center text-center p-3.5 rounded-xl border transition-all cursor-pointer ${
+                    payMethod === "jazzcash"
+                      ? "border-amber-600 bg-amber-50/40 ring-1 ring-amber-600 shadow-2xs"
+                      : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
+                  }`}
+                >
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-100/70 text-amber-700 mb-2">
+                    <span className="text-[14px]">📱</span>
+                  </div>
+                  <span className="text-[13px] font-bold text-slate-900">JazzCash</span>
+                  <span className="text-[10px] text-slate-500 mt-0.5">Mobile Wallet</span>
+                </button>
+
+                {/* Easypaisa */}
+                <button
+                  type="button"
+                  disabled={busy || corporateBlocked}
+                  onClick={() => setPayMethod("easypaisa")}
+                  className={`flex flex-col items-center text-center p-3.5 rounded-xl border transition-all cursor-pointer ${
+                    payMethod === "easypaisa"
+                      ? "border-emerald-600 bg-emerald-50/40 ring-1 ring-emerald-600 shadow-2xs"
+                      : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
+                  }`}
+                >
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100/70 text-emerald-700 mb-2">
+                    <span className="text-[14px]">📱</span>
+                  </div>
+                  <span className="text-[13px] font-bold text-slate-900">Easypaisa</span>
+                  <span className="text-[10px] text-slate-500 mt-0.5">Mobile Account</span>
+                </button>
+
+                {/* 1Link IBFT */}
+                <button
+                  type="button"
+                  disabled={busy || corporateBlocked}
+                  onClick={() => setPayMethod("onelink_ibft")}
+                  className={`flex flex-col items-center text-center p-3.5 rounded-xl border transition-all cursor-pointer ${
+                    payMethod === "onelink_ibft"
+                      ? "border-blue-800 bg-blue-50/40 ring-1 ring-blue-800 shadow-2xs"
+                      : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
+                  }`}
+                >
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100/70 text-blue-900 mb-2">
+                    <span className="text-[14px]">🏛️</span>
+                  </div>
+                  <span className="text-[13px] font-bold text-slate-900">1Link IBFT</span>
+                  <span className="text-[10px] text-slate-500 mt-0.5">1Bill Bank Transfer</span>
+                </button>
+              </div>
+            ) : null}
+
+            {/* Payment Fields */}
+            <div className="mt-6 space-y-4">
+              {payMethod === "card" ? (
+                <div className="space-y-3">
+                  <Input
+                    label="Card number / token *"
+                    value={paymentToken}
+                    onChange={(e) => setPaymentToken(e.target.value)}
+                    placeholder="pm_card_visa or test token"
+                    disabled={busy || !canCapture || checkoutBlockedByPriceChange || corporateBlocked}
+                  />
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="saveCard"
+                      checked={saveCard}
+                      onChange={(e) => setSaveCard(e.target.checked)}
+                      className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                    />
+                    <label htmlFor="saveCard" className="text-[12px] text-slate-600 select-none cursor-pointer">
+                      Save card for future faster bookings
+                    </label>
+                  </div>
+                </div>
+              ) : null}
+
+              {payMethod === "jazzcash" ? (
+                <div className="space-y-2">
+                  <Input
+                    label="JazzCash Mobile Account Number *"
+                    value={accountNumber}
+                    onChange={(e) => setAccountNumber?.(e.target.value)}
+                    placeholder="03001234567"
+                    disabled={busy || checkoutBlockedByPriceChange || corporateBlocked}
+                  />
+                  <p className="text-[11px] text-slate-500">
+                    Enter your JazzCash registered mobile number. You will receive an MPIN confirmation prompt on your phone.
+                  </p>
+                </div>
+              ) : null}
+
+              {payMethod === "easypaisa" ? (
+                <div className="space-y-2">
+                  <Input
+                    label="Easypaisa Mobile Account Number *"
+                    value={accountNumber}
+                    onChange={(e) => setAccountNumber?.(e.target.value)}
+                    placeholder="03451234567"
+                    disabled={busy || checkoutBlockedByPriceChange || corporateBlocked}
+                  />
+                  <p className="text-[11px] text-slate-500">
+                    Enter your Easypaisa mobile number. You will receive an OTP / PIN authorization prompt.
+                  </p>
+                </div>
+              ) : null}
+
+              {payMethod === "onelink_ibft" ? (
+                <div className="rounded-xl border border-blue-200 bg-blue-50/50 p-4 text-[12px] text-blue-900 space-y-1">
+                  <p className="font-semibold text-[13px]">1Bill / 1Link Direct Bank Transfer</p>
+                  <p className="text-slate-600">
+                    Clicking &ldquo;Pay with 1Link&rdquo; generates a unique 1Bill consumer number. Pay via any Pakistani banking app (HBL, Meezan, UBL, Alfalah, etc.) within the hold window to issue your confirmed ticket.
+                  </p>
+                </div>
+              ) : null}
+
+              {payMethod === "corporate_credit" ? (
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-[12px] text-slate-700">
+                  Corporate credit selected — company credit is verified server-side.
+                </div>
+              ) : null}
+
+              {/* Action Buttons */}
+              <div className="pt-3 flex flex-col sm:flex-row gap-3">
+                <Button
+                  type="button"
+                  className="flex-1 py-4 text-[15px] font-bold shadow-md cursor-pointer"
+                  disabled={
+                    busy ||
+                    (!canCapture && payMethod === "card") ||
+                    checkoutBlockedByPriceChange ||
+                    corporateBlocked
+                  }
+                  onClick={onPay}
+                >
+                  {paying ? "Processing payment…" : `Pay ${formattedPayAmount} & Confirm Booking →`}
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="py-4 px-6 text-[14px] font-semibold border-slate-300 hover:bg-slate-50 text-slate-700 cursor-pointer"
+                  disabled={busy || checkoutBlockedByPriceChange || corporateBlocked}
+                  onClick={onReserve}
+                >
+                  {reserving ? "Holding seat…" : "Hold / Reserve Booking"}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
