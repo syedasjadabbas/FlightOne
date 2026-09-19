@@ -36,6 +36,7 @@ export type ProfilePatch = {
   preferredAirlines?: string[] | null;
   preferredCabin?: "ECONOMY" | "PREMIUM_ECONOMY" | "BUSINESS" | "FIRST" | null;
   maxLayoverMinutes?: number | null;
+  metadata?: Record<string, unknown>;
 };
 
 export type Companion = {

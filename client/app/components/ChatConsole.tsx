@@ -195,6 +195,64 @@ export function ChatConsole() {
     return formatPriceMinor(min, currency);
   }, [chat.searchPanel, chat.activeOriginIdx]);
 
+  const handleQuoteAndCheckout = async (offerToBook: OfferCard, token: string) => {
+    try {
+      const corp = useCorporateProfileStore.getState();
+      const payload = quotePayloadFromOffer(
+        offerToBook,
+        corp.mode === "CORPORATE" && corp.companyId
+          ? { companyId: corp.companyId }
+          : undefined,
+      );
+      const res = await fetch("/api/bookings/quote", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+      const json = await res.json().catch(() => null);
+      if (!res.ok) {
+        setView("chat");
+        chat.send(
+          `I couldn't start checkout for ${offerToBook.title}: ${json?.error || json?.message || "quote failed"}.`,
+        );
+        return;
+      }
+      const bookingId = json?.data?.id;
+      if (!bookingId) {
+        setView("chat");
+        chat.send(`Quote succeeded but no booking id was returned for ${offerToBook.title}.`);
+        return;
+      }
+      window.location.href = `/checkout/${bookingId}`;
+    } catch (err) {
+      setView("chat");
+      chat.send(
+        `I couldn't start checkout for ${offerToBook.title}: ${err instanceof Error ? err.message : "quote failed"}.`,
+      );
+    }
+  };
+
+  // Auto-resume pending checkout offer after user returns from login
+  useEffect(() => {
+    if (!hasHydrated || !accessToken) return;
+    try {
+      const pendingRaw = sessionStorage.getItem("flightone_pending_checkout_offer");
+      if (pendingRaw) {
+        sessionStorage.removeItem("flightone_pending_checkout_offer");
+        const pendingOffer = JSON.parse(pendingRaw);
+        if (pendingOffer && offerHasQuoteSnapshot(pendingOffer)) {
+          void handleQuoteAndCheckout(pendingOffer, accessToken);
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }, [hasHydrated, accessToken]);
+
   return (
     <div className="fo-chat-console relative flex min-h-0 min-w-0 w-full flex-row overflow-hidden">
       {view === "chat" && (
@@ -256,51 +314,17 @@ export function ChatConsole() {
               );
               return;
             }
-            const accessToken = useAuthStore.getState().accessToken;
-            if (!accessToken) {
-              window.location.href = `/login?redirect=${encodeURIComponent("/chat")}`;
+            const currentToken = useAuthStore.getState().accessToken;
+            if (!currentToken) {
+              try {
+                sessionStorage.setItem("flightone_pending_checkout_offer", JSON.stringify(offer));
+              } catch {
+                // ignore
+              }
+              window.location.href = `/login?redirect=${encodeURIComponent("/chat?resumeCheckout=true")}`;
               return;
             }
-            void (async () => {
-              try {
-                const corp = useCorporateProfileStore.getState();
-                const payload = quotePayloadFromOffer(
-                  offer,
-                  corp.mode === "CORPORATE" && corp.companyId
-                    ? { companyId: corp.companyId }
-                    : undefined,
-                );
-                const res = await fetch("/api/bookings/quote", {
-                  method: "POST",
-                  headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                    "Content-Type": "application/json",
-                    Accept: "application/json",
-                  },
-                  body: JSON.stringify(payload),
-                });
-                const json = await res.json().catch(() => null);
-                if (!res.ok) {
-                  setView("chat");
-                  chat.send(
-                    `I couldn't start checkout for ${offer.title}: ${json?.error || json?.message || "quote failed"}.`,
-                  );
-                  return;
-                }
-                const bookingId = json?.data?.id;
-                if (!bookingId) {
-                  setView("chat");
-                  chat.send(`Quote succeeded but no booking id was returned for ${offer.title}.`);
-                  return;
-                }
-                window.location.href = `/checkout/${bookingId}`;
-              } catch (err) {
-                setView("chat");
-                chat.send(
-                  `I couldn't start checkout for ${offer.title}: ${err instanceof Error ? err.message : "quote failed"}.`,
-                );
-              }
-            })();
+            void handleQuoteAndCheckout(offer, currentToken);
           }}
           onBookTrip={(itinerary) => {
             setView("chat");

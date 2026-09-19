@@ -52,10 +52,22 @@ import {
   type PaymentMethodOption,
 } from "./_components/CheckoutQuotedActions";
 
-function CheckoutProgressBar({ status }: { status: string }) {
+function CheckoutProgressBar({
+  status,
+  quotedStep = "TRAVELLER",
+}: {
+  status: string;
+  quotedStep?: "TRAVELLER" | "PAYMENT";
+}) {
   const isQuoted = status === "QUOTED";
   const isReserved = status === "RESERVED";
   const isTicketed = status === "TICKETED" || status === "ACTIVE" || status === "COMPLETED";
+
+  const isStep1Done = (isQuoted && quotedStep === "PAYMENT") || isReserved || isTicketed;
+  const isStep1Active = isQuoted && quotedStep === "TRAVELLER";
+
+  const isStep2Done = isTicketed;
+  const isStep2Active = (isQuoted && quotedStep === "PAYMENT") || isReserved;
 
   return (
     <div className="grid grid-cols-3 gap-2 sm:gap-4 py-3 sm:py-4 border-y border-slate-200/80">
@@ -63,12 +75,14 @@ function CheckoutProgressBar({ status }: { status: string }) {
       <div className="flex items-center gap-2.5 sm:gap-3">
         <div
           className={`flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-full text-[12px] sm:text-[13px] font-bold transition-colors ${
-            isReserved || isTicketed
-              ? "bg-emerald-600 text-white"
-              : "bg-blue-600 text-white ring-4 ring-blue-50"
+            isStep1Done
+              ? "bg-emerald-600 text-white shadow-xs"
+              : isStep1Active
+                ? "bg-blue-600 text-white ring-4 ring-blue-50"
+                : "bg-slate-100 text-slate-400 border border-slate-200"
           }`}
         >
-          {isReserved || isTicketed ? (
+          {isStep1Done ? (
             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
               <polyline points="20 6 9 17 4 12" />
             </svg>
@@ -80,7 +94,7 @@ function CheckoutProgressBar({ status }: { status: string }) {
           )}
         </div>
         <div className="min-w-0">
-          <p className={`text-[12px] sm:text-[13px] font-bold truncate ${isQuoted ? "text-slate-900" : "text-slate-700"}`}>
+          <p className={`text-[12px] sm:text-[13px] font-bold truncate ${isStep1Active || isStep1Done ? "text-slate-900" : "text-slate-500"}`}>
             1. Traveller
           </p>
           <p className="text-[11px] text-slate-500 truncate hidden sm:block">Passenger details</p>
@@ -91,14 +105,14 @@ function CheckoutProgressBar({ status }: { status: string }) {
       <div className="flex items-center gap-2.5 sm:gap-3">
         <div
           className={`flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-full text-[12px] sm:text-[13px] font-bold transition-colors ${
-            isTicketed
-              ? "bg-emerald-600 text-white"
-              : isReserved
+            isStep2Done
+              ? "bg-emerald-600 text-white shadow-xs"
+              : isStep2Active
                 ? "bg-blue-600 text-white ring-4 ring-blue-50"
                 : "bg-slate-100 text-slate-400 border border-slate-200"
           }`}
         >
-          {isTicketed ? (
+          {isStep2Done ? (
             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
               <polyline points="20 6 9 17 4 12" />
             </svg>
@@ -110,7 +124,7 @@ function CheckoutProgressBar({ status }: { status: string }) {
           )}
         </div>
         <div className="min-w-0">
-          <p className={`text-[12px] sm:text-[13px] font-bold truncate ${isReserved ? "text-slate-900" : "text-slate-500"}`}>
+          <p className={`text-[12px] sm:text-[13px] font-bold truncate ${isStep2Active || isStep2Done ? "text-slate-900" : "text-slate-500"}`}>
             2. Payment
           </p>
           <p className="text-[11px] text-slate-500 truncate hidden sm:block">Secure payment</p>
@@ -149,6 +163,7 @@ function CheckoutProgressBar({ status }: { status: string }) {
 }
 
 export function CheckoutClient({ bookingId }: { bookingId: string }) {
+  const [quotedStep, setQuotedStep] = useState<"TRAVELLER" | "PAYMENT">("TRAVELLER");
   const hasHydrated = useAuthStore((s) => s.hasHydrated);
   const accessToken = useAuthStore((s) => s.accessToken);
   const user = useAuthStore((s) => s.user);
@@ -508,13 +523,13 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
       </div>
 
       {/* ── 2. BOOKING PROGRESS BAR ──────────────────────── */}
-      <CheckoutProgressBar status={booking.status} />
+      <CheckoutProgressBar status={booking.status} quotedStep={quotedStep} />
 
       {/* ── 3. MAIN RESPONSIVE TWO-COLUMN LAYOUT ──────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* ── LEFT COLUMN (~65%) ─────────────────────────── */}
         <div className="lg:col-span-7 xl:col-span-8 flex flex-col gap-6">
-          {approvalGate ? (
+          {approvalGate && (booking.status !== "QUOTED" || quotedStep === "PAYMENT") ? (
             <CheckoutCorporateSection
               bookingId={bookingId}
               bookingStatus={booking.status}
@@ -540,7 +555,7 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
             />
           ) : null}
 
-          {booking.status === "QUOTED" ? (
+          {booking.status === "QUOTED" && quotedStep === "PAYMENT" ? (
             <CheckoutRewardsSection
               balance={rewardsSummary?.balance ?? 0}
               rewardPoints={rewardPoints}
@@ -587,6 +602,21 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
 
           {booking.status === "QUOTED" ? (
             <CheckoutQuotedActions
+              quotedStep={quotedStep}
+              onContinueToCheckout={() => {
+                setLocalError(null);
+                setQuotedStep("PAYMENT");
+                if (typeof window !== "undefined") {
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }
+              }}
+              onBackToTraveller={() => {
+                setLocalError(null);
+                setQuotedStep("TRAVELLER");
+                if (typeof window !== "undefined") {
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }
+              }}
               formData={formData}
               setFormData={setFormData}
               savedCompanions={companions || []}

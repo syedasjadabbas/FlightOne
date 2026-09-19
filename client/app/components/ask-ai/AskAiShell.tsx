@@ -9,6 +9,7 @@ import type {
   SearchResultsPanel,
 } from "@/lib/ask-ai/types";
 import type { SidebarFilterFacets, SidebarFilterState } from "@/lib/ask-ai/sidebarFilters";
+import { offerHasQuoteSnapshot } from "@/lib/bookings/quoteFromOffer";
 import { FlightOfferDetailModal } from "../FlightOfferDetailModal";
 import { TripDetailModal } from "../TripDetailModal";
 import { ResultsRail } from "./ResultsRail";
@@ -125,6 +126,14 @@ export function AskAiShell({
     onBookTrip?.(itinerary);
   }
 
+  function handleViewOffer(offer: OfferCard) {
+    if (onBookOffer && offerHasQuoteSnapshot(offer)) {
+      handleBookOffer(offer);
+    } else {
+      setDetailOffer(offer);
+    }
+  }
+
   return (
     <div
       className={
@@ -169,7 +178,7 @@ export function AskAiShell({
             onSidebarFiltersChange={onSidebarFiltersChange}
             onClearSidebarFilters={onClearSidebarFilters}
             onSortChange={onSortChange}
-            onViewOffer={setDetailOffer}
+            onViewOffer={handleViewOffer}
             onViewTrip={setDetailTrip}
             onSendFilter={onSendFilter}
             onTripTitleChange={onTripTitleChange}
