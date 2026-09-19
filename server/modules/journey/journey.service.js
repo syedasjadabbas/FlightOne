@@ -840,7 +840,17 @@ export async function pollWatch(watchId, opts = {}) {
 
   const booking = await prisma.booking.findUnique({
     where: { id: watch.bookingId },
-    select: { id: true, product: true, metadata: true, externalRef: true, status: true },
+    select: {
+      id: true,
+      userId: true,
+      product: true,
+      metadata: true,
+      externalRef: true,
+      status: true,
+      amountMinor: true,
+      currency: true,
+      netMinor: true,
+    },
   });
   const fields = booking
     ? extractJourneyFieldsFromBooking(booking)
@@ -1058,6 +1068,21 @@ export async function pollWatch(watchId, opts = {}) {
     },
     select: WATCH_SELECT,
   });
+
+  if (events.length && booking?.userId) {
+    try {
+      const concierge = await import("../concierge/concierge.evaluate.js");
+      await concierge.evaluateForWatch({
+        watch: updatedWatch,
+        booking,
+        events,
+        isFact: Boolean(statusResult.isFact),
+        statusSnapshot: statusResult.snapshot || null,
+      });
+    } catch (e) {
+      logger.warn("concierge.evaluate_failed", { watchId: watch.id, err: e?.message });
+    }
+  }
 
   return {
     watch: updatedWatch,

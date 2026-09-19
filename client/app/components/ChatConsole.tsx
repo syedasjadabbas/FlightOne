@@ -19,6 +19,8 @@ import {
   useDeleteConversationMutation,
 } from "@/lib/api/conversations.api";
 import { ChatSidebar } from "./chat/ChatSidebar";
+import { VoiceMicButton } from "./voice/VoiceMicButton";
+import { PredictiveSuggestions } from "./ask-ai/PredictiveSuggestions";
 
 /** Ava — full chat workspace + full results workspace (state preserved). */
 export function ChatConsole() {
@@ -337,6 +339,13 @@ export function ChatConsole() {
               onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
               isSidebarOpen={isSidebarOpen}
               onDeleteChat={handleDeleteCurrentChat}
+              composerAccessory={
+                <VoiceMicButton
+                  conversationId={chat.conversationId}
+                  onTranscript={(text) => chat.send(text)}
+                />
+              }
+              heroAccessory={<PredictiveSuggestions onSearch={(text) => chat.send(text)} />}
             />
           }
         />

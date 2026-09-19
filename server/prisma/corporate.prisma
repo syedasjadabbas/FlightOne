@@ -58,6 +58,10 @@ model Company {
   projectCodes     ProjectCode[]
   invoices         CorporateInvoice[]
   invoiceSequence  CorporateInvoiceSequence?
+  portal           CompanyPortal?
+  perDiemPolicies  PerDiemPolicy[]
+  expenses         Expense[]
+  carbonEstimates  CarbonEstimate[]
 }
 
 /// Per-company invoice number sequence (concurrency-safe increment).
@@ -187,4 +191,137 @@ model ApprovalRequest {
   @@index([status])
   @@index([companyId])
   @@index([bookingId])
+}
+
+/// Phase 3 — white-label portal branding, custom domain, and SSO config.
+/// Domain VERIFIED is only set after a real verification provider succeeds.
+/// SSO client secret is encrypted at rest and never selected for API responses.
+model CompanyPortal {
+  companyId     String  @id
+  company       Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  portalName    String
+  displayName   String?
+  logoUrl       String?
+  primaryColor  String?
+  secondaryColor String?
+  portalEnabled Boolean @default(false)
+
+  hostname                  String?
+  domainStatus              String    @default("UNCONFIGURED")
+  domainVerificationToken   String?
+  domainVerifiedAt          DateTime?
+  domainReason              String?
+
+  ssoProviderType     String?
+  ssoIssuer           String?
+  ssoClientId         String?
+  ssoClientSecretEnc  String?
+  ssoMetadataUrl      String?
+  ssoEnabled          Boolean @default(false)
+  ssoStatus           String  @default("UNCONFIGURED")
+  ssoReason           String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([hostname])
+}
+
+enum ExpenseStatus {
+  DRAFT
+  SUBMITTED
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+  REIMBURSEMENT_PENDING
+  REIMBURSED
+}
+
+enum ExpenseOcrStatus {
+  UNCONFIGURED
+  UNPROCESSED
+  PROCESSED
+  FAILED
+}
+
+/// Organization-scoped per-diem policy. Absent policy ≠ invented default.
+model PerDiemPolicy {
+  id               String   @id @default(cuid())
+  companyId        String
+  company          Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  name             String
+  dailyAmountMinor Int
+  currency         String
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([companyId])
+}
+
+/// Employee expense linked to an optional company booking (scalar bookingId).
+model Expense {
+  id         String  @id @default(cuid())
+  companyId  String
+  company    Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  ownerUserId String
+  bookingId   String?
+
+  expenseDate DateTime
+  category    String
+  amountMinor Int
+  currency    String
+  merchant    String?
+  description String?
+  status      ExpenseStatus @default(DRAFT)
+
+  perDiemPolicyId     String?
+  perDiemAmountMinor  Int?
+  perDiemConfigured   Boolean @default(false)
+
+  ocrStatus     ExpenseOcrStatus @default(UNCONFIGURED)
+  ocrProvider   String?
+  ocrExtracted  Json?
+  ocrProvenance Json?
+
+  receiptStorageKey        String?
+  receiptContentType       String?
+  receiptByteSize          Int?
+  receiptOriginalFilename  String?
+
+  reimbursementExportedAt DateTime?
+  reimbursementExportKind String?
+
+  approverUserId String?
+  decisionNote   String?
+  decidedAt      DateTime?
+  submittedAt    DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId])
+  @@index([ownerUserId])
+  @@index([status])
+  @@index([bookingId])
+}
+
+/// Provenance-bearing CO₂ estimate for a company booking. Never stored without method/version.
+model CarbonEstimate {
+  id             String   @id @default(cuid())
+  companyId      String
+  company        Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  bookingId      String
+  product        String
+  status         String
+  gramsCo2e      Int?
+  methodCode     String
+  methodVersion  String
+  inputs         Json?
+  reason         String?
+  calculatedAt   DateTime @default(now())
+
+  @@unique([bookingId])
+  @@index([companyId])
+  @@index([companyId, calculatedAt])
 }

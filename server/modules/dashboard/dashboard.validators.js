@@ -27,3 +27,26 @@ export const dashboardQuerySchema = z
     message: "from must be on or before to",
     path: ["from"],
   });
+
+export const advancedAnalyticsQuerySchema = z
+  .object({
+    from: z.coerce.date({ errorMap: () => ({ message: "from must be a valid ISO date" }) }),
+    to: z.coerce.date({ errorMap: () => ({ message: "to must be a valid ISO date" }) }),
+    currency: z
+      .string()
+      .trim()
+      .length(3, "currency must be a 3-letter ISO 4217 code")
+      .transform((v) => v.toUpperCase())
+      .optional(),
+    product: z.enum(DASHBOARD_PRODUCTS).optional(),
+    companyId: z.string().trim().min(1).max(80).optional(),
+    metric: z.enum(["volume", "spend"]).optional(),
+  })
+  .refine((q) => q.from <= q.to, {
+    message: "from must be on or before to",
+    path: ["from"],
+  })
+  .refine((q) => (q.to.getTime() - q.from.getTime()) / 86400000 <= 366, {
+    message: "Analytics range cannot exceed 366 days",
+    path: ["to"],
+  });

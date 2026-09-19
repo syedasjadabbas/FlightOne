@@ -18,7 +18,7 @@ import {
   FlexibleDatesButton,
   NearbyAirportsButton,
   PriceCalendarStub,
-  PriceInsightStub,
+  FareInsightPanel,
   TrackPriceButton,
 } from "./ResultsTools";
 import { ResultsRailSkeleton } from "./ResultsRailSkeleton";
@@ -591,7 +591,17 @@ export function ResultsRail({
                       : undefined
                   }
                 />
-                <PriceInsightStub />
+                <FareInsightPanel
+                  origin={routeIata?.origin}
+                  destination={routeIata?.dest}
+                  currentAmountMinor={
+                    offers
+                      .map((o) => o.priceMinor)
+                      .filter((n): n is number => Number.isFinite(n))
+                      .sort((a, b) => a - b)[0] ?? null
+                  }
+                  currency={offers.find((o) => o.currency)?.currency ?? null}
+                />
               </header>
 
               {filterSidebar ? (

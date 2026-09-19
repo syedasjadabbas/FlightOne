@@ -1,0 +1,68 @@
+// Phase 3 — Autonomous Travel Concierge.
+// Owned by modules/concierge/. Traveller-owned pre-authorised rules.
+// Cross-module refs (userId, bookingId, watchId, journeyEventId) are
+// intentional plain scalars — same pattern as prisma/journey.prisma.
+
+enum ConciergeTrigger {
+  DELAY
+  CANCELLED
+  DISRUPTION
+  REBOOK_OPPORTUNITY
+}
+
+enum ConciergeAction {
+  NOTIFY
+  PREPARE_REBOOK
+  AUTONOMOUS_REBOOK
+}
+
+enum ConciergeExecutionStatus {
+  EVALUATED
+  SKIPPED
+  BLOCKED
+  PENDING_CONFIRMATION
+  EXECUTED
+  FAILED
+  ESCALATED
+}
+
+model ConciergeRule {
+  id                 String           @id @default(cuid())
+  userId             String
+  name               String
+  enabled            Boolean          @default(true)
+  trigger            ConciergeTrigger
+  thresholdMinutes   Int?
+  action             ConciergeAction
+  maxAdditionalMinor Int
+  currency           String           @default("PKR")
+  notifyOnTrigger    Boolean          @default(true)
+  disabledAt         DateTime?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  executions         ConciergeExecution[]
+
+  @@index([userId, enabled])
+}
+
+model ConciergeExecution {
+  id              String                    @id @default(cuid())
+  ruleId          String
+  rule            ConciergeRule             @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+  userId          String
+  bookingId       String
+  watchId         String?
+  journeyEventId  String?
+  idempotencyKey  String                    @unique
+  status          ConciergeExecutionStatus
+  reason          String?
+  extraMinor      Int?
+  quoteBookingId  String?
+  metadata        Json?
+  createdAt       DateTime                  @default(now())
+  updatedAt       DateTime                  @updatedAt
+
+  @@index([userId, createdAt])
+  @@index([bookingId])
+  @@index([ruleId])
+}

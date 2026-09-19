@@ -1,6 +1,9 @@
 "use client";
 
 import { FEATURE_FLAGS } from "@/lib/ask-ai/featureFlags";
+import { useEffect } from "react";
+import { useGetFareInsightMutation } from "@/lib/api/recommendations.api";
+import { fareActionLabel, fareStatusLabel, formatFareMinor } from "@/lib/recommendation/predictiveDisplay";
 
 export function PriceCalendarStub({
   dateSpan,
@@ -28,17 +31,79 @@ export function PriceCalendarStub({
   );
 }
 
-export function PriceInsightStub() {
-  if (!FEATURE_FLAGS.priceForecast) return null;
+export function FareInsightPanel({
+  origin,
+  destination,
+  currentAmountMinor,
+  currency,
+  departureDate,
+}: {
+  origin?: string | null;
+  destination?: string | null;
+  currentAmountMinor?: number | null;
+  currency?: string | null;
+  departureDate?: string | null;
+}) {
+  const [fetchInsight, { data, isLoading }] = useGetFareInsightMutation();
+
+  useEffect(() => {
+    if (!origin || !destination) return;
+    void fetchInsight({
+      origin,
+      destination,
+      ...(departureDate ? { departureDate } : {}),
+      ...(Number.isInteger(currentAmountMinor) ? { currentAmountMinor: currentAmountMinor as number } : {}),
+      ...(currency ? { currency } : {}),
+    });
+  }, [origin, destination, currentAmountMinor, currency, departureDate, fetchInsight]);
+
+  if (!origin || !destination) return null;
+
+  const current = data?.currentFare;
+  const prediction = data?.prediction;
 
   return (
     <div className="results-tool-panel results-tool-panel--insight">
-      <p className="results-tool-panel__title">Price insight</p>
-      <p className="results-tool-panel__hint">
-        Price forecast will appear here when a prediction source is connected. No forecast data is available yet.
-      </p>
+      <p className="results-tool-panel__title">Fare insight</p>
+      {isLoading && !data ? (
+        <p className="results-tool-panel__hint">Checking verified fares for this route…</p>
+      ) : (
+        <>
+          <p className="results-tool-panel__hint">
+            Current observed fare:{" "}
+            {current?.available
+              ? `${formatFareMinor(current.amountMinor, current.currency)} (verified from this search)`
+              : "not available on this result set"}
+          </p>
+          <p className="results-tool-panel__hint">
+            {prediction
+              ? `${fareStatusLabel(prediction.status)}. ${fareActionLabel(prediction.suggestedAction)}. ${prediction.explanation}`
+              : "Not enough data for a prediction."}
+          </p>
+          {prediction?.confidence ? (
+            <p className="results-tool-panel__hint">
+              Data quality: {prediction.confidence.quality || prediction.confidence.level}
+              {Number.isInteger(prediction.confidence.sampleCount)
+                ? ` (${prediction.confidence.sampleCount} prior observations)`
+                : ""}
+              . FlightOne will not book from this insight.
+            </p>
+          ) : null}
+        </>
+      )}
     </div>
   );
+}
+
+/** @deprecated alias — fare insight is now live from observed snapshots, not a stub. */
+export function PriceInsightStub(props: {
+  origin?: string | null;
+  destination?: string | null;
+  currentAmountMinor?: number | null;
+  currency?: string | null;
+  departureDate?: string | null;
+}) {
+  return <FareInsightPanel {...props} />;
 }
 
 export function TrackPriceButton({

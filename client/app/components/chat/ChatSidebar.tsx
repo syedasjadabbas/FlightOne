@@ -616,6 +616,7 @@ export function ChatSidebar({
                   <p className="truncate text-[10px] text-slate-400">{user.email}</p>
                 </div>
               </Link>
+              <div className="flex items-center shrink-0">
               <Link
                 href="/vault"
                 className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-cyan-400 transition-colors"
@@ -631,6 +632,22 @@ export function ChatSidebar({
                   />
                 </svg>
               </Link>
+              <Link
+                href="/concierge"
+                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-cyan-400 transition-colors"
+                title="Autonomous Concierge"
+                aria-label="Open Autonomous Concierge"
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </Link>
+              </div>
             </div>
           ) : (
             <div className="flex items-center justify-between text-xs text-slate-400 px-1">

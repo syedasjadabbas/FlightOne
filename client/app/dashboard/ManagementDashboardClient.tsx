@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Button, Spinner } from "@/components/ui";
 import { PermissionGate } from "@/components/PermissionGate";
-import { useGetDashboardOverviewQuery } from "@/lib/api/dashboard.api";
+import { useGetAdvancedAnalyticsQuery, useGetDashboardOverviewQuery } from "@/lib/api/dashboard.api";
+import { AdvancedAnalyticsPanel } from "./AdvancedAnalyticsPanel";
 import { usePermissions } from "@/lib/permissions/usePermissions";
 import { useAuthStore } from "@/store/auth.store";
 
@@ -154,6 +155,13 @@ export function ManagementDashboardClient() {
     rangeKey === "custom" && (!customFrom || !customTo || new Date(customFrom) > new Date(customTo));
 
   const { data, isLoading, isFetching, error, refetch } = useGetDashboardOverviewQuery(range, {
+    skip: skip || !canRead || customInvalid,
+  });
+  const {
+    data: advanced,
+    isLoading: advancedLoading,
+    isError: advancedError,
+  } = useGetAdvancedAnalyticsQuery(range, {
     skip: skip || !canRead || customInvalid,
   });
 
@@ -1221,6 +1229,7 @@ export function ManagementDashboardClient() {
             </section>
           </>
         )}
+        <AdvancedAnalyticsPanel data={advanced} isLoading={advancedLoading} isError={advancedError} />
       </div>
     </PermissionGate>
   );

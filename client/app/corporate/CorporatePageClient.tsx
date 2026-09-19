@@ -26,6 +26,10 @@ import {
 } from "@/lib/api/corporate.api";
 import { useAuthStore } from "@/store/auth.store";
 import { useCorporateProfileStore } from "@/store/corporateProfile.store";
+import { CorporatePortalSection } from "./_components/CorporatePortalSection";
+import { CorporateExpensesSection } from "./_components/CorporateExpensesSection";
+import { CorporateCarbonSection } from "./_components/CorporateCarbonSection";
+import { CorporateAnalyticsSection } from "./_components/CorporateAnalyticsSection";
 
 const TABLE_PAGE_SIZE = 10;
 
@@ -721,6 +725,26 @@ export function CorporatePageClient() {
             <p className="fo-desk__empty">Only company ADMIN can manage project codes.</p>
           )}
         </section>
+      ) : null}
+
+      {activeCompanyId && isAdmin ? (
+        <CorporatePortalSection companyId={activeCompanyId} isAdmin={isAdmin} />
+      ) : activeCompanyId ? (
+        <CorporatePortalSection companyId={activeCompanyId} isAdmin={false} />
+      ) : null}
+
+      {activeCompanyId ? (
+        <CorporateExpensesSection
+          companyId={activeCompanyId}
+          isAdmin={isAdmin}
+          isApprover={isApprover}
+          bookings={bookings?.items || []}
+        />
+      ) : null}
+
+      {activeCompanyId ? <CorporateCarbonSection companyId={activeCompanyId} /> : null}
+      {activeCompanyId ? (
+        <CorporateAnalyticsSection companyId={activeCompanyId} canRead={isAdmin || isApprover} />
       ) : null}
 
       {activeCompanyId && isAdmin ? (

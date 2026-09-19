@@ -1,10 +1,9 @@
 # Module 06 — Corporate Travel
 
 **PRD Module 6** · Prefix: `CORP` · Phase: 1 (approvals/credit) → 3 (white-label portals,
-expense management)
+expense management, carbon reporting)
 
-**Status: MODULE 6 COMPLETE** (Phase 1 in-scope). Items below marked deferred are
-PRD Phase 2/3 or cross-module dependencies — not open Module 6 implementation stages.
+**Status: MODULE 6 COMPLETE** (Phase 1 in-scope). Phase 3 P3-03 adds portal branding, expenses, and carbon reporting without changing Phase 1 contracts.
 
 ## Objective (from PRD)
 
@@ -74,8 +73,8 @@ while keeping payment methods and booking history separate.
 | Dept/project budgets | PRD-deferred — company credit only |
 | Full payment vault isolation per profile | PRD-deferred — `corporate_credit` vs card path exists |
 | Personal/corporate booking history UI split | PRD-deferred — `metadata.companyId` + `listCompanyBookings` |
-| White-label portals / expense / carbon | Phase 3 |
-| Module 17 analytics | Out of scope |
+| White-label portals / expense / carbon | Phase 3 P3-03 — branding, domain/SSO boundaries, expenses, FO_FACTORS_V1 carbon |
+| Company analytics | Phase 3 P3-04 — ADMIN/APPROVER `GET /companies/:id/analytics`; organization-scoped FO_ANALYTICS_V1 |
 
 ## Business rules / invariants
 

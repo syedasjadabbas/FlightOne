@@ -16,7 +16,7 @@ import {
   type GroupDateFlexibility,
   type GroupType,
 } from "@/lib/api/groups.api";
-import { isValidGroupPassengerCount, MIN_GROUP_PASSENGERS } from "@/lib/groups/groupRequest";
+import { formatGroupRequestSubmitError, isValidGroupPassengerCount, MIN_GROUP_PASSENGERS } from "@/lib/groups/groupRequest";
 import { useAuthStore } from "@/store/auth.store";
 
 const TYPES: GroupType[] = [
@@ -202,17 +202,29 @@ export function GroupsPageClient() {
 
     const count = parseInt(passengerCount, 10);
     if (!isValidGroupPassengerCount(count)) {
-      setFormMsg(`Group travel requires at least ${MIN_GROUP_PASSENGERS} passengers.`);
+      setFormMsg("Group travel requests require at least 10 travellers.");
       return;
     }
-    if (!groupName.trim() || !origin.trim() || !destination.trim()) {
-      setFormMsg("Please enter a group name, origin, and destination.");
+    if (!groupName.trim()) {
+      setFormMsg("Please enter your group name.");
+      return;
+    }
+    if (!origin.trim()) {
+      setFormMsg("Please enter your origin.");
+      return;
+    }
+    if (!destination.trim()) {
+      setFormMsg("Please enter your destination.");
       return;
     }
     const email = contactEmail.trim() || user?.email || "";
     const name = contactName.trim() || user?.name || "";
-    if (!name || !email) {
-      setFormMsg("Contact name and email are required.");
+    if (!name) {
+      setFormMsg("Please enter your contact name.");
+      return;
+    }
+    if (!email) {
+      setFormMsg("Please enter your contact email.");
       return;
     }
 
@@ -258,8 +270,8 @@ export function GroupsPageClient() {
       setTransportNotes("");
       void refetchRequests();
       void refetch();
-    } catch {
-      setFormMsg("Could not submit the group request. Check the fields and try again, or ask Ava.");
+    } catch (err) {
+      setFormMsg(formatGroupRequestSubmitError(err));
     }
   }
 

@@ -51,7 +51,7 @@ and surface **typically three** curated options instead of an OTA-style results 
 - [ ] Feed signal back into per-customer preference weighting (Module 02) over time
 
 ### Phase 3 extensions
-- [ ] Predictive recommendations (proactive suggestions based on history/season/price
+- [x] Predictive recommendations (proactive suggestions based on history/season/price
       trends, not just reactive to a search)
 
 ## Business rules / invariants

@@ -13,6 +13,7 @@ import { DocumentsSection } from "./_components/DocumentsSection";
 import { SessionsSection } from "./_components/SessionsSection";
 import { TwoFactorSection } from "./_components/TwoFactorSection";
 import { TravelHistorySection } from "./_components/TravelHistorySection";
+import { PredictiveSuggestions } from "@/app/components/ask-ai/PredictiveSuggestions";
 
 type ProfileTab =
   | "PREFERENCES"
@@ -380,6 +381,11 @@ export function ProfilePageClient() {
         {activeTab === "HISTORY" && (
           <div className="space-y-6">
             <TravelHistorySection />
+            <PredictiveSuggestions
+              onSearch={(q) => {
+                window.location.href = `/chat?q=${encodeURIComponent(q)}`;
+              }}
+            />
           </div>
         )}
       </div>

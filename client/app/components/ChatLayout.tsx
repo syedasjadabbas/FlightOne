@@ -164,6 +164,8 @@ export function ChatLayout({
   onToggleSidebar,
   isSidebarOpen,
   onDeleteChat,
+  composerAccessory,
+  heroAccessory,
 }: {
   messages: UiMessage[];
   busy: boolean;
@@ -183,6 +185,8 @@ export function ChatLayout({
   onToggleSidebar?: () => void;
   isSidebarOpen?: boolean;
   onDeleteChat?: () => void;
+  composerAccessory?: ReactNode;
+  heroAccessory?: ReactNode;
 }) {
   const [input, setInput] = useState("");
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
@@ -498,6 +502,8 @@ export function ChatLayout({
                   </div>
                 </div>
 
+                {heroAccessory}
+
                 {/* 4 Destination Cards Grid (Dubai, Istanbul, Family Trip, Japan) */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 lg:gap-3.5 shrink-0">
                   {DESTINATION_CARDS.map((card) => (
@@ -709,6 +715,8 @@ export function ChatLayout({
                   disabled={busy}
                   autoComplete="off"
                 />
+
+                {composerAccessory}
 
                 {/* Send button with arrow up */}
                 <button

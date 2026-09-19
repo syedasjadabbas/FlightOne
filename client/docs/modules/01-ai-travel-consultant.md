@@ -58,9 +58,9 @@ customer with raw search results itself.
 - [ ] Logging of AI decisions/recommendations for later audit and quality review
 
 ### Phase 3 extensions
-- [ ] Voice AI channel (speech-to-text/text-to-speech front end on the same conversation
+- [x] Voice AI channel (speech-to-text/text-to-speech front end on the same conversation
       engine)
-- [ ] Autonomous Travel Concierge — proactive suggestions without an explicit user prompt
+- [x] Autonomous Travel Concierge — proactive suggestions without an explicit user prompt
       (e.g. rebooking suggestions after a schedule change), still gated by Module 13 escalation
       rules and Module 03 booking authority
 

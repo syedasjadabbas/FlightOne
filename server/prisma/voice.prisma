@@ -1,0 +1,100 @@
+// Phase 3 — Voice AI channel on the Module 01 conversation engine.
+// Owned by modules/voice/. Cross-module refs (userId, conversationId,
+// bookingId, supplierOfferSnapshotId) are intentional plain scalars —
+// same pattern as prisma/journey.prisma — so this slice does not reshape
+// User/Conversation/Booking relations.
+
+enum VoiceChannel {
+  WEB
+  PHONE
+}
+
+enum VoiceSessionState {
+  IDLE
+  LISTENING
+  PROCESSING
+  SPEAKING
+  CONFIRMATION_REQUIRED
+  COMPLETED
+  FAILED
+  UNAVAILABLE
+}
+
+enum VoiceBookingIntentStatus {
+  PENDING_CONFIRMATION
+  OTP_SENT
+  CONFIRMED
+  EXPIRED
+  REJECTED
+}
+
+/// Browser or phone-line session. Phone identity is never taken from the
+/// caller-provided From header alone — only a prior authenticated binding
+/// (VoiceCallerBinding) may associate a hashed number with a traveller.
+model VoiceSession {
+  id             String            @id @default(cuid())
+  userId         String?
+  conversationId String?
+  channel        VoiceChannel
+  state          VoiceSessionState @default(IDLE)
+  locale         String?
+  callerPhoneHash String?
+  lastErrorCode  String?
+  metadata       Json?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  bookingIntents VoiceBookingIntent[]
+
+  @@index([userId, createdAt])
+  @@index([conversationId])
+}
+
+/// Authenticated traveller opts in a phone number. Store hash only.
+model VoiceCallerBinding {
+  id        String   @id @default(cuid())
+  userId    String
+  phoneHash String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, phoneHash])
+  @@index([phoneHash])
+}
+
+/// Voice-driven booking is quote-only after OTP. Never tickets/pays itself.
+model VoiceBookingIntent {
+  id                      String                   @id @default(cuid())
+  sessionId               String
+  session                 VoiceSession             @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  userId                  String
+  status                  VoiceBookingIntentStatus @default(PENDING_CONFIRMATION)
+  supplierOfferSnapshotId String?
+  product                 String?
+  currency                String?
+  amountMinor             Int?
+  bookingId               String?
+  expiresAt               DateTime
+  metadata                Json?
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  otpChallenges           VoiceOtpChallenge[]
+
+  @@index([userId, status])
+  @@index([sessionId])
+}
+
+model VoiceOtpChallenge {
+  id          String             @id @default(cuid())
+  intentId    String
+  intent      VoiceBookingIntent @relation(fields: [intentId], references: [id], onDelete: Cascade)
+  userId      String
+  codeHash    String
+  attempts    Int                @default(0)
+  maxAttempts Int                @default(5)
+  expiresAt   DateTime
+  consumedAt  DateTime?
+  createdAt   DateTime           @default(now())
+
+  @@index([intentId])
+  @@index([userId, createdAt])
+}

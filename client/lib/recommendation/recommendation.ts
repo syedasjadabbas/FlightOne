@@ -81,6 +81,8 @@ export {
 /** API paths for Module 04 feedback capture + learned prefs. */
 export const RECOMMENDATION_FEEDBACK_PATH = "/recommendations/feedback";
 export const RECOMMENDATION_LEARNED_PATH = "/recommendations/learned";
+export const RECOMMENDATION_PREDICTIVE_PATH = "/recommendations/predictive";
+export const RECOMMENDATION_FARE_INSIGHT_PATH = "/recommendations/fare-insight";
 
 const clamp = (n: number, lo = 0, hi = 100) => Math.max(lo, Math.min(hi, n));
 

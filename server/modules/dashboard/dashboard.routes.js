@@ -3,7 +3,7 @@ import { validateQuery } from "../../lib/validate.js";
 import { requireAuth } from "../../middlewares/auth.js";
 import { requireAnyPermission } from "../../middlewares/permission.js";
 import * as dashboardController from "./dashboard.controller.js";
-import { dashboardQuerySchema } from "./dashboard.validators.js";
+import { dashboardQuerySchema, advancedAnalyticsQuerySchema } from "./dashboard.validators.js";
 
 const router = Router();
 
@@ -27,5 +27,10 @@ router.get(
   dashboardController.escalationsBreakdown,
 );
 router.get("/ava-guidance", validateQuery(dashboardQuerySchema), dashboardController.avaGuidance);
+router.get("/advanced", validateQuery(advancedAnalyticsQuerySchema), dashboardController.advancedOverview);
+router.get("/advanced/forecast", validateQuery(advancedAnalyticsQuerySchema), dashboardController.advancedForecast);
+router.get("/advanced/cohorts", validateQuery(advancedAnalyticsQuerySchema), dashboardController.advancedCohorts);
+router.get("/advanced/elasticity", validateQuery(advancedAnalyticsQuerySchema), dashboardController.advancedElasticity);
+router.get("/advanced/suppliers", validateQuery(advancedAnalyticsQuerySchema), dashboardController.advancedSuppliers);
 
 export default router;

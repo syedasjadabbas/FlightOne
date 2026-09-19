@@ -36,3 +36,14 @@ model RecommendationFeedback {
   @@index([offerId])
   @@index([conversationId])
 }
+
+/// Phase 3 predictive recs — proactive notification opt-in (owner-only).
+/// Calendar/history/fare observations stay in existing Booking/Snapshot tables.
+model PredictivePreference {
+  userId            String   @id
+  proactiveEnabled  Boolean  @default(true)
+  notifyApp         Boolean  @default(true)
+  notifyEmail       Boolean  @default(false)
+  updatedAt         DateTime @updatedAt
+  createdAt         DateTime @default(now())
+}

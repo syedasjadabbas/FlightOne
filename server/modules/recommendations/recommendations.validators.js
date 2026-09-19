@@ -74,3 +74,23 @@ export const feedbackSchema = z.object({
   /** Real offer attributes at feedback time — required for learning to apply later. */
   context: feedbackContextSchema,
 });
+
+export const fareInsightSchema = z.object({
+  origin: z.string().trim().min(3).max(10),
+  destination: z.string().trim().min(3).max(10),
+  departureDate: z.string().trim().min(8).max(16).optional(),
+  currentAmountMinor: z.number().int().nonnegative().optional(),
+  currency: z.string().trim().length(3).optional(),
+});
+
+export const dismissPredictiveSchema = z.object({
+  id: z.string().trim().min(1).max(120),
+});
+
+export const predictivePrefsSchema = z
+  .object({
+    proactiveEnabled: z.boolean().optional(),
+    notifyApp: z.boolean().optional(),
+    notifyEmail: z.boolean().optional(),
+  })
+  .refine((v) => Object.keys(v).length > 0, { message: "No fields to update" });

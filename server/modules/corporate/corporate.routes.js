@@ -29,11 +29,31 @@ import {
   issueInvoiceSchema,
   listInvoicesQuerySchema,
   updateInvoiceStatusSchema,
+  updateBrandingSchema,
+  configureDomainSchema,
+  updateSsoSchema,
+  resolvePortalQuerySchema,
+  expenseIdParamsSchema,
+  createExpenseSchema,
+  updateExpenseSchema,
+  expenseReceiptSchema,
+  decideExpenseSchema,
+  listExpensesQuerySchema,
+  upsertPerDiemSchema,
+  quotePerDiemQuerySchema,
+  carbonDashboardQuerySchema,
 } from "./corporate.validators.js";
+import { advancedAnalyticsQuerySchema } from "../dashboard/dashboard.validators.js";
 
 const router = Router();
 
-// Guests cannot access any corporate functionality.
+router.get(
+  "/portals/resolve",
+  validateQuery(resolvePortalQuerySchema),
+  corporateController.resolvePublicPortal,
+);
+
+// Guests cannot access any other corporate functionality.
 router.use(requireAuth);
 
 router.get("/me/active-profile", corporateController.activeProfile);
@@ -185,6 +205,131 @@ router.post(
   validateParams(approvalIdParamsSchema),
   validateBody(decideApprovalSchema),
   corporateController.decideApproval,
+);
+
+router.get(
+  "/companies/:id/portal",
+  validateParams(companyIdParamsSchema),
+  corporateController.getCompanyPortal,
+);
+router.patch(
+  "/companies/:id/portal/branding",
+  validateParams(companyIdParamsSchema),
+  validateBody(updateBrandingSchema),
+  corporateController.updateCompanyBranding,
+);
+router.post(
+  "/companies/:id/portal/domain",
+  validateParams(companyIdParamsSchema),
+  validateBody(configureDomainSchema),
+  corporateController.configureCustomDomain,
+);
+router.post(
+  "/companies/:id/portal/domain/verify",
+  validateParams(companyIdParamsSchema),
+  corporateController.verifyCustomDomain,
+);
+router.patch(
+  "/companies/:id/portal/sso",
+  validateParams(companyIdParamsSchema),
+  validateBody(updateSsoSchema),
+  corporateController.updateCompanySso,
+);
+router.post(
+  "/companies/:id/portal/sso/start",
+  validateParams(companyIdParamsSchema),
+  corporateController.startCompanySso,
+);
+
+router.get(
+  "/companies/:id/expenses",
+  validateParams(companyIdParamsSchema),
+  validateQuery(listExpensesQuerySchema),
+  corporateController.listExpenses,
+);
+router.post(
+  "/companies/:id/expenses",
+  validateParams(companyIdParamsSchema),
+  validateBody(createExpenseSchema),
+  corporateController.createExpense,
+);
+router.get(
+  "/companies/:id/expenses/export",
+  validateParams(companyIdParamsSchema),
+  corporateController.exportExpenses,
+);
+router.get(
+  "/companies/:id/expenses/:expenseId",
+  validateParams(expenseIdParamsSchema),
+  corporateController.getExpense,
+);
+router.patch(
+  "/companies/:id/expenses/:expenseId",
+  validateParams(expenseIdParamsSchema),
+  validateBody(updateExpenseSchema),
+  corporateController.updateExpense,
+);
+router.post(
+  "/companies/:id/expenses/:expenseId/receipt",
+  validateParams(expenseIdParamsSchema),
+  validateBody(expenseReceiptSchema),
+  corporateController.attachExpenseReceipt,
+);
+router.get(
+  "/companies/:id/expenses/:expenseId/receipt",
+  validateParams(expenseIdParamsSchema),
+  corporateController.downloadExpenseReceipt,
+);
+router.post(
+  "/companies/:id/expenses/:expenseId/submit",
+  validateParams(expenseIdParamsSchema),
+  corporateController.submitExpense,
+);
+router.post(
+  "/companies/:id/expenses/:expenseId/decide",
+  validateParams(expenseIdParamsSchema),
+  validateBody(decideExpenseSchema),
+  corporateController.decideExpense,
+);
+router.post(
+  "/companies/:id/expenses/:expenseId/reimburse",
+  validateParams(expenseIdParamsSchema),
+  corporateController.reimburseExpense,
+);
+router.get(
+  "/companies/:id/per-diem",
+  validateParams(companyIdParamsSchema),
+  corporateController.listPerDiemPolicies,
+);
+router.post(
+  "/companies/:id/per-diem",
+  validateParams(companyIdParamsSchema),
+  validateBody(upsertPerDiemSchema),
+  corporateController.upsertPerDiemPolicy,
+);
+router.get(
+  "/companies/:id/per-diem/quote",
+  validateParams(companyIdParamsSchema),
+  validateQuery(quotePerDiemQuerySchema),
+  corporateController.quotePerDiem,
+);
+
+router.get(
+  "/companies/:id/carbon",
+  validateParams(companyIdParamsSchema),
+  validateQuery(carbonDashboardQuerySchema),
+  corporateController.getCarbonDashboard,
+);
+router.get(
+  "/companies/:id/carbon/nudges",
+  validateParams(companyIdParamsSchema),
+  corporateController.getCarbonNudges,
+);
+router.get(
+  "/companies/:id/analytics",
+  validateParams(companyIdParamsSchema),
+  validateQuery(advancedAnalyticsQuerySchema),
+  corporateController.getCompanyAnalytics,
 );
 
 export default router;

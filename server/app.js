@@ -48,6 +48,8 @@ import rewardsRouter from "./modules/rewards/index.js";
 import suppliersRouter from "./modules/suppliers/index.js";
 import visaRouter from "./modules/visa/index.js";
 import vaultRouter from "./modules/vault/index.js";
+import voiceRouter from "./modules/voice/index.js";
+import conciergeRouter from "./modules/concierge/index.js";
 
 dotenv.config();
 
@@ -138,6 +140,8 @@ app.use("/api/v1/rewards", rewardsRouter);
 app.use("/api/v1/suppliers", suppliersRouter);
 app.use("/api/v1/visa", visaRouter);
 app.use("/api/v1/vault", vaultRouter);
+app.use("/api/v1/voice", voiceRouter);
+app.use("/api/v1/concierge", conciergeRouter);
 
 app.use((req, res) => {
   appLogger.debug("Route not found", { method: req.method, path: req.path });

@@ -1,5 +1,6 @@
 import { successResponse } from "../../lib/response.js";
 import * as dashboardService from "./dashboard.service.js";
+import * as advanced from "./dashboard.advanced.js";
 
 export async function overview(req, res, next) {
   try {
@@ -112,6 +113,51 @@ export async function escalationsBreakdown(req, res, next) {
 export async function avaGuidance(req, res, next) {
   try {
     const data = await dashboardService.buildAvaDashboardGuidance(req.query);
+    return successResponse(res, "OK", data);
+  } catch (e) {
+    next(e);
+  }
+}
+
+export async function advancedOverview(req, res, next) {
+  try {
+    const data = await advanced.getStaffAdvancedAnalytics(req.user.id, req.query);
+    return successResponse(res, "OK", data);
+  } catch (e) {
+    next(e);
+  }
+}
+
+export async function advancedForecast(req, res, next) {
+  try {
+    const data = await advanced.getStaffAdvancedForecast(req.user.id, req.query);
+    return successResponse(res, "OK", data);
+  } catch (e) {
+    next(e);
+  }
+}
+
+export async function advancedCohorts(req, res, next) {
+  try {
+    const data = await advanced.getStaffAdvancedCohorts(req.user.id, req.query);
+    return successResponse(res, "OK", data);
+  } catch (e) {
+    next(e);
+  }
+}
+
+export async function advancedElasticity(req, res, next) {
+  try {
+    const data = await advanced.getStaffAdvancedElasticity(req.user.id, req.query);
+    return successResponse(res, "OK", data);
+  } catch (e) {
+    next(e);
+  }
+}
+
+export async function advancedSuppliers(req, res, next) {
+  try {
+    const data = await advanced.getStaffAdvancedSuppliers(req.user.id, req.query);
     return successResponse(res, "OK", data);
   } catch (e) {
     next(e);

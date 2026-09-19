@@ -134,7 +134,14 @@ export const dashboardApi = baseApi.injectEndpoints({
       query: (params) => ({ url: "/dashboard/overview", params: rangeParams(params.from, params.to, params) }),
       providesTags: ["Dashboard"],
     }),
+    getAdvancedAnalytics: build.query<
+      import("@/lib/api/corporate.api").AdvancedAnalyticsDto,
+      { from: string; to: string; currency?: string; product?: string; companyId?: string }
+    >({
+      query: (params) => ({ url: "/dashboard/advanced", params: rangeParams(params.from, params.to, params) }),
+      providesTags: ["Dashboard"],
+    }),
   }),
 });
 
-export const { useGetDashboardOverviewQuery } = dashboardApi;
+export const { useGetDashboardOverviewQuery, useGetAdvancedAnalyticsQuery } = dashboardApi;

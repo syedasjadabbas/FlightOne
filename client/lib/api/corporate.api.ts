@@ -113,6 +113,60 @@ export type CorporateInvoice = {
   voidedAt: string | null;
 };
 
+export type AdvancedAnalyticsDto = {
+  range: { from: string; to: string };
+  companyId: string | null;
+  forecasts: {
+    volume: {
+      available: boolean;
+      status: string;
+      explanation?: string;
+      forecast?: number | null;
+      sampleCount?: number;
+      provenance?: { generatedAt?: string; sampleCount?: number; methodCode?: string };
+    };
+    spend: { available: boolean; status: string; explanation?: string; forecast?: number | null; sampleCount?: number };
+  };
+  cohorts: {
+    dataStatus: string;
+    items: Array<{
+      cohort: string;
+      size: number;
+      activeTravellers: number;
+      bookings: number;
+      spendMinor: number;
+    }>;
+    emptyReason: string | null;
+    privacy?: string;
+  };
+  elasticity: {
+    available: boolean;
+    status: string;
+    kind?: string;
+    causal?: boolean;
+    autoPriceChange?: boolean;
+    explanation?: string;
+    sampleCount?: number;
+  };
+  suppliers: {
+    available: boolean;
+    status: string;
+    insights: Array<{ kind: string; body: string; supplierCode?: string }>;
+    explanation?: string;
+    autoNegotiate?: boolean;
+  };
+  phase3Activity?: {
+    voiceSessions: number;
+    conciergeExecutions: number;
+    predictiveSignals: number;
+    expenses: number | null;
+    carbonEstimatesAvailable: number | null;
+    note?: string;
+  };
+  pricesUnchanged?: boolean;
+  contractsUnchanged?: boolean;
+};
+
 export const corporateApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     listCompanies: build.query<Company[], void>({
@@ -383,6 +437,257 @@ export const corporateApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Corporate"],
     }),
+    getCompanyPortal: build.query<
+      {
+        branding: {
+          portalName: string;
+          displayName: string | null;
+          logoUrl: string | null;
+          primaryColor: string | null;
+          secondaryColor: string | null;
+          enabled: boolean;
+        };
+        domain: {
+          hostname: string | null;
+          status: string;
+          reason: string | null;
+          verificationToken: string | null;
+          capability: { configured: boolean; reason: string | null };
+        };
+        sso: {
+          providerType: string | null;
+          issuer: string | null;
+          clientId: string | null;
+          enabled: boolean;
+          status: string;
+          reason: string | null;
+          hasClientSecret: boolean;
+          capability: { configured: boolean; available: boolean; reason: string | null };
+        };
+      },
+      string
+    >({
+      query: (companyId) => `/corporate/companies/${companyId}/portal`,
+      providesTags: ["Corporate"],
+    }),
+    updateCompanyBranding: build.mutation<
+      unknown,
+      {
+        companyId: string;
+        portalName?: string;
+        displayName?: string | null;
+        logoUrl?: string | null;
+        primaryColor?: string | null;
+        secondaryColor?: string | null;
+        portalEnabled?: boolean;
+      }
+    >({
+      query: ({ companyId, ...body }) => ({
+        url: `/corporate/companies/${companyId}/portal/branding`,
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: ["Corporate"],
+    }),
+    configureCompanyDomain: build.mutation<unknown, { companyId: string; hostname: string }>({
+      query: ({ companyId, hostname }) => ({
+        url: `/corporate/companies/${companyId}/portal/domain`,
+        method: "POST",
+        body: { hostname },
+      }),
+      invalidatesTags: ["Corporate"],
+    }),
+    verifyCompanyDomain: build.mutation<unknown, { companyId: string }>({
+      query: ({ companyId }) => ({
+        url: `/corporate/companies/${companyId}/portal/domain/verify`,
+        method: "POST",
+      }),
+      invalidatesTags: ["Corporate"],
+    }),
+    updateCompanySso: build.mutation<
+      unknown,
+      {
+        companyId: string;
+        providerType?: "oidc" | "saml" | "unconfigured";
+        issuer?: string | null;
+        clientId?: string | null;
+        clientSecret?: string;
+        metadataUrl?: string | null;
+        enabled?: boolean;
+      }
+    >({
+      query: ({ companyId, ...body }) => ({
+        url: `/corporate/companies/${companyId}/portal/sso`,
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: ["Corporate"],
+    }),
+    listExpenses: build.query<
+      {
+        items: Array<{
+          id: string;
+          category: string;
+          amountMinor: number;
+          currency: string;
+          merchant: string | null;
+          status: string;
+          ocrStatus: string;
+          hasReceipt: boolean;
+          bookingId: string | null;
+          expenseDate: string;
+          perDiemConfigured: boolean;
+        }>;
+        total: number;
+        ocr: { configured: boolean; reason: string | null };
+        financeExport: { configured: boolean; reason: string | null };
+      },
+      { companyId: string; status?: string }
+    >({
+      query: ({ companyId, status }) => {
+        const params = new URLSearchParams();
+        if (status) params.set("status", status);
+        const q = params.toString();
+        return `/corporate/companies/${companyId}/expenses${q ? `?${q}` : ""}`;
+      },
+      providesTags: ["Corporate"],
+    }),
+    createExpense: build.mutation<
+      { id: string },
+      {
+        companyId: string;
+        amountMinor: number;
+        currency?: string;
+        category?: string;
+        merchant?: string;
+        description?: string;
+        expenseDate?: string;
+        bookingId?: string;
+        days?: number;
+      }
+    >({
+      query: ({ companyId, ...body }) => ({
+        url: `/corporate/companies/${companyId}/expenses`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Corporate"],
+    }),
+    submitExpense: build.mutation<unknown, { companyId: string; expenseId: string }>({
+      query: ({ companyId, expenseId }) => ({
+        url: `/corporate/companies/${companyId}/expenses/${expenseId}/submit`,
+        method: "POST",
+      }),
+      invalidatesTags: ["Corporate"],
+    }),
+    decideExpense: build.mutation<
+      unknown,
+      { companyId: string; expenseId: string; decision: "APPROVE" | "REJECT"; note?: string }
+    >({
+      query: ({ companyId, expenseId, ...body }) => ({
+        url: `/corporate/companies/${companyId}/expenses/${expenseId}/decide`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Corporate"],
+    }),
+    reimburseExpense: build.mutation<unknown, { companyId: string; expenseId: string }>({
+      query: ({ companyId, expenseId }) => ({
+        url: `/corporate/companies/${companyId}/expenses/${expenseId}/reimburse`,
+        method: "POST",
+      }),
+      invalidatesTags: ["Corporate"],
+    }),
+    exportExpenses: build.query<
+      {
+        format: string;
+        filename: string;
+        contentBase64: string;
+        count: number;
+        submittedExternally: boolean;
+        integration: { configured: boolean; reason: string | null };
+      },
+      { companyId: string }
+    >({
+      query: ({ companyId }) => `/corporate/companies/${companyId}/expenses/export`,
+    }),
+    attachExpenseReceipt: build.mutation<
+      unknown,
+      { companyId: string; expenseId: string; contentBase64: string; contentType: string; originalFilename?: string }
+    >({
+      query: ({ companyId, expenseId, ...body }) => ({
+        url: `/corporate/companies/${companyId}/expenses/${expenseId}/receipt`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Corporate"],
+    }),
+    listPerDiemPolicies: build.query<
+      { configured: boolean; items: Array<{ id: string; name: string; dailyAmountMinor: number; currency: string }>; emptyReason: string | null },
+      string
+    >({
+      query: (companyId) => `/corporate/companies/${companyId}/per-diem`,
+      providesTags: ["Corporate"],
+    }),
+    upsertPerDiemPolicy: build.mutation<
+      unknown,
+      { companyId: string; name?: string; dailyAmountMinor: number; currency?: string }
+    >({
+      query: ({ companyId, ...body }) => ({
+        url: `/corporate/companies/${companyId}/per-diem`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Corporate"],
+    }),
+    getCarbonDashboard: build.query<
+      {
+        totals: {
+          gramsCo2e: number;
+          flightGramsCo2e: number;
+          hotelGramsCo2e: number;
+          bookingCount: number;
+          estimatedCount: number;
+          insufficientCount: number;
+        };
+        method: { code: string; version: string; note: string };
+        breakdown: Array<{
+          bookingId: string;
+          product: string;
+          status: string;
+          gramsCo2e: number | null;
+          reason: string | null;
+        }>;
+        period: { from: string | null; to: string | null };
+      },
+      { companyId: string; from?: string; to?: string }
+    >({
+      query: ({ companyId, from, to }) => {
+        const params = new URLSearchParams();
+        if (from) params.set("from", from);
+        if (to) params.set("to", to);
+        const q = params.toString();
+        return `/corporate/companies/${companyId}/carbon${q ? `?${q}` : ""}`;
+      },
+      providesTags: ["Corporate"],
+    }),
+    getCarbonNudges: build.query<
+      { items: Array<{ kind: string; title: string; body: string }>; emptyReason: string | null },
+      string
+    >({
+      query: (companyId) => `/corporate/companies/${companyId}/carbon/nudges`,
+      providesTags: ["Corporate"],
+    }),
+    getCompanyAnalytics: build.query<
+      AdvancedAnalyticsDto,
+      { companyId: string; from: string; to: string }
+    >({
+      query: ({ companyId, from, to }) => ({
+        url: `/corporate/companies/${companyId}/analytics`,
+        params: { from, to },
+      }),
+      providesTags: ["Corporate"],
+    }),
   }),
 });
 
@@ -409,4 +714,21 @@ export const {
   useIssueInvoiceMutation,
   useLazyGetInvoicePdfQuery,
   useUpdateInvoiceStatusMutation,
+  useGetCompanyPortalQuery,
+  useUpdateCompanyBrandingMutation,
+  useConfigureCompanyDomainMutation,
+  useVerifyCompanyDomainMutation,
+  useUpdateCompanySsoMutation,
+  useListExpensesQuery,
+  useCreateExpenseMutation,
+  useSubmitExpenseMutation,
+  useDecideExpenseMutation,
+  useReimburseExpenseMutation,
+  useLazyExportExpensesQuery,
+  useAttachExpenseReceiptMutation,
+  useListPerDiemPoliciesQuery,
+  useUpsertPerDiemPolicyMutation,
+  useGetCarbonDashboardQuery,
+  useGetCarbonNudgesQuery,
+  useGetCompanyAnalyticsQuery,
 } = corporateApi;

@@ -191,3 +191,121 @@ export const listInvoicesQuerySchema = z.object({
 export const updateInvoiceStatusSchema = z.object({
   status: z.enum(CORPORATE_INVOICE_STATUSES),
 });
+
+const hexColor = z
+  .string()
+  .trim()
+  .regex(/^#[0-9A-Fa-f]{6}$/, "colour must be #RRGGBB")
+  .nullable()
+  .optional();
+
+export const updateBrandingSchema = z
+  .object({
+    portalName: z.string().trim().min(1).max(120).optional(),
+    displayName: z.string().trim().min(1).max(120).nullable().optional(),
+    logoUrl: z.string().trim().max(500).nullable().optional(),
+    primaryColor: hexColor,
+    secondaryColor: hexColor,
+    portalEnabled: z.boolean().optional(),
+  })
+  .refine((v) => Object.keys(v).length > 0, { message: "At least one field is required" });
+
+export const configureDomainSchema = z.object({
+  hostname: z.string().trim().min(1).max(253),
+});
+
+export const updateSsoSchema = z
+  .object({
+    providerType: z.enum(["oidc", "saml", "unconfigured"]).optional(),
+    issuer: z.string().trim().max(400).nullable().optional(),
+    clientId: z.string().trim().max(200).nullable().optional(),
+    clientSecret: z.string().trim().min(1).max(400).optional(),
+    metadataUrl: z.string().trim().max(500).nullable().optional(),
+    enabled: z.boolean().optional(),
+  })
+  .refine((v) => Object.keys(v).length > 0, { message: "At least one field is required" });
+
+export const resolvePortalQuerySchema = z.object({
+  host: z.string().trim().min(1).max(253),
+});
+
+export const expenseIdParamsSchema = z.object({
+  id: z.string().trim().min(1),
+  expenseId: z.string().trim().min(1),
+});
+
+export const createExpenseSchema = z.object({
+  amountMinor: z.number().int().nonnegative(),
+  currency: z
+    .string()
+    .trim()
+    .length(3)
+    .transform((v) => v.toUpperCase())
+    .optional(),
+  category: z.string().trim().min(1).max(40).optional(),
+  merchant: z.string().trim().max(200).optional(),
+  description: z.string().trim().max(500).optional(),
+  expenseDate: z.string().trim().min(8).max(40).optional(),
+  bookingId: z.string().trim().min(1).optional(),
+  days: z.number().int().min(1).max(60).optional(),
+});
+
+export const updateExpenseSchema = z
+  .object({
+    amountMinor: z.number().int().nonnegative().optional(),
+    category: z.string().trim().min(1).max(40).optional(),
+    merchant: z.string().trim().max(200).nullable().optional(),
+    description: z.string().trim().max(500).nullable().optional(),
+    expenseDate: z.string().trim().min(8).max(40).optional(),
+    bookingId: z.string().trim().min(1).nullable().optional(),
+  })
+  .refine((v) => Object.keys(v).length > 0, { message: "At least one field is required" });
+
+export const expenseReceiptSchema = z.object({
+  contentBase64: z.string().min(1).max(20_000_000),
+  contentType: z.string().trim().min(1).max(80),
+  originalFilename: z.string().trim().min(1).max(180).optional(),
+});
+
+export const decideExpenseSchema = z.object({
+  decision: z.enum(["APPROVE", "REJECT"]),
+  note: z.string().trim().max(500).optional(),
+});
+
+export const listExpensesQuerySchema = z.object({
+  status: z
+    .enum([
+      "DRAFT",
+      "SUBMITTED",
+      "PENDING_APPROVAL",
+      "APPROVED",
+      "REJECTED",
+      "REIMBURSEMENT_PENDING",
+      "REIMBURSED",
+    ])
+    .optional(),
+  page: z.coerce.number().int().min(1).optional(),
+  pageSize: z.coerce.number().int().min(1).max(50).optional(),
+});
+
+export const upsertPerDiemSchema = z.object({
+  id: z.string().trim().min(1).optional(),
+  name: z.string().trim().min(1).max(120).optional(),
+  dailyAmountMinor: z.number().int().nonnegative(),
+  currency: z
+    .string()
+    .trim()
+    .length(3)
+    .transform((v) => v.toUpperCase())
+    .optional(),
+  isActive: z.boolean().optional(),
+});
+
+export const quotePerDiemQuerySchema = z.object({
+  days: z.coerce.number().int().min(1).max(60).optional(),
+});
+
+export const carbonDashboardQuerySchema = z.object({
+  from: z.string().trim().min(8).max(16).optional(),
+  to: z.string().trim().min(8).max(16).optional(),
+});

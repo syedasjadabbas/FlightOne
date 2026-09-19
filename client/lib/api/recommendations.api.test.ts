@@ -4,6 +4,8 @@ import { buildRecommendationFeedbackBody } from "@/lib/recommendation/feedbackPa
 import {
   RECOMMENDATION_FEEDBACK_PATH,
   RECOMMENDATION_LEARNED_PATH,
+  RECOMMENDATION_PREDICTIVE_PATH,
+  RECOMMENDATION_FARE_INSIGHT_PATH,
 } from "@/lib/recommendation/recommendation";
 import type { OfferCard } from "@/lib/consultant/types";
 
@@ -13,7 +15,6 @@ const sampleOffer: OfferCard = {
   angle: "best_value",
   title: "EY",
   subtitle: "LHE-DXB",
-  score: 90,
   price: "USD 100.00",
   priceMinor: 10000,
   currency: "USD",
@@ -44,6 +45,8 @@ describe("recommendations.api", () => {
       expect.arrayContaining([
         "recordRecommendationFeedback",
         "getLearnedPreferences",
+        "getPredictiveRecommendations",
+        "getFareInsight",
       ]),
     );
   });
@@ -51,6 +54,8 @@ describe("recommendations.api", () => {
   it("targets the existing Module 04 feedback and learned paths", () => {
     expect(RECOMMENDATION_FEEDBACK_PATH).toBe("/recommendations/feedback");
     expect(RECOMMENDATION_LEARNED_PATH).toBe("/recommendations/learned");
+    expect(RECOMMENDATION_PREDICTIVE_PATH).toBe("/recommendations/predictive");
+    expect(RECOMMENDATION_FARE_INSIGHT_PATH).toBe("/recommendations/fare-insight");
   });
 
   it("ACCEPT body is shaped for POST /recommendations/feedback", () => {
