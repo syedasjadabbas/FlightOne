@@ -391,13 +391,6 @@ export function useAskAiChat(
     ]);
     setBusy(true);
     setSearchPhase("extract");
-    setSearchResultMessageId(null);
-    // Clear prior panel so Results never shows a stale route (e.g. Istanbul)
-    // while a new Lahore→Dubai search is in flight.
-    setSearchPanel(null);
-    setFilterPills([]);
-    setSidebarFilters(null);
-    setSidebarFacets(null);
     setFollowUpSuggestions([]);
 
     const history = [...messages, userMsg]
@@ -531,12 +524,6 @@ export function useAskAiChat(
             setActiveOriginIdx(0);
             if (event.meta.provider) setProvider(event.meta.provider);
             keepPriceSort(panel);
-          } else {
-            setSearchPanel(null);
-            setSearchResultMessageId(null);
-            setFilterPills([]);
-            setSidebarFilters(null);
-            setSidebarFacets(null);
           }
           return;
         }
@@ -615,9 +602,6 @@ export function useAskAiChat(
           setFilterPills(incoming.filterPills);
         }
         keepPriceSort?.(incoming);
-      } else {
-        setSearchPanel(null);
-        setSearchResultMessageId(null);
       }
     }
     const replyFromApi = data.reply || "";
