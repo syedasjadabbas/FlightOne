@@ -67,3 +67,13 @@ export async function escalate(req, res, next) {
     next(e);
   }
 }
+
+export async function remove(req, res, next) {
+  try {
+    const data = await conversationsService.deleteConversation(req.user.id, req.params.id);
+    return successResponse(res, "Conversation deleted", data);
+  } catch (e) {
+    next(e);
+  }
+}
+

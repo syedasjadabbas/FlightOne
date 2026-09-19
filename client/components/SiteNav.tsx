@@ -169,6 +169,13 @@ export function SiteNav({
     setOpenDropdown((prev) => (prev === id ? null : id));
   }, []);
 
+  const handleAvaClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (pathname === "/chat") {
+      e.preventDefault();
+      window.dispatchEvent(new CustomEvent("flightone:new-chat"));
+    }
+  };
+
   /* ── Pill button for dropdown trigger ── */
   const PillBtn = ({
     label,
@@ -229,18 +236,21 @@ export function SiteNav({
     href,
     label,
     highlight = false,
+    onClick,
   }: {
     href: string;
     label: string;
     highlight?: boolean;
+    onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
   }) => {
-    const isExact = pathname === href;
-    const isNested = href !== "/" && pathname.startsWith(href);
+    const isExact = pathname === href || (href.startsWith("/chat") && pathname === "/chat");
+    const isNested = href !== "/" && !href.startsWith("/chat") && pathname.startsWith(href);
     const active = isExact || isNested;
 
     return (
       <Link
         href={href}
+        onClick={onClick}
         style={{
           padding: "6px 14px",
           borderRadius: "20px",
@@ -310,7 +320,9 @@ export function SiteNav({
   }) => (
     <Link
       href={href}
-      onClick={() => setOpenDropdown(null)}
+      onClick={() => {
+        setTimeout(() => setOpenDropdown(null), 50);
+      }}
       style={{
         display: "flex",
         alignItems: "flex-start",
@@ -361,7 +373,7 @@ export function SiteNav({
         }}
       >
         <NavLink href="/" label="Home" />
-        <NavLink href="/chat" label="Ava ✦" highlight />
+        <NavLink href="/chat?new=true" label="Ava +" highlight onClick={handleAvaClick} />
         <NavLink href="/journey" label="My Journey" />
         <NavLink href="/vault" label="Vault" />
       </nav>
@@ -521,7 +533,7 @@ export function SiteNav({
             className="nav-desktop-right"
             style={{ display: "flex", alignItems: "center", gap: "4px" }}
           >
-            <NavLink href="/chat" label="Ava ✦" highlight />
+            <NavLink href="/chat?new=true" label="Ava +" highlight onClick={handleAvaClick} />
             <NavLink href="/journey" label="My Journey" />
             <NavLink href="/vault" label="Vault" />
 
@@ -899,7 +911,9 @@ export function SiteNav({
             {/* Primary Direct Links */}
             <Link
               href="/"
-              onClick={() => setMobileOpen(false)}
+              onClick={() => {
+                setTimeout(() => setMobileOpen(false), 50);
+              }}
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -915,8 +929,14 @@ export function SiteNav({
             </Link>
 
             <Link
-              href="/chat"
-              onClick={() => setMobileOpen(false)}
+              href="/chat?new=true"
+              onClick={(e) => {
+                if (pathname === "/chat") {
+                  e.preventDefault();
+                  window.dispatchEvent(new CustomEvent("flightone:new-chat"));
+                }
+                setTimeout(() => setMobileOpen(false), 50);
+              }}
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -932,7 +952,7 @@ export function SiteNav({
                 marginBottom: "4px",
               }}
             >
-              <span>✦</span> Chat with Ava
+              <span>+</span> Chat with Ava
             </Link>
 
             {/* Explore accordion */}
@@ -1053,7 +1073,9 @@ export function SiteNav({
                 <div style={{ display: "flex", flexDirection: "column", gap: "8px", padding: "8px 16px" }}>
                   <Link
                     href="/login"
-                    onClick={() => setMobileOpen(false)}
+                    onClick={() => {
+                      setTimeout(() => setMobileOpen(false), 50);
+                    }}
                     style={{
                       textAlign: "center",
                       padding: "10px",
@@ -1069,7 +1091,9 @@ export function SiteNav({
                   </Link>
                   <Link
                     href="/signup"
-                    onClick={() => setMobileOpen(false)}
+                    onClick={() => {
+                      setTimeout(() => setMobileOpen(false), 50);
+                    }}
                     style={{
                       textAlign: "center",
                       padding: "10px",
@@ -1203,7 +1227,9 @@ function MobileLink({
   return (
     <Link
       href={href}
-      onClick={onClose}
+      onClick={() => {
+        setTimeout(onClose, 50);
+      }}
       style={{
         display: "flex",
         alignItems: "center",

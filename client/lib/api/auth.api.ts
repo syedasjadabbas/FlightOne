@@ -94,14 +94,140 @@ export interface RevokeOtherSessionsResponse {
   revokedCount: number;
 }
 
+export interface TwoFactorSetupRequest {
+  tempToken?: string;
+}
+
+export interface TwoFactorSetupResponse {
+  secret: string;
+  otpauthUrl?: string;
+  otpauthUri?: string;
+  backupCodes: string[];
+  message: string;
+}
+
+export interface TwoFactorConfirmRequest {
+  code: string;
+  tempToken?: string;
+}
+
+export interface TwoFactorConfirmResponse {
+  ok?: boolean;
+  message?: string;
+  accessToken?: string;
+  sessionId?: string | null;
+  user?: AuthUser;
+}
+
+export interface TwoFactorVerifyRequest {
+  code: string;
+  tempToken?: string;
+  type?: "totp" | "backup_code";
+}
+
+export interface TwoFactorVerifyResponse extends AuthSession {
+  mfa?: boolean;
+}
+
+export interface TwoFactorDisableRequest {
+  password?: string;
+  code?: string;
+}
+
+export interface TwoFactorDisableResponse {
+  ok: boolean;
+  message: string;
+}
+
+export interface LoginSuccessResponse extends AuthSession {
+  requires2fa?: false;
+}
+
+export interface Login2faChallengeResponse {
+  requires2fa: true;
+  requires2faSetup?: false;
+  tempToken: string;
+  methods: string[];
+  message: string;
+}
+
+export interface Login2faSetupResponse {
+  requires2fa: true;
+  requires2faSetup: true;
+  tempToken: string;
+  message: string;
+}
+
+export type LoginResponse =
+  | LoginSuccessResponse
+  | Login2faChallengeResponse
+  | Login2faSetupResponse;
+
 export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    login: builder.mutation<AuthSession, LoginRequest>({
+    login: builder.mutation<LoginResponse, LoginRequest>({
       query: (body) => ({ url: "/auth/login", method: "POST", body }),
       invalidatesTags: ["Me", "AuthSessions"],
       async onQueryStarted(_arg, { queryFulfilled }) {
         const { data } = await queryFulfilled.catch(() => ({ data: undefined }));
-        if (data) useAuthStore.getState().setSession(data);
+        if (data && !("requires2fa" in data && data.requires2fa)) {
+          useAuthStore.getState().setSession(data as AuthSession);
+        }
+      },
+    }),
+
+    twoFactorSetup: builder.mutation<TwoFactorSetupResponse, TwoFactorSetupRequest | void>({
+      query: (body) => ({
+        url: "/auth/2fa/setup",
+        method: "POST",
+        body: body ?? {},
+      }),
+    }),
+
+    twoFactorConfirm: builder.mutation<TwoFactorConfirmResponse, TwoFactorConfirmRequest>({
+      query: (body) => ({
+        url: "/auth/2fa/confirm",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Me", "AuthSessions"],
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        const { data } = await queryFulfilled.catch(() => ({ data: undefined }));
+        if (data?.accessToken && data.user) {
+          useAuthStore.getState().setSession(data as AuthSession);
+        } else if (data?.ok) {
+          useAuthStore.getState().updateUser({ twoFactorEnabled: true });
+        }
+      },
+    }),
+
+    twoFactorVerify: builder.mutation<TwoFactorVerifyResponse, TwoFactorVerifyRequest>({
+      query: (body) => ({
+        url: "/auth/2fa/verify",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Me", "AuthSessions"],
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        const { data } = await queryFulfilled.catch(() => ({ data: undefined }));
+        if (data?.accessToken && data.user) {
+          useAuthStore.getState().setSession(data as AuthSession);
+        }
+      },
+    }),
+
+    twoFactorDisable: builder.mutation<TwoFactorDisableResponse, TwoFactorDisableRequest>({
+      query: (body) => ({
+        url: "/auth/2fa/disable",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Me", "AuthSessions"],
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        const { data } = await queryFulfilled.catch(() => ({ data: undefined }));
+        if (data?.ok) {
+          useAuthStore.getState().updateUser({ twoFactorEnabled: false });
+        }
       },
     }),
 
@@ -231,4 +357,8 @@ export const {
   useListSessionsQuery,
   useRevokeSessionMutation,
   useRevokeOtherSessionsMutation,
+  useTwoFactorSetupMutation,
+  useTwoFactorConfirmMutation,
+  useTwoFactorVerifyMutation,
+  useTwoFactorDisableMutation,
 } = authApi;

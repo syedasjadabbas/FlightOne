@@ -78,8 +78,16 @@ export function useSignupForm() {
         setStep("verify");
         setInfoMessage(`A 6-digit verification code was sent to ${trimmedEmail}.`);
       }
-    } catch {
-      // Handled via errorMessage logic below
+    } catch (err: any) {
+      const msg =
+        err?.data?.message ||
+        err?.data?.error ||
+        (err?.status === 409
+          ? "An account with this email already exists. Try logging in."
+          : err?.status === 400
+            ? "Please check your details and try again."
+            : "Something went wrong — please try again.");
+      setLocalError(msg);
     }
   }
 
@@ -111,9 +119,22 @@ export function useSignupForm() {
         }
       }
 
-      router.replace(searchParams.get("redirect") || "/chat");
-    } catch {
-      // Handled via errorMessage logic below
+      const target = searchParams.get("redirect") || "/chat";
+      if (typeof window !== "undefined") {
+        window.location.assign(target);
+      } else {
+        router.replace(target);
+      }
+    } catch (err: any) {
+      const msg =
+        err?.data?.message ||
+        err?.data?.error ||
+        (err?.status === 429
+          ? "Too many failed attempts. Please request a new code."
+          : err?.status === 400
+            ? "Invalid or expired verification code."
+            : "Something went wrong — please try again.");
+      setLocalError(msg);
     }
   }
 
@@ -139,32 +160,7 @@ export function useSignupForm() {
     }
   }
 
-  const registerErrorKind = !registerError
-    ? null
-    : "status" in registerError && registerError.status === 409
-      ? "duplicate"
-      : "status" in registerError && registerError.status === 400
-        ? "validation"
-        : "unknown";
-
-  const verifyErrorMessage = !verifyError
-    ? null
-    : "status" in verifyError && verifyError.status === 429
-      ? (verifyError.data as any)?.message || "Too many failed attempts. Please request a new code."
-      : "status" in verifyError && verifyError.status === 400
-        ? "Invalid or expired verification code."
-        : "Something went wrong — please try again.";
-
-  const errorMessage =
-    localError ||
-    verifyErrorMessage ||
-    (registerErrorKind === "duplicate"
-      ? "An account with this email already exists. Try logging in."
-      : registerErrorKind === "validation"
-        ? "Please check your details and try again."
-        : registerErrorKind === "unknown"
-          ? "Something went wrong — please try again."
-          : null);
+  const errorMessage = localError;
 
   return {
     step,

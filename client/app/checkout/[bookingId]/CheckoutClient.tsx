@@ -52,6 +52,102 @@ import {
   type PaymentMethodOption,
 } from "./_components/CheckoutQuotedActions";
 
+function CheckoutProgressBar({ status }: { status: string }) {
+  const isQuoted = status === "QUOTED";
+  const isReserved = status === "RESERVED";
+  const isTicketed = status === "TICKETED" || status === "ACTIVE" || status === "COMPLETED";
+
+  return (
+    <div className="grid grid-cols-3 gap-2 sm:gap-4 py-3 sm:py-4 border-y border-slate-200/80">
+      {/* Step 1: Traveller */}
+      <div className="flex items-center gap-2.5 sm:gap-3">
+        <div
+          className={`flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-full text-[12px] sm:text-[13px] font-bold transition-colors ${
+            isReserved || isTicketed
+              ? "bg-emerald-600 text-white"
+              : "bg-blue-600 text-white ring-4 ring-blue-50"
+          }`}
+        >
+          {isReserved || isTicketed ? (
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          ) : (
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+          )}
+        </div>
+        <div className="min-w-0">
+          <p className={`text-[12px] sm:text-[13px] font-bold truncate ${isQuoted ? "text-slate-900" : "text-slate-700"}`}>
+            1. Traveller
+          </p>
+          <p className="text-[11px] text-slate-500 truncate hidden sm:block">Passenger details</p>
+        </div>
+      </div>
+
+      {/* Step 2: Payment */}
+      <div className="flex items-center gap-2.5 sm:gap-3">
+        <div
+          className={`flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-full text-[12px] sm:text-[13px] font-bold transition-colors ${
+            isTicketed
+              ? "bg-emerald-600 text-white"
+              : isReserved
+                ? "bg-blue-600 text-white ring-4 ring-blue-50"
+                : "bg-slate-100 text-slate-400 border border-slate-200"
+          }`}
+        >
+          {isTicketed ? (
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          ) : (
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <rect x="2" y="5" width="20" height="14" rx="2" />
+              <line x1="2" y1="10" x2="22" y2="10" />
+            </svg>
+          )}
+        </div>
+        <div className="min-w-0">
+          <p className={`text-[12px] sm:text-[13px] font-bold truncate ${isReserved ? "text-slate-900" : "text-slate-500"}`}>
+            2. Payment
+          </p>
+          <p className="text-[11px] text-slate-500 truncate hidden sm:block">Secure payment</p>
+        </div>
+      </div>
+
+      {/* Step 3: Ticket */}
+      <div className="flex items-center gap-2.5 sm:gap-3">
+        <div
+          className={`flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-full text-[12px] sm:text-[13px] font-bold transition-colors ${
+            isTicketed
+              ? "bg-emerald-600 text-white ring-4 ring-emerald-50"
+              : "bg-slate-100 text-slate-400 border border-slate-200"
+          }`}
+        >
+          {isTicketed ? (
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          ) : (
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M15 5l-3 3-3-3" />
+              <circle cx="12" cy="12" r="9" />
+            </svg>
+          )}
+        </div>
+        <div className="min-w-0">
+          <p className={`text-[12px] sm:text-[13px] font-bold truncate ${isTicketed ? "text-slate-900" : "text-slate-500"}`}>
+            3. Ticket
+          </p>
+          <p className="text-[11px] text-slate-500 truncate hidden sm:block">Confirmation</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function CheckoutClient({ bookingId }: { bookingId: string }) {
   const hasHydrated = useAuthStore((s) => s.hasHydrated);
   const accessToken = useAuthStore((s) => s.accessToken);
@@ -150,7 +246,7 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
 
   if (!hasHydrated) {
     return (
-      <div className="fo-desk__panel">
+      <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center shadow-xs">
         <Spinner label="Loading session…" />
       </div>
     );
@@ -158,13 +254,13 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
 
   if (!accessToken) {
     return (
-      <div className="fo-desk__panel fo-desk__stack">
-        <p className="fo-desk__empty" style={{ padding: 0 }}>
+      <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center space-y-4 shadow-xs">
+        <p className="text-[15px] text-slate-700">
           Sign in to continue checkout. Guests cannot book.
         </p>
         <Link
           href={`/login?redirect=${encodeURIComponent(`/checkout/${bookingId}`)}`}
-          className="text-[14px] text-[var(--cyan)] underline"
+          className="inline-block rounded-xl bg-blue-600 px-6 py-2.5 text-[14px] font-semibold text-white hover:bg-blue-700 transition-colors"
         >
           Log in
         </Link>
@@ -174,19 +270,19 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
 
   if (isLoading) {
     return (
-      <div className="fo-desk__panel">
-        <Spinner label="Loading booking…" />
+      <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center shadow-xs">
+        <Spinner label="Loading booking details…" />
       </div>
     );
   }
 
   if (isError || !booking) {
     return (
-      <div className="fo-desk__panel fo-desk__stack">
-        <p className="text-[15px] text-[var(--danger)]" role="alert">
+      <div className="rounded-2xl border border-red-200 bg-white p-8 text-center space-y-4 shadow-xs">
+        <p className="text-[15px] font-medium text-red-600" role="alert">
           {apiErrorMessage(error) || "Booking not found"}
         </p>
-        <Button variant="ghost" onClick={() => void refetch()}>
+        <Button variant="secondary" onClick={() => void refetch()}>
           Retry
         </Button>
       </div>
@@ -375,136 +471,203 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
   const checkoutBlockedByPriceChange = Boolean(priceChange);
 
   return (
-    <div className="fo-checkout">
-      <CheckoutBookingSummary booking={booking} tickets={tickets} vouchers={vouchers} />
+    <div className="w-full space-y-6 pb-12">
+      {/* ── 1. PAGE HEADER ───────────────────────────────── */}
+      <div className="flex flex-wrap items-start justify-between gap-4 pt-1">
+        <div className="space-y-1.5">
+          <Link
+            href="/chat"
+            className="inline-flex items-center gap-1.5 text-[13px] font-medium text-slate-500 hover:text-slate-900 transition-colors"
+          >
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+            Back to search
+          </Link>
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
+            Complete Your Reservation
+          </h1>
+          <p className="text-[13px] sm:text-[14px] text-slate-500 max-w-2xl">
+            Almost there! Review your details and complete the payment to confirm your booking.
+          </p>
+        </div>
 
-      {approvalGate ? (
-        <CheckoutCorporateSection
-          bookingId={bookingId}
-          bookingStatus={booking.status}
-          bookingMetadata={booking.metadata}
-          approvalGate={approvalGate}
-          corpCompanyId={corpCompanyId}
-          corpMode={corpMode}
-          payMethod={payMethod === "corporate_credit" ? "corporate_credit" : "card"}
-          setPayMethod={(m) => setPayMethod(m)}
-          busy={busy}
-          onRequestApproval={async () => {
-            setLocalError(null);
-            try {
-              await createApproval({
-                bookingId,
-                companyId: (corpCompanyId || approvalGate.companyId)!,
-              }).unwrap();
-              await refetchGate();
-            } catch (err) {
-              setLocalError(apiErrorMessage(err));
-            }
-          }}
-        />
-      ) : null}
+        {/* Security indicator badge */}
+        <div className="flex items-center gap-3 rounded-xl border border-slate-200/80 bg-white px-3.5 py-2.5 shadow-2xs">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+          </div>
+          <div>
+            <p className="text-[12px] font-bold text-slate-900 leading-tight">Your information is secure</p>
+            <p className="text-[11px] text-slate-500">Encrypted and protected</p>
+          </div>
+        </div>
+      </div>
 
-      {booking.status === "QUOTED" ? (
-        <CheckoutRewardsSection
-          balance={rewardsSummary?.balance ?? 0}
-          rewardPoints={rewardPoints}
-          setRewardPoints={setRewardPoints}
-          busy={busy}
-          onApply={async () => {
-            setLocalError(null);
-            try {
-              await applyCredit({
-                bookingId,
-                points: Number(rewardPoints),
-                idempotencyKey: `checkout-${bookingId}-${rewardPoints}`,
-              }).unwrap();
-              await refetch();
-            } catch (err) {
-              setLocalError(apiErrorMessage(err));
-            }
-          }}
-        />
-      ) : null}
+      {/* ── 2. BOOKING PROGRESS BAR ──────────────────────── */}
+      <CheckoutProgressBar status={booking.status} />
 
-      <CheckoutVisaWarning visaWarning={visaWarning} />
+      {/* ── 3. MAIN RESPONSIVE TWO-COLUMN LAYOUT ──────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* ── LEFT COLUMN (~65%) ─────────────────────────── */}
+        <div className="lg:col-span-7 xl:col-span-8 flex flex-col gap-6">
+          {approvalGate ? (
+            <CheckoutCorporateSection
+              bookingId={bookingId}
+              bookingStatus={booking.status}
+              bookingMetadata={booking.metadata}
+              approvalGate={approvalGate}
+              corpCompanyId={corpCompanyId}
+              corpMode={corpMode}
+              payMethod={payMethod === "corporate_credit" ? "corporate_credit" : "card"}
+              setPayMethod={(m) => setPayMethod(m)}
+              busy={busy}
+              onRequestApproval={async () => {
+                setLocalError(null);
+                try {
+                  await createApproval({
+                    bookingId,
+                    companyId: (corpCompanyId || approvalGate.companyId)!,
+                  }).unwrap();
+                  await refetchGate();
+                } catch (err) {
+                  setLocalError(apiErrorMessage(err));
+                }
+              }}
+            />
+          ) : null}
 
-      {priceChange ? (
-        <CheckoutPriceChangeAlert
-          priceChange={priceChange}
-          busy={busy}
-          accepting={acceptState.isLoading}
-          onAccept={() => void onAcceptNewPrice()}
-        />
-      ) : null}
+          {booking.status === "QUOTED" ? (
+            <CheckoutRewardsSection
+              balance={rewardsSummary?.balance ?? 0}
+              rewardPoints={rewardPoints}
+              setRewardPoints={setRewardPoints}
+              busy={busy}
+              onApply={async () => {
+                setLocalError(null);
+                try {
+                  await applyCredit({
+                    bookingId,
+                    points: Number(rewardPoints),
+                    idempotencyKey: `checkout-${bookingId}-${rewardPoints}`,
+                  }).unwrap();
+                  await refetch();
+                } catch (err) {
+                  setLocalError(apiErrorMessage(err));
+                }
+              }}
+            />
+          ) : null}
 
-      {!payCap?.configured ? (
-        <p className="fo-checkout__alert text-[13px] text-[var(--danger)]">
-          Payment gateway unconfigured — live card capture is unavailable until credentials are set.
-        </p>
-      ) : null}
+          <CheckoutVisaWarning visaWarning={visaWarning} />
 
-      {booking.status === "QUOTED" ? (
-        <CheckoutQuotedActions
-          formData={formData}
-          setFormData={setFormData}
-          savedCompanions={companions || []}
-          onSelectPrimary={handleSelectPrimary}
-          onSelectCompanion={handleSelectCompanion}
-          paymentToken={paymentToken}
-          setPaymentToken={setPaymentToken}
-          accountNumber={accountNumber}
-          setAccountNumber={setAccountNumber}
-          payMethod={payMethod}
-          setPayMethod={setPayMethod}
-          busy={busy}
-          checkoutBlockedByPriceChange={checkoutBlockedByPriceChange}
-          corporateBlocked={corporateBlocked}
-          canCapture={Boolean(payCap?.canCapture)}
-          paying={payState.isLoading}
-          reserving={reserveState.isLoading}
-          onPay={() => void onPay()}
-          onReserve={() => void onReserve()}
-        />
-      ) : null}
+          {priceChange ? (
+            <CheckoutPriceChangeAlert
+              priceChange={priceChange}
+              busy={busy}
+              accepting={acceptState.isLoading}
+              onAccept={() => void onAcceptNewPrice()}
+            />
+          ) : null}
 
-      {booking.status === "RESERVED" ? (
-        <CheckoutReservedActions
-          busy={busy}
-          canTicket={Boolean(supplierCap?.canTicket)}
-          hasPayment={hasSuccessfulPayment}
-          pendingPaymentDetails={pendingPayment?.metadata || null}
-          checkoutBlockedByPriceChange={checkoutBlockedByPriceChange}
-          corporateBlocked={corporateBlocked}
-          payMethod={payMethod}
-          setPayMethod={setPayMethod}
-          paymentToken={paymentToken}
-          setPaymentToken={setPaymentToken}
-          accountNumber={accountNumber}
-          setAccountNumber={setAccountNumber}
-          canCapture={Boolean(payCap?.canCapture)}
-          paying={payState.isLoading}
-          ticketing={ticketState.isLoading}
-          onPay={() => void onPay()}
-          onTicket={() => void onTicket()}
-        />
-      ) : null}
+          {!payCap?.configured ? (
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-[13px] text-amber-800">
+              Payment gateway unconfigured — live card capture is unavailable until credentials are set.
+            </div>
+          ) : null}
 
-      {booking.status === "TICKETED" ? (
-        <p className="fo-checkout__notice">
-          Ticketed with supplier confirmation
-          {booking.externalRef ? ` (${booking.externalRef})` : ""}.
-        </p>
-      ) : null}
+          {actionError ? (
+            <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-[13px] text-red-700" role="alert">
+              {actionError}
+            </div>
+          ) : null}
 
-      {actionError ? (
-        <p className="text-[13px] text-[var(--danger)]" role="alert">
-          {actionError}
-        </p>
-      ) : null}
+          {booking.status === "QUOTED" ? (
+            <CheckoutQuotedActions
+              formData={formData}
+              setFormData={setFormData}
+              savedCompanions={companions || []}
+              onSelectPrimary={handleSelectPrimary}
+              onSelectCompanion={handleSelectCompanion}
+              paymentToken={paymentToken}
+              setPaymentToken={setPaymentToken}
+              accountNumber={accountNumber}
+              setAccountNumber={setAccountNumber}
+              payMethod={payMethod}
+              setPayMethod={setPayMethod}
+              busy={busy}
+              checkoutBlockedByPriceChange={checkoutBlockedByPriceChange}
+              corporateBlocked={corporateBlocked}
+              canCapture={Boolean(payCap?.canCapture)}
+              paying={payState.isLoading}
+              reserving={reserveState.isLoading}
+              onPay={() => void onPay()}
+              onReserve={() => void onReserve()}
+              amountMinor={booking.amountMinor}
+              currency={booking.currency}
+            />
+          ) : null}
 
-      <Link href="/chat" className="inline-block text-[13px] text-ink-faint underline">
-        Back to chat
-      </Link>
+          {booking.status === "RESERVED" ? (
+            <CheckoutReservedActions
+              busy={busy}
+              canTicket={Boolean(supplierCap?.canTicket)}
+              hasPayment={hasSuccessfulPayment}
+              pendingPaymentDetails={pendingPayment?.metadata || null}
+              checkoutBlockedByPriceChange={checkoutBlockedByPriceChange}
+              corporateBlocked={corporateBlocked}
+              payMethod={payMethod}
+              setPayMethod={setPayMethod}
+              paymentToken={paymentToken}
+              setPaymentToken={setPaymentToken}
+              accountNumber={accountNumber}
+              setAccountNumber={setAccountNumber}
+              canCapture={Boolean(payCap?.canCapture)}
+              paying={payState.isLoading}
+              ticketing={ticketState.isLoading}
+              onPay={() => void onPay()}
+              onTicket={() => void onTicket()}
+              amountMinor={booking.amountMinor}
+              currency={booking.currency}
+            />
+          ) : null}
+
+          {booking.status === "TICKETED" ? (
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-6 text-center space-y-2">
+              <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 mb-2">
+                <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </div>
+              <h3 className="text-[17px] font-bold text-emerald-950">Ticket Successfully Issued!</h3>
+              <p className="text-[13px] text-emerald-800 max-w-md mx-auto">
+                Confirmed with supplier {booking.externalRef ? `(PNR: ${booking.externalRef})` : ""}.
+                Your e-tickets and receipt have been delivered to your email and stored in your Traveller Vault.
+              </p>
+              <div className="pt-3">
+                <Link
+                  href="/journey"
+                  className="inline-block rounded-xl bg-emerald-600 px-6 py-2.5 text-[14px] font-semibold text-white hover:bg-emerald-700 transition-colors shadow-xs"
+                >
+                  View in My Journey →
+                </Link>
+              </div>
+            </div>
+          ) : null}
+        </div>
+
+        {/* ── RIGHT COLUMN (~35%, Sticky) ────────────────── */}
+        <div className="lg:col-span-5 xl:col-span-4 flex flex-col gap-6 lg:sticky lg:top-6">
+          <CheckoutBookingSummary
+            booking={booking}
+            tickets={tickets}
+            vouchers={vouchers}
+          />
+        </div>
+      </div>
     </div>
   );
 }

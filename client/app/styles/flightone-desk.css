@@ -6,7 +6,7 @@
 :root {
   --fo-desk-max: 56rem;
   --fo-desk-max-wide: 64rem;
-  --fo-desk-max-checkout: 32rem;
+  --fo-desk-max-checkout: 76rem;
   --fo-desk-gap: 1.25rem;
   --fo-desk-radius: 0.5rem;
   --fo-desk-line: color-mix(in oklab, var(--navy) 12%, transparent);

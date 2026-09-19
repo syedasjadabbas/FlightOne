@@ -262,3 +262,12 @@ export async function escalateConversation(userId, conversationId, note) {
 
   return { conversation, escalation };
 }
+
+export async function deleteConversation(userId, conversationId) {
+  await findOwnedConversationOrThrow(userId, conversationId, { id: true });
+  await prisma.conversation.delete({
+    where: { id: conversationId },
+  });
+  return { id: conversationId, deleted: true };
+}
+

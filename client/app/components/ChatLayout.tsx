@@ -163,6 +163,7 @@ export function ChatLayout({
   loadingRoute = null,
   onToggleSidebar,
   isSidebarOpen,
+  onDeleteChat,
 }: {
   messages: UiMessage[];
   busy: boolean;
@@ -181,14 +182,22 @@ export function ChatLayout({
   loadingRoute?: LoadingRouteCodes | null;
   onToggleSidebar?: () => void;
   isSidebarOpen?: boolean;
+  onDeleteChat?: () => void;
 }) {
   const [input, setInput] = useState("");
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const composerDockRef = useRef<HTMLElement>(null);
 
   const originCity = location?.place || location?.city || "your city";
   const isActiveChat = messages.some((m) => m.role === "user");
   const showHero = !isActiveChat && messages.length === 1;
+
+  useEffect(() => {
+    if (!isActiveChat) {
+      setShowConfirmDelete(false);
+    }
+  }, [isActiveChat]);
 
   const thinkingPhase: SearchPhase =
     !busy || searchPhase === "idle" || searchPhase === "done" ? "extract" : searchPhase;
@@ -328,33 +337,86 @@ export function ChatLayout({
         <header className="chat-page__header shrink-0 min-w-0 px-4 sm:px-6 lg:px-8 xl:px-10 pt-3 pb-1.5 sm:pt-4 sm:pb-2">
           <div className="w-full max-w-6xl mx-auto flex items-center justify-between">
             {isActiveChat ? (
-              <div className="flex items-center gap-3">
-                {onToggleSidebar && (
-                  <button
-                    type="button"
-                    onClick={onToggleSidebar}
-                    className="inline-flex items-center justify-center rounded-lg p-1.5 text-slate-500 hover:bg-slate-200/80 hover:text-slate-900 transition-colors focus:outline-none"
-                    aria-label={isSidebarOpen ? "Close past chats sidebar" : "Open past chats sidebar"}
-                    title={isSidebarOpen ? "Close past chats" : "Open past chats"}
-                  >
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <rect x="3" y="3" width="18" height="18" rx="3" strokeWidth="2" />
-                      <path d="M9 3v18" strokeWidth="2" />
-                    </svg>
-                  </button>
-                )}
-                <div className="flex items-center gap-2">
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-900 px-2.5 py-0.5 text-xs font-semibold text-white">
-                    <span className="text-cyan-400">✨</span> Ava
-                  </span>
-                  <span className="text-xs text-slate-500 font-medium">Your Travel Consultant</span>
+              <>
+                <div className="flex items-center gap-3">
+                  {onToggleSidebar && (
+                    <button
+                      type="button"
+                      onClick={onToggleSidebar}
+                      className="inline-flex items-center justify-center rounded-lg p-1.5 text-slate-500 hover:bg-slate-200/80 hover:text-slate-900 transition-colors focus:outline-none"
+                      aria-label={isSidebarOpen ? "Close past chats sidebar" : "Open past chats sidebar"}
+                      title={isSidebarOpen ? "Close past chats" : "Open past chats"}
+                    >
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <rect x="3" y="3" width="18" height="18" rx="3" strokeWidth="2" />
+                        <path d="M9 3v18" strokeWidth="2" />
+                      </svg>
+                    </button>
+                  )}
+                  <div className="flex items-center gap-2">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-900 px-2.5 py-0.5 text-xs font-semibold text-white">
+                      <span className="text-cyan-400">✨</span> Ava
+                    </span>
+                    <span className="text-xs text-slate-500 font-medium hidden sm:inline">Your Travel Consultant</span>
+                  </div>
+                  {busy && (
+                    <span className="text-xs text-cyan-700 font-semibold animate-pulse">
+                      · {thinkingLabel}
+                    </span>
+                  )}
                 </div>
-                {busy && (
-                  <span className="text-xs text-cyan-700 font-semibold animate-pulse">
-                    · {thinkingLabel}
-                  </span>
-                )}
-              </div>
+
+                <div className="flex items-center gap-2 ml-auto">
+                  {banner ? <div className="flex items-center">{banner}</div> : null}
+                  {onDeleteChat && (
+                    showConfirmDelete ? (
+                      <div className="flex items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50/95 px-2.5 py-1 text-xs shadow-xs animate-in fade-in duration-150">
+                        <span className="text-rose-700 font-medium text-[11px] sm:text-xs">Delete chat?</span>
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmDelete(false)}
+                          className="rounded px-1.5 py-0.5 text-[11px] sm:text-xs text-slate-600 hover:bg-rose-100 hover:text-slate-900 transition-colors"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowConfirmDelete(false);
+                            onDeleteChat();
+                          }}
+                          className="rounded bg-rose-600 px-2 py-0.5 text-[11px] sm:text-xs font-medium text-white hover:bg-rose-700 transition-colors shadow-2xs"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmDelete(true)}
+                        className="group inline-flex items-center gap-1.5 rounded-lg border border-slate-200/90 bg-white/90 px-2.5 py-1 text-xs font-medium text-slate-600 shadow-2xs hover:border-rose-300 hover:bg-rose-50/80 hover:text-rose-700 transition-all"
+                        title="Delete current conversation"
+                        aria-label="Delete chat"
+                      >
+                        <svg
+                          className="h-3.5 w-3.5 text-slate-400 group-hover:text-rose-600 transition-colors"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="1.8"
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                          />
+                        </svg>
+                        <span className="hidden sm:inline">Delete chat</span>
+                      </button>
+                    )
+                  )}
+                </div>
+              </>
             ) : (
               <div className="flex items-center justify-end gap-3 w-full">
                 {onToggleSidebar && (

@@ -100,6 +100,16 @@ export function useAskAiChat(
     if (!hasHydratedAuth || sessionRestoredRef.current) return;
     sessionRestoredRef.current = true;
 
+    const isExplicitNew =
+      typeof window !== "undefined" &&
+      (new URLSearchParams(window.location.search).get("new") === "true" ||
+        new URLSearchParams(window.location.search).get("new") === "1");
+
+    if (isExplicitNew) {
+      clearChatHandoff();
+      return;
+    }
+
     const handoff = loadChatHandoff();
 
     // Unauthenticated full reload: wipe temporary guest handoff and keep landing state.

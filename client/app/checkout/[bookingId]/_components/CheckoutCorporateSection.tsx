@@ -57,10 +57,13 @@ export function CheckoutCorporateSection({
   const canSelect = bookingStatus === "QUOTED" && Boolean(companyId);
 
   return (
-    <div className="fo-desk__panel fo-desk__stack" style={{ gap: "0.5rem" }}>
-      <p className="fo-desk__section-label">Corporate approval</p>
-      <p className="text-[12px] text-ink-soft">
-        Status: {approvalGate.approvalStatus || "REQUIRED"} ·{" "}
+    <div className="rounded-2xl border border-indigo-200/80 bg-white p-5 shadow-xs space-y-3">
+      <div className="flex items-center gap-2">
+        <span className="text-[16px]">🏢</span>
+        <h3 className="text-[14px] font-bold text-slate-900">Corporate Approval & Spend</h3>
+      </div>
+      <p className="text-[12px] text-slate-600">
+        Status: <strong className="text-slate-900">{approvalGate.approvalStatus || "REQUIRED"}</strong> ·{" "}
         {approvalGate.canProceed ? "can proceed" : "blocked until approved"}
       </p>
       {approvalGate.policyEvaluation && !approvalGate.policyEvaluation.withinPolicy ? (

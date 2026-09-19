@@ -14,6 +14,7 @@ export interface ChatSidebarProps {
   onClose: () => void;
   onSelectConversation: (id: string) => void;
   onNewChat: () => void;
+  onDeleteConversation?: (id: string) => Promise<void> | void;
   resumingId?: string | null;
 }
 
@@ -124,12 +125,15 @@ export function ChatSidebar({
   onClose,
   onSelectConversation,
   onNewChat,
+  onDeleteConversation,
   resumingId = null,
 }: ChatSidebarProps) {
   const user = useAuthStore((s) => s.user);
   const accessToken = useAuthStore((s) => s.accessToken);
   const [searchQuery, setSearchQuery] = useState("");
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [escalatedId, setEscalatedId] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -140,6 +144,7 @@ export function ChatSidebar({
       const target = e.target as HTMLElement;
       if (!target.closest(".fo-chat-sidebar__menu-container")) {
         setMenuOpenId(null);
+        setConfirmDeleteId(null);
       }
     }
     if (menuOpenId) {
@@ -148,11 +153,13 @@ export function ChatSidebar({
     }
   }, [menuOpenId]);
 
-  // Handle Escape key to close mobile drawer
+  // Handle Escape key to close mobile drawer or close menu/confirm
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") {
-        if (menuOpenId) {
+        if (confirmDeleteId) {
+          setConfirmDeleteId(null);
+        } else if (menuOpenId) {
           setMenuOpenId(null);
         } else if (isOpen) {
           onClose();
@@ -161,7 +168,7 @@ export function ChatSidebar({
     }
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, menuOpenId, onClose]);
+  }, [isOpen, menuOpenId, confirmDeleteId, onClose]);
 
   // Filter conversations based on search
   const filteredConversations = useMemo(() => {
@@ -444,7 +451,13 @@ export function ChatSidebar({
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setMenuOpenId(isMenuOpen ? null : conv.id);
+                            if (isMenuOpen) {
+                              setMenuOpenId(null);
+                              setConfirmDeleteId(null);
+                            } else {
+                              setMenuOpenId(conv.id);
+                              setConfirmDeleteId(null);
+                            }
                           }}
                           aria-label={`Options for ${title}`}
                           aria-expanded={isMenuOpen}
@@ -462,7 +475,7 @@ export function ChatSidebar({
                         {/* Popover Action Menu */}
                         {isMenuOpen && (
                           <div
-                            className="pointer-events-auto absolute right-0 top-full mt-1 w-44 rounded-xl border border-slate-700/80 bg-[#091e33] p-1.5 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100"
+                            className="pointer-events-auto absolute right-0 top-full mt-1 w-48 rounded-xl border border-slate-700/80 bg-[#091e33] p-1.5 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100"
                             role="menu"
                             aria-orientation="vertical"
                           >
@@ -510,6 +523,69 @@ export function ChatSidebar({
                               </svg>
                               <span>{escalatedId === conv.id ? "Support notified" : "Consultant help"}</span>
                             </button>
+
+                            {onDeleteConversation && (
+                              <div className="mt-1 border-t border-slate-700/60 pt-1">
+                                {confirmDeleteId === conv.id ? (
+                                  <div className="rounded-lg bg-rose-950/60 p-2 border border-rose-800/70 text-xs">
+                                    <p className="text-[11px] font-semibold text-rose-200 mb-1.5 leading-tight">
+                                      Delete this chat?
+                                    </p>
+                                    <div className="flex items-center justify-end gap-1.5">
+                                      <button
+                                        type="button"
+                                        disabled={deletingId === conv.id}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setConfirmDeleteId(null);
+                                        }}
+                                        className="rounded px-2 py-0.5 text-[11px] text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
+                                      >
+                                        Cancel
+                                      </button>
+                                      <button
+                                        type="button"
+                                        disabled={deletingId === conv.id}
+                                        onClick={async (e) => {
+                                          e.stopPropagation();
+                                          setDeletingId(conv.id);
+                                          try {
+                                            await onDeleteConversation(conv.id);
+                                          } finally {
+                                            setDeletingId(null);
+                                            setConfirmDeleteId(null);
+                                            setMenuOpenId(null);
+                                          }
+                                        }}
+                                        className="rounded bg-rose-600 px-2 py-0.5 text-[11px] font-medium text-white hover:bg-rose-500 disabled:opacity-50 transition-colors"
+                                      >
+                                        {deletingId === conv.id ? "Deleting..." : "Delete"}
+                                      </button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    role="menuitem"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setConfirmDeleteId(conv.id);
+                                    }}
+                                    className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs text-rose-400 hover:bg-rose-950/40 hover:text-rose-300 transition-colors"
+                                  >
+                                    <svg className="h-3.5 w-3.5 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth="2"
+                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                      />
+                                    </svg>
+                                    <span>Delete chat</span>
+                                  </button>
+                                )}
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>

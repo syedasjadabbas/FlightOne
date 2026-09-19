@@ -14,29 +14,39 @@ type VisaWarning = {
 export function CheckoutVisaWarning({ visaWarning }: { visaWarning: VisaWarning | null }) {
   if (!visaWarning?.show) return null;
 
+  const isCaution = visaWarning.severity === "caution";
+
   return (
     <div
-      className={
-        visaWarning.severity === "caution"
-          ? "fo-checkout__alert space-y-2"
-          : "fo-checkout__notice space-y-2"
-      }
+      className={`rounded-2xl border p-5 shadow-xs space-y-2.5 ${
+        isCaution
+          ? "border-amber-200 bg-amber-50/70 text-amber-950"
+          : "border-blue-200 bg-blue-50/70 text-blue-950"
+      }`}
       role="status"
     >
-      <p className="text-[14px] font-medium text-[var(--navy)]">{visaWarning.title}</p>
-      <p className="text-[13px] text-ink-soft">{visaWarning.body}</p>
-      <p className="text-[12px] text-ink-faint">
+      <div className="flex items-center gap-2">
+        <span className="text-[16px]">{isCaution ? "⚠️" : "ℹ️"}</span>
+        <p className="text-[14px] font-bold">{visaWarning.title}</p>
+      </div>
+
+      <p className="text-[13px] leading-relaxed text-slate-700">{visaWarning.body}</p>
+
+      <p className="text-[11px] text-slate-500">
         {visaWarning.isFact
           ? "Attributed catalog fact — still not a booking block."
           : "Guidance only — not confirmed visa eligibility."}
         {visaWarning.escalateRecommended ? " Consider consultant review via Visa or Chat." : ""}
       </p>
-      <Link
-        href="/visa"
-        className="inline-block text-[13px] text-[var(--sky)] underline-offset-2 hover:underline"
-      >
-        Open visa check
-      </Link>
+
+      <div>
+        <Link
+          href="/visa"
+          className="inline-flex items-center gap-1 text-[12px] font-semibold text-blue-600 underline hover:text-blue-700"
+        >
+          Open visa intelligence check →
+        </Link>
+      </div>
     </div>
   );
 }

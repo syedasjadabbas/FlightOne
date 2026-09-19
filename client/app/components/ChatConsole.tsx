@@ -14,7 +14,10 @@ import { ChatLayout } from "./ChatLayout";
 import { useAuthStore } from "@/store/auth.store";
 import { useCorporateProfileStore } from "@/store/corporateProfile.store";
 import { offerHasQuoteSnapshot, quotePayloadFromOffer } from "@/lib/bookings/quoteFromOffer";
-import { useListConversationsQuery } from "@/lib/api/conversations.api";
+import {
+  useListConversationsQuery,
+  useDeleteConversationMutation,
+} from "@/lib/api/conversations.api";
 import { ChatSidebar } from "./chat/ChatSidebar";
 
 /** Ava — full chat workspace + full results workspace (state preserved). */
@@ -24,10 +27,50 @@ export function ChatConsole() {
   const [view, setView] = useState<AskAiView>("chat");
   const hasHydrated = useAuthStore((s) => s.hasHydrated);
   const accessToken = useAuthStore((s) => s.accessToken);
+  const [deleteConversation] = useDeleteConversationMutation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [resumingId, setResumingId] = useState<string | null>(null);
   const searchParams = useSearchParams();
   const initialQueryHandledRef = useRef(false);
+
+  const handleDeleteConversation = async (id: string) => {
+    try {
+      await deleteConversation(id).unwrap();
+      if (chat.conversationId === id) {
+        chat.startNewChat();
+        setView("chat");
+      }
+    } catch (err) {
+      console.error("Failed to delete conversation:", err);
+    }
+  };
+
+  const handleDeleteCurrentChat = async () => {
+    if (chat.conversationId) {
+      await handleDeleteConversation(chat.conversationId);
+    } else {
+      chat.startNewChat();
+      setView("chat");
+    }
+  };
+
+  // Handle new chat intent from navbar Ava click or query param
+  useEffect(() => {
+    const isNew = searchParams.get("new");
+    if (isNew === "true" || isNew === "1") {
+      chat.startNewChat();
+      setView("chat");
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    const handleNewChat = () => {
+      chat.startNewChat();
+      setView("chat");
+    };
+    window.addEventListener("flightone:new-chat", handleNewChat);
+    return () => window.removeEventListener("flightone:new-chat", handleNewChat);
+  }, [chat.startNewChat]);
 
   // Auto-run query passed from public travel homepage search widget or trending card
   useEffect(() => {
@@ -154,30 +197,33 @@ export function ChatConsole() {
 
   return (
     <div className="fo-chat-console relative flex min-h-0 min-w-0 w-full flex-row overflow-hidden">
-      <ChatSidebar
-        conversations={conversations?.items ?? []}
-        activeConversationId={chat.conversationId}
-        isLoading={conversationsLoading}
-        isOpen={isSidebarOpen}
-        onClose={() => setIsSidebarOpen(false)}
-        onSelectConversation={(id) => {
-          setResumingId(id);
-          void chat.resumeConversationById(id).finally(() => {
-            setResumingId(null);
+      {view === "chat" && (
+        <ChatSidebar
+          conversations={conversations?.items ?? []}
+          activeConversationId={chat.conversationId}
+          isLoading={conversationsLoading}
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
+          onSelectConversation={(id) => {
+            setResumingId(id);
+            void chat.resumeConversationById(id).finally(() => {
+              setResumingId(null);
+              if (typeof window !== "undefined" && window.innerWidth < 1024) {
+                setIsSidebarOpen(false);
+              }
+            });
+          }}
+          onNewChat={() => {
+            chat.startNewChat();
+            setView("chat");
             if (typeof window !== "undefined" && window.innerWidth < 1024) {
               setIsSidebarOpen(false);
             }
-          });
-        }}
-        onNewChat={() => {
-          chat.startNewChat();
-          setView("chat");
-          if (typeof window !== "undefined" && window.innerWidth < 1024) {
-            setIsSidebarOpen(false);
-          }
-        }}
-        resumingId={resumingId}
-      />
+          }}
+          onDeleteConversation={handleDeleteConversation}
+          resumingId={resumingId}
+        />
+      )}
 
       <div className="flex-1 flex min-h-0 min-w-0 flex-col overflow-hidden">
         <AskAiShell
@@ -204,6 +250,7 @@ export function ChatConsole() {
           conversationId={chat.conversationId}
           onBookOffer={(offer) => {
             if (!offerHasQuoteSnapshot(offer)) {
+              setView("chat");
               chat.send(
                 `I'd like to book ${offer.title} at ${offer.price}. This option isn't quote-ready yet — search while signed in so we can lock a live fare.`,
               );
@@ -234,6 +281,7 @@ export function ChatConsole() {
                 });
                 const json = await res.json().catch(() => null);
                 if (!res.ok) {
+                  setView("chat");
                   chat.send(
                     `I couldn't start checkout for ${offer.title}: ${json?.error || json?.message || "quote failed"}.`,
                   );
@@ -241,11 +289,13 @@ export function ChatConsole() {
                 }
                 const bookingId = json?.data?.id;
                 if (!bookingId) {
+                  setView("chat");
                   chat.send(`Quote succeeded but no booking id was returned for ${offer.title}.`);
                   return;
                 }
                 window.location.href = `/checkout/${bookingId}`;
               } catch (err) {
+                setView("chat");
                 chat.send(
                   `I couldn't start checkout for ${offer.title}: ${err instanceof Error ? err.message : "quote failed"}.`,
                 );
@@ -253,6 +303,7 @@ export function ChatConsole() {
             })();
           }}
           onBookTrip={(itinerary) => {
+            setView("chat");
             chat.send(
               `I'd like to book this complete trip (${itinerary.hops.join(" → ")}) at ${itinerary.totalPrice}`,
             );
@@ -275,6 +326,7 @@ export function ChatConsole() {
               loadingRoute={chat.loadingRoute}
               onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
               isSidebarOpen={isSidebarOpen}
+              onDeleteChat={handleDeleteCurrentChat}
             />
           }
         />

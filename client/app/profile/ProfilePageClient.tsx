@@ -11,6 +11,7 @@ import { EmergencySection } from "./_components/EmergencySection";
 import { LoyaltySection } from "./_components/LoyaltySection";
 import { DocumentsSection } from "./_components/DocumentsSection";
 import { SessionsSection } from "./_components/SessionsSection";
+import { TwoFactorSection } from "./_components/TwoFactorSection";
 import { TravelHistorySection } from "./_components/TravelHistorySection";
 
 type ProfileTab =
@@ -28,7 +29,7 @@ const TABS: Array<{ id: ProfileTab; label: string; icon: string }> = [
   { id: "EMERGENCY", label: "Emergency Contact", icon: "🚨" },
   { id: "LOYALTY", label: "Loyalty Programs", icon: "⭐" },
   { id: "DOCUMENTS", label: "Identity & Verification", icon: "🛂" },
-  { id: "SECURITY", label: "Active Sessions", icon: "🔒" },
+  { id: "SECURITY", label: "Security & Sessions", icon: "🔒" },
   { id: "HISTORY", label: "Travel History", icon: "✈" },
 ];
 
@@ -184,6 +185,7 @@ export function ProfilePageClient() {
 
         {activeTab === "SECURITY" && (
           <div className="space-y-6">
+            <TwoFactorSection />
             <SessionsSection />
           </div>
         )}

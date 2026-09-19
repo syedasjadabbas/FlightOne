@@ -50,6 +50,7 @@ export default function NewsPreviewSection() {
         marginTop: '-2.5rem',
       }}
     >
+      <div id="search" aria-hidden="true" style={{ position: 'absolute', top: 0, height: 0, width: 0 }} />
       <div
         style={{
           width: '100%',

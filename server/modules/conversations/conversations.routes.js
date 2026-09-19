@@ -48,4 +48,10 @@ router.post(
   conversationsController.escalate,
 );
 
+router.delete(
+  "/:id",
+  validateParams(conversationIdParamsSchema),
+  conversationsController.remove,
+);
+
 export default router;

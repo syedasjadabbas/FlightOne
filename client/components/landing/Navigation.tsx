@@ -2,6 +2,8 @@
 
 import Link from 'next/link';
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useAuthStore } from '@/store/auth.store';
+import { useLogoutMutation } from '@/lib/api/auth.api';
 
 /* ─────────────────────────────────────────────────────────────────────────────
    Types
@@ -43,6 +45,17 @@ export default function Navigation() {
   const [mobileOpen,     setMobileOpen]     = useState(false);
   const [mobileAccordion, setMobileAccordion] = useState<string | null>(null);
   const navRef = useRef<HTMLElement>(null);
+
+  const hasHydrated = useAuthStore((s) => s.hasHydrated);
+  const isAuthenticated = useAuthStore((s) => Boolean(s.accessToken));
+  const user = useAuthStore((s) => s.user);
+  const userLabel = useAuthStore((s) => s.user?.name ?? s.user?.email ?? null);
+  const [logout, { isLoading: isLoggingOut }] = useLogoutMutation();
+
+  const onLogout = () => {
+    setOpenDropdown(null);
+    void logout();
+  };
 
   /* ── scroll position tracking ── */
   useEffect(() => {
@@ -109,14 +122,16 @@ export default function Navigation() {
   }, []);
 
   const handleScrollToTop = (e: React.MouseEvent) => {
-    e.preventDefault();
     setOpenDropdown(null);
     setMobileOpen(false);
-    const lenis = (window as unknown as {
-      __lenis?: { scrollTo: (t: number, o?: { duration?: number }) => void };
-    }).__lenis;
-    if (lenis) lenis.scrollTo(0, { duration: 1.2 });
-    else window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (typeof window !== 'undefined' && window.location.pathname === '/') {
+      e.preventDefault();
+      const lenis = (window as unknown as {
+        __lenis?: { scrollTo: (t: number, o?: { duration?: number }) => void };
+      }).__lenis;
+      if (lenis) lenis.scrollTo(0, { duration: 1.2 });
+      else window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   /* ── pill button (triggers a dropdown) ── */
@@ -234,7 +249,9 @@ export default function Navigation() {
   }) => (
     <Link
       href={href}
-      onClick={() => setOpenDropdown(null)}
+      onClick={() => {
+        setTimeout(() => setOpenDropdown(null), 50);
+      }}
       style={{
         display: 'flex',
         alignItems: 'flex-start',
@@ -242,6 +259,8 @@ export default function Navigation() {
         padding: '10px 14px',
         borderRadius: '10px',
         textDecoration: 'none',
+        pointerEvents: 'auto',
+        cursor: 'pointer',
         transition: 'background 0.15s',
       }}
       onMouseEnter={e =>
@@ -304,7 +323,7 @@ export default function Navigation() {
             'background-color 0.35s ease, border-color 0.35s ease, backdrop-filter 0.35s ease',
         }}
       >
-        {/* ── LEFT: Explore + Services ── */}
+        {/* ── LEFT: Home + Explore + Services ── */}
         <nav
           aria-label="Primary navigation"
           className="nav-desktop-left"
@@ -316,6 +335,9 @@ export default function Navigation() {
             position: 'relative',
           }}
         >
+          {/* Home */}
+          <NavLink href="/" label="Home" />
+
           {/* Explore */}
           <div style={{ position: 'relative' }}>
             <PillBtn label="Explore" id="explore" />
@@ -328,6 +350,8 @@ export default function Navigation() {
                   top: 'calc(100% + 12px)',
                   left: 0,
                   width: '260px',
+                  pointerEvents: 'auto',
+                  zIndex: 210,
                   background: dropdownBg,
                   border: dropdownBorder,
                   borderRadius: '16px',
@@ -357,6 +381,8 @@ export default function Navigation() {
                   top: 'calc(100% + 12px)',
                   left: 0,
                   width: '280px',
+                  pointerEvents: 'auto',
+                  zIndex: 210,
                   background: dropdownBg,
                   border: dropdownBorder,
                   borderRadius: '16px',
@@ -445,7 +471,10 @@ export default function Navigation() {
 
             {/* Account dropdown */}
             <div style={{ position: 'relative' }}>
-              <PillBtn label="Account" id="account" />
+              <PillBtn
+                label={hasHydrated && isAuthenticated ? (userLabel?.split('@')[0] || 'Account') : 'Account'}
+                id="account"
+              />
               {openDropdown === 'account' && (
                 <div
                   role="menu"
@@ -454,7 +483,9 @@ export default function Navigation() {
                     position: 'absolute',
                     top: 'calc(100% + 12px)',
                     right: 0,
-                    width: '220px',
+                    width: '230px',
+                    pointerEvents: 'auto',
+                    zIndex: 210,
                     background: dropdownBg,
                     border: dropdownBorder,
                     borderRadius: '16px',
@@ -465,23 +496,94 @@ export default function Navigation() {
                     animation: 'navDropIn 0.18s ease',
                   }}
                 >
-                  {ACCOUNT_ITEMS.map(item => (
-                    <DropItem key={item.label} href={item.href} icon={item.icon} label={item.label} />
-                  ))}
-                  <div
-                    style={{
-                      margin: '6px 8px',
-                      height: '1px',
-                      backgroundColor: isLightSection
-                        ? 'rgba(14,22,32,0.08)'
-                        : 'rgba(245,244,223,0.08)',
-                    }}
-                  />
-                  <DropItem href="/login"  icon="🔑" label="Sign In"        desc="Access your account" />
-                  <DropItem href="/signup" icon="✨" label="Create Account" desc="Join FlightOne free"  />
+                  {hasHydrated && isAuthenticated ? (
+                    <>
+                      <div
+                        style={{
+                          padding: '8px 12px',
+                          borderBottom: isLightSection
+                            ? '1px solid rgba(14,22,32,0.08)'
+                            : '1px solid rgba(245,244,223,0.08)',
+                        }}
+                      >
+                        <p style={{ fontSize: '13px', fontWeight: 600, color: textColor, margin: 0 }}>
+                          {user?.name || 'Traveler'}
+                        </p>
+                        {user?.email && (
+                          <p style={{ fontSize: '11px', color: subTextColor, margin: '2px 0 0' }}>
+                            {user.email}
+                          </p>
+                        )}
+                      </div>
+                      <DropItem href="/profile" icon="👤" label="Profile" desc="Personal details & 2FA" />
+                      <DropItem href="/journey" icon="🗺" label="My Journey" desc="Active bookings & routes" />
+                      <DropItem href="/vault"   icon="🔒" label="Travel Vault" desc="Passports & secure docs" />
+                      <DropItem href="/dashboard" icon="⚡" label="Dashboard" desc="Operations & overview" />
+                      <div
+                        style={{
+                          margin: '6px 8px',
+                          height: '1px',
+                          backgroundColor: isLightSection
+                            ? 'rgba(14,22,32,0.08)'
+                            : 'rgba(245,244,223,0.08)',
+                        }}
+                      />
+                      <button
+                        type="button"
+                        disabled={isLoggingOut}
+                        onClick={onLogout}
+                        style={{
+                          width: '100%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '10px',
+                          padding: '9px 14px',
+                          borderRadius: '10px',
+                          border: 'none',
+                          background: 'transparent',
+                          color: '#ef4444',
+                          fontSize: '13px',
+                          fontWeight: 500,
+                          cursor: 'pointer',
+                          textAlign: 'left',
+                          transition: 'background 0.15s',
+                        }}
+                        onMouseEnter={(e) =>
+                          (e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.08)')
+                        }
+                        onMouseLeave={(e) =>
+                          (e.currentTarget.style.backgroundColor = 'transparent')
+                        }
+                      >
+                        <span style={{ fontSize: '15px' }}>🚪</span>
+                        {isLoggingOut ? 'Signing out…' : 'Log Out'}
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      {ACCOUNT_ITEMS.map(item => (
+                        <DropItem key={item.label} href={item.href} icon={item.icon} label={item.label} />
+                      ))}
+                      <div
+                        style={{
+                          margin: '6px 8px',
+                          height: '1px',
+                          backgroundColor: isLightSection
+                            ? 'rgba(14,22,32,0.08)'
+                            : 'rgba(245,244,223,0.08)',
+                        }}
+                      />
+                      <DropItem href="/login"  icon="🔑" label="Sign In"        desc="Access your account" />
+                      <DropItem href="/signup" icon="✨" label="Create Account" desc="Join FlightOne free"  />
+                    </>
+                  )}
                 </div>
               )}
             </div>
+
+            {(!hasHydrated || !isAuthenticated) && (
+              <NavLink href="/login" label="Sign In" />
+            )}
           </div>
 
           {/* Mobile hamburger */}
@@ -661,41 +763,86 @@ export default function Navigation() {
                 }`,
               }}
             >
-              <MobileAccordion
-                id="account"
-                label="Account"
-                open={mobileAccordion === 'account'}
-                onToggle={() =>
-                  setMobileAccordion(p => (p === 'account' ? null : 'account'))
-                }
-                textColor={textColor}
-                isLight={isLightSection}
-              >
-                {ACCOUNT_ITEMS.map(item => (
+              {hasHydrated && isAuthenticated ? (
+                <>
+                  <p style={{ padding: '4px 16px', fontSize: '12px', color: subTextColor, margin: 0 }}>
+                    Signed in as {userLabel}
+                  </p>
                   <MobileLink
-                    key={item.label}
-                    href={item.href}
-                    label={item.label}
-                    icon={item.icon}
+                    href="/profile"
+                    label="Profile & Preferences"
+                    icon="👤"
                     textColor={textColor}
                     onClose={() => setMobileOpen(false)}
                   />
-                ))}
-                <MobileLink
-                  href="/login"
-                  label="Sign In"
-                  icon="🔑"
+                  <MobileLink
+                    href="/dashboard"
+                    label="Management Dashboard"
+                    icon="⚡"
+                    textColor={textColor}
+                    onClose={() => setMobileOpen(false)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileOpen(false);
+                      void logout();
+                    }}
+                    style={{
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      padding: '11px 16px',
+                      background: 'none',
+                      border: 'none',
+                      color: '#f87171',
+                      fontSize: '14px',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                    }}
+                  >
+                    <span style={{ width: '20px', textAlign: 'center' }}>🚪</span>
+                    Log Out
+                  </button>
+                </>
+              ) : (
+                <MobileAccordion
+                  id="account"
+                  label="Account"
+                  open={mobileAccordion === 'account'}
+                  onToggle={() =>
+                    setMobileAccordion(p => (p === 'account' ? null : 'account'))
+                  }
                   textColor={textColor}
-                  onClose={() => setMobileOpen(false)}
-                />
-                <MobileLink
-                  href="/signup"
-                  label="Create Account"
-                  icon="✨"
-                  textColor={textColor}
-                  onClose={() => setMobileOpen(false)}
-                />
-              </MobileAccordion>
+                  isLight={isLightSection}
+                >
+                  {ACCOUNT_ITEMS.map(item => (
+                    <MobileLink
+                      key={item.label}
+                      href={item.href}
+                      label={item.label}
+                      icon={item.icon}
+                      textColor={textColor}
+                      onClose={() => setMobileOpen(false)}
+                    />
+                  ))}
+                  <MobileLink
+                    href="/login"
+                    label="Sign In"
+                    icon="🔑"
+                    textColor={textColor}
+                    onClose={() => setMobileOpen(false)}
+                  />
+                  <MobileLink
+                    href="/signup"
+                    label="Create Account"
+                    icon="✨"
+                    textColor={textColor}
+                    onClose={() => setMobileOpen(false)}
+                  />
+                </MobileAccordion>
+              )}
             </div>
           </nav>
         </div>
@@ -821,7 +968,9 @@ function MobileLink({
   return (
     <Link
       href={href}
-      onClick={onClose}
+      onClick={() => {
+        setTimeout(onClose, 50);
+      }}
       style={{
         display: 'flex',
         alignItems: 'center',

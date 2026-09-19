@@ -119,12 +119,10 @@ export function AskAiShell({
 
   function handleBookOffer(offer: OfferCard) {
     onBookOffer?.(offer);
-    setView("chat");
   }
 
   function handleBookTrip(itinerary: ItinerarySummary) {
     onBookTrip?.(itinerary);
-    setView("chat");
   }
 
   return (

@@ -19,6 +19,8 @@ export interface AuthUser {
   id: string;
   email: string;
   name: string | null;
+  role?: string | null;
+  twoFactorEnabled?: boolean;
 }
 
 export interface AuthSession {
@@ -37,6 +39,7 @@ interface AuthState {
   hasHydrated: boolean;
   setSession: (session: AuthSession) => void;
   clearSession: () => void;
+  updateUser: (patch: Partial<AuthUser>) => void;
   setHasHydrated: (value: boolean) => void;
 }
 
@@ -91,6 +94,11 @@ export const useAuthStore = create<AuthState>()(
           user: null,
         });
       },
+
+      updateUser: (patch) =>
+        set((state) => ({
+          user: state.user ? { ...state.user, ...patch } : null,
+        })),
 
       setHasHydrated: (value) => set({ hasHydrated: value }),
     }),

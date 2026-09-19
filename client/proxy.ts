@@ -40,14 +40,6 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  if (pathname === "/login" && isAuthenticated) {
-    return NextResponse.redirect(new URL("/", request.url));
-  }
-
-  if (pathname === "/signup" && isAuthenticated) {
-    return NextResponse.redirect(new URL("/", request.url));
-  }
-
   return NextResponse.next();
 }
 

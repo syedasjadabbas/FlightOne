@@ -48,7 +48,7 @@ export const conversationsApi = baseApi.injectEndpoints({
     >({
       query: (params) => ({
         url: "/conversations",
-        params: params ?? undefined,
+        params: params ? params : undefined,
       }),
       providesTags: ["Conversation"],
     }),
@@ -75,6 +75,14 @@ export const conversationsApi = baseApi.injectEndpoints({
         { type: "Conversation", id: arg.conversationId },
       ],
     }),
+
+    deleteConversation: builder.mutation<{ id: string; deleted: boolean }, string>({
+      query: (id) => ({
+        url: `/conversations/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Conversation"],
+    }),
   }),
 });
 
@@ -83,4 +91,5 @@ export const {
   useListConversationsQuery,
   useGetConversationQuery,
   useRecordConversationMessagesMutation,
+  useDeleteConversationMutation,
 } = conversationsApi;
