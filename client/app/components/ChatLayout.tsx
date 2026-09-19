@@ -228,10 +228,8 @@ export function ChatLayout({
   }, [messages]);
 
   const showResultsOnLatest =
-    chatResultsState === "results" &&
-    latestAssistantId != null &&
-    lastMessage?.role === "assistant" &&
-    Boolean(lastMessage.content);
+    (chatResultsState === "results" || resultCount > 0) &&
+    latestAssistantId != null;
 
   const lastUserText = useMemo(() => {
     for (let i = messages.length - 1; i >= 0; i -= 1) {
@@ -358,6 +356,17 @@ export function ChatLayout({
                       <span className="text-cyan-400">✨</span> Ava
                     </span>
                     <span className="text-xs text-slate-500 font-medium hidden sm:inline">Your Travel Consultant</span>
+                    {resultCount > 0 && onOpenResults ? (
+                      <button
+                        type="button"
+                        onClick={onOpenResults}
+                        className="ml-1 inline-flex items-center gap-1 rounded-full bg-cyan-600 hover:bg-cyan-700 text-white px-2.5 py-0.5 text-[11px] font-bold shadow-2xs transition-colors cursor-pointer"
+                        title="View search results"
+                      >
+                        <span>View results ({resultCount})</span>
+                        <span aria-hidden="true">→</span>
+                      </button>
+                    ) : null}
                   </div>
                   {busy && (
                     <span className="text-xs text-cyan-700 font-semibold animate-pulse">
@@ -556,10 +565,19 @@ export function ChatLayout({
                 const prev = messages[i - 1];
                 const showIdentity =
                   m.role === "assistant" && (i === 0 || prev?.role !== "assistant");
+                const shouldShowFooter =
+                  (isLatestAssistant && showResultsOnLatest) ||
+                  (m.role === "assistant" &&
+                    resultCount > 0 &&
+                    m.content &&
+                    (m.content.toLowerCase().includes("options for") ||
+                      m.content.toLowerCase().includes("live options") ||
+                      m.content.toLowerCase().includes("live flights")));
+
                 const footer =
-                  isLatestAssistant && showResultsOnLatest ? (
+                  shouldShowFooter ? (
                     <ResultsMessageFooter
-                      chatResultsState={chatResultsState}
+                      chatResultsState="results"
                       resultCount={resultCount}
                       resultNoun={resultNoun}
                       destinationLabel={destinationLabel}
