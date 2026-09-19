@@ -48,11 +48,14 @@ enum NotificationChannel {
   APP
   EMAIL
   WHATSAPP
+  SMS
 }
 
 enum NotificationStatus {
   PENDING
   SENT
+  DELIVERED
+  READ
   FAILED
 }
 

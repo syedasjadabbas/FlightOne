@@ -21,6 +21,7 @@
  */
 import prisma from "../../config/prisma.js";
 import { AppError } from "../../lib/customError.js";
+import { writeAudit } from "../../lib/audit.js";
 import { DEFAULT_PAGE_SIZE } from "../../lib/utils.js";
 import { assertMinorAmount, assertNonNegativeMinorAmount, marginMinor } from "../../lib/money.js";
 // Module 05 — Pricing & Margin Engine is the pricing authority for this
@@ -100,6 +101,110 @@ async function enqueueOpsEventSafe(event) {
 }
 
 /**
+ * Auto-escalate fulfilment failures to Module 13 (Human Agent Escalation)
+ * and record immutable audit trail per SDS UF-03.6 and UF-03.7.
+ */
+async function escalateTicketingFailureSafe({ booking, userId, error, details }) {
+  try {
+    const { escalateIfSupplierFailure } = await import("../escalations/escalations.service.js");
+    let conversationId = booking.metadata?.conversationId;
+    if (!conversationId) {
+      const latestConv = await prisma.conversation.findFirst({
+        where: { userId },
+        orderBy: { updatedAt: "desc" },
+        select: { id: true },
+      });
+      if (latestConv) {
+        conversationId = latestConv.id;
+      } else {
+        const created = await prisma.conversation.create({
+          data: {
+            userId,
+            title: `Fulfilment Escalation for Booking ${booking.id}`,
+            metadata: { channel: "SYSTEM", source: "fulfilment_escalation" },
+          },
+          select: { id: true },
+        });
+        conversationId = created.id;
+      }
+    }
+
+    const failureMsg = error?.message || details?.reason || "Supplier ticketing failed";
+    const escResult = await escalateIfSupplierFailure({
+      conversationId,
+      userId,
+      bookingId: booking.id,
+      supplierCode: booking.supplierCode || "GALILEO",
+      errorCode: "SUPPLIER_TICKETING_FAILED",
+      message: failureMsg,
+      failureClass: "HARD",
+      requiresHumanIntervention: true,
+    });
+
+    const existingMeta = booking.metadata && typeof booking.metadata === "object" ? booking.metadata : {};
+    await prisma.booking.update({
+      where: { id: booking.id },
+      data: {
+        metadata: {
+          ...existingMeta,
+          supplierBooking: {
+            ...(existingMeta.supplierBooking || {}),
+            ticket: {
+              status: "failed",
+              at: new Date().toISOString(),
+              error: failureMsg,
+              details: details ?? null,
+            },
+            escalation: escResult?.escalated
+              ? {
+                  ticketId: escResult.ticket?.id ?? null,
+                  status: escResult.ticket?.status ?? "OPEN",
+                  trigger: "SUPPLIER_FAILURE",
+                  escalatedAt: new Date().toISOString(),
+                }
+              : null,
+          },
+        },
+      },
+    });
+
+    await writeAudit({
+      userId,
+      action: "SUPPLIER_FULFILMENT_FAILED",
+      resourceType: "Booking",
+      resourceId: booking.id,
+      metadata: {
+        supplierCode: booking.supplierCode,
+        externalRef: booking.externalRef,
+        error: failureMsg,
+        escalated: escResult?.escalated ?? false,
+        escalationTicketId: escResult?.ticket?.id ?? null,
+      },
+    });
+
+    await enqueueOpsEventSafe({
+      type: "BOOKING_FULFILMENT_FAILED",
+      aggregateType: "BOOKING",
+      aggregateId: booking.id,
+      payload: {
+        bookingId: booking.id,
+        userId,
+        supplierCode: booking.supplierCode,
+        externalRef: booking.externalRef,
+        error: failureMsg,
+        escalationId: escResult?.ticket?.id ?? null,
+      },
+    });
+
+    return escResult;
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error("Failed to auto-escalate ticketing failure", { bookingId: booking?.id, err: e });
+    return null;
+  }
+}
+
+/**
  * Module 10 — Rewards & Referrals earn hook (dynamic import avoids a static
  * import cycle, same rationale/posture as `enqueueOpsEventSafe` above — a
  * failure to earn rewards must never fail the ticketing transition it's
@@ -154,7 +259,8 @@ async function ingestVaultDocumentsSafe({
 }
 
 /**
- * Enqueue confirmed booking notification across in-app and email channels.
+ * Enqueue confirmed booking & ticket notification across in-app, email, and WhatsApp channels.
+ * Strictly per SDS Appendix D: Booking confirmed / ticketed + documents -> App, Email, WhatsApp.
  * Swallow errors; notification failures must never fail the ticketing transition.
  */
 async function sendBookingConfirmationNotificationSafe(ticketed) {
@@ -167,8 +273,38 @@ async function sendBookingConfirmationNotificationSafe(ticketed) {
           ? "Hotel"
           : "Trip";
     const ref = ticketed.externalRef || ticketed.id;
+    const ticketNumbers =
+      ticketed.metadata?.ticketNumbers ||
+      (Array.isArray(ticketed.metadata?.tickets)
+        ? ticketed.metadata.tickets.map((t) => t.ticketNumber || t).filter(Boolean)
+        : null);
+
+    const ticketSuffix = ticketNumbers?.length ? ` (Ticket: ${ticketNumbers.join(", ")})` : "";
     const title = `${productLabel} Booking Confirmed (${ref})`;
-    const body = `Your ${productLabel.toLowerCase()} booking ${ticketed.id} has been confirmed with reference ${ref}.`;
+    const body = `Your ${productLabel.toLowerCase()} booking ${ticketed.id} has been confirmed with reference ${ref}${ticketSuffix}.`;
+
+    // Extract phone for WhatsApp / SMS routing
+    const primaryTraveller = Array.isArray(ticketed.travellerSnapshot)
+      ? ticketed.travellerSnapshot[0]
+      : null;
+    const phone =
+      ticketed.metadata?.phone ||
+      ticketed.metadata?.contactPhone ||
+      primaryTraveller?.phone ||
+      primaryTraveller?.mobileNumber ||
+      null;
+
+    const basePayload = {
+      bookingId: ticketed.id,
+      status: ticketed.status,
+      product: ticketed.product,
+      externalRef: ticketed.externalRef,
+      amountMinor: ticketed.amountMinor,
+      currency: ticketed.currency,
+      ticketNumbers: ticketNumbers || [],
+      phone,
+    };
+
     await enqueueNotificationOutbox([
       {
         userId: ticketed.userId,
@@ -176,14 +312,7 @@ async function sendBookingConfirmationNotificationSafe(ticketed) {
         dedupeKey: `booking:confirmed:${ticketed.id}:app`,
         title,
         body,
-        payload: {
-          bookingId: ticketed.id,
-          status: ticketed.status,
-          product: ticketed.product,
-          externalRef: ticketed.externalRef,
-          amountMinor: ticketed.amountMinor,
-          currency: ticketed.currency,
-        },
+        payload: basePayload,
       },
       {
         userId: ticketed.userId,
@@ -191,14 +320,15 @@ async function sendBookingConfirmationNotificationSafe(ticketed) {
         dedupeKey: `booking:confirmed:${ticketed.id}:email`,
         title,
         body,
-        payload: {
-          bookingId: ticketed.id,
-          status: ticketed.status,
-          product: ticketed.product,
-          externalRef: ticketed.externalRef,
-          amountMinor: ticketed.amountMinor,
-          currency: ticketed.currency,
-        },
+        payload: basePayload,
+      },
+      {
+        userId: ticketed.userId,
+        channel: "WHATSAPP",
+        dedupeKey: `booking:confirmed:${ticketed.id}:whatsapp`,
+        title,
+        body,
+        payload: basePayload,
       },
     ]);
   } catch (e) {
@@ -1101,15 +1231,38 @@ export async function ticketBooking(userId, bookingId, { clientAmountMinor } = {
     throw new AppError(409, "Ticketing already in progress");
   }
 
-  let supplierTicket;
-  try {
-    supplierTicket = await ticketSupplierInventory({ ...booking, ticketAttemptId: attemptId });
-  } catch (e) {
+  let supplierTicket = null;
+  let lastErr = null;
+  const maxAttempts = 3; // 1 initial + 2 retries per SDS UF-03.7
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      supplierTicket = await ticketSupplierInventory({
+        ...booking,
+        ticketAttemptId: attemptId,
+        ticketingAttemptNumber: attempt,
+      });
+      if (supplierTicket.status === "ok" || supplierTicket.status === "unconfigured") {
+        break;
+      }
+    } catch (e) {
+      lastErr = e;
+      if (attempt === maxAttempts) break;
+      await new Promise((r) => setTimeout(r, 50));
+    }
+  }
+
+  if (lastErr && (!supplierTicket || supplierTicket.status === "failed")) {
     await prisma.booking.update({
       where: { id: booking.id },
       data: { ticketAttemptId: null },
     });
-    throw e;
+    await escalateTicketingFailureSafe({
+      booking,
+      userId,
+      error: lastErr,
+      details: { reason: lastErr.message },
+    });
+    throw lastErr;
   }
 
   if (supplierTicket.status === "unconfigured") {
@@ -1126,7 +1279,13 @@ export async function ticketBooking(userId, bookingId, { clientAmountMinor } = {
       data: { ticketAttemptId: null },
     });
     if (supplierTicket.status === "failed") {
-      // Keep RESERVED so the customer can retry; hold is released only on cancel.
+      // Keep RESERVED so the customer can retry; auto-escalate to Module 13 per SDS UF-03.7
+      await escalateTicketingFailureSafe({
+        booking,
+        userId,
+        error: null,
+        details: supplierTicket.details,
+      });
       throw new AppError(
         409,
         supplierTicket.details?.reason || "Supplier ticketing failed",

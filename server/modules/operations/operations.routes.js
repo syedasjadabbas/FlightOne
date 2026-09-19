@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { validateBody, validateQuery } from "../../lib/validate.js";
 import { requireAuth } from "../../middlewares/auth.js";
+import { requireStaff2fa } from "../../middlewares/staff2fa.js";
 import { requirePermission } from "../../middlewares/permission.js";
 import * as operationsController from "./operations.controller.js";
 import {
@@ -18,6 +19,7 @@ import {
 const router = Router();
 
 router.use(requireAuth);
+router.use(requireStaff2fa);
 
 router.get("/overview", requirePermission("ops:dashboard:read"), operationsController.overview);
 router.get(

@@ -13,6 +13,7 @@ import {
   deliverAppNotification,
   deliverEmailNotification,
   deliverWhatsAppNotification,
+  deliverSmsNotification,
   deliverNotification,
 } from "./deliver.js";
 
@@ -74,6 +75,195 @@ describe("notification channel adapters", () => {
     );
     assert.equal(r.ok, false);
     assert.equal(r.retryable, true);
+  });
+
+  it("SMS fails clearly when unconfigured (no fake SENT)", async () => {
+    const r = await deliverSmsNotification(
+      { id: "n6", userId: "u1", title: "t", body: "b", payload: { phone: "+923001234567" } },
+      { env: {} },
+    );
+    assert.equal(r.ok, false);
+    assert.equal(r.reason, "sms_not_configured");
+    assert.equal(r.retryable, false);
+  });
+
+  it("SMS fails when recipient phone number missing or invalid", async () => {
+    const r = await deliverSmsNotification(
+      { id: "n7", userId: "u1", title: "t", body: "b", payload: {} },
+      {
+        env: {
+          TWILIO_ACCOUNT_SID: "ACtest",
+          TWILIO_AUTH_TOKEN: "testtok",
+          TWILIO_FROM_NUMBER: "+1234567890",
+        },
+      },
+    );
+    assert.equal(r.ok, false);
+    assert.equal(r.reason, "sms_recipient_phone_missing_or_invalid");
+  });
+
+  it("SMS Twilio dispatch succeeds with valid credentials", async () => {
+    let calledUrl = null;
+    let authHeader = null;
+    const r = await deliverSmsNotification(
+      {
+        id: "n8",
+        userId: "u1",
+        title: "OTP",
+        body: "Your code is 123456",
+        payload: { phone: "03001234567" },
+      },
+      {
+        env: {
+          TWILIO_ACCOUNT_SID: "ACtest123",
+          TWILIO_AUTH_TOKEN: "secret456",
+          TWILIO_FROM_NUMBER: "+15551234567",
+        },
+        fetchImpl: async (url, opts) => {
+          calledUrl = url;
+          authHeader = opts.headers.Authorization;
+          return {
+            ok: true,
+            status: 201,
+            json: async () => ({ sid: "SM_test_sid_123", status: "queued" }),
+          };
+        },
+      },
+    );
+
+    assert.equal(r.ok, true);
+    assert.equal(r.provider, "sms-twilio");
+    assert.equal(r.messageId, "SM_test_sid_123");
+    assert.match(calledUrl, /api\.twilio\.com.*ACtest123/);
+    assert.match(authHeader, /^Basic /);
+  });
+
+  it("SMS Twilio 5xx error is marked retryable", async () => {
+    const r = await deliverSmsNotification(
+      {
+        id: "n9",
+        userId: "u1",
+        title: "Alert",
+        body: "Flight delayed",
+        payload: { phone: "+923001234567" },
+      },
+      {
+        env: {
+          TWILIO_ACCOUNT_SID: "ACtest",
+          TWILIO_AUTH_TOKEN: "tok",
+          TWILIO_FROM_NUMBER: "+123",
+        },
+        fetchImpl: async () => ({
+          ok: false,
+          status: 503,
+          json: async () => ({ code: 20500, message: "Twilio internal error" }),
+        }),
+      },
+    );
+    assert.equal(r.ok, false);
+    assert.equal(r.retryable, true);
+  });
+
+  it("SMS simulated double dispatches successfully when allowed", async () => {
+    const r = await deliverSmsNotification(
+      {
+        id: "n10",
+        userId: "u1",
+        title: "Test",
+        body: "Testing simulation",
+        payload: { phone: "+923001234567" },
+      },
+      {
+        env: { ALLOW_SIMULATED_NOTIFICATIONS: "true" },
+      },
+    );
+    assert.equal(r.ok, true);
+    assert.equal(r.provider, "sms-simulated");
+    assert.match(r.messageId, /^sim_sms_/);
+  });
+
+  it("WHATSAPP Meta Cloud API dispatch succeeds with valid credentials", async () => {
+    let sentBody = null;
+    let authHeader = null;
+    const r = await deliverWhatsAppNotification(
+      {
+        id: "n11",
+        userId: "u1",
+        title: "Booking Confirmed",
+        body: "Your booking FO-123 is confirmed.",
+        payload: { phone: "+923001234567" },
+      },
+      {
+        env: {
+          WHATSAPP_API_TOKEN: "EAAtesttoken",
+          WHATSAPP_PHONE_NUMBER_ID: "10987654321",
+        },
+        fetchImpl: async (url, opts) => {
+          authHeader = opts.headers.Authorization;
+          sentBody = JSON.parse(opts.body);
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              messaging_product: "whatsapp",
+              contacts: [{ input: "923001234567", wa_id: "923001234567" }],
+              messages: [{ id: "wamid.HBgLMTIzNDU=" }],
+            }),
+          };
+        },
+      },
+    );
+
+    assert.equal(r.ok, true);
+    assert.equal(r.provider, "whatsapp-cloud");
+    assert.equal(r.messageId, "wamid.HBgLMTIzNDU=");
+    assert.equal(authHeader, "Bearer EAAtesttoken");
+    assert.equal(sentBody.to, "923001234567");
+    assert.equal(sentBody.type, "text");
+    assert.equal(sentBody.text.body, "Your booking FO-123 is confirmed.");
+  });
+
+  it("WHATSAPP Cloud API 5xx error is marked retryable", async () => {
+    const r = await deliverWhatsAppNotification(
+      {
+        id: "n12",
+        userId: "u1",
+        title: "t",
+        body: "b",
+        payload: { phone: "+923001234567" },
+      },
+      {
+        env: {
+          WHATSAPP_API_TOKEN: "tok",
+          WHATSAPP_PHONE_NUMBER_ID: "123",
+        },
+        fetchImpl: async () => ({
+          ok: false,
+          status: 500,
+          json: async () => ({ error: { message: "Internal server error", code: 131000 } }),
+        }),
+      },
+    );
+    assert.equal(r.ok, false);
+    assert.equal(r.retryable, true);
+  });
+
+  it("WHATSAPP simulated double dispatches successfully when allowed", async () => {
+    const r = await deliverWhatsAppNotification(
+      {
+        id: "n13",
+        userId: "u1",
+        title: "t",
+        body: "b",
+        payload: { phone: "+923001234567" },
+      },
+      {
+        env: { ALLOW_SIMULATED_NOTIFICATIONS: "true" },
+      },
+    );
+    assert.equal(r.ok, true);
+    assert.equal(r.provider, "whatsapp-simulated");
+    assert.match(r.messageId, /^sim_wa_/);
   });
 });
 
@@ -198,6 +388,13 @@ describe("notification outbox drain (integration)", () => {
       },
     });
 
+    await prisma.notificationOutbox.deleteMany({
+      where: {
+        status: "PENDING",
+        userId: { not: user.id },
+      },
+    });
+
     const result = await drainNotificationOutbox({
       env: { NOTIFY_EMAIL_WEBHOOK_URL: "https://hooks.test/email" },
       fetchImpl: async () => ({ ok: false, status: 503 }),
@@ -210,5 +407,221 @@ describe("notification outbox drain (integration)", () => {
       where: { userId: user.id, channel: "EMAIL" },
     });
     assert.equal(row.status, "PENDING");
+  });
+
+  it("exhausting maxAttempts marks retryable failure as FAILED", async () => {
+    const user = await prisma.user.create({
+      data: {
+        email: `fo.notify.maxretry.${Date.now()}@example.com`,
+        name: "MaxRetry",
+        passwordHash: await bcrypt.hash("TestPass123!", 10),
+      },
+    });
+    users.push(user.id);
+
+    const dedupeKey = `max-retry-${Date.now()}`;
+    await prisma.notificationOutbox.create({
+      data: {
+        userId: user.id,
+        channel: "EMAIL",
+        dedupeKey,
+        title: "t",
+        body: "b",
+      },
+    });
+
+    await prisma.notificationOutbox.deleteMany({
+      where: {
+        status: "PENDING",
+        userId: { not: user.id },
+      },
+    });
+
+    // Pass 1: attempt 1 with maxAttempts: 2 -> remains PENDING
+    const pass1 = await drainNotificationOutbox({
+      env: { NOTIFY_EMAIL_WEBHOOK_URL: "https://hooks.test/email" },
+      fetchImpl: async () => ({ ok: false, status: 503 }),
+      limit: 10,
+      maxAttempts: 2,
+    });
+    assert.equal(pass1.deferred, 1);
+    assert.equal(pass1.failed, 0);
+
+    // Pass 2: attempt 2 reaches maxAttempts -> marks FAILED
+    const pass2 = await drainNotificationOutbox({
+      env: { NOTIFY_EMAIL_WEBHOOK_URL: "https://hooks.test/email" },
+      fetchImpl: async () => ({ ok: false, status: 503 }),
+      limit: 10,
+      maxAttempts: 2,
+    });
+    assert.equal(pass2.deferred, 0);
+    assert.equal(pass2.failed, 1);
+
+    const row = await prisma.notificationOutbox.findFirst({
+      where: { userId: user.id, dedupeKey },
+    });
+    assert.equal(row.status, "FAILED");
+    assert.match(row.payload.deliveryError.reason, /^max_retries_exceeded/);
+  });
+});
+
+describe("provider callback handling", () => {
+  let prisma;
+  const users = [];
+
+  before(async () => {
+    prisma = (await import("../../config/prisma.js")).default;
+  });
+
+  after(async () => {
+    for (const id of users) {
+      await prisma.notificationOutbox.deleteMany({ where: { userId: id } }).catch(() => {});
+      await prisma.user.delete({ where: { id } }).catch(() => {});
+    }
+  });
+
+  it("SMS callback updates status to DELIVERED idempotently", async () => {
+    const { handleSmsCallback } = await import("../../modules/notifications/notifications.controller.js");
+
+    const user = await prisma.user.create({
+      data: {
+        email: `fo.cb.sms.${Date.now()}@example.com`,
+        name: "SmsCb",
+        passwordHash: await bcrypt.hash("TestPass123!", 10),
+      },
+    });
+    users.push(user.id);
+
+    const messageSid = `SM_cb_test_${Date.now()}`;
+    const row = await prisma.notificationOutbox.create({
+      data: {
+        userId: user.id,
+        channel: "SMS",
+        dedupeKey: `sms-cb-${Date.now()}`,
+        title: "Test",
+        body: "Testing callback",
+        status: "SENT",
+        payload: {
+          delivery: { provider: "sms-twilio", messageId: messageSid, status: "SENT" },
+        },
+      },
+    });
+
+    // Mock Express req & res
+    let responseStatus = null;
+    let responseJson = null;
+    const res = {
+      status(code) {
+        responseStatus = code;
+        return this;
+      },
+      json(data) {
+        responseJson = data;
+        return this;
+      },
+    };
+
+    // First delivered callback
+    await handleSmsCallback(
+      { body: { MessageSid: messageSid, MessageStatus: "delivered" } },
+      res,
+    );
+
+    assert.equal(responseStatus, 200);
+    assert.equal(responseJson.ok, true);
+    assert.equal(responseJson.updated, true);
+    assert.equal(responseJson.status, "DELIVERED");
+
+    let updated = await prisma.notificationOutbox.findUnique({ where: { id: row.id } });
+    assert.equal(updated.status, "DELIVERED");
+    assert.ok(updated.payload.delivery.deliveredAt);
+
+    // Duplicate callback -> idempotent no-op
+    await handleSmsCallback(
+      { body: { MessageSid: messageSid, MessageStatus: "delivered" } },
+      res,
+    );
+    assert.equal(responseJson.ok, true);
+    assert.equal(responseJson.updated, false);
+  });
+
+  it("WhatsApp Meta Cloud API callback updates status to READ", async () => {
+    const { handleWhatsAppCallback } = await import("../../modules/notifications/notifications.controller.js");
+
+    const user = await prisma.user.create({
+      data: {
+        email: `fo.cb.wa.${Date.now()}@example.com`,
+        name: "WaCb",
+        passwordHash: await bcrypt.hash("TestPass123!", 10),
+      },
+    });
+    users.push(user.id);
+
+    const waMessageId = `wamid.HBgL_${Date.now()}`;
+    const row = await prisma.notificationOutbox.create({
+      data: {
+        userId: user.id,
+        channel: "WHATSAPP",
+        dedupeKey: `wa-cb-${Date.now()}`,
+        title: "Test",
+        body: "Testing WA callback",
+        status: "SENT",
+        payload: {
+          delivery: { provider: "whatsapp-cloud", messageId: waMessageId, status: "SENT" },
+        },
+      },
+    });
+
+    const res = {
+      status: () => res,
+      json: (d) => d,
+    };
+
+    // 1. Delivered
+    await handleWhatsAppCallback(
+      {
+        body: {
+          entry: [
+            {
+              changes: [
+                {
+                  value: {
+                    statuses: [{ id: waMessageId, status: "delivered", timestamp: "1726660000" }],
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      },
+      res,
+    );
+
+    let updated = await prisma.notificationOutbox.findUnique({ where: { id: row.id } });
+    assert.equal(updated.status, "DELIVERED");
+
+    // 2. Read
+    await handleWhatsAppCallback(
+      {
+        body: {
+          entry: [
+            {
+              changes: [
+                {
+                  value: {
+                    statuses: [{ id: waMessageId, status: "read", timestamp: "1726660010" }],
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      },
+      res,
+    );
+
+    updated = await prisma.notificationOutbox.findUnique({ where: { id: row.id } });
+    assert.equal(updated.status, "READ");
+    assert.ok(updated.payload.delivery.readAt);
   });
 });

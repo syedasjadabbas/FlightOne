@@ -13,10 +13,43 @@ import {
   resendVerificationSchema,
   resetPasswordSchema,
   revokeOtherSessionsSchema,
+  twoFactorConfirmSchema,
+  twoFactorDisableSchema,
+  twoFactorSetupSchema,
+  twoFactorVerifySchema,
   verifyEmailSchema,
 } from "./auth.validators.js";
 
 const router = Router();
+
+router.post(
+  "/2fa/setup",
+  authLimiter,
+  validateBody(twoFactorSetupSchema),
+  authController.twoFactorSetup,
+);
+
+router.post(
+  "/2fa/confirm",
+  authLimiter,
+  validateBody(twoFactorConfirmSchema),
+  authController.twoFactorConfirm,
+);
+
+router.post(
+  "/2fa/verify",
+  loginLimiter,
+  validateBody(twoFactorVerifySchema),
+  authController.twoFactorVerify,
+);
+
+router.post(
+  "/2fa/disable",
+  requireAuth,
+  authLimiter,
+  validateBody(twoFactorDisableSchema),
+  authController.twoFactorDisable,
+);
 
 router.post(
   "/bootstrap",

@@ -1,0 +1,12 @@
+-- Module 00 — Mandatory Staff 2FA & User Two-Factor Authentication
+-- Strictly according to SDS M00, Appendix E, NFR-SEC-03, AUTH-05, UF-00.8
+
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "twoFactorEnabled" BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "twoFactorSecret" TEXT;
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "twoFactorPendingSecret" TEXT;
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "twoFactorBackupCodes" JSONB;
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "twoFactorLastStep" INTEGER;
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "twoFactorAttempts" INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "twoFactorLockedUntil" TIMESTAMP(3);
+
+ALTER TABLE "RefreshToken" ADD COLUMN IF NOT EXISTS "mfa" BOOLEAN NOT NULL DEFAULT false;

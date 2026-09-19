@@ -54,6 +54,65 @@ async function enqueueOpsEventSafe(event) {
   }
 }
 
+async function sendPaymentConfirmationNotificationSafe(payment) {
+  try {
+    const { enqueueNotificationOutbox } = await import("../../lib/notifications/enqueue.js");
+    const amountFormatted = `${payment.currency} ${(payment.amountMinor / 100).toFixed(2)}`;
+    const title = `Payment Received (${payment.currency} ${(payment.amountMinor / 100).toFixed(0)})`;
+    const body = `Your payment of ${amountFormatted} for booking ${payment.bookingId} was successful via ${payment.provider}.`;
+
+    const phone =
+      payment.metadata?.phone ||
+      payment.metadata?.accountNumber ||
+      payment.metadata?.mobile ||
+      null;
+
+    const basePayload = {
+      paymentId: payment.id,
+      bookingId: payment.bookingId,
+      status: payment.status,
+      provider: payment.provider,
+      amountMinor: payment.amountMinor,
+      currency: payment.currency,
+      providerPaymentId: payment.providerPaymentId,
+      phone,
+    };
+
+    await enqueueNotificationOutbox([
+      {
+        userId: payment.userId,
+        channel: "APP",
+        dedupeKey: `payment:confirmed:${payment.id}:app`,
+        title,
+        body,
+        payload: basePayload,
+      },
+      {
+        userId: payment.userId,
+        channel: "EMAIL",
+        dedupeKey: `payment:confirmed:${payment.id}:email`,
+        title,
+        body,
+        payload: basePayload,
+      },
+      {
+        userId: payment.userId,
+        channel: "WHATSAPP",
+        dedupeKey: `payment:confirmed:${payment.id}:whatsapp`,
+        title,
+        body,
+        payload: basePayload,
+      },
+    ]);
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error("Failed to enqueue payment confirmation notification", {
+      paymentId: payment?.id,
+      err: e,
+    });
+  }
+}
+
 async function enqueuePaymentCaptured(row) {
   if (!row || !["CAPTURED", "AUTHORIZED"].includes(row.status)) return row;
   await enqueueOpsEventSafe({
@@ -68,6 +127,7 @@ async function enqueuePaymentCaptured(row) {
       provider: row.provider,
     },
   });
+  await sendPaymentConfirmationNotificationSafe(row);
   return row;
 }
 

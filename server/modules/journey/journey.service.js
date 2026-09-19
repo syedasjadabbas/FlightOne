@@ -46,7 +46,7 @@ const WATCHABLE_BOOKING_STATUSES = new Set(["TICKETED", "ACTIVE"]);
 
 function notificationChannelsFromEnv(env = process.env) {
   const raw = env.JOURNEY_NOTIFICATION_CHANNELS?.trim();
-  const allowed = new Set(["APP", "EMAIL", "WHATSAPP"]);
+  const allowed = new Set(["APP", "EMAIL", "WHATSAPP", "SMS"]);
   if (!raw) return ["APP", "EMAIL", "WHATSAPP"];
   const parsed = raw
     .split(",")
@@ -685,7 +685,16 @@ export async function pollWatch(watchId, opts = {}) {
 
   async function applyChanges(changes, snapshotKey, snapshot) {
     for (const change of changes) {
-      const { event, notifications: n } = await recordChangeEvent(watch, change, channels);
+      const isCriticalDisruption =
+        change.type === "CANCELLED" ||
+        change.type === "MISSED_CONNECTION" ||
+        change.escalateRecommended ||
+        (typeof change.severity === "number" && change.severity >= 3);
+      const effectiveChannels =
+        isCriticalDisruption && !channels.includes("SMS")
+          ? [...channels, "SMS"]
+          : channels;
+      const { event, notifications: n } = await recordChangeEvent(watch, change, effectiveChannels);
       if (event) {
         events.push(event);
         notifications.push(...n);

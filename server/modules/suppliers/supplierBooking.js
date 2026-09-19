@@ -16,8 +16,27 @@ import { bookingRefsForRevalidation } from "./suppliers.service.js";
 import {
   bookHeldReservationWithTravelport,
   cancelTravelportHold,
+  cancelTravelportReservation,
 } from "./travelport/book.js";
 import { ticketHeldReservationWithTravelport } from "./travelport/ticket.js";
+import {
+  retrieveTravelportReservation,
+  modifyTravelportReservation,
+} from "./travelport/retrieve.js";
+import { getTravelportSeatMap } from "./travelport/seats.js";
+import {
+  quoteTravelportExchange,
+  reissueTravelportTicket,
+} from "./travelport/exchange.js";
+import {
+  voidTravelportTicket,
+  quoteTravelportRefund,
+} from "./travelport/refund.js";
+import { divideTravelportReservation } from "./travelport/divide.js";
+import {
+  readTravelportQueue,
+  countTravelportQueue,
+} from "./travelport/queues.js";
 import {
   bookRateHawkReservation,
   cancelRateHawkHold,
@@ -578,3 +597,92 @@ export function assertSupplierRevalidateOrBlock(revalidateResult) {
   err.details = revalidateResult?.details ?? null;
   throw err;
 }
+
+export async function retrieveSupplierReservation(locator, supplierCode = "GALILEO") {
+  const code = String(supplierCode || "").toUpperCase();
+  if (code === "GALILEO" || code === "TRAVELPORT") {
+    return retrieveTravelportReservation(locator);
+  }
+  return { status: "unconfigured", details: { reason: `Retrieve not supported for supplier ${code}` } };
+}
+
+export async function modifySupplierReservation(locator, modifications, supplierCode = "GALILEO") {
+  const code = String(supplierCode || "").toUpperCase();
+  if (code === "GALILEO" || code === "TRAVELPORT") {
+    return modifyTravelportReservation(locator, modifications);
+  }
+  return { status: "unconfigured", details: { reason: `Modify not supported for supplier ${code}` } };
+}
+
+export async function getSupplierSeatMap(params, supplierCode = "GALILEO") {
+  const code = String(supplierCode || "").toUpperCase();
+  if (code === "GALILEO" || code === "TRAVELPORT") {
+    return getTravelportSeatMap(params);
+  }
+  return { status: "unconfigured", details: { reason: `Seat map not supported for supplier ${code}` } };
+}
+
+export async function quoteSupplierExchange(params, supplierCode = "GALILEO") {
+  const code = String(supplierCode || "").toUpperCase();
+  if (code === "GALILEO" || code === "TRAVELPORT") {
+    return quoteTravelportExchange(params);
+  }
+  return { status: "unconfigured", details: { reason: `Exchange quote not supported for supplier ${code}` } };
+}
+
+export async function reissueSupplierTicket(params, supplierCode = "GALILEO") {
+  const code = String(supplierCode || "").toUpperCase();
+  if (code === "GALILEO" || code === "TRAVELPORT") {
+    return reissueTravelportTicket(params);
+  }
+  return { status: "unconfigured", details: { reason: `Reissue not supported for supplier ${code}` } };
+}
+
+export async function voidSupplierTicket(ticketNumber, opts, supplierCode = "GALILEO") {
+  const code = String(supplierCode || "").toUpperCase();
+  if (code === "GALILEO" || code === "TRAVELPORT") {
+    return voidTravelportTicket(ticketNumber, opts);
+  }
+  return { status: "unconfigured", details: { reason: `Void not supported for supplier ${code}` } };
+}
+
+export async function quoteSupplierRefund(params, supplierCode = "GALILEO") {
+  const code = String(supplierCode || "").toUpperCase();
+  if (code === "GALILEO" || code === "TRAVELPORT") {
+    return quoteTravelportRefund(params);
+  }
+  return { status: "unconfigured", details: { reason: `Refund quote not supported for supplier ${code}` } };
+}
+
+export async function divideSupplierReservation(locator, params, supplierCode = "GALILEO") {
+  const code = String(supplierCode || "").toUpperCase();
+  if (code === "GALILEO" || code === "TRAVELPORT") {
+    return divideTravelportReservation(locator, params);
+  }
+  return { status: "unconfigured", details: { reason: `Divide PNR not supported for supplier ${code}` } };
+}
+
+export async function readSupplierQueues(opts, supplierCode = "GALILEO") {
+  const code = String(supplierCode || "").toUpperCase();
+  if (code === "GALILEO" || code === "TRAVELPORT") {
+    return readTravelportQueue(opts);
+  }
+  return { status: "unconfigured", details: { reason: `Queues not supported for supplier ${code}` } };
+}
+
+export async function countSupplierQueue(opts, supplierCode = "GALILEO") {
+  const code = String(supplierCode || "").toUpperCase();
+  if (code === "GALILEO" || code === "TRAVELPORT") {
+    return countTravelportQueue(opts);
+  }
+  return { status: "unconfigured", count: 0, details: { reason: `Queues not supported for supplier ${code}` } };
+}
+
+export async function cancelSupplierReservation(locator, supplierCode = "GALILEO") {
+  const code = String(supplierCode || "").toUpperCase();
+  if (code === "GALILEO" || code === "TRAVELPORT") {
+    return cancelTravelportReservation(locator);
+  }
+  return { status: "skipped", reason: `no cancel adapter for supplier ${code}` };
+}
+

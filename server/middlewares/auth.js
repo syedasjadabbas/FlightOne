@@ -32,7 +32,11 @@ export function optionalAuth(req, _res, next) {
     }
     const payload = verifyAccessToken(raw);
     if (payload?.sub) {
-      req.user = { id: payload.sub, email: payload.email };
+      req.user = {
+        id: payload.sub,
+        email: payload.email,
+        mfa: Boolean(payload.mfa),
+      };
     }
   } catch {
     // ignore invalid optional token
@@ -55,7 +59,11 @@ export async function requireAuth(req, _res, next) {
       return next(new AppError(401, "Invalid token"));
     }
     await assertAccessTokenStillValid(payload.sub, payload);
-    req.user = { id: payload.sub, email: payload.email };
+    req.user = {
+      id: payload.sub,
+      email: payload.email,
+      mfa: Boolean(payload.mfa),
+    };
     req.permissions = await getEffectivePermissions(req.user.id);
     next();
   } catch (e) {

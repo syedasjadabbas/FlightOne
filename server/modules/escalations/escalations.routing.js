@@ -121,8 +121,14 @@ export async function findEligibleConsultants(requiredPermissions) {
   }
 
   // Users who have ALL required keys via global (companyId null) role grants.
+  // Excludes platform Super Admin accounts from being counted as active frontline queue specialists.
   const rows = await prisma.userRole.findMany({
-    where: { companyId: null },
+    where: {
+      companyId: null,
+      role: {
+        name: { notIn: ["Super Admin", "SuperAdmin", "super_admin"] },
+      },
+    },
     select: {
       userId: true,
       role: {

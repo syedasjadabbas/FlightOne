@@ -868,7 +868,93 @@ export async function createApprovalRequest(requesterUserId, { bookingId, compan
     status: approval.status,
     withinPolicy: evaluation.withinPolicy,
   });
+
+  if (approval.status === "PENDING") {
+    await notifyApprovalRequestedSafe(approval, booking);
+  }
+
   return approval;
+}
+
+async function notifyApprovalRequestedSafe(approval, booking) {
+  try {
+    const { enqueueNotificationOutbox } = await import("../../lib/notifications/enqueue.js");
+    const approvers = await prisma.companyMembership.findMany({
+      where: {
+        companyId: approval.companyId,
+        role: { in: ["APPROVER", "ADMIN"] },
+      },
+      select: { userId: true },
+    });
+    const approverIds = [...new Set(approvers.map((a) => a.userId).filter(Boolean))];
+    if (!approverIds.length) return;
+
+    const formattedAmount = `${approval.currency} ${(approval.amountMinor / 100).toFixed(2)}`;
+    const title = "Corporate Travel Approval Requested";
+    const body = `Travel approval requested for booking ${approval.bookingId} (${formattedAmount}). Action required.`;
+
+    const rows = [];
+    for (const approverId of approverIds) {
+      for (const channel of ["APP", "EMAIL", "WHATSAPP"]) {
+        rows.push({
+          userId: approverId,
+          channel,
+          dedupeKey: `corporate:approval:request:${approval.id}:${approverId}:${channel.toLowerCase()}`,
+          title,
+          body,
+          payload: {
+            module: "corporate",
+            approvalId: approval.id,
+            bookingId: approval.bookingId,
+            companyId: approval.companyId,
+            amountMinor: approval.amountMinor,
+            currency: approval.currency,
+          },
+        });
+      }
+    }
+    await enqueueNotificationOutbox(rows);
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error("Failed to enqueue corporate approval requested notification", {
+      approvalId: approval?.id,
+      err: e,
+    });
+  }
+}
+
+async function notifyApprovalDecidedSafe(approval, updated, decision, note) {
+  try {
+    const { enqueueNotificationOutbox } = await import("../../lib/notifications/enqueue.js");
+    const statusLabel = updated.status.toLowerCase();
+    const title = `Travel Approval ${updated.status}`;
+    const reasonSuffix = note ? `: ${note}` : ".";
+    const body = `Your travel approval request for booking ${approval.bookingId} was ${statusLabel}${reasonSuffix}`;
+
+    const rows = ["APP", "EMAIL", "WHATSAPP"].map((channel) => ({
+      userId: approval.requesterUserId,
+      channel,
+      dedupeKey: `corporate:approval:decision:${updated.id}:${statusLabel}:${channel.toLowerCase()}`,
+      title,
+      body,
+      payload: {
+        module: "corporate",
+        approvalId: updated.id,
+        bookingId: approval.bookingId,
+        companyId: approval.companyId,
+        decision,
+        status: updated.status,
+        decisionNote: note ?? null,
+      },
+    }));
+    await enqueueNotificationOutbox(rows);
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error("Failed to enqueue corporate approval decided notification", {
+      approvalId: updated?.id,
+      err: e,
+    });
+  }
 }
 
 export async function listApprovals(
@@ -930,7 +1016,7 @@ export async function listApprovals(
 export async function decideApproval(approverUserId, id, { decision, note }) {
   const approval = await prisma.approvalRequest.findUnique({
     where: { id },
-    select: { id: true, status: true, companyId: true, bookingId: true },
+    select: { id: true, status: true, companyId: true, bookingId: true, requesterUserId: true },
   });
   if (!approval) {
     throw new AppError(404, "Approval request not found");
@@ -959,8 +1045,13 @@ export async function decideApproval(approverUserId, id, { decision, note }) {
     decision,
     status: updated.status,
   });
+
+  await notifyApprovalDecidedSafe(approval, updated, decision, note);
+
   return updated;
 }
+
+export const decideApprovalRequest = decideApproval;
 
 /**
  * Bookings/payments hook — corporate spend gate before RESERVE / corporate pay.

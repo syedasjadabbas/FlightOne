@@ -5,6 +5,16 @@ import { AppError } from "../../../lib/customError.js";
 import { getAccessToken } from "./auth.js";
 import { travelportConfig } from "./config.js";
 
+/** @type {null | ((path: string, opts?: object) => Promise<{ json: any, e2eTrackingId?: string | null, status?: number, error?: string, raw?: string }>)} */
+let travelportFetchOverride = null;
+
+export function setTravelportFetchForTests(fn) {
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("Cannot override Travelport fetch in production");
+  }
+  travelportFetchOverride = typeof fn === "function" ? fn : null;
+}
+
 /**
  * @param {string} path  Path under the chosen base, e.g. "/catalog/search/..."
  * @param {{
@@ -14,9 +24,29 @@ import { travelportConfig } from "./config.js";
  *   baseUrl?: string,
  *   acceptVersion?: string,
  *   contentVersion?: string,
+ *   allowHttpError?: boolean,
  * }} [opts]
  */
 export async function travelportFetch(path, opts = {}) {
+  if (travelportFetchOverride) {
+    const result = await travelportFetchOverride(path, opts);
+    if (!result) {
+      throw new AppError(502, `Travelport test double returned no response for ${path}`);
+    }
+    const status = result.status ?? 200;
+    const ok = status >= 200 && status < 300;
+    if (!ok && !opts.allowHttpError) {
+      throw new AppError(status >= 500 ? 502 : status, result.error || `Travelport ${path} HTTP ${status}`);
+    }
+    return {
+      json: result.json ?? null,
+      e2eTrackingId: result.e2eTrackingId ?? "test-e2e-id",
+      status,
+      error: result.error,
+      raw: result.raw,
+    };
+  }
+
   const cfg = travelportConfig();
   const token = await getAccessToken();
   const method = opts.method || "POST";

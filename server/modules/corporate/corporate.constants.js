@@ -12,7 +12,9 @@ export const APPROVAL_DECISIONS = ["APPROVE", "REJECT", "CHANGES_REQUESTED"];
 /** Maps ApprovalDecision → ApprovalRequest.status */
 export const DECISION_TO_STATUS = Object.freeze({
   APPROVE: "APPROVED",
+  APPROVED: "APPROVED",
   REJECT: "REJECTED",
+  REJECTED: "REJECTED",
   CHANGES_REQUESTED: "CHANGES_REQUESTED",
 });
 

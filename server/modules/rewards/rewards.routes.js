@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { optionalAuth, requireAuth } from "../../middlewares/auth.js";
+import { validateBody, validateParams, validateQuery } from "../../lib/validate.js";
 import * as rewardsController from "./rewards.controller.js";
 import {
   attachReferralSchema,

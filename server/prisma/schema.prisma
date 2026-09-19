@@ -16,6 +16,16 @@ model User {
   /// Set when password changes/resets — access JWTs with iat before this are rejected.
   passwordChangedAt DateTime?
   emailVerifiedAt   DateTime?
+
+  // Module 00 — Staff & User Two-Factor Authentication (M00 / NFR-SEC-03 / UF-00.8)
+  twoFactorEnabled       Boolean   @default(false)
+  twoFactorSecret        String?   // AES-256-GCM encrypted TOTP secret (fo1:...)
+  twoFactorPendingSecret String?   // AES-256-GCM encrypted TOTP secret during setup
+  twoFactorBackupCodes   Json?     // Array of { codeHash: string, usedAt: string|null }
+  twoFactorLastStep      Int?      // Replay protection: last verified time step counter
+  twoFactorAttempts      Int       @default(0)
+  twoFactorLockedUntil   DateTime?
+
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
@@ -58,6 +68,8 @@ model RefreshToken {
   userAgent  String?
   /// Optional client IP at issue (safe display metadata).
   ip         String?
+  /// True if session completed 2FA verification.
+  mfa        Boolean   @default(false)
   createdAt  DateTime  @default(now())
 
   @@index([userId])

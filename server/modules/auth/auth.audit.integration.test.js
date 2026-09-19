@@ -32,6 +32,7 @@ async function createUser(label, password = "AuditPass123!") {
       name: `Audit ${label}`,
       passwordHash: await bcrypt.hash(password, 12),
       passwordChangedAt: new Date(Date.now() - 60_000),
+      emailVerifiedAt: new Date(),
     },
   });
   createdUserIds.push(user.id);

@@ -18,3 +18,16 @@ export function signAccessToken(payload, expiresIn) {
 export function verifyAccessToken(token) {
   return jwt.verify(token, secret());
 }
+
+export function signTempToken(payload, expiresIn = "5m") {
+  return jwt.sign(payload, secret(), { expiresIn });
+}
+
+export function verifyTempToken(token, expectedPurpose) {
+  const payload = jwt.verify(token, secret());
+  if (expectedPurpose && payload.purpose !== expectedPurpose) {
+    throw new Error("Invalid token purpose");
+  }
+  return payload;
+}
+

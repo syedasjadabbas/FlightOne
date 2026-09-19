@@ -68,3 +68,29 @@ export async function searchFlights(query, { timeoutMs } = {}) {
     `${SUPPLIER_CODE} searchFlights`,
   );
 }
+
+export { isTravelportConfigured } from "./travelport/config.js";
+export {
+  bookHeldReservationWithTravelport as reserveInventory,
+  cancelTravelportHold as cancelHold,
+  cancelTravelportReservation as cancelReservation,
+} from "./travelport/book.js";
+export { ticketHeldReservationWithTravelport as ticketInventory } from "./travelport/ticket.js";
+export {
+  retrieveTravelportReservation as retrieveReservation,
+  modifyTravelportReservation as modifyReservation,
+} from "./travelport/retrieve.js";
+export { getTravelportSeatMap as getSeatMap } from "./travelport/seats.js";
+export {
+  quoteTravelportExchange as quoteExchange,
+  reissueTravelportTicket as reissueTicket,
+} from "./travelport/exchange.js";
+export {
+  voidTravelportTicket as voidTicket,
+  quoteTravelportRefund as quoteRefund,
+} from "./travelport/refund.js";
+export { divideTravelportReservation as divideReservation } from "./travelport/divide.js";
+export {
+  readTravelportQueue as readQueues,
+  countTravelportQueue as countQueue,
+} from "./travelport/queues.js";

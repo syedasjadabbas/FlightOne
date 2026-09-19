@@ -3,12 +3,22 @@ import prisma from "../../config/prisma.js";
 import { AppError } from "../../lib/customError.js";
 import { randomToken, sha256Hex } from "../../lib/crypto.js";
 import { parseDurationToMs } from "../../lib/expires.js";
-import { signAccessToken } from "../../lib/jwt.js";
+import { signAccessToken, signTempToken, verifyTempToken } from "../../lib/jwt.js";
 import { comparePassword, hashPassword } from "../../lib/password.js";
 import { writeAudit } from "../../lib/audit.js";
 import { enqueueNotificationOutbox } from "../../lib/notifications/enqueue.js";
 import { drainNotificationOutbox } from "../../lib/notifications/drain.js";
 import logger from "../../lib/logger.js";
+import {
+  generateTotpSecret,
+  generateTotp,
+  verifyTotp,
+  generateBackupCodes,
+  hashBackupCode,
+  generateTotpUri,
+} from "../../lib/totp.js";
+import { encryptField, decryptField } from "../../lib/fieldEncryption.js";
+import { isStaffRole, userHasStaffRole } from "../../lib/staffRoles.js";
 import {
   captureSessionClientMeta,
   summarizeUserAgent,
@@ -92,10 +102,12 @@ async function resolveCurrentSessionIdFromRefresh(userId, refreshToken) {
   return row?.id ?? null;
 }
 
-async function issueSession(user, { req, familyId } = {}) {
+async function issueSession(user, { req, familyId, mfa = false } = {}) {
+  const isMfa = Boolean(mfa);
   const accessToken = signAccessToken({
     sub: user.id,
     email: user.email,
+    mfa: isMfa,
   });
   const refreshToken = randomToken();
   const now = new Date();
@@ -111,8 +123,9 @@ async function issueSession(user, { req, familyId } = {}) {
       lastUsedAt: now,
       userAgent: meta.userAgent,
       ip: meta.ip,
+      mfa: isMfa,
     },
-    select: { id: true, familyId: true },
+    select: { id: true, familyId: true, mfa: true },
   });
 
   await writeAudit({
@@ -125,6 +138,7 @@ async function issueSession(user, { req, familyId } = {}) {
       userAgent: meta.userAgent,
       ip: meta.ip,
       familyId: row.familyId,
+      mfa: isMfa,
     },
   }).catch(() => {});
 
@@ -133,6 +147,7 @@ async function issueSession(user, { req, familyId } = {}) {
     refreshToken,
     sessionId: row.id,
     user: toAuthUser(user),
+    mfa: isMfa,
   };
 }
 
@@ -180,11 +195,20 @@ export async function issueEmailVerificationOtp(user, { env = process.env } = {}
     },
   });
 
-  await enqueueNotificationOutbox([
+  const profile = await prisma.travellerProfile
+    .findUnique({
+      where: { userId: user.id },
+      select: { phone: true },
+    })
+    .catch(() => null);
+  const phone = profile?.phone || null;
+
+  const dedupeKey = `email-verification:${user.id}:${Date.now()}`;
+  const rows = [
     {
       userId: user.id,
       channel: "EMAIL",
-      dedupeKey: `email-verification:${user.id}:${Date.now()}`,
+      dedupeKey,
       title: "Verify your FlightOne email address",
       body: `Your 6-digit email verification code is: ${otp}. It expires in 10 minutes.`,
       payload: {
@@ -192,9 +216,44 @@ export async function issueEmailVerificationOtp(user, { env = process.env } = {}
         kind: "email_verification_otp",
         otp,
         expiresAt: expiresAt.toISOString(),
+        phone,
       },
     },
-  ]).catch((e) => {
+  ];
+
+  if (phone) {
+    rows.push({
+      userId: user.id,
+      channel: "WHATSAPP",
+      dedupeKey,
+      title: "Verify your FlightOne email address",
+      body: `Your 6-digit verification code is: ${otp}. It expires in 10 minutes.`,
+      payload: {
+        module: "auth",
+        kind: "email_verification_otp",
+        otp,
+        expiresAt: expiresAt.toISOString(),
+        phone,
+      },
+    });
+    rows.push({
+      userId: user.id,
+      channel: "SMS",
+      dedupeKey,
+      title: "FlightOne Security Code",
+      body: `FlightOne verification code: ${otp}. Valid for 10 minutes. Do not share.`,
+      payload: {
+        module: "auth",
+        kind: "email_verification_otp",
+        otp,
+        expiresAt: expiresAt.toISOString(),
+        phone,
+        isFallback: true,
+      },
+    });
+  }
+
+  await enqueueNotificationOutbox(rows).catch((e) => {
     logger.warn("auth.email_verification.enqueue_failed", {
       userId: user.id,
       err: e?.message,
@@ -208,6 +267,7 @@ export async function issueEmailVerificationOtp(user, { env = process.env } = {}
     requiresVerification: true,
     email: user.email,
     userId: user.id,
+    user: { id: user.id, email: user.email, name: user.name ?? null },
     ...(env.NODE_ENV === "test" && env.EMAIL_VERIFICATION_RETURN_TOKEN === "true"
       ? { _testToken: otp }
       : {}),
@@ -391,6 +451,12 @@ export async function loginUser({ email, password }, { req } = {}) {
       name: true,
       passwordHash: true,
       emailVerifiedAt: true,
+      twoFactorEnabled: true,
+      userRoles: {
+        select: {
+          role: { select: { name: true } },
+        },
+      },
     },
   });
 
@@ -433,6 +499,66 @@ export async function loginUser({ email, password }, { req } = {}) {
     });
   }
 
+  const isStaff = userHasStaffRole(user.userRoles);
+
+  if (user.twoFactorEnabled) {
+    // 2FA is active: issue 2FA challenge token
+    const tempToken = signTempToken(
+      {
+        sub: user.id,
+        email: user.email,
+        purpose: "2fa_challenge",
+        isStaff,
+      },
+      "10m",
+    );
+
+    await writeAudit({
+      userId: user.id,
+      action: "auth.login.2fa_challenge",
+      resourceType: "User",
+      resourceId: user.id,
+      req,
+      metadata: { isStaff, twoFactorEnabled: true },
+    }).catch(() => {});
+
+    return {
+      requires2fa: true,
+      tempToken,
+      methods: ["totp", "backup_code"],
+      message: "Two-factor authentication code required",
+    };
+  }
+
+  if (isStaff) {
+    // Staff member must enroll in 2FA (NFR-SEC-03 / UF-15.8)
+    const tempToken = signTempToken(
+      {
+        sub: user.id,
+        email: user.email,
+        purpose: "2fa_enrollment",
+        isStaff: true,
+      },
+      "15m",
+    );
+
+    await writeAudit({
+      userId: user.id,
+      action: "auth.login.2fa_setup_required",
+      resourceType: "User",
+      resourceId: user.id,
+      req,
+      metadata: { isStaff, twoFactorEnabled: false },
+    }).catch(() => {});
+
+    return {
+      requires2fa: true,
+      requires2faSetup: true,
+      tempToken,
+      message: "Two-factor authentication enrollment is mandatory for staff roles",
+    };
+  }
+
   await writeAudit({
     userId: user.id,
     action: "auth.login",
@@ -443,7 +569,7 @@ export async function loginUser({ email, password }, { req } = {}) {
   });
 
   // Distinct from auth.login: issues refresh-token session (auth.session.create).
-  return issueSession(user, { req });
+  return issueSession(user, { req, mfa: false });
 }
 
 export async function getProfile(userId) {
@@ -479,8 +605,9 @@ export async function refreshSession({ refreshToken }, { req } = {}) {
         expiresAt: true,
         revokedAt: true,
         revokeReason: true,
+        mfa: true,
         user: {
-          select: { id: true, email: true, name: true },
+          select: { id: true, email: true, name: true, twoFactorEnabled: true },
         },
       },
     });
@@ -526,9 +653,11 @@ export async function refreshSession({ refreshToken }, { req } = {}) {
       return { type: "reject" };
     }
 
+    const isMfa = Boolean(row.mfa || row.user.twoFactorEnabled);
     const accessToken = signAccessToken({
       sub: row.user.id,
       email: row.user.email,
+      mfa: isMfa,
     });
     const nextRefresh = randomToken();
     const now = new Date();
@@ -542,6 +671,7 @@ export async function refreshSession({ refreshToken }, { req } = {}) {
         lastUsedAt: now,
         userAgent: meta.userAgent,
         ip: meta.ip,
+        mfa: isMfa,
       },
       select: { id: true, familyId: true },
     });
@@ -553,6 +683,7 @@ export async function refreshSession({ refreshToken }, { req } = {}) {
         refreshToken: nextRefresh,
         sessionId: next.id,
         user: toAuthUser(row.user),
+        mfa: isMfa,
       },
       audit: {
         userId: row.user.id,
@@ -820,11 +951,20 @@ export async function requestPasswordReset({ email }, { req, env = process.env }
 
   if (emailDelivery === "QUEUED") {
     const hourBucket = new Date().toISOString().slice(0, 13);
-    await enqueueNotificationOutbox([
+    const profile = await prisma.travellerProfile
+      .findUnique({
+        where: { userId: user.id },
+        select: { phone: true },
+      })
+      .catch(() => null);
+    const phone = profile?.phone || null;
+
+    const dedupeKey = `password-reset:${user.id}:${hourBucket}`;
+    const rows = [
       {
         userId: user.id,
         channel: "EMAIL",
-        dedupeKey: `password-reset:${user.id}:${hourBucket}`,
+        dedupeKey,
         title: "Your FlightOne Password Reset Code",
         body: `Your 6-digit password verification code is: ${otp}. It expires in 10 minutes. Do not share this code with anyone.`,
         payload: {
@@ -832,9 +972,44 @@ export async function requestPasswordReset({ email }, { req, env = process.env }
           kind: "password_reset_otp",
           otp,
           expiresAt: expiresAt.toISOString(),
+          phone,
         },
       },
-    ]).catch((e) => {
+    ];
+
+    if (phone) {
+      rows.push({
+        userId: user.id,
+        channel: "WHATSAPP",
+        dedupeKey,
+        title: "Your FlightOne Password Reset Code",
+        body: `Your 6-digit password verification code is: ${otp}. It expires in 10 minutes. Do not share this code with anyone.`,
+        payload: {
+          module: "auth",
+          kind: "password_reset_otp",
+          otp,
+          expiresAt: expiresAt.toISOString(),
+          phone,
+        },
+      });
+      rows.push({
+        userId: user.id,
+        channel: "SMS",
+        dedupeKey,
+        title: "FlightOne Security Code",
+        body: `FlightOne verification code: ${otp}. Valid for 10 minutes. Do not share.`,
+        payload: {
+          module: "auth",
+          kind: "password_reset_otp",
+          otp,
+          expiresAt: expiresAt.toISOString(),
+          phone,
+          isFallback: true,
+        },
+      });
+    }
+
+    await enqueueNotificationOutbox(rows).catch((e) => {
       logger.warn("auth.password_reset.enqueue_failed", {
         userId: user.id,
         err: e?.message,
@@ -974,3 +1149,334 @@ export async function assertAccessTokenStillValid(userId, jwtPayload) {
     throw new AppError(401, "Session invalidated — please log in again");
   }
 }
+
+/**
+ * Initiate 2FA enrollment for staff or travellers (UF-00.8).
+ * Generates an RFC 6238 TOTP secret, 10 single-use recovery backup codes, and QR URI.
+ * The secret is encrypted with AES-256-GCM before saving to Postgres.
+ */
+export async function setupTwoFactor(userId, { req } = {}) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, email: true, twoFactorEnabled: true },
+  });
+  if (!user) throw new AppError(404, "User not found");
+
+  const secret = generateTotpSecret(20);
+  const backupCodes = generateBackupCodes(10);
+  const hashedBackupCodes = backupCodes.map((code) => ({
+    codeHash: hashBackupCode(code),
+    usedAt: null,
+  }));
+  const encryptedSecret = encryptField(secret);
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      twoFactorPendingSecret: encryptedSecret,
+      twoFactorBackupCodes: hashedBackupCodes,
+    },
+  });
+
+  const otpauthUrl = generateTotpUri({ email: user.email, secret });
+
+  await writeAudit({
+    userId: user.id,
+    action: "auth.2fa.setup_initiated",
+    resourceType: "User",
+    resourceId: user.id,
+    req,
+    metadata: { backupCodesCount: backupCodes.length },
+  }).catch(() => {});
+
+  return {
+    secret,
+    otpauthUrl,
+    backupCodes,
+    message: "Save your backup codes in a secure location. They will not be displayed again.",
+  };
+}
+
+/**
+ * Confirm 2FA setup with the first valid TOTP code.
+ * Activates 2FA and revokes pending setup state.
+ */
+export async function confirmTwoFactor(userId, { code }, { req, tempTokenUsed = false } = {}) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      twoFactorPendingSecret: true,
+      twoFactorBackupCodes: true,
+    },
+  });
+  if (!user) throw new AppError(404, "User not found");
+  if (!user.twoFactorPendingSecret) {
+    throw new AppError(400, "Two-factor authentication setup has not been initiated");
+  }
+
+  const secret = decryptField(user.twoFactorPendingSecret);
+  const verification = verifyTotp(code, secret);
+  if (!verification.valid) {
+    throw new AppError(400, "Invalid verification code");
+  }
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      twoFactorEnabled: true,
+      twoFactorSecret: user.twoFactorPendingSecret,
+      twoFactorPendingSecret: null,
+      twoFactorLastStep: tempTokenUsed ? verification.step : null,
+      twoFactorAttempts: 0,
+      twoFactorLockedUntil: null,
+    },
+  });
+
+  await writeAudit({
+    userId: user.id,
+    action: "auth.2fa.enabled",
+    resourceType: "User",
+    resourceId: user.id,
+    req,
+    metadata: { method: "totp" },
+  }).catch(() => {});
+
+  if (tempTokenUsed) {
+    const session = await issueSession(user, { req, mfa: true });
+    return {
+      ...session,
+      ok: true,
+      message: "Two-factor authentication enabled successfully",
+    };
+  }
+
+  return {
+    ok: true,
+    message: "Two-factor authentication enabled successfully",
+  };
+}
+
+/**
+ * Verify 2FA challenge code (TOTP or single-use recovery code) during login.
+ * Includes replay protection, attempt counting, and 15-minute account lockout on 5 failures.
+ */
+export async function verifyTwoFactor({ tempToken, code, type }, { req } = {}) {
+  if (!tempToken) {
+    throw new AppError(400, "Temporary verification token is required");
+  }
+  let payload;
+  try {
+    payload = verifyTempToken(tempToken, "2fa_challenge");
+  } catch {
+    throw new AppError(401, "Invalid or expired 2FA challenge token");
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: payload.sub },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      twoFactorEnabled: true,
+      twoFactorSecret: true,
+      twoFactorBackupCodes: true,
+      twoFactorLastStep: true,
+      twoFactorAttempts: true,
+      twoFactorLockedUntil: true,
+    },
+  });
+
+  if (!user || !user.twoFactorEnabled || !user.twoFactorSecret) {
+    throw new AppError(400, "Two-factor authentication is not active for this user");
+  }
+
+  if (user.twoFactorLockedUntil && new Date(user.twoFactorLockedUntil) > new Date()) {
+    const remainingMs = new Date(user.twoFactorLockedUntil).getTime() - Date.now();
+    const remainingMins = Math.max(1, Math.ceil(remainingMs / 60000));
+    throw new AppError(429, `Too many failed attempts. Account locked for ${remainingMins} minute(s).`);
+  }
+
+  const rawCode = String(code ?? "").trim();
+  const isBackupCode = type === "backup_code" || rawCode.includes("-");
+
+  if (isBackupCode) {
+    const hashed = hashBackupCode(rawCode);
+    const backupCodes = Array.isArray(user.twoFactorBackupCodes)
+      ? [...user.twoFactorBackupCodes]
+      : [];
+
+    const foundIdx = backupCodes.findIndex(
+      (b) => b.codeHash === hashed && !b.usedAt,
+    );
+
+    if (foundIdx === -1) {
+      const nextAttempts = (user.twoFactorAttempts || 0) + 1;
+      const lockedUntil = nextAttempts >= 5 ? new Date(Date.now() + 15 * 60 * 1000) : null;
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { twoFactorAttempts: nextAttempts, twoFactorLockedUntil: lockedUntil },
+      });
+      await writeAudit({
+        userId: user.id,
+        action: "auth.2fa.failure",
+        resourceType: "User",
+        resourceId: user.id,
+        req,
+        metadata: { method: "backup_code", reason: "invalid_code", attempts: nextAttempts },
+      }).catch(() => {});
+      throw new AppError(401, "Invalid or already used recovery code");
+    }
+
+    // Mark single-use code as used
+    backupCodes[foundIdx] = {
+      ...backupCodes[foundIdx],
+      usedAt: new Date().toISOString(),
+    };
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        twoFactorBackupCodes: backupCodes,
+        twoFactorAttempts: 0,
+        twoFactorLockedUntil: null,
+      },
+    });
+
+    await writeAudit({
+      userId: user.id,
+      action: "auth.2fa.backup_code.used",
+      resourceType: "User",
+      resourceId: user.id,
+      req,
+      metadata: { remainingBackupCodes: backupCodes.filter((b) => !b.usedAt).length },
+    }).catch(() => {});
+
+    return issueSession(user, { req, mfa: true });
+  }
+
+  // TOTP code verification path
+  const secret = decryptField(user.twoFactorSecret);
+  const verification = verifyTotp(rawCode, secret);
+
+  if (!verification.valid) {
+    const nextAttempts = (user.twoFactorAttempts || 0) + 1;
+    const lockedUntil = nextAttempts >= 5 ? new Date(Date.now() + 15 * 60 * 1000) : null;
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { twoFactorAttempts: nextAttempts, twoFactorLockedUntil: lockedUntil },
+    });
+    await writeAudit({
+      userId: user.id,
+      action: "auth.2fa.failure",
+      resourceType: "User",
+      resourceId: user.id,
+      req,
+      metadata: { method: "totp", reason: verification.reason || "invalid_code", attempts: nextAttempts },
+    }).catch(() => {});
+    throw new AppError(401, "Invalid verification code");
+  }
+
+  // Replay prevention: cannot reuse the same TOTP code at the same or earlier step
+  if (user.twoFactorLastStep != null && verification.step <= user.twoFactorLastStep) {
+    await writeAudit({
+      userId: user.id,
+      action: "auth.2fa.replay_rejected",
+      resourceType: "User",
+      resourceId: user.id,
+      req,
+      metadata: { step: verification.step, lastStep: user.twoFactorLastStep },
+    }).catch(() => {});
+    throw new AppError(401, "Verification code has already been used. Please wait for a new code.");
+  }
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      twoFactorLastStep: verification.step,
+      twoFactorAttempts: 0,
+      twoFactorLockedUntil: null,
+    },
+  });
+
+  await writeAudit({
+    userId: user.id,
+    action: "auth.2fa.success",
+    resourceType: "User",
+    resourceId: user.id,
+    req,
+    metadata: { method: "totp", step: verification.step },
+  }).catch(() => {});
+
+  return issueSession(user, { req, mfa: true });
+}
+
+/**
+ * Disable 2FA for a user account.
+ * Prohibited for SDS staff roles (NFR-SEC-03).
+ */
+export async function disableTwoFactor(userId, { password, code }, { req } = {}) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      email: true,
+      passwordHash: true,
+      twoFactorEnabled: true,
+      twoFactorSecret: true,
+      userRoles: {
+        select: {
+          role: { select: { name: true } },
+        },
+      },
+    },
+  });
+  if (!user) throw new AppError(404, "User not found");
+
+  if (userHasStaffRole(user.userRoles)) {
+    throw new AppError(403, "Two-factor authentication is mandatory for staff roles and cannot be disabled");
+  }
+
+  if (!user.twoFactorEnabled) {
+    throw new AppError(400, "Two-factor authentication is not currently enabled");
+  }
+
+  let verified = false;
+  if (password && user.passwordHash) {
+    verified = await comparePassword(password, user.passwordHash);
+  } else if (code && user.twoFactorSecret) {
+    const secret = decryptField(user.twoFactorSecret);
+    const res = verifyTotp(code, secret);
+    verified = res.valid;
+  }
+
+  if (!verified) {
+    throw new AppError(401, "Invalid password or verification code");
+  }
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      twoFactorEnabled: false,
+      twoFactorSecret: null,
+      twoFactorBackupCodes: null,
+      twoFactorPendingSecret: null,
+      twoFactorLastStep: null,
+      twoFactorAttempts: 0,
+      twoFactorLockedUntil: null,
+    },
+  });
+
+  await writeAudit({
+    userId: user.id,
+    action: "auth.2fa.disabled",
+    resourceType: "User",
+    resourceId: user.id,
+    req,
+  }).catch(() => {});
+
+  return { ok: true, message: "Two-factor authentication disabled successfully" };
+}
+

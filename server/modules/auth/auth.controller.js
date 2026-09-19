@@ -61,7 +61,79 @@ export async function bootstrap(req, res, next) {
 export async function login(req, res, next) {
   try {
     const data = await authService.loginUser(req.body, { req });
+    if (data?.requires2fa) {
+      return successResponse(res, data.message || "Two-factor authentication required", data);
+    }
     return successResponse(res, "OK", attachSessionCookies(req, res, data));
+  } catch (e) {
+    next(e);
+  }
+}
+
+export async function twoFactorSetup(req, res, next) {
+  try {
+    const tempToken = req.body?.tempToken || req.headers.authorization?.replace(/^Bearer\s+/i, "");
+    let userId = req.user?.id;
+    if (!userId && tempToken) {
+      const { verifyTempToken } = await import("../../lib/jwt.js");
+      const payload = verifyTempToken(tempToken, "2fa_enrollment");
+      userId = payload.sub;
+    }
+    if (!userId) {
+      return res.status(401).json({ ok: false, error: "Authentication or enrollment token required" });
+    }
+    const data = await authService.setupTwoFactor(userId, { req });
+    return successResponse(res, "Two-factor authentication setup initiated", data);
+  } catch (e) {
+    next(e);
+  }
+}
+
+export async function twoFactorConfirm(req, res, next) {
+  try {
+    const tempToken = req.body?.tempToken || req.headers.authorization?.replace(/^Bearer\s+/i, "");
+    let userId = req.user?.id;
+    let tempTokenUsed = false;
+    if (!userId && tempToken) {
+      const { verifyTempToken } = await import("../../lib/jwt.js");
+      const payload = verifyTempToken(tempToken, "2fa_enrollment");
+      userId = payload.sub;
+      tempTokenUsed = true;
+    }
+    if (!userId) {
+      return res.status(401).json({ ok: false, error: "Authentication or enrollment token required" });
+    }
+    const data = await authService.confirmTwoFactor(userId, { code: req.body.code }, { req, tempTokenUsed });
+    if (data?.accessToken) {
+      return successResponse(res, data.message || "Two-factor authentication enabled", attachSessionCookies(req, res, data));
+    }
+    return successResponse(res, data.message || "Two-factor authentication enabled", data);
+  } catch (e) {
+    next(e);
+  }
+}
+
+export async function twoFactorVerify(req, res, next) {
+  try {
+    const tempToken = req.body?.tempToken || req.headers.authorization?.replace(/^Bearer\s+/i, "");
+    const data = await authService.verifyTwoFactor(
+      { tempToken, code: req.body.code, type: req.body.type },
+      { req },
+    );
+    return successResponse(res, "Two-factor authentication verified", attachSessionCookies(req, res, data));
+  } catch (e) {
+    next(e);
+  }
+}
+
+export async function twoFactorDisable(req, res, next) {
+  try {
+    const data = await authService.disableTwoFactor(
+      req.user.id,
+      { password: req.body.password, code: req.body.code },
+      { req },
+    );
+    return successResponse(res, data.message, data);
   } catch (e) {
     next(e);
   }

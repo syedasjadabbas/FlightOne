@@ -13,9 +13,11 @@
  */
 
 import logger from "../logger.js";
+import { dispatchSms } from "./providers/sms.provider.js";
+import { dispatchWhatsApp } from "./providers/whatsapp.provider.js";
 
 /**
- * @typedef {{ ok: true, provider: string } | { ok: false, reason: string, retryable?: boolean }} DeliveryResult
+ * @typedef {{ ok: true, provider: string, messageId?: string } | { ok: false, reason: string, retryable?: boolean, provider?: string }} DeliveryResult
  */
 
 function webhookConfig(channel, env = process.env) {
@@ -24,7 +26,9 @@ function webhookConfig(channel, env = process.env) {
       ? env.NOTIFY_EMAIL_WEBHOOK_URL?.trim()
       : channel === "WHATSAPP"
         ? env.NOTIFY_WHATSAPP_WEBHOOK_URL?.trim()
-        : null;
+        : channel === "SMS"
+          ? env.NOTIFY_SMS_WEBHOOK_URL?.trim()
+          : null;
   return {
     url: url || null,
     apiKey: env.NOTIFY_WEBHOOK_API_KEY?.trim() || null,
@@ -58,7 +62,16 @@ export async function deliverEmailNotification(notification, deps = {}) {
  * @returns {Promise<DeliveryResult>}
  */
 export async function deliverWhatsAppNotification(notification, deps = {}) {
-  return deliverWebhookChannel("WHATSAPP", notification, deps);
+  return dispatchWhatsApp(notification, deps);
+}
+
+/**
+ * @param {object} notification
+ * @param {{ fetchImpl?: typeof fetch, env?: NodeJS.ProcessEnv }} [deps]
+ * @returns {Promise<DeliveryResult>}
+ */
+export async function deliverSmsNotification(notification, deps = {}) {
+  return dispatchSms(notification, deps);
 }
 
 async function deliverWebhookChannel(channel, notification, deps = {}) {
@@ -118,8 +131,14 @@ async function deliverWebhookChannel(channel, notification, deps = {}) {
       };
     }
 
+    const resJson = typeof res.json === "function" ? await res.json().catch(() => ({})) : {};
+    const messageId = resJson?.messageId || resJson?.id || null;
     logger.info("notify.webhook.sent", { channel, id: notification.id });
-    return { ok: true, provider: `${channel.toLowerCase()}-webhook` };
+    return {
+      ok: true,
+      provider: `${channel.toLowerCase()}-webhook`,
+      ...(messageId ? { messageId } : {}),
+    };
   } catch (e) {
     logger.error("notify.webhook.error", {
       channel,
@@ -150,6 +169,8 @@ export async function deliverNotification(notification, deps = {}) {
       return deliverEmailNotification(notification, deps);
     case "WHATSAPP":
       return deliverWhatsAppNotification(notification, deps);
+    case "SMS":
+      return deliverSmsNotification(notification, deps);
     default:
       return {
         ok: false,
@@ -158,3 +179,4 @@ export async function deliverNotification(notification, deps = {}) {
       };
   }
 }
+

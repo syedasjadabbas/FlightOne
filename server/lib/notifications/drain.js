@@ -46,6 +46,14 @@ export async function drainNotificationOutbox(opts = {}) {
   const results = [];
 
   for (const n of pending) {
+    const existingPayload = n.payload && typeof n.payload === "object" ? n.payload : {};
+    const existingDelivery =
+      existingPayload.delivery && typeof existingPayload.delivery === "object"
+        ? existingPayload.delivery
+        : {};
+    const currentAttempts = (existingDelivery.attempts || 0) + 1;
+    const maxAttempts = Number(opts.maxAttempts) || 5;
+
     const delivery = await deliverNotification(n, {
       fetchImpl: opts.fetchImpl,
       env: opts.env,
@@ -58,36 +66,71 @@ export async function drainNotificationOutbox(opts = {}) {
           status: "SENT",
           sentAt: opts.now ?? new Date(),
           payload: {
-            ...(n.payload && typeof n.payload === "object" ? n.payload : {}),
-            delivery: { provider: delivery.provider, at: new Date().toISOString() },
+            ...existingPayload,
+            delivery: {
+              ...existingDelivery,
+              provider: delivery.provider,
+              ...(delivery.messageId ? { messageId: delivery.messageId } : {}),
+              status: "SENT",
+              attempts: currentAttempts,
+              at: (opts.now ?? new Date()).toISOString(),
+            },
           },
         },
       });
       drained += 1;
-      results.push({ id: n.id, channel: n.channel, status: "SENT" });
+      results.push({ id: n.id, channel: n.channel, status: "SENT", messageId: delivery.messageId });
       continue;
     }
 
-    if (delivery.retryable) {
+    if (delivery.retryable && currentAttempts < maxAttempts) {
       // Leave PENDING for a later drain pass — do not pretend success.
+      await prisma.notificationOutbox.update({
+        where: { id: n.id },
+        data: {
+          payload: {
+            ...existingPayload,
+            delivery: {
+              ...existingDelivery,
+              attempts: currentAttempts,
+              lastAttemptAt: new Date().toISOString(),
+            },
+            deliveryError: {
+              reason: delivery.reason,
+              at: new Date().toISOString(),
+            },
+          },
+        },
+      });
       deferred += 1;
       results.push({
         id: n.id,
         channel: n.channel,
         status: "PENDING",
         reason: delivery.reason,
+        attempt: currentAttempts,
       });
       continue;
     }
+
+    const failureReason =
+      delivery.retryable && currentAttempts >= maxAttempts
+        ? `max_retries_exceeded:${delivery.reason}`
+        : delivery.reason;
 
     await prisma.notificationOutbox.update({
       where: { id: n.id },
       data: {
         status: "FAILED",
         payload: {
-          ...(n.payload && typeof n.payload === "object" ? n.payload : {}),
+          ...existingPayload,
+          delivery: {
+            ...existingDelivery,
+            attempts: currentAttempts,
+            lastAttemptAt: new Date().toISOString(),
+          },
           deliveryError: {
-            reason: delivery.reason,
+            reason: failureReason,
             at: new Date().toISOString(),
           },
         },
@@ -98,7 +141,8 @@ export async function drainNotificationOutbox(opts = {}) {
       id: n.id,
       channel: n.channel,
       status: "FAILED",
-      reason: delivery.reason,
+      reason: failureReason,
+      attempts: currentAttempts,
     });
   }
 

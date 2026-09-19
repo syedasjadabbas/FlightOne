@@ -51,3 +51,26 @@ export const revokeOtherSessionsSchema = z
     refreshToken: z.string().min(1).optional(),
   })
   .default({});
+
+export const twoFactorSetupSchema = z
+  .object({
+    tempToken: z.string().optional(),
+  })
+  .default({});
+
+export const twoFactorConfirmSchema = z.object({
+  code: z.string().min(1),
+  tempToken: z.string().optional(),
+});
+
+export const twoFactorVerifySchema = z.object({
+  code: z.string().min(1),
+  tempToken: z.string().optional(),
+  type: z.enum(["totp", "backup_code"]).optional(),
+});
+
+export const twoFactorDisableSchema = z.object({
+  password: z.string().optional(),
+  code: z.string().optional(),
+});
+
