@@ -98,7 +98,11 @@ export function RefundCaseDetailClient({ id }: { id: string }) {
         {data.failureReason ? (
           <p className="fo-traveller__row-body">Note: {data.failureReason}</p>
         ) : null}
-        {data.status === "COMPLETED" ? (
+        {data.status === "REQUIRES_HUMAN" ? (
+          <p className="text-[14px] font-medium text-amber-800">
+            Manual review — automation could not safely complete this refund. It is not a payout.
+          </p>
+        ) : data.status === "COMPLETED" ? (
           <p className="text-[14px] font-medium text-ink">
             Refund completed after payment confirmation.
           </p>
@@ -109,6 +113,19 @@ export function RefundCaseDetailClient({ id }: { id: string }) {
           </p>
         )}
       </TravellerSection>
+
+      {data.audit?.length ? (
+        <TravellerSection title="History">
+          <ul className="fo-traveller__list">
+            {data.audit.map((row) => (
+              <li key={row.id} className="fo-traveller__row">
+                <p className="fo-traveller__row-title">{row.action}</p>
+                <p className="fo-traveller__row-meta">{new Date(row.createdAt).toLocaleString()}</p>
+              </li>
+            ))}
+          </ul>
+        </TravellerSection>
+      ) : null}
 
       {calc ? (
         <TravellerSection title="Calculation">

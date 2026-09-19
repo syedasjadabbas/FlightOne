@@ -74,6 +74,7 @@ model TravelGroup {
   attendanceWaypoints GroupAttendanceWaypoint[]
   photos          GroupPhoto[]
   tripMemories    GroupTripMemory[]
+  travelRequests  GroupTravelRequest[]
 
   @@index([createdByUserId])
 }
@@ -239,6 +240,76 @@ model GroupPollVote {
   @@index([pollId])
 }
 
+/// Manual-assisted group booking enquiry (10+ travellers). Status is the
+/// request lifecycle only — never invents airline availability, fares, PNRs,
+/// or tickets. Fulfilment is desk-assisted, not automated ticketing.
+enum GroupTravelRequestStatus {
+  SUBMITTED
+  IN_REVIEW
+  CANCELLED
+}
+
+enum GroupDateFlexibility {
+  EXACT
+  PLUS_MINUS_1
+  PLUS_MINUS_3
+  FLEXIBLE_WEEK
+}
+
+enum GroupCabinPreference {
+  ECONOMY
+  PREMIUM_ECONOMY
+  BUSINESS
+  FIRST
+}
+
+model GroupTravelRequest {
+  id              String                   @id @default(cuid())
+  createdByUserId String
+  groupId         String?
+  group           TravelGroup?             @relation(fields: [groupId], references: [id], onDelete: SetNull)
+
+  name   String
+  type   GroupType
+  status GroupTravelRequestStatus @default(SUBMITTED)
+
+  origin          String
+  destination     String
+  departureDate   DateTime?
+  returnDate      DateTime?
+  flexibility     GroupDateFlexibility     @default(EXACT)
+  passengerCount  Int
+  cabinPreference GroupCabinPreference?
+  purpose         String?
+
+  contactName    String
+  contactEmail   String
+  contactPhone   String?
+  organization   String?
+
+  baggageRequired         Boolean @default(false)
+  seatingTogether         Boolean @default(false)
+  airportTransfers        Boolean @default(false)
+  splitBilling            Boolean @default(false)
+  accommodationRequired   Boolean @default(false)
+  accommodationNotes      String?
+  transportNotes          String?
+  notes                   String?
+
+  idempotencyKey String?
+  cancelledAt    DateTime?
+  cancelReason   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([idempotencyKey])
+  @@index([createdByUserId])
+  @@index([status])
+  @@index([groupId])
+  @@index([createdAt])
+}
+
 enum MiceEventType {
   MEETING
   INCENTIVE
@@ -284,9 +355,74 @@ model MiceEvent {
   transfers MiceTransfer[]
   sponsors  MiceSponsor[]
   budgetLines MiceBudgetLine[]
+  enquiries MiceEventEnquiry[]
 
   @@index([groupId])
   @@index([createdByUserId])
+}
+
+/// Manual-assisted MICE enquiry. Status is the request lifecycle only —
+/// never invents venue holds, airline inventory, hotel blocks, fares, or PNRs.
+enum MiceEnquiryStatus {
+  SUBMITTED
+  IN_REVIEW
+  CANCELLED
+}
+
+model MiceEventEnquiry {
+  id              String            @id @default(cuid())
+  createdByUserId String
+  eventId         String?
+  event           MiceEvent?        @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  companyId       String?
+
+  name   String
+  type   MiceEventType
+  status MiceEnquiryStatus @default(SUBMITTED)
+
+  organization String?
+  destination  String
+  origin       String?
+  venue        String?
+
+  eventStartsAt  DateTime
+  eventEndsAt    DateTime
+  travelStartsAt DateTime?
+  travelEndsAt   DateTime?
+
+  attendeeCount Int
+  budgetMinor   Int?
+  currency      String?
+
+  contactName  String
+  contactEmail String
+  contactPhone String?
+
+  flightsRequired           Boolean @default(false)
+  hotelsRequired            Boolean @default(false)
+  transfersRequired         Boolean @default(false)
+  meetingSpaceRequired      Boolean @default(false)
+  cateringRequired          Boolean @default(false)
+  visaAssistanceRequired    Boolean @default(false)
+
+  accommodationNotes String?
+  transportNotes     String?
+  flightNotes        String?
+  meetingNotes       String?
+  notes              String?
+
+  idempotencyKey String?
+  cancelledAt    DateTime?
+  cancelReason   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([idempotencyKey])
+  @@index([createdByUserId])
+  @@index([status])
+  @@index([eventId])
+  @@index([createdAt])
 }
 
 /// `userId` is optional — a delegate need not be a platform User (module

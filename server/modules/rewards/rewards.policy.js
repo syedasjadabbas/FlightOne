@@ -28,6 +28,55 @@ export function getRewardsPolicy(env = process.env) {
   };
 }
 
+/**
+ * Public policy surface for UI/API. Describes only events the ledger actually
+ * implements — never invents multipliers, lounge access, or cash-out.
+ */
+export function getPublicRewardsPolicy(env = process.env) {
+  const policy = getRewardsPolicy(env);
+  return {
+    earnPointsPerHundredMinor: policy.earnPointsPerHundredMinor,
+    referralBonusPoints: policy.referralBonusPoints,
+    pointValueMinor: policy.pointValueMinor,
+    creditExpiryDays: policy.creditExpiryDays,
+    tierThresholds: policy.tierThresholds.map((row) => ({
+      tier: row.tier,
+      minInclusive: row.minInclusive,
+      nextTier: row.nextTier,
+      nextAt: row.nextAt,
+    })),
+    tierNotes:
+      "Tiers are labels from lifetime earned points. They do not currently change earn rates or unlock separate perks.",
+    earningEvents: [
+      {
+        id: "TICKETED_BOOKING",
+        status: "LIVE",
+        eligibleBookingStatuses: ["TICKETED", "ACTIVE", "COMPLETED"],
+        rate: { pointsPerHundredMinor: policy.earnPointsPerHundredMinor },
+        description:
+          "Points are credited only after a booking is ticketed, active, or completed. Quoted searches and unpaid bookings do not earn.",
+      },
+      {
+        id: "REFERRAL_FIRST_TICKETED",
+        status: "LIVE",
+        points: policy.referralBonusPoints,
+        description:
+          "Referral bonus is credited to the referrer after the referred traveller's first eligible earn on a ticketed booking.",
+      },
+    ],
+    redemptionOptions: [
+      {
+        id: "CHECKOUT_CREDIT",
+        status: "LIVE",
+        appliesToBookingStatus: "QUOTED",
+        pointValueMinor: policy.pointValueMinor,
+        description:
+          "Redeem points at checkout to reduce the customer-payable amount on a quoted booking. Supplier net is unchanged. There is no cash payout.",
+      },
+    ],
+  };
+}
+
 function parsePositiveInt(raw, fallback) {
   const n = Number(raw);
   if (!Number.isInteger(n) || n < 0) return fallback;

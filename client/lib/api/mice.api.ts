@@ -25,6 +25,81 @@ export type MiceEvent = {
   myRole?: string;
 };
 
+export type MiceEnquiryStatus = "SUBMITTED" | "IN_REVIEW" | "CANCELLED";
+
+export type MiceEventEnquiry = {
+  id: string;
+  createdByUserId: string;
+  eventId: string | null;
+  companyId: string | null;
+  name: string;
+  type: MiceEventType;
+  status: MiceEnquiryStatus;
+  organization: string | null;
+  destination: string;
+  origin: string | null;
+  venue: string | null;
+  eventStartsAt: string;
+  eventEndsAt: string;
+  travelStartsAt: string | null;
+  travelEndsAt: string | null;
+  attendeeCount: number;
+  budgetMinor: number | null;
+  currency: string | null;
+  contactName: string;
+  contactEmail: string;
+  contactPhone: string | null;
+  flightsRequired: boolean;
+  hotelsRequired: boolean;
+  transfersRequired: boolean;
+  meetingSpaceRequired: boolean;
+  cateringRequired: boolean;
+  visaAssistanceRequired: boolean;
+  accommodationNotes: string | null;
+  transportNotes: string | null;
+  flightNotes: string | null;
+  meetingNotes: string | null;
+  notes: string | null;
+  cancelledAt: string | null;
+  cancelReason: string | null;
+  createdAt: string;
+  updatedAt: string;
+  fulfilment?: string;
+  fulfilmentNote?: string;
+  event?: MiceEvent | null;
+};
+
+export type CreateMiceEnquiryBody = {
+  name: string;
+  type: MiceEventType;
+  organization?: string;
+  destination: string;
+  origin?: string;
+  venue?: string;
+  eventStartsAt: string;
+  eventEndsAt: string;
+  travelStartsAt?: string;
+  travelEndsAt?: string;
+  attendeeCount: number;
+  budgetMinor?: number;
+  currency?: string;
+  contactName: string;
+  contactEmail: string;
+  contactPhone?: string;
+  flightsRequired?: boolean;
+  hotelsRequired?: boolean;
+  transfersRequired?: boolean;
+  meetingSpaceRequired?: boolean;
+  cateringRequired?: boolean;
+  visaAssistanceRequired?: boolean;
+  accommodationNotes?: string;
+  transportNotes?: string;
+  flightNotes?: string;
+  meetingNotes?: string;
+  notes?: string;
+  idempotencyKey?: string;
+};
+
 export type MiceTransfer = {
   id: string;
   eventId: string;
@@ -55,6 +130,37 @@ export const miceApi = baseApi.injectEndpoints({
     listMiceEvents: build.query<MiceEvent[], void>({
       query: () => "/mice/events",
       providesTags: ["Mice"],
+    }),
+    listMiceEnquiries: build.query<{ items: MiceEventEnquiry[] }, void>({
+      query: () => "/mice/enquiries",
+      providesTags: ["Mice"],
+    }),
+    getMiceEnquiry: build.query<MiceEventEnquiry, string>({
+      query: (enquiryId) => `/mice/enquiries/${enquiryId}`,
+      providesTags: (_r, _e, id) => [{ type: "Mice", id: `enquiry-${id}` }],
+    }),
+    createMiceEnquiry: build.mutation<MiceEventEnquiry, CreateMiceEnquiryBody>({
+      query: (body) => ({ url: "/mice/enquiries", method: "POST", body }),
+      invalidatesTags: ["Mice"],
+    }),
+    updateMiceEnquiry: build.mutation<
+      MiceEventEnquiry,
+      { enquiryId: string; body: Partial<CreateMiceEnquiryBody> }
+    >({
+      query: ({ enquiryId, body }) => ({
+        url: `/mice/enquiries/${enquiryId}`,
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: ["Mice"],
+    }),
+    cancelMiceEnquiry: build.mutation<MiceEventEnquiry, { enquiryId: string; reason?: string }>({
+      query: ({ enquiryId, reason }) => ({
+        url: `/mice/enquiries/${enquiryId}/cancel`,
+        method: "POST",
+        body: { reason },
+      }),
+      invalidatesTags: ["Mice"],
     }),
     getMiceEvent: build.query<MiceEvent, string>({
       query: (id) => `/mice/events/${id}`,
@@ -259,6 +365,11 @@ export const miceApi = baseApi.injectEndpoints({
 
 export const {
   useListMiceEventsQuery,
+  useListMiceEnquiriesQuery,
+  useGetMiceEnquiryQuery,
+  useCreateMiceEnquiryMutation,
+  useUpdateMiceEnquiryMutation,
+  useCancelMiceEnquiryMutation,
   useGetMiceEventQuery,
   useCreateMiceEventMutation,
   useListMiceDelegatesQuery,

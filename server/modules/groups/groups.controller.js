@@ -1,5 +1,6 @@
 import { successResponse } from "../../lib/response.js";
 import * as groupsService from "./groups.service.js";
+import * as groupRequests from "./groups.requests.js";
 
 function handle(fn) {
   return async (req, res, next) => {
@@ -275,4 +276,35 @@ export const generateMemory = handle(async (req, res) => {
 export const listMemories = handle(async (req, res) => {
   const data = await groupsService.listTripMemories(req.params.id, req.user.id, req.permissions);
   return successResponse(res, "OK", data);
+});
+
+export const createGroupTravelRequest = handle(async (req, res) => {
+  const data = await groupRequests.createGroupTravelRequest(req.user.id, req.body);
+  return successResponse(res, "Group travel request submitted", data, 201);
+});
+
+export const listMyGroupTravelRequests = handle(async (req, res) => {
+  const data = await groupRequests.listMyGroupTravelRequests(req.user.id);
+  return successResponse(res, "OK", data);
+});
+
+export const getGroupTravelRequest = handle(async (req, res) => {
+  const data = await groupRequests.getGroupTravelRequest(req.user.id, req.params.requestId);
+  return successResponse(res, "OK", data);
+});
+
+export const updateGroupTravelRequest = handle(async (req, res) => {
+  const data = await groupRequests.updateGroupTravelRequest(
+    req.user.id,
+    req.params.requestId,
+    req.body,
+  );
+  return successResponse(res, "Group travel request updated", data);
+});
+
+export const cancelGroupTravelRequest = handle(async (req, res) => {
+  const data = await groupRequests.cancelGroupTravelRequest(req.user.id, req.params.requestId, {
+    reason: req.body?.reason,
+  });
+  return successResponse(res, "Group travel request cancelled", data);
 });

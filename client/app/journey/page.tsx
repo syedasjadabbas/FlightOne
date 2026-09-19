@@ -2,7 +2,7 @@ import { SiteNav } from "@/components/SiteNav";
 import { TravellerShell } from "@/app/components/traveller";
 import { JourneyPageClient } from "./JourneyPageClient";
 
-export const metadata = { title: "Journey watches — FlightOne" };
+export const metadata = { title: "My Journey — FlightOne" };
 
 export default function JourneyPage() {
   return (

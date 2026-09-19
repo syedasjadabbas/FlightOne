@@ -224,6 +224,39 @@ export async function runVisaNotificationScheduler(opts = {}) {
     expirySkipped += r.skippedDuplicate;
   }
 
+  const vaultVisas = await prisma.vaultDocument.findMany({
+    where: {
+      type: "VISA",
+      isActive: true,
+      expiresAt: { not: null, lte: expiryHorizon, gte: now },
+      OR: [{ visaRecord: null }, { visaRecord: { remindersEnabled: true } }],
+    },
+    select: {
+      id: true,
+      ownerUserId: true,
+      type: true,
+      expiresAt: true,
+    },
+    take: batchSize,
+    orderBy: { expiresAt: "asc" },
+  });
+
+  let vaultExpiryScanned = 0;
+  for (const doc of vaultVisas) {
+    const linkedIdentity = await prisma.travellerIdentityDocument.findFirst({
+      where: { vaultDocumentId: doc.id, type: "VISA", status: "ACTIVE" },
+      select: { id: true },
+    });
+    if (linkedIdentity) continue;
+    vaultExpiryScanned += 1;
+    const r = await scheduleVisaDocumentExpiryNotifications(doc, {
+      now,
+      leadDays: expiryLeads,
+    });
+    expiryEnqueued += r.enqueued;
+    expirySkipped += r.skippedDuplicate;
+  }
+
   // Upcoming bookings with destination + departAt in metadata (never invent departAt).
   const bookings = await prisma.booking.findMany({
     where: {
@@ -283,6 +316,7 @@ export async function runVisaNotificationScheduler(opts = {}) {
 
   return {
     visaDocsScanned: visaDocs.length,
+    vaultVisaDocsScanned: vaultExpiryScanned,
     expiryEnqueued,
     expirySkippedDuplicate: expirySkipped,
     bookingsScanned: bookings.length,

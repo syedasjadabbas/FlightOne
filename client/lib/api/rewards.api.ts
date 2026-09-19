@@ -3,6 +3,41 @@
  */
 import { baseApi } from "@/lib/api/baseApi";
 
+export type RewardTierThreshold = {
+  tier: string;
+  minInclusive: number;
+  nextTier: string | null;
+  nextAt: number | null;
+};
+
+export type RewardEarningEvent = {
+  id: string;
+  status: string;
+  description: string;
+  eligibleBookingStatuses?: string[];
+  rate?: { pointsPerHundredMinor: number };
+  points?: number;
+};
+
+export type RewardRedemptionOption = {
+  id: string;
+  status: string;
+  description: string;
+  appliesToBookingStatus?: string;
+  pointValueMinor?: number;
+};
+
+export type RewardsPolicy = {
+  earnPointsPerHundredMinor: number;
+  referralBonusPoints: number;
+  pointValueMinor: number;
+  creditExpiryDays: number;
+  tierThresholds?: RewardTierThreshold[];
+  tierNotes?: string;
+  earningEvents?: RewardEarningEvent[];
+  redemptionOptions?: RewardRedemptionOption[];
+};
+
 export type RewardsSummary = {
   balance: number;
   tier: string;
@@ -15,26 +50,24 @@ export type RewardsSummary = {
     progressRatio: number;
     nextAt?: number | null;
   };
-  policy: {
-    earnPointsPerHundredMinor: number;
-    referralBonusPoints: number;
-    pointValueMinor: number;
-    creditExpiryDays: number;
-  };
+  policy: RewardsPolicy;
 };
 
 export type RewardLedgerEntry = {
   id: string;
+  accountId?: string;
   type: string;
   points: number;
   bookingId: string | null;
   note: string | null;
+  metadata?: Record<string, unknown> | null;
+  expiresAt?: string | null;
   createdAt: string;
 };
 
 export const rewardsApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
-    getRewardsPolicy: build.query<RewardsSummary["policy"], void>({
+    getRewardsPolicy: build.query<RewardsPolicy, void>({
       query: () => "/rewards/policy",
       providesTags: ["Rewards"],
     }),
@@ -48,6 +81,10 @@ export const rewardsApi = baseApi.injectEndpoints({
     >({
       query: (params) => ({ url: "/rewards/ledger", params: params || undefined }),
       providesTags: ["Rewards"],
+    }),
+    getRewardLedgerEntry: build.query<RewardLedgerEntry, string>({
+      query: (entryId) => `/rewards/ledger/${entryId}`,
+      providesTags: (_r, _e, id) => [{ type: "Rewards", id }],
     }),
     getRewardsReferrals: build.query<
       { items: Array<{ id: string; status: string; rewardedAt: string | null }> },
@@ -106,6 +143,7 @@ export const {
   useGetRewardsPolicyQuery,
   useGetRewardsSummaryQuery,
   useGetRewardsLedgerQuery,
+  useGetRewardLedgerEntryQuery,
   useGetRewardsReferralsQuery,
   useApplyCheckoutCreditMutation,
   useAttachReferralMutation,

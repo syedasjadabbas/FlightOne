@@ -6,6 +6,7 @@ import {
   attachReferralSchema,
   checkoutCreditSchema,
   companyIdParamsSchema,
+  ledgerEntryIdParamsSchema,
   listLedgerQuerySchema,
   redeemPointsSchema,
   upsertCorporateProgramSchema,
@@ -18,6 +19,11 @@ router.get("/policy", optionalAuth, rewardsController.getPolicy);
 router.use(requireAuth);
 router.get("/", rewardsController.getSummary);
 router.get("/ledger", validateQuery(listLedgerQuerySchema), rewardsController.listLedger);
+router.get(
+  "/ledger/:entryId",
+  validateParams(ledgerEntryIdParamsSchema),
+  rewardsController.getLedgerEntry,
+);
 router.get("/referrals", rewardsController.listReferrals);
 router.post("/redeem", validateBody(redeemPointsSchema), rewardsController.redeem);
 router.post(

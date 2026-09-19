@@ -65,6 +65,7 @@ model VaultDocument {
   isActive     Boolean @default(true)
 
   shareLinks VaultShareLink[]
+  visaRecord VaultVisaRecord?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -94,4 +95,45 @@ model VaultShareLink {
   createdAt DateTime @default(now())
 
   @@index([documentId])
+}
+
+/// Traveller-owned visa facts on a VaultDocument of type VISA (Phase 2 Visa Vault).
+/// Embassy rules, processing times, and required-document lists are NOT stored here —
+/// those come from Module 08 attributed lookup at read time. Appointment fields are
+/// traveller-entered (or copied from an owned VisaApplication) — never invented.
+enum VaultVisaHolderStatus {
+  ISSUED
+  PENDING
+  IN_PROCESS
+  CANCELLED
+}
+
+model VaultVisaRecord {
+  id         String        @id @default(cuid())
+  documentId String        @unique
+  document   VaultDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  /// ISO 3166-1 alpha-2 destination / issuing country for the visa.
+  destinationCode String?
+  /// Traveller-entered class (tourist, business, e-visa, …) — not a government taxonomy.
+  visaType        String?
+  holderStatus    VaultVisaHolderStatus @default(ISSUED)
+
+  /// Module 08 VisaApplication.id — plain scalar, no FK (same cross-module pattern).
+  visaApplicationId String?
+
+  appointmentAt       DateTime?
+  appointmentLocation String?
+
+  /// Traveller-entered issuing post name — not attributed embassy directory data.
+  issuingAuthority String?
+
+  remindersEnabled Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([destinationCode])
+  @@index([visaApplicationId])
+  @@index([holderStatus])
 }

@@ -42,6 +42,7 @@ after(async () => {
     await prisma.miceCheckIn.deleteMany({ where: { eventId: id } }).catch(() => {});
     await prisma.miceSession.deleteMany({ where: { eventId: id } }).catch(() => {});
     await prisma.miceDelegate.deleteMany({ where: { eventId: id } }).catch(() => {});
+    await prisma.miceEventEnquiry.deleteMany({ where: { eventId: id } }).catch(() => {});
     await prisma.miceEvent.delete({ where: { id } }).catch(() => {});
   }
   for (const id of userIds) {

@@ -22,6 +22,13 @@ import {
   sha256Buffer,
   validateUploadPayload,
 } from "./vault.storage.js";
+import {
+  VISA_RECORD_PUBLIC_SELECT,
+  loadVisaIntelligenceOverlay,
+  toPublicVisaMeta,
+  upsertVisaRecord,
+} from "./vault.visaMeta.js";
+import { computeExpiryStatus } from "../profile/documentExpiry.js";
 
 const DEFAULT_SHARE_TTL_HOURS = 72;
 
@@ -47,6 +54,7 @@ const DOCUMENT_SELECT = {
   isActive: true,
   createdAt: true,
   updatedAt: true,
+  visaRecord: { select: VISA_RECORD_PUBLIC_SELECT },
 };
 
 const DOCUMENT_INTERNAL_SELECT = {
@@ -62,6 +70,7 @@ function toPublicDocument(row) {
     storageKey: _sk,
     contentSha256: _hash,
     encryptedNote: _note,
+    visaRecord,
     ...rest
   } = row;
   const expired =
@@ -70,11 +79,23 @@ function toPublicDocument(row) {
   if (!row.isActive) lifecycleStatus = "SUPERSEDED";
   else if (expired) lifecycleStatus = "EXPIRED";
 
+  const expiry = computeExpiryStatus(row.expiresAt);
+  const visaMeta =
+    row.type === "VISA"
+      ? toPublicVisaMeta(visaRecord || { holderStatus: "ISSUED" }, {
+          expiresAt: row.expiresAt,
+          isActive: row.isActive,
+        })
+      : null;
+
   return {
     ...rest,
     hasBinary: Boolean(row.storageKey || row.byteSize),
     lifecycleStatus,
+    expiryStatus: expiry.state,
+    daysUntilExpiry: expiry.daysRemaining,
     isPlatformIssued: Boolean(row.bookingId) && PLATFORM_IMMUTABLE_TYPES.has(row.type),
+    visaMeta,
   };
 }
 
@@ -126,7 +147,7 @@ export function getStorageCapability() {
 
 export async function listMyDocuments(
   userId,
-  { type, expiringWithinDays, includeInactive, companionId } = {},
+  { type, expiringWithinDays, includeInactive, companionId, destinationCode } = {},
 ) {
   const where = {
     ownerUserId: userId,
@@ -139,6 +160,9 @@ export async function listMyDocuments(
     where.expiresAt = {
       lte: new Date(Date.now() + expiringWithinDays * 24 * 60 * 60 * 1000),
     };
+  }
+  if (destinationCode) {
+    where.visaRecord = { destinationCode: String(destinationCode).toUpperCase() };
   }
 
   const items = await prisma.vaultDocument.findMany({
@@ -184,16 +208,35 @@ export async function createDocument(userId, req, body) {
     select: DOCUMENT_SELECT,
   });
 
+  if (withUrl.type === "VISA") {
+    await upsertVisaRecord({
+      documentId: withUrl.id,
+      ownerUserId: userId,
+      type: withUrl.type,
+      visaMeta: body.visaMeta,
+    });
+  }
+
+  const stored = await prisma.vaultDocument.findFirst({
+    where: { id: withUrl.id, ownerUserId: userId },
+    select: DOCUMENT_SELECT,
+  });
+
   await writeAudit({
     userId,
     action: "vault.document.create",
     resourceType: "VaultDocument",
     resourceId: withUrl.id,
     req,
-    metadata: { type: withUrl.type, bookingId: withUrl.bookingId, hasBinary: false },
+    metadata: {
+      type: withUrl.type,
+      bookingId: withUrl.bookingId,
+      hasBinary: false,
+      hasVisaMeta: withUrl.type === "VISA",
+    },
   });
 
-  return toPublicDocument(withUrl);
+  return toPublicDocument(stored || withUrl);
 }
 
 /**
@@ -259,6 +302,20 @@ export async function uploadDocument(userId, req, body) {
     select: DOCUMENT_SELECT,
   });
 
+  if (doc.type === "VISA") {
+    await upsertVisaRecord({
+      documentId: doc.id,
+      ownerUserId: userId,
+      type: doc.type,
+      visaMeta: body.visaMeta,
+    });
+  }
+
+  const stored = await prisma.vaultDocument.findFirst({
+    where: { id: doc.id, ownerUserId: userId },
+    select: DOCUMENT_SELECT,
+  });
+
   await writeAudit({
     userId,
     action: "vault.document.upload",
@@ -269,11 +326,12 @@ export async function uploadDocument(userId, req, body) {
       type: doc.type,
       contentType: validated.contentType,
       byteSize: validated.byteLength,
+      hasVisaMeta: doc.type === "VISA",
       // Never log contentSha256 of sensitive docs in clear — omit hash entirely.
     },
   });
 
-  return toPublicDocument(doc);
+  return toPublicDocument(stored || doc);
 }
 
 export async function getDocumentById(userId, req, documentId) {
@@ -288,7 +346,18 @@ export async function getDocumentById(userId, req, documentId) {
     metadata: { type: doc.type },
   });
 
-  return toPublicDocument(doc);
+  const publicDoc = toPublicDocument(doc);
+  if (doc.type !== "VISA") {
+    return publicDoc;
+  }
+
+  const visaIntelligence = await loadVisaIntelligenceOverlay({
+    ownerUserId: userId,
+    destinationCode: publicDoc.visaMeta?.destinationCode,
+    visaApplicationId: publicDoc.visaMeta?.visaApplicationId,
+  });
+
+  return { ...publicDoc, visaIntelligence };
 }
 
 /**
@@ -357,6 +426,35 @@ export async function updateDocument(userId, req, documentId, patch) {
     throw new AppError(400, "Storage and ownership fields are not client-writable");
   }
 
+  const versioningKeys = ["title", "companionId", "issueDate", "expiresAt", "fileMeta", "encryptedNote"];
+  const hasVersioningPatch = versioningKeys.some((key) => patch[key] !== undefined);
+
+  // Visa-only metadata edits stay in place — they are not a document renewal.
+  if (!hasVersioningPatch && patch.visaMeta !== undefined) {
+    if (current.type !== "VISA") {
+      throw new AppError(400, "visaMeta is only allowed for VISA documents");
+    }
+    await upsertVisaRecord({
+      documentId: current.id,
+      ownerUserId: userId,
+      type: current.type,
+      visaMeta: patch.visaMeta,
+    });
+    const stored = await prisma.vaultDocument.findFirst({
+      where: { id: current.id, ownerUserId: userId },
+      select: DOCUMENT_SELECT,
+    });
+    await writeAudit({
+      userId,
+      action: "vault.document.visa_meta",
+      resourceType: "VaultDocument",
+      resourceId: current.id,
+      req,
+      metadata: { type: current.type },
+    });
+    return toPublicDocument(stored);
+  }
+
   const next = await prisma.$transaction(async (tx) => {
     await tx.vaultDocument.update({
       where: { id: current.id },
@@ -396,6 +494,21 @@ export async function updateDocument(userId, req, documentId, patch) {
     select: DOCUMENT_SELECT,
   });
 
+  if (withUrl.type === "VISA") {
+    await upsertVisaRecord({
+      documentId: withUrl.id,
+      ownerUserId: userId,
+      type: withUrl.type,
+      visaMeta: patch.visaMeta,
+      copyFromDocumentId: current.id,
+    });
+  }
+
+  const stored = await prisma.vaultDocument.findFirst({
+    where: { id: withUrl.id, ownerUserId: userId },
+    select: DOCUMENT_SELECT,
+  });
+
   await writeAudit({
     userId,
     action: "vault.document.version",
@@ -405,7 +518,7 @@ export async function updateDocument(userId, req, documentId, patch) {
     metadata: { supersedesId: current.id, version: withUrl.version },
   });
 
-  return toPublicDocument(withUrl);
+  return toPublicDocument(stored || withUrl);
 }
 
 /**
@@ -492,6 +605,20 @@ export async function replaceDocumentBinary(userId, req, documentId, body) {
     select: DOCUMENT_SELECT,
   });
 
+  if (doc.type === "VISA") {
+    await upsertVisaRecord({
+      documentId: doc.id,
+      ownerUserId: userId,
+      type: doc.type,
+      copyFromDocumentId: current.id,
+    });
+  }
+
+  const stored = await prisma.vaultDocument.findFirst({
+    where: { id: doc.id, ownerUserId: userId },
+    select: DOCUMENT_SELECT,
+  });
+
   await writeAudit({
     userId,
     action: "vault.document.replace",
@@ -505,7 +632,7 @@ export async function replaceDocumentBinary(userId, req, documentId, body) {
     },
   });
 
-  return toPublicDocument(doc);
+  return toPublicDocument(stored || doc);
 }
 
 export async function deleteDocument(userId, req, documentId) {

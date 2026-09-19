@@ -4,18 +4,22 @@ import { requireAuth } from "../../middlewares/auth.js";
 import * as c from "./mice.controller.js";
 import {
   budgetLineSchema,
+  cancelMiceEnquirySchema,
   checkInSchema,
   createEventSchema,
+  createMiceEnquirySchema,
   createSessionSchema,
   delegateIdParamsSchema,
   eventIdParamsSchema,
   linkBookingSchema,
+  miceEnquiryIdParamsSchema,
   registerDelegateSchema,
   selfRegisterSchema,
   sponsorSchema,
   transferIdParamsSchema,
   transferSchema,
   updateEventSchema,
+  updateMiceEnquirySchema,
   updateTransferSchema,
 } from "./mice.validators.js";
 
@@ -23,6 +27,26 @@ const router = Router();
 router.use(requireAuth);
 
 router.get("/transfers/capability", c.getTransferCapability);
+
+router.get("/enquiries", c.listMyMiceEnquiries);
+router.post("/enquiries", validateBody(createMiceEnquirySchema), c.createMiceEnquiry);
+router.get(
+  "/enquiries/:enquiryId",
+  validateParams(miceEnquiryIdParamsSchema),
+  c.getMiceEnquiry,
+);
+router.patch(
+  "/enquiries/:enquiryId",
+  validateParams(miceEnquiryIdParamsSchema),
+  validateBody(updateMiceEnquirySchema),
+  c.updateMiceEnquiry,
+);
+router.post(
+  "/enquiries/:enquiryId/cancel",
+  validateParams(miceEnquiryIdParamsSchema),
+  validateBody(cancelMiceEnquirySchema),
+  c.cancelMiceEnquiry,
+);
 
 router.post("/events", validateBody(createEventSchema), c.createEvent);
 router.get("/events", c.listEvents);

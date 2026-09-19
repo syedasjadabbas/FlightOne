@@ -14,6 +14,15 @@ export async function eligibility(req, res, next) {
   }
 }
 
+export async function listRefundableBookings(req, res, next) {
+  try {
+    const data = await refundsService.listMyRefundableBookings(req.user);
+    return successResponse(res, "OK", data);
+  } catch (e) {
+    next(e);
+  }
+}
+
 export async function calculate(req, res, next) {
   try {
     const data = await refundsService.calculateRefund(req.user, req.permissions, req.body);

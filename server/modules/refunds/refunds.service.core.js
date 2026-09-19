@@ -183,6 +183,63 @@ export async function resolveConfiguredAgencyFeeBps() {
   return null;
 }
 
+export async function listMyRefundableBookings(user) {
+  if (!user?.id) throw new AppError(401, "Authentication required");
+  const bookings = await prisma.booking.findMany({
+    where: {
+      userId: user.id,
+      status: { in: [...CALCULABLE_BOOKING_STATUSES] },
+    },
+    orderBy: { createdAt: "desc" },
+    take: 50,
+    select: {
+      id: true,
+      status: true,
+      product: true,
+      currency: true,
+      amountMinor: true,
+      createdAt: true,
+      fareRules: true,
+    },
+  });
+
+  const pricingAgencyFeeBps = await resolveConfiguredAgencyFeeBps();
+  return {
+    items: bookings.map((booking) => {
+      const calc = computeRefundAmounts(booking.amountMinor, booking.fareRules, {
+        product: booking.product,
+        pricingAgencyFeeBps,
+      });
+      const eligible =
+        calc.formula?.rule !== "NON_REFUNDABLE_FARE" &&
+        (calc.dataStatus === "OK" ||
+          calc.dataStatus === "REQUIRES_HUMAN" ||
+          (booking.fareRules && booking.fareRules.refundable === true));
+      const confirmed = calc.dataStatus === "OK";
+      return {
+        bookingId: booking.id,
+        status: booking.status,
+        product: booking.product,
+        currency: booking.currency,
+        amountMinor: booking.amountMinor,
+        createdAt: booking.createdAt,
+        eligible: Boolean(eligible),
+        eligibilityStatus:
+          calc.formula?.rule === "NON_REFUNDABLE_FARE"
+            ? "NOT_ELIGIBLE"
+            : calc.dataStatus === "DATA_UNAVAILABLE"
+              ? "DATA_UNAVAILABLE"
+              : calc.dataStatus === "REQUIRES_HUMAN"
+                ? "REQUIRES_HUMAN"
+                : "ELIGIBLE",
+        dataStatus: calc.dataStatus,
+        refundableMinor: confirmed ? calc.refundableMinor : null,
+        confirmed,
+      };
+    }),
+  };
+}
+
 export async function getRefundEligibility(user, permissions, bookingId) {
   const booking = await getBookingOrThrow(bookingId);
   assertBookingAccess(booking, user, permissions, "refunds:read");
@@ -300,7 +357,12 @@ export async function createRefundCase(user, permissions, body = {}) {
       where: { idempotencyKey },
       select: CASE_SELECT,
     });
-    if (existing) return { ...existing, deduplicated: true };
+    if (existing) {
+      if (existing.createdByUserId !== user.id) {
+        throw new AppError(409, "Idempotency key already used");
+      }
+      return { ...existing, deduplicated: true };
+    }
   }
 
   const booking = await getBookingOrThrow(bookingId, { id: true, userId: true, status: true });
@@ -323,19 +385,32 @@ export async function createRefundCase(user, permissions, body = {}) {
     } else status = "QUOTED";
   }
 
-  const created = await prisma.refundCase.create({
-    data: {
-      bookingId: booking.id,
-      calculationId: calculationId ?? null,
-      status,
-      kind: calcKind,
-      reason: reason ?? null,
-      partial: partial ?? calcKind === "PARTIAL_REFUND",
-      idempotencyKey: idempotencyKey || null,
-      createdByUserId: user.id,
-    },
-    select: CASE_SELECT,
-  });
+  let created;
+  try {
+    created = await prisma.refundCase.create({
+      data: {
+        bookingId: booking.id,
+        calculationId: calculationId ?? null,
+        status,
+        kind: calcKind,
+        reason: reason ?? null,
+        partial: partial ?? calcKind === "PARTIAL_REFUND",
+        idempotencyKey: idempotencyKey || null,
+        createdByUserId: user.id,
+      },
+      select: CASE_SELECT,
+    });
+  } catch (e) {
+    if (e.code === "P2002" && idempotencyKey) {
+      const raced = await prisma.refundCase.findUnique({
+        where: { idempotencyKey },
+        select: CASE_SELECT,
+      });
+      if (raced && raced.createdByUserId === user.id) return { ...raced, deduplicated: true };
+      throw new AppError(409, "Idempotency key already used");
+    }
+    throw e;
+  }
 
   await writeServicingAudit({
     bookingId: booking.id,
@@ -358,10 +433,14 @@ export async function createRefundCase(user, permissions, body = {}) {
 
 export async function submitRefundCase(user, permissions, caseId) {
   const refundCase = await getCaseOrThrow(caseId);
-  const booking = await getBookingOrThrow(refundCase.bookingId, { id: true, userId: true });
+  const booking = await getBookingOrThrow(refundCase.bookingId, { id: true, userId: true, status: true });
   assertBookingAccess(booking, user, permissions, "refunds:write");
 
-  if (refundCase.status === "SUBMITTED" || refundCase.status === "PROCESSING") {
+  if (
+    refundCase.status === "SUBMITTED" ||
+    refundCase.status === "PROCESSING" ||
+    refundCase.status === "REQUIRES_HUMAN"
+  ) {
     return refundCase;
   }
 
@@ -407,7 +486,41 @@ export async function submitRefundCase(user, permissions, caseId) {
     },
   });
 
-  return updated;
+  return tryAutoProcessAfterSubmit(user, { permissions }, caseId, updated);
+}
+
+async function tryAutoProcessAfterSubmit(user, req, caseId, submitted) {
+  try {
+    const refundCase = await getCaseOrThrow(caseId);
+    const calculation = refundCase.calculationId
+      ? await prisma.refundCalculation.findUnique({
+          where: { id: refundCase.calculationId },
+          select: { dataStatus: true },
+        })
+      : null;
+    if (!calculation || calculation.dataStatus !== "OK") return submitted;
+
+    const booking = await getBookingOrThrow(refundCase.bookingId, {
+      id: true,
+      userId: true,
+      status: true,
+    });
+    const payments = await prisma.payment.findMany({
+      where: { bookingId: booking.id, status: { in: ["CAPTURED", "AUTHORIZED"] } },
+      select: { id: true },
+      take: 1,
+    });
+    const canTry = ["QUOTED", "RESERVED"].includes(booking.status) || payments.length > 0;
+    if (!canTry) return submitted;
+
+    return await processRefundCase(user, req, caseId, { allowOwnerAuto: true });
+  } catch {
+    try {
+      return await getCaseOrThrow(caseId);
+    } catch {
+      return submitted;
+    }
+  }
 }
 
 async function issueTravelCreditIfNeeded(refundCase, calculation, booking) {
@@ -479,11 +592,9 @@ export async function escalateRefundCase(user, permissions, caseId, { note, trig
   return { escalated: true, ticket, refundCase: updated };
 }
 
-export async function processRefundCase(user, req, caseId) {
+export async function processRefundCase(user, req, caseId, opts = {}) {
   const permissions = req.permissions;
-  if (!hasPermissionEff(permissions, "refunds:write")) {
-    throw new AppError(403, "refunds:write permission required to process refunds");
-  }
+  const isStaff = hasPermissionEff(permissions, "refunds:write");
 
   const refundCase = await getCaseOrThrow(caseId);
   if (refundCase.status === "COMPLETED") return refundCase;
@@ -493,6 +604,11 @@ export async function processRefundCase(user, req, caseId) {
   }
 
   const booking = await getBookingOrThrow(refundCase.bookingId);
+  if (!isStaff) {
+    if (!opts.allowOwnerAuto || booking.userId !== user.id) {
+      throw new AppError(403, "refunds:write permission required to process refunds");
+    }
+  }
   const calculation = refundCase.calculationId
     ? await prisma.refundCalculation.findUnique({ where: { id: refundCase.calculationId } })
     : null;

@@ -25,11 +25,114 @@ export type TravelGroup = {
   myMembership?: { role: string; status: string } | null;
 };
 
+export type GroupTravelRequestStatus = "SUBMITTED" | "IN_REVIEW" | "CANCELLED";
+
+export type GroupDateFlexibility = "EXACT" | "PLUS_MINUS_1" | "PLUS_MINUS_3" | "FLEXIBLE_WEEK";
+
+export type GroupCabinPreference = "ECONOMY" | "PREMIUM_ECONOMY" | "BUSINESS" | "FIRST";
+
+export type GroupTravelRequest = {
+  id: string;
+  createdByUserId: string;
+  groupId: string | null;
+  name: string;
+  type: GroupType;
+  status: GroupTravelRequestStatus;
+  origin: string;
+  destination: string;
+  departureDate: string | null;
+  returnDate: string | null;
+  flexibility: GroupDateFlexibility;
+  passengerCount: number;
+  cabinPreference: GroupCabinPreference | null;
+  purpose: string | null;
+  contactName: string;
+  contactEmail: string;
+  contactPhone: string | null;
+  organization: string | null;
+  baggageRequired: boolean;
+  seatingTogether: boolean;
+  airportTransfers: boolean;
+  splitBilling: boolean;
+  accommodationRequired: boolean;
+  accommodationNotes: string | null;
+  transportNotes: string | null;
+  notes: string | null;
+  cancelledAt: string | null;
+  cancelReason: string | null;
+  createdAt: string;
+  updatedAt: string;
+  fulfilment?: string;
+  fulfilmentNote?: string;
+  minPassengerCount?: number;
+  group?: TravelGroup | null;
+};
+
+export type CreateGroupTravelRequestBody = {
+  name: string;
+  type: GroupType;
+  origin: string;
+  destination: string;
+  departureDate?: string;
+  returnDate?: string;
+  flexibility: GroupDateFlexibility;
+  passengerCount: number;
+  cabinPreference?: GroupCabinPreference | null;
+  purpose?: string;
+  contactName: string;
+  contactEmail: string;
+  contactPhone?: string;
+  organization?: string;
+  baggageRequired?: boolean;
+  seatingTogether?: boolean;
+  airportTransfers?: boolean;
+  splitBilling?: boolean;
+  accommodationRequired?: boolean;
+  accommodationNotes?: string;
+  transportNotes?: string;
+  notes?: string;
+  idempotencyKey?: string;
+};
+
 export const groupsApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     listMyGroups: build.query<TravelGroup[], void>({
       query: () => "/groups",
       providesTags: ["Groups"],
+    }),
+    listGroupTravelRequests: build.query<
+      { items: GroupTravelRequest[]; minPassengerCount: number },
+      void
+    >({
+      query: () => "/groups/requests",
+      providesTags: ["Groups"],
+    }),
+    getGroupTravelRequest: build.query<GroupTravelRequest, string>({
+      query: (requestId) => `/groups/requests/${requestId}`,
+      providesTags: (_r, _e, id) => [{ type: "Groups", id: `request-${id}` }],
+    }),
+    createGroupTravelRequest: build.mutation<GroupTravelRequest, CreateGroupTravelRequestBody>({
+      query: (body) => ({ url: "/groups/requests", method: "POST", body }),
+      invalidatesTags: ["Groups"],
+    }),
+    updateGroupTravelRequest: build.mutation<
+      GroupTravelRequest,
+      { requestId: string; body: Partial<CreateGroupTravelRequestBody> }
+    >({
+      query: ({ requestId, body }) => ({
+        url: `/groups/requests/${requestId}`,
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: ["Groups"],
+    }),
+    cancelGroupTravelRequest: build.mutation<GroupTravelRequest, { requestId: string; reason?: string }>({
+      query: ({ requestId, reason }) => ({
+        url: `/groups/requests/${requestId}/cancel`,
+        method: "POST",
+        body: { reason },
+      }),
+      invalidatesTags: ["Groups"],
     }),
     getGroup: build.query<TravelGroup, string>({
       query: (id) => `/groups/${id}`,
@@ -224,6 +327,11 @@ export const groupsApi = baseApi.injectEndpoints({
 
 export const {
   useListMyGroupsQuery,
+  useListGroupTravelRequestsQuery,
+  useGetGroupTravelRequestQuery,
+  useCreateGroupTravelRequestMutation,
+  useUpdateGroupTravelRequestMutation,
+  useCancelGroupTravelRequestMutation,
   useGetGroupQuery,
   useCreateGroupMutation,
   useJoinGroupMutation,

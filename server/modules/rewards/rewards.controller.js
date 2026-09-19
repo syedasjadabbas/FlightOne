@@ -87,9 +87,22 @@ export async function upsertCorporateProgram(req, res, next) {
   }
 }
 
+export async function getLedgerEntry(req, res, next) {
+  try {
+    const data = await rewardsService.getLedgerEntry(
+      req.user,
+      req.permissions,
+      req.params.entryId,
+    );
+    return successResponse(res, "OK", data);
+  } catch (e) {
+    next(e);
+  }
+}
+
 export async function getPolicy(req, res, next) {
   try {
-    return successResponse(res, "OK", rewardsService.getRewardsPolicy());
+    return successResponse(res, "OK", rewardsService.getPublicRewardsPolicy());
   } catch (e) {
     next(e);
   }

@@ -13,9 +13,12 @@ import {
 import {
   useAttachReferralMutation,
   useGetCorporateRewardProgramQuery,
+  useGetRewardLedgerEntryQuery,
   useGetRewardsLedgerQuery,
+  useGetRewardsPolicyQuery,
   useGetRewardsReferralsQuery,
   useGetRewardsSummaryQuery,
+  type RewardsPolicy,
 } from "@/lib/api/rewards.api";
 import { useListCompaniesQuery } from "@/lib/api/corporate.api";
 import { useAuthStore } from "@/store/auth.store";
@@ -41,6 +44,69 @@ function CorporateRewardsBlock({ companyId, companyName }: { companyId: string; 
   );
 }
 
+function PolicyExplainer({ policy }: { policy: RewardsPolicy | undefined }) {
+  if (!policy) return null;
+  return (
+    <>
+      <TravellerSection title="How points are earned">
+        <ul className="fo-traveller__list">
+          {(policy.earningEvents || []).map((event) => (
+            <li key={event.id} className="fo-traveller__row">
+              <p className="fo-traveller__row-title">{event.id.replace(/_/g, " ")}</p>
+              <p className="fo-traveller__row-body">{event.description}</p>
+              <p className="fo-traveller__row-meta">
+                Status: {event.status}
+                {event.rate
+                  ? ` · ${event.rate.pointsPerHundredMinor} pt per 100 minor units`
+                  : ""}
+                {typeof event.points === "number" ? ` · ${event.points} pts` : ""}
+                {event.eligibleBookingStatuses?.length
+                  ? ` · eligible: ${event.eligibleBookingStatuses.join(", ")}`
+                  : ""}
+              </p>
+            </li>
+          ))}
+        </ul>
+      </TravellerSection>
+
+      <TravellerSection
+        title="Redemption"
+        note="Points are not cashed out. Checkout is the live redemption path."
+      >
+        <ul className="fo-traveller__list">
+          {(policy.redemptionOptions || []).map((opt) => (
+            <li key={opt.id} className="fo-traveller__row">
+              <p className="fo-traveller__row-title">{opt.id.replace(/_/g, " ")}</p>
+              <p className="fo-traveller__row-body">{opt.description}</p>
+              <p className="fo-traveller__row-meta">
+                Status: {opt.status}
+                {opt.appliesToBookingStatus ? ` · booking must be ${opt.appliesToBookingStatus}` : ""}
+              </p>
+            </li>
+          ))}
+        </ul>
+        <p className="fo-traveller__section-note mt-2">
+          Apply credits from a quoted booking at checkout. This page does not change your balance.
+        </p>
+      </TravellerSection>
+
+      <TravellerSection title="Membership tiers" note={policy.tierNotes}>
+        <ul className="fo-traveller__list">
+          {(policy.tierThresholds || []).map((row) => (
+            <li key={row.tier} className="fo-traveller__row">
+              <p className="fo-traveller__row-title">{row.tier}</p>
+              <p className="fo-traveller__row-meta">
+                From {row.minInclusive} lifetime pts earned
+                {row.nextAt ? ` · next ${row.nextTier} at ${row.nextAt}` : " · highest configured tier"}
+              </p>
+            </li>
+          ))}
+        </ul>
+      </TravellerSection>
+    </>
+  );
+}
+
 export function RewardsPageClient() {
   const hasHydrated = useAuthStore((s) => s.hasHydrated);
   const accessToken = useAuthStore((s) => s.accessToken);
@@ -48,14 +114,21 @@ export function RewardsPageClient() {
   const [localMsg, setLocalMsg] = useState<string | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
   const [ledgerPage, setLedgerPage] = useState(1);
+  const [selectedEntryId, setSelectedEntryId] = useState<string | null>(null);
 
   const skip = !hasHydrated || !accessToken;
+  const { data: publicPolicy, isLoading: policyLoading, isError: policyError, refetch: refetchPolicy } =
+    useGetRewardsPolicyQuery(undefined, { skip: !hasHydrated || Boolean(accessToken) });
   const { data: summary, isLoading, isError, refetch } = useGetRewardsSummaryQuery(undefined, {
     skip,
   });
   const { data: ledger } = useGetRewardsLedgerQuery(
     { page: ledgerPage, pageSize: TRAVELLER_PAGE_SIZE },
     { skip },
+  );
+  const { data: entryDetail, isFetching: entryLoading, isError: entryError } = useGetRewardLedgerEntryQuery(
+    selectedEntryId || "",
+    { skip: skip || !selectedEntryId },
   );
   const { data: referrals } = useGetRewardsReferralsQuery(undefined, { skip });
   const { data: companies } = useListCompaniesQuery(undefined, { skip });
@@ -76,11 +149,34 @@ export function RewardsPageClient() {
   }
 
   if (!accessToken) {
+    if (policyLoading) {
+      return (
+        <div className="flex justify-center py-16">
+          <Spinner />
+        </div>
+      );
+    }
+    if (policyError || !publicPolicy) {
+      return (
+        <TravellerState
+          variant="error"
+          title="Rewards unavailable"
+          action={
+            <Button type="button" size="sm" onClick={() => void refetchPolicy()}>
+              Retry
+            </Button>
+          }
+        >
+          Could not load the published rewards policy.
+        </TravellerState>
+      );
+    }
+
     return (
       <>
         <TravellerPageHeader
           title="Rewards & Loyalty"
-          lede="Earn FlightOne points across flights, stays, cars, and custom tours. Points are credited upon booking completion and reduce payable amounts at checkout."
+          lede="Ledger-based points from ticketed bookings. Sign in to see your own balance — this page never invents points."
           actions={
             <div className="flex gap-2">
               <Link href="/login?redirect=%2Frewards">
@@ -96,54 +192,38 @@ export function RewardsPageClient() {
         <TravellerSection title="How FlightOne Rewards works">
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="rounded-xl border border-slate-200/80 bg-white/70 p-4 shadow-2xs">
-              <p className="text-sm font-semibold text-slate-900">1. Earn on Every Trip</p>
+              <p className="text-sm font-semibold text-slate-900">1. Earn on ticketed trips</p>
               <p className="mt-1 text-xs text-slate-600 leading-relaxed">
-                Earn 1 point per 100 minor units spent on all confirmed flights, hotels, and custom travel packages.
+                {publicPolicy.earnPointsPerHundredMinor} point
+                {publicPolicy.earnPointsPerHundredMinor === 1 ? "" : "s"} per 100 minor units on
+                ticketed, active, or completed bookings. Quotes and unpaid searches do not earn.
               </p>
             </div>
             <div className="rounded-xl border border-slate-200/80 bg-white/70 p-4 shadow-2xs">
-              <p className="text-sm font-semibold text-slate-900">2. Apply at Checkout</p>
+              <p className="text-sm font-semibold text-slate-900">2. Apply at checkout</p>
               <p className="mt-1 text-xs text-slate-600 leading-relaxed">
-                Redeem your points directly during checkout to lower what you pay — no blackout dates or hidden fees.
+                Redeem on a quoted booking to reduce the amount you pay. There is no cash payout.
               </p>
             </div>
             <div className="rounded-xl border border-slate-200/80 bg-white/70 p-4 shadow-2xs">
-              <p className="text-sm font-semibold text-slate-900">3. Invite & Multiply</p>
+              <p className="text-sm font-semibold text-slate-900">3. Referrals</p>
               <p className="mt-1 text-xs text-slate-600 leading-relaxed">
-                Share your personal referral code. Earn 250 bonus points when friends complete their first ticketed trip.
+                Share your referral code after you sign in. Bonus of {publicPolicy.referralBonusPoints}{" "}
+                points is credited when the referred traveller earns on their first ticketed booking.
               </p>
             </div>
           </div>
         </TravellerSection>
 
-        <TravellerSection title="Membership Tiers">
-          <ul className="fo-traveller__list">
-            <li className="fo-traveller__row">
-              <p className="fo-traveller__row-title">Bronze Member</p>
-              <p className="fo-traveller__row-meta">Baseline tier · Standard 1x point accrual · Real-time price tracking</p>
-            </li>
-            <li className="fo-traveller__row">
-              <p className="fo-traveller__row-title">Silver Explorer · 10,000 pts</p>
-              <p className="fo-traveller__row-meta">1.25x point multiplier · Priority Ava assistant response time · Dedicated consultant review</p>
-            </li>
-            <li className="fo-traveller__row">
-              <p className="fo-traveller__row-title">Gold Voyager · 25,000 pts</p>
-              <p className="fo-traveller__row-meta">1.5x point multiplier · Waived administrative rebooking fees · Expedited visa reviews</p>
-            </li>
-            <li className="fo-traveller__row">
-              <p className="fo-traveller__row-title">Platinum Sovereign · 50,000 pts</p>
-              <p className="fo-traveller__row-meta">2x point multiplier · VIP lounge access vouchers · 24/7 dedicated executive travel manager</p>
-            </li>
-          </ul>
-        </TravellerSection>
+        <PolicyExplainer policy={publicPolicy} />
 
         <TravellerSection
-          title="Account Balance & Referrals"
-          note="Rewards balances, point ledgers, and referral codes are linked to your verified FlightOne account."
+          title="Your balance"
+          note="Balances, ledgers, and referral codes are account-owned. Guests have no points on this page."
           panel
         >
           <p className="text-sm text-slate-600">
-            Sign in to check your active points balance, track your tier progress, or share your referral link.
+            Sign in to see your ledger-computed balance. Nothing here is a placeholder amount.
           </p>
           <div className="mt-3 flex gap-3">
             <Link href="/login?redirect=%2Frewards">
@@ -183,12 +263,13 @@ export function RewardsPageClient() {
   }
 
   const progressPct = Math.round((summary.progress?.progressRatio ?? 0) * 100);
+  const policy = summary.policy;
 
   return (
     <>
       <TravellerPageHeader
         title="Rewards & Loyalty"
-        lede="Ledger-based credits earned from completed ticketed bookings. Redemption directly reduces the checkout amount on your next journey."
+        lede="Ledger-based credits earned from completed ticketed bookings. Redemption reduces the checkout amount on a quoted booking."
         actions={
           <div className="flex gap-2">
             <Link href="/#search">
@@ -205,22 +286,23 @@ export function RewardsPageClient() {
         }
       />
 
-      <TravellerSection title="Active Points Balance">
+      <TravellerSection title="Active points balance">
         <div className="flex flex-wrap items-baseline gap-3">
           <p className="fo-traveller__balance">
             {summary.balance}
             <span>pts</span>
           </p>
           <span className="text-xs text-slate-500">
-            ≈ {summary.balance * (summary.policy?.pointValueMinor ?? 1)} minor currency units redeemable at checkout
+            ≈ {summary.balance * (policy?.pointValueMinor ?? 1)} minor currency units redeemable at checkout
           </span>
         </div>
         <p className="fo-traveller__section-note">
-          Credit expiry: {summary.policy?.creditExpiryDays ?? "365"} days from issuance (ledger-enforced).
+          Credit expiry: {policy?.creditExpiryDays ?? "—"} days from issuance (ledger-enforced). Status:{" "}
+          {summary.tier}.
         </p>
       </TravellerSection>
 
-      <TravellerSection title="Loyalty Tier Progress">
+      <TravellerSection title="Loyalty tier progress">
         <div className="flex items-center justify-between">
           <p className="text-[18px] font-semibold text-ink">{summary.tier}</p>
           <span className="text-xs font-medium text-slate-500">
@@ -230,7 +312,7 @@ export function RewardsPageClient() {
         <p className="fo-traveller__section-note">
           {summary.progress?.nextTier
             ? `${summary.progress.pointsToNext} points needed to reach ${summary.progress.nextTier}`
-            : "Top tier status unlocked"}
+            : "Highest configured tier"}
         </p>
         {summary.progress?.nextTier ? (
           <div className="fo-traveller__progress mt-2" aria-hidden>
@@ -242,11 +324,13 @@ export function RewardsPageClient() {
       {summary.balance === 0 ? (
         <div className="rounded-xl border border-sky-200/80 bg-sky-50/60 p-4 text-xs text-sky-900 shadow-2xs">
           <div className="flex items-start gap-3">
-            <span className="text-lg">⭐</span>
+            <span className="text-lg">★</span>
             <div className="space-y-1.5">
-              <p className="font-semibold text-sky-950">Earn Your First FlightOne Points</p>
+              <p className="font-semibold text-sky-950">No points on your ledger yet</p>
               <p className="leading-relaxed text-sky-800">
-                You earn 1 point for every 100 minor units spent across all confirmed flight, hotel, and bespoke tour bookings. Points are automatically credited upon completion of your journey and can be redeemed directly at checkout.
+                You earn {policy.earnPointsPerHundredMinor} point
+                {policy.earnPointsPerHundredMinor === 1 ? "" : "s"} per 100 minor units after a booking is
+                ticketed, active, or completed. Quoted or unpaid bookings do not credit points.
               </p>
               <div className="flex gap-2 pt-1">
                 <Link href="/#search">
@@ -261,9 +345,11 @@ export function RewardsPageClient() {
         </div>
       ) : null}
 
+      <PolicyExplainer policy={policy} />
+
       <TravellerSection
-        title="Referral Program"
-        note={`Share your referral code. Bonus (${summary.policy.referralBonusPoints} pts) is credited to your ledger when your invitee completes their first ticketed booking.`}
+        title="Referral program"
+        note={`Share your referral code. Bonus (${policy.referralBonusPoints} pts) is credited when your invitee completes their first ticketed earn.`}
         panel
       >
         <div className="flex items-center gap-3">
@@ -280,14 +366,15 @@ export function RewardsPageClient() {
                 setTimeout(() => setCopiedLink(false), 2500);
               }}
             >
-              {copiedLink ? "✓ Link Copied!" : "Copy Invite Link"}
+              {copiedLink ? "Link copied" : "Copy invite link"}
             </button>
           ) : null}
         </div>
 
         {(referrals?.items || []).length === 0 ? (
           <TravellerState title="No referrals yet">
-            Share your unique invite code with colleagues and friends to earn 250 points on their first completed trip.
+            Share your invite code. The {policy.referralBonusPoints}-point bonus posts only after their first
+            ticketed earn.
           </TravellerState>
         ) : (
           <ul className="fo-traveller__list mt-3">
@@ -295,7 +382,9 @@ export function RewardsPageClient() {
               <li key={r.id} className="fo-traveller__row">
                 <p className="fo-traveller__row-title">Referral · {r.status}</p>
                 <p className="fo-traveller__row-meta">
-                  {r.rewardedAt ? `Credited on ${new Date(r.rewardedAt).toLocaleDateString()}` : "Pending first booking completion"}
+                  {r.rewardedAt
+                    ? `Credited on ${new Date(r.rewardedAt).toLocaleDateString()}`
+                    : "Pending first ticketed booking"}
                 </p>
               </li>
             ))}
@@ -323,7 +412,7 @@ export function RewardsPageClient() {
             placeholder="e.g. AB12CD34"
           />
           <Button type="submit" size="sm" disabled={attachState.isLoading || !referralInput.trim()}>
-            {attachState.isLoading ? "Attaching…" : "Apply Referral Code"}
+            {attachState.isLoading ? "Attaching…" : "Apply referral code"}
           </Button>
           {localMsg ? <p className="text-[12px] text-ink-soft">{localMsg}</p> : null}
         </form>
@@ -331,7 +420,7 @@ export function RewardsPageClient() {
 
       {(companies || []).length > 0 ? (
         <TravellerSection
-          title="Corporate Loyalty Programs"
+          title="Corporate loyalty programs"
           note="Company-level reward balances are segregated from your personal rewards ledger."
         >
           <ul className="fo-traveller__list">
@@ -342,22 +431,29 @@ export function RewardsPageClient() {
         </TravellerSection>
       ) : null}
 
-      <TravellerSection title="Rewards Ledger History">
+      <TravellerSection title="Rewards ledger history">
         {(ledger?.items || []).length === 0 ? (
           <TravellerState title="No transactions on record">
-            Points earned from completed bookings and referral rewards will appear here.
+            Points from ticketed bookings and referral bonuses will appear here after the ledger posts them.
           </TravellerState>
         ) : (
           <>
             <ul className="fo-traveller__list">
               {ledger?.items.map((row) => (
                 <li key={row.id} className="fo-traveller__row">
-                  <div className="fo-traveller__row-top">
+                  <button
+                    type="button"
+                    className="fo-traveller__row-top w-full text-left"
+                    onClick={() =>
+                      setSelectedEntryId((current) => (current === row.id ? null : row.id))
+                    }
+                  >
                     <div>
                       <p className="fo-traveller__row-title">{row.type.replace(/_/g, " ")}</p>
                       <p className="fo-traveller__row-body">{row.note || "—"}</p>
                       <p className="fo-traveller__row-meta">
                         {new Date(row.createdAt).toLocaleString()}
+                        {selectedEntryId === row.id ? " · details open" : " · view details"}
                       </p>
                     </div>
                     <span
@@ -369,7 +465,39 @@ export function RewardsPageClient() {
                     >
                       {row.points >= 0 ? `+${row.points}` : row.points} pts
                     </span>
-                  </div>
+                  </button>
+                  {selectedEntryId === row.id ? (
+                    <div className="mt-2 rounded-lg border border-slate-200 bg-slate-50/80 p-3 text-xs text-slate-700">
+                      {entryLoading ? (
+                        <p>Loading ledger details…</p>
+                      ) : entryError || !entryDetail ? (
+                        <p>Could not load this ledger entry.</p>
+                      ) : (
+                        <dl className="grid gap-1 sm:grid-cols-2">
+                          <div>
+                            <dt className="text-slate-500">Entry</dt>
+                            <dd className="font-mono">{entryDetail.id}</dd>
+                          </div>
+                          <div>
+                            <dt className="text-slate-500">Type</dt>
+                            <dd>{entryDetail.type}</dd>
+                          </div>
+                          <div>
+                            <dt className="text-slate-500">Booking</dt>
+                            <dd>{entryDetail.bookingId || "—"}</dd>
+                          </div>
+                          <div>
+                            <dt className="text-slate-500">Expires</dt>
+                            <dd>
+                              {entryDetail.expiresAt
+                                ? new Date(entryDetail.expiresAt).toLocaleDateString()
+                                : "—"}
+                            </dd>
+                          </div>
+                        </dl>
+                      )}
+                    </div>
+                  ) : null}
                 </li>
               ))}
             </ul>
@@ -385,7 +513,8 @@ export function RewardsPageClient() {
       </TravellerSection>
 
       <p className="fo-traveller__meta text-xs text-slate-500">
-        Earn rate: {summary.policy.earnPointsPerHundredMinor} pt per 100 minor units. Points are credited upon ticket completion and redeemable at checkout. Airline alliance frequent flyer miles pooling is scheduled for Phase 2.
+        Earn rate: {policy.earnPointsPerHundredMinor} pt per 100 minor units. Credited on ticketed /
+        active / completed bookings only. Redeemable at checkout on quoted bookings.
       </p>
     </>
   );

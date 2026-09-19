@@ -461,4 +461,70 @@ describe("journey Module 09", () => {
     assert.equal(cap.hotel.canPollLive, false);
     assert.ok(cap.notificationChannels.includes("WHATSAPP"));
   });
+
+  it("listWatchesForUser is owner-scoped, syncs ticketed bookings, hides unverified status", async () => {
+    const owner = await createUser("listOwn");
+    const other = await createUser("listOth");
+    const ownBooking = await createTicketedBooking(owner.id);
+    const otherBooking = await createTicketedBooking(other.id);
+    await journeyService.ensureWatchForBooking({
+      bookingId: otherBooking.id,
+      userId: other.id,
+    });
+
+    const listed = await journeyService.listWatchesForUser(owner.id, { pageSize: 50 });
+    assert.ok(listed.items.some((w) => w.bookingId === ownBooking.id));
+    assert.equal(listed.items.some((w) => w.bookingId === otherBooking.id), false);
+    const mine = listed.items.find((w) => w.bookingId === ownBooking.id);
+    assert.equal(mine.phase, "UPCOMING");
+    assert.equal(mine.liveFlight.confirmed, false);
+    assert.equal(mine.liveFlight.snapshot, null);
+    assert.ok(Array.isArray(mine.itinerary));
+    assert.ok(mine.itinerary.some((i) => i.kind === "FLIGHT" && i.origin === "LHE"));
+    assert.equal(mine.booking.product, "FLIGHT");
+
+    const stolen = listed.items[0];
+    await assert.rejects(
+      () => journeyService.getWatchForUser(other.id, stolen.id),
+      (err) => err.statusCode === 403,
+    );
+
+    const events = await journeyService.listEventsForWatch(owner.id, mine.id, {});
+    assert.equal(Array.isArray(events.items), true);
+  });
+
+  it("verified delay events persist, notify owner only, and appear on the watch", async () => {
+    process.env.NODE_ENV = "test";
+    setStatusFetcherForTests(async () => ({
+      status: "DELAYED",
+      minutesDelayed: 25,
+      gate: "B2",
+      observedAt: new Date().toISOString(),
+      source: "test",
+    }));
+    const user = await createUser("evtOwn");
+    const stranger = await createUser("evtStr");
+    const booking = await createTicketedBooking(user.id, {
+      departAt: new Date(Date.now() + 10 * 60 * 60 * 1000).toISOString(),
+    });
+    const watch = await journeyService.ensureWatchForBooking({
+      bookingId: booking.id,
+      userId: user.id,
+    });
+    const polled = await journeyService.pollWatch(watch.id, { channels: ["APP"] });
+    assert.equal(polled.isFact, true);
+    assert.ok(polled.events.some((e) => e.type === "DELAY" || e.type === "GATE_CHANGE"));
+    const detail = await journeyService.getWatchForUser(user.id, watch.id);
+    assert.equal(detail.liveFlight.confirmed, true);
+    assert.ok(detail.disruptions.length >= 1);
+    const notes = await prisma.notificationOutbox.findMany({ where: { userId: user.id } });
+    assert.ok(notes.length >= 1);
+    const leaked = await prisma.notificationOutbox.findMany({ where: { userId: stranger.id } });
+    assert.equal(leaked.length, 0);
+    await assert.rejects(
+      () => journeyService.listEventsForWatch(stranger.id, watch.id, {}),
+      (err) => err.statusCode === 403,
+    );
+    resetStatusFetcherForTests();
+  });
 });

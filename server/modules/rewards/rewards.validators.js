@@ -26,6 +26,10 @@ export const listLedgerQuerySchema = z.object({
   pageSize: z.coerce.number().int().min(1).max(100).optional(),
 });
 
+export const ledgerEntryIdParamsSchema = z.object({
+  entryId: z.string().trim().min(1),
+});
+
 export const companyIdParamsSchema = z.object({
   companyId: z.string().trim().min(1),
 });

@@ -47,9 +47,63 @@ export type VaultDocument = {
   isActive: boolean;
   hasBinary: boolean;
   lifecycleStatus?: "ACTIVE" | "EXPIRED" | "SUPERSEDED";
+  expiryStatus?: "unknown" | "valid" | "expiring_soon" | "expired";
+  daysUntilExpiry?: number | null;
   isPlatformIssued?: boolean;
+  visaMeta?: VaultVisaMeta | null;
+  visaIntelligence?: VaultVisaIntelligence | null;
   createdAt: string;
   updatedAt: string;
+};
+
+export type VaultVisaHolderStatus = "ISSUED" | "PENDING" | "IN_PROCESS" | "CANCELLED";
+
+export type VaultVisaMeta = {
+  destinationCode: string | null;
+  visaType: string | null;
+  holderStatus: VaultVisaHolderStatus;
+  visaStatus: string;
+  visaApplicationId: string | null;
+  appointmentAt: string | null;
+  appointmentLocation: string | null;
+  issuingAuthority: string | null;
+  remindersEnabled: boolean;
+};
+
+export type VaultVisaMetaInput = {
+  destinationCode?: string | null;
+  visaType?: string | null;
+  holderStatus?: VaultVisaHolderStatus;
+  visaApplicationId?: string | null;
+  appointmentAt?: string | null;
+  appointmentLocation?: string | null;
+  issuingAuthority?: string | null;
+  remindersEnabled?: boolean;
+};
+
+export type VaultVisaIntelligence = {
+  dataStatus: string;
+  isFact: boolean;
+  isGuidance: boolean;
+  category: string | null;
+  source: string | null;
+  lastVerifiedAt: string | null;
+  embassyInfo: unknown;
+  processingDaysMin: number | null;
+  processingDaysMax: number | null;
+  requiredDocuments: unknown;
+  confidenceNote: string;
+  linkedApplication: {
+    id: string;
+    status: string;
+    appointmentAt: string | null;
+    appointmentLocation: string | null;
+    destinationCode: string;
+    nationalityCode: string;
+    category: string | null;
+  } | null;
+  nationalityCode?: string;
+  destinationCode?: string;
 };
 
 export const vaultApi = baseApi.injectEndpoints({
@@ -65,6 +119,7 @@ export const vaultApi = baseApi.injectEndpoints({
         expiringWithinDays?: number;
         includeInactive?: boolean;
         companionId?: string;
+        destinationCode?: string;
       } | void
     >({
       query: (params) => ({
@@ -90,6 +145,7 @@ export const vaultApi = baseApi.injectEndpoints({
         companionId?: string;
         issueDate?: string;
         expiresAt?: string;
+        visaMeta?: VaultVisaMetaInput;
       }
     >({
       query: (body) => ({ url: "/vault", method: "POST", body }),
@@ -106,9 +162,27 @@ export const vaultApi = baseApi.injectEndpoints({
         companionId?: string;
         issueDate?: string;
         expiresAt?: string;
+        visaMeta?: VaultVisaMetaInput;
       }
     >({
       query: (body) => ({ url: "/vault/upload", method: "POST", body }),
+      invalidatesTags: ["Vault"],
+    }),
+    updateVaultDocument: build.mutation<
+      VaultDocument,
+      {
+        id: string;
+        title?: string;
+        issueDate?: string | null;
+        expiresAt?: string | null;
+        visaMeta?: VaultVisaMetaInput;
+      }
+    >({
+      query: ({ id, ...body }) => ({
+        url: `/vault/${id}`,
+        method: "PATCH",
+        body,
+      }),
       invalidatesTags: ["Vault"],
     }),
     replaceVaultDocument: build.mutation<
@@ -151,6 +225,7 @@ export const {
   useGetVaultDocumentQuery,
   useCreateVaultDocumentMutation,
   useUploadVaultDocumentMutation,
+  useUpdateVaultDocumentMutation,
   useReplaceVaultDocumentMutation,
   useDeleteVaultDocumentMutation,
   useShareVaultDocumentMutation,

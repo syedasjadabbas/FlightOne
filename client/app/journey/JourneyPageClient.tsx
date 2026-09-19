@@ -10,68 +10,51 @@ import {
   useJourneyRebookHandoffMutation,
   useListJourneyWatchesQuery,
   usePollJourneyWatchMutation,
+  type JourneyEvent,
   type JourneyWatch,
 } from "@/lib/api/journey.api";
 import { useAuthStore } from "@/store/auth.store";
 
-type PollResult = {
-  dataStatus?: string;
-  isFact?: boolean;
-  ancillary?: {
-    weather?: string | null;
-    hotel?: string | null;
-    transfer?: string | null;
-    immigration?: string | null;
-  };
-  watch?: {
-    arriveAt?: string | null;
-    metadata?: {
-      lastStatusSnapshot?: {
-        gate?: string | null;
-        terminal?: string | null;
-        minutesDelayed?: number | null;
-        status?: string | null;
-        [key: string]: unknown;
-      } | null;
-      [key: string]: unknown;
-    } | null;
-  };
-};
-
 function formatTime(iso: string | null | undefined) {
   if (!iso) return "—";
-  try {
-    const d = new Date(iso);
-    return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  } catch {
-    return "—";
-  }
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "—";
+  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
 function formatDate(iso: string | null | undefined) {
   if (!iso) return "—";
-  try {
-    const d = new Date(iso);
-    return d.toLocaleDateString([], {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  } catch {
-    return "—";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "—";
+  return d.toLocaleDateString([], {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+function phaseLabel(phase: string | undefined, fallbackStatus: string) {
+  switch (phase) {
+    case "IN_PROGRESS":
+      return "In progress";
+    case "UPCOMING":
+      return "Upcoming";
+    case "COMPLETED":
+      return "Completed";
+    case "PAUSED":
+      return "Monitoring paused";
+    default:
+      return fallbackStatus;
   }
 }
 
-function resolveFlightRoute(w: JourneyWatch) {
-  const meta = (w.metadata || {}) as Record<string, unknown>;
-  const origin = (meta.origin as string) || (meta.originCode as string) || (meta.from as string) || "DEP";
-  const destination = (meta.destination as string) || (meta.destinationCode as string) || (meta.to as string) || "ARR";
-  const originCity = (meta.originCity as string) || origin;
-  const destinationCity = (meta.destinationCity as string) || destination;
-  const airline = (meta.airline as string) || (meta.airlineName as string) || "FlightOne Partner";
-
-  return { origin, destination, originCity, destinationCity, airline };
+function eventTone(type: string, severity: number) {
+  if (type === "CANCELLED" || severity >= 3) return "rose";
+  if (type === "DELAY" || type === "GATE_CHANGE" || type === "TERMINAL_CHANGE" || type === "WEATHER") {
+    return "amber";
+  }
+  return "slate";
 }
 
 export function JourneyPageClient() {
@@ -93,27 +76,31 @@ export function JourneyPageClient() {
 
   const [activeWatchId, setActiveWatchId] = useState<string | null>(null);
   const [msg, setMsg] = useState<{ text: string; type: "success" | "error" | "info" } | null>(null);
-  const [pollByWatch, setPollByWatch] = useState<Record<string, PollResult>>({});
   const [altsByWatch, setAltsByWatch] = useState<
-    Record<string, { offers?: Array<{ supplierOfferSnapshotId?: string; [k: string]: unknown }>; note?: string }>
+    Record<
+      string,
+      {
+        offers?: Array<{ supplierOfferSnapshotId?: string }>;
+        note?: string;
+        reason?: string;
+      }
+    >
   >({});
 
-  const { upcomingWatches, pastWatches } = useMemo(() => {
+  const liveCap = capability?.flightStatus || capability;
+  const canPollLive = Boolean(liveCap?.canPollLive);
+
+  const { inProgress, upcoming, completed } = useMemo(() => {
     const items = data?.items || [];
-    const now = new Date().getTime();
-    const upcoming: JourneyWatch[] = [];
-    const past: JourneyWatch[] = [];
-
+    const inProg: JourneyWatch[] = [];
+    const up: JourneyWatch[] = [];
+    const done: JourneyWatch[] = [];
     for (const w of items) {
-      const arrTime = w.arriveAt ? new Date(w.arriveAt).getTime() : null;
-      if (w.status === "COMPLETED" || (arrTime && arrTime < now - 1000 * 60 * 60 * 6)) {
-        past.push(w);
-      } else {
-        upcoming.push(w);
-      }
+      if (w.phase === "COMPLETED" || w.status === "COMPLETED") done.push(w);
+      else if (w.phase === "IN_PROGRESS") inProg.push(w);
+      else up.push(w);
     }
-
-    return { upcomingWatches: upcoming, pastWatches: past };
+    return { inProgress: inProg, upcoming: up, completed: done };
   }, [data?.items]);
 
   if (!hasHydrated) {
@@ -127,487 +114,481 @@ export function JourneyPageClient() {
   if (!accessToken) {
     return (
       <div className="mx-auto max-w-2xl py-16 text-center">
-        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-cyan-500/10 text-cyan-600">
-          <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-          </svg>
-        </div>
         <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl font-[var(--font-sora)]">
-          Live Journey Management
+          My Journey
         </h1>
         <p className="mt-3 text-base text-slate-600">
-          Sign in to view real-time flight telemetry, terminal gates, weather alerts, and delay protection for your bookings.
+          Sign in to see ticketed itineraries you own. Live delays, gates, and cancellations appear
+          only when a verified status feed returns them.
         </p>
         <div className="mt-6 flex justify-center gap-3">
           <Link href="/login?redirect=/journey">
-            <Button size="md" className="px-6">Log in to FlightOne</Button>
+            <Button size="md" className="px-6">
+              Log in
+            </Button>
           </Link>
           <Link href="/signup">
-            <Button size="md" variant="secondary" className="px-6">Create Account</Button>
+            <Button size="md" variant="secondary" className="px-6">
+              Create account
+            </Button>
           </Link>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="w-full space-y-8">
-      {/* Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200/80 pb-6">
-        <div>
-          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-cyan-700">
-            <span className="inline-block h-2 w-2 rounded-full bg-cyan-500 animate-pulse" />
-            Live Flight Tracking
+  function renderWatchCard(w: JourneyWatch) {
+    const live = w.liveFlight;
+    const snap = live?.confirmed ? live.snapshot : null;
+    const flightLeg = (w.itinerary || []).find((i) => i.kind === "FLIGHT");
+    const origin = flightLeg?.origin || null;
+    const destination = flightLeg?.destination || null;
+    const isCurrentBusy = activeWatchId === w.id;
+    const events = w.events || [];
+    const disruptions = w.disruptions || [];
+
+    return (
+      <div
+        key={w.id}
+        className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-sm"
+      >
+        <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-[#0b2438] px-6 py-5 text-white">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <span className="rounded-lg bg-white/10 px-2.5 py-1 text-xs font-semibold tracking-wider text-cyan-300">
+                {w.flightNumber || w.booking?.product || "ITINERARY"}
+              </span>
+              <span className="text-sm font-medium text-slate-300">
+                {phaseLabel(w.phase, w.status)}
+              </span>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              {snap?.status ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-semibold text-emerald-200 border border-emerald-500/30">
+                  Verified: {String(snap.status)}
+                  {snap.minutesDelayed ? ` · +${snap.minutesDelayed}m` : ""}
+                </span>
+              ) : (
+                <span className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-slate-200">
+                  Live status {live?.dataStatus || "unavailable"}
+                </span>
+              )}
+              {snap?.gate ? (
+                <span className="rounded-full bg-cyan-500/20 border border-cyan-500/30 px-3 py-1 text-xs font-semibold text-cyan-200">
+                  Gate {String(snap.gate)}
+                </span>
+              ) : null}
+              {snap?.terminal ? (
+                <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-slate-200">
+                  Terminal {String(snap.terminal)}
+                </span>
+              ) : null}
+            </div>
           </div>
-          <h1 className="mt-1 text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 font-[var(--font-sora)]">
-            My Journeys
-          </h1>
-          <p className="mt-1.5 text-sm sm:text-base text-slate-600 max-w-2xl">
-            Real-time updates for your booked trips. Track gate changes, delays, and flight status 24/7.
-          </p>
+
+          <div className="mt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+            <div>
+              <div className="text-3xl sm:text-4xl font-extrabold tracking-tight font-[var(--font-sora)]">
+                {origin || "—"}
+              </div>
+              <div className="text-sm text-cyan-300 font-semibold mt-2">{formatTime(w.departAt)}</div>
+              <div className="text-xs text-slate-400">{formatDate(w.departAt)}</div>
+            </div>
+            <div className="flex flex-1 max-w-xs flex-col items-center justify-center px-4">
+              <div className="h-[2px] w-full bg-slate-700" />
+              <span className="mt-2 text-[11px] text-slate-400 font-medium">
+                {origin && destination ? "Ticketed itinerary" : "Route not stored on this booking"}
+              </span>
+            </div>
+            <div className="sm:text-right">
+              <div className="text-3xl sm:text-4xl font-extrabold tracking-tight font-[var(--font-sora)]">
+                {destination || "—"}
+              </div>
+              <div className="text-sm text-cyan-300 font-semibold mt-2">{formatTime(w.arriveAt)}</div>
+              <div className="text-xs text-slate-400">{formatDate(w.arriveAt)}</div>
+            </div>
+          </div>
         </div>
 
-        {/* Live Tracking Status Badge */}
+        <div className="p-6 space-y-5">
+          {!live?.confirmed ? (
+            <p className="text-xs text-slate-600 leading-relaxed">
+              {live?.reason ||
+                "Live delays, gates, and cancellations are not shown until a verified provider poll succeeds."}
+            </p>
+          ) : null}
+
+          {(w.itinerary || []).length > 0 ? (
+            <div>
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">Itinerary</h3>
+              <ul className="mt-2 space-y-2">
+                {(w.itinerary || []).map((item, idx) => (
+                  <li
+                    key={`${item.kind}-${idx}`}
+                    className="rounded-lg border border-slate-200 bg-slate-50/80 px-3 py-2 text-sm text-slate-800"
+                  >
+                    {item.kind === "FLIGHT" ? (
+                      <>
+                        Flight {item.flightNumber || "—"} · {item.origin || "—"} → {item.destination || "—"}
+                      </>
+                    ) : null}
+                    {item.kind === "HOTEL" ? (
+                      <>
+                        Hotel check-in {formatDate(item.checkInDate)}
+                        {item.confirmationRef ? ` · ref ${item.confirmationRef}` : ""}
+                      </>
+                    ) : null}
+                    {item.kind === "TRANSFER" ? (
+                      <>
+                        Transfer{item.transferRef ? ` ${item.transferRef}` : ""}
+                        {item.pickupAt ? ` · pickup ${formatDate(item.pickupAt)} ${formatTime(item.pickupAt)}` : ""}
+                      </>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <p className="text-sm text-slate-600">No attributed itinerary fields on this booking.</p>
+          )}
+
+          {disruptions.length > 0 ? (
+            <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-3">
+              <p className="text-xs font-semibold uppercase tracking-wider text-amber-900">
+                Recorded disruptions
+              </p>
+              <ul className="mt-2 space-y-1.5">
+                {disruptions.map((ev) => (
+                  <li key={ev.id} className="text-sm text-amber-950">
+                    {ev.title}
+                    <span className="block text-xs text-amber-800">{formatDate(ev.createdAt)}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          {events.length > 0 ? (
+            <div>
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">Timeline</h3>
+              <ol className="mt-2 space-y-2">
+                {events.map((ev: JourneyEvent) => (
+                  <li key={ev.id} className="flex gap-3 text-sm">
+                    <span
+                      className={`mt-1 h-2 w-2 shrink-0 rounded-full ${
+                        eventTone(ev.type, ev.severity) === "rose"
+                          ? "bg-rose-500"
+                          : eventTone(ev.type, ev.severity) === "amber"
+                            ? "bg-amber-500"
+                            : "bg-slate-400"
+                      }`}
+                    />
+                    <div>
+                      <p className="font-medium text-slate-900">{ev.title}</p>
+                      {ev.body ? <p className="text-xs text-slate-600">{ev.body}</p> : null}
+                      <p className="text-[11px] text-slate-500">
+                        {ev.type} · {new Date(ev.createdAt).toLocaleString()}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          ) : (
+            <p className="text-xs text-slate-500">No monitoring events recorded yet.</p>
+          )}
+
+          <div className="flex flex-wrap items-center justify-between gap-4 border-t border-slate-100 pt-4">
+            <div className="text-xs text-slate-500 space-y-1">
+              <div>
+                Booking{" "}
+                <Link
+                  href={`/checkout/${w.bookingId}`}
+                  className="font-mono font-semibold text-cyan-700 hover:underline"
+                >
+                  {w.booking?.ticketRef || w.bookingId}
+                </Link>
+                {w.booking?.status ? ` · ${w.booking.status}` : ""}
+              </div>
+              <div>
+                Last poll:{" "}
+                {w.lastPolledAt ? new Date(w.lastPolledAt).toLocaleString() : "Not polled yet"}
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center gap-2.5">
+              <Button
+                size="sm"
+                variant="secondary"
+                disabled={(isPolling && isCurrentBusy) || w.status === "COMPLETED"}
+                onClick={async () => {
+                  setActiveWatchId(w.id);
+                  setMsg(null);
+                  try {
+                    const r = await poll(w.id).unwrap();
+                    setMsg({
+                      text: r.isFact
+                        ? `Verified status: ${r.dataStatus}.`
+                        : `Poll finished (${r.dataStatus || "unavailable"}). No live status invented.`,
+                      type: r.isFact ? "success" : "info",
+                    });
+                    refetch();
+                  } catch {
+                    setMsg({
+                      text: "Could not poll this watch. Completed journeys cannot be polled.",
+                      type: "error",
+                    });
+                  } finally {
+                    setActiveWatchId(null);
+                  }
+                }}
+              >
+                {isPolling && isCurrentBusy ? "Polling…" : "Refresh status"}
+              </Button>
+              <Button
+                size="sm"
+                variant="secondary"
+                disabled={isLoadingAlts && isCurrentBusy}
+                onClick={async () => {
+                  setActiveWatchId(w.id);
+                  setMsg(null);
+                  try {
+                    const r = await alternatives(w.id).unwrap();
+                    setAltsByWatch((prev) => ({
+                      ...prev,
+                      [w.id]: {
+                        offers: Array.isArray(r.offers) ? r.offers : [],
+                        note: r.note,
+                        reason: r.reason,
+                      },
+                    }));
+                    setMsg({
+                      text: r.autoBooked
+                        ? "Unexpected auto-book flag — FlightOne does not auto-rebook."
+                        : r.note || r.reason || "Alternative search finished. Nothing was booked.",
+                      type: "info",
+                    });
+                  } catch {
+                    setMsg({ text: "Could not search alternatives.", type: "error" });
+                  } finally {
+                    setActiveWatchId(null);
+                  }
+                }}
+              >
+                {isLoadingAlts && isCurrentBusy ? "Searching…" : "Find alternatives"}
+              </Button>
+              <Button
+                size="sm"
+                variant="secondary"
+                disabled={isEscalating && isCurrentBusy}
+                onClick={async () => {
+                  setActiveWatchId(w.id);
+                  setMsg(null);
+                  try {
+                    const r = await escalate({
+                      id: w.id,
+                      reason: "Traveller requested help from My Journey",
+                    }).unwrap();
+                    setMsg({
+                      text:
+                        r.message ||
+                        (r.auditOnly
+                          ? "Help request recorded. Open chat with Ava to create a consultant ticket."
+                          : "Disruption escalation recorded."),
+                      type: "info",
+                    });
+                  } catch {
+                    setMsg({ text: "Could not record a help request.", type: "error" });
+                  } finally {
+                    setActiveWatchId(null);
+                  }
+                }}
+              >
+                {isEscalating && isCurrentBusy ? "Sending…" : "Request assistance"}
+              </Button>
+              <Link href={`/refunds?bookingId=${encodeURIComponent(w.bookingId)}`}>
+                <Button size="sm" variant="ghost">
+                  Refund / cancel
+                </Button>
+              </Link>
+              <Link href={`/checkout/${w.bookingId}`}>
+                <Button size="sm" variant="ghost">
+                  Booking
+                </Button>
+              </Link>
+            </div>
+          </div>
+
+          {altsByWatch[w.id] ? (
+            <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4">
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-600">
+                Alternative inventory
+              </p>
+              <p className="mt-1 text-xs text-slate-600">
+                {altsByWatch[w.id].note ||
+                  altsByWatch[w.id].reason ||
+                  "Selecting an option prepares a quote. It does not ticket or charge."}
+              </p>
+              {(altsByWatch[w.id].offers || []).length ? (
+                <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {(altsByWatch[w.id].offers || []).slice(0, 3).map((offer, idx) => {
+                    const snapId = offer.supplierOfferSnapshotId;
+                    if (!snapId) return null;
+                    return (
+                      <div key={snapId} className="rounded-lg border border-slate-200 bg-white p-3">
+                        <div className="text-xs font-semibold text-slate-900">Option #{idx + 1}</div>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          disabled={isRebooking}
+                          className="mt-2 text-xs"
+                          onClick={async () => {
+                            setMsg(null);
+                            try {
+                              const r = await rebookHandoff({
+                                id: w.id,
+                                supplierOfferSnapshotId: snapId,
+                              }).unwrap();
+                              setMsg({
+                                text:
+                                  r.message ||
+                                  "Quote handoff prepared. FlightOne did not rebook or charge.",
+                                type: "info",
+                              });
+                            } catch {
+                              setMsg({ text: "Could not prepare quote handoff.", type: "error" });
+                            }
+                          }}
+                        >
+                          Prepare quote
+                        </Button>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="mt-2 text-xs text-slate-500">No alternative offers returned.</p>
+              )}
+            </div>
+          ) : null}
+        </div>
+      </div>
+    );
+  }
+
+  const empty = inProgress.length === 0 && upcoming.length === 0 && completed.length === 0;
+
+  return (
+    <div className="w-full space-y-8">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200/80 pb-6">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wider text-cyan-700">Journey monitoring</p>
+          <h1 className="mt-1 text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 font-[var(--font-sora)]">
+            My Journey
+          </h1>
+          <p className="mt-1.5 text-sm sm:text-base text-slate-600 max-w-2xl">
+            Ticketed trips you own. Status, gates, and disruptions appear only from stored itinerary
+            data or a verified provider poll.
+          </p>
+        </div>
         <div className="flex items-center gap-2 self-start sm:self-auto rounded-full border border-slate-200/80 bg-white px-3.5 py-1.5 text-xs text-slate-600 shadow-sm">
-          <span className="inline-block h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="font-medium text-slate-700">Live Tracking:</span>
-          <span className="font-semibold text-emerald-700">
-            {capability?.canPollLive ? "Real-time" : "Active"}
+          <span className={`inline-block h-2 w-2 rounded-full ${canPollLive ? "bg-emerald-500" : "bg-slate-400"}`} />
+          <span className="font-medium text-slate-700">
+            {canPollLive ? "Live status feed configured" : "Live status feed unavailable"}
           </span>
         </div>
       </div>
 
-      {/* Global Toast / Feedback */}
-      {msg && (
+      {msg ? (
         <div
           className={`flex items-center justify-between rounded-xl px-4 py-3 text-sm font-medium ${
             msg.type === "success"
               ? "bg-emerald-50 border border-emerald-200 text-emerald-900"
               : msg.type === "error"
-              ? "bg-rose-50 border border-rose-200 text-rose-900"
-              : "bg-sky-50 border border-sky-200 text-sky-900"
+                ? "bg-rose-50 border border-rose-200 text-rose-900"
+                : "bg-sky-50 border border-sky-200 text-sky-900"
           }`}
           role="status"
         >
           <span>{msg.text}</span>
-          <button
-            type="button"
-            onClick={() => setMsg(null)}
-            className="text-xs opacity-60 hover:opacity-100"
-          >
-            ✕ Dismiss
+          <button type="button" onClick={() => setMsg(null)} className="text-xs opacity-60 hover:opacity-100">
+            Dismiss
           </button>
         </div>
-      )}
+      ) : null}
 
-      {/* Loading & Error States */}
       {isLoading ? (
         <div className="flex justify-center py-20">
           <Spinner label="Loading your trips…" />
         </div>
       ) : isError ? (
         <div className="rounded-2xl border border-rose-200 bg-rose-50/50 p-8 text-center">
-          <p className="text-base font-semibold text-rose-900">Could not load your trips</p>
-          <p className="mt-1 text-sm text-rose-700">Please check your connection and try again.</p>
+          <p className="text-base font-semibold text-rose-900">Could not load your journeys</p>
+          <p className="mt-1 text-sm text-rose-700">This is an error loading watches you own — not a flight status.</p>
           <Button size="sm" variant="secondary" onClick={() => refetch()} className="mt-4">
-            Try Again
+            Try again
           </Button>
         </div>
-      ) : upcomingWatches.length === 0 && pastWatches.length === 0 ? (
-        /* Executive Empty State */
+      ) : empty ? (
         <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50/70 p-10 sm:p-16 text-center">
-          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
-            <svg className="h-8 w-8 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
           <h3 className="text-xl font-bold tracking-tight text-slate-900 font-[var(--font-sora)]">
-            No Upcoming Trips
+            No monitored journeys
           </h3>
           <p className="mx-auto mt-2 max-w-md text-sm text-slate-600">
-            When you book flights through Ava, your flight details, gate numbers, and real-time status updates will appear here automatically.
+            Ticketed or active bookings you own appear here. Quoted carts and other travellers’ trips
+            do not.
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             <Link href="/chat">
-              <Button size="md" className="px-5">
-                Plan a Trip with Ava →
-              </Button>
+              <Button size="md">Ask Ava</Button>
             </Link>
             <Link href="/vault">
-              <Button size="md" variant="secondary" className="px-5">
-                Manage Travel Vault
+              <Button size="md" variant="secondary">
+                Travel vault
               </Button>
             </Link>
           </div>
         </div>
       ) : (
         <div className="space-y-10">
-          {/* Section: Active & Upcoming Trips */}
-          {upcomingWatches.length > 0 && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-bold tracking-tight text-slate-900 font-[var(--font-sora)]">
-                  Upcoming Journeys ({upcomingWatches.length})
-                </h2>
-                <span className="text-xs text-slate-500 font-medium">Automatic 24/7 flight tracking active</span>
-              </div>
-
-              <div className="grid grid-cols-1 gap-6">
-                {upcomingWatches.map((w) => {
-                  const meta = (w.metadata || {}) as Record<string, unknown>;
-                  const snapFromList = (meta.lastStatusSnapshot || null) as PollResult["watch"] extends {
-                    metadata?: { lastStatusSnapshot?: infer S };
-                  }
-                    ? S
-                    : null;
-                  const pollResult = pollByWatch[w.id];
-                  const snap = pollResult?.watch?.metadata?.lastStatusSnapshot || snapFromList;
-                  const route = resolveFlightRoute(w);
-                  const isCurrentBusy = activeWatchId === w.id;
-
-                  const isDelayed = (snap?.minutesDelayed ?? 0) > 0;
-                  const flightStatus = snap?.status || (isDelayed ? `Delayed ${snap?.minutesDelayed}m` : w.status);
-
-                  return (
-                    <div
-                      key={w.id}
-                      className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-sm hover:shadow-md transition-shadow"
-                    >
-                      {/* Top Flight Banner */}
-                      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-[#0b2438] px-6 py-5 text-white">
-                        <div className="flex flex-wrap items-center justify-between gap-3">
-                          <div className="flex items-center gap-3">
-                            <span className="rounded-lg bg-white/10 px-2.5 py-1 text-xs font-semibold tracking-wider text-cyan-300">
-                              {w.flightNumber || "FLIGHT"}
-                            </span>
-                            <span className="text-sm font-medium text-slate-300">{route.airline}</span>
-                          </div>
-
-                          <div className="flex items-center gap-2">
-                            <span
-                              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
-                                isDelayed
-                                  ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
-                                  : "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
-                              }`}
-                            >
-                              <span
-                                className={`h-1.5 w-1.5 rounded-full ${
-                                  isDelayed ? "bg-amber-400" : "bg-emerald-400 animate-pulse"
-                                }`}
-                              />
-                              {String(flightStatus)}
-                            </span>
-
-                            {snap?.gate && (
-                              <span className="rounded-full bg-cyan-500/20 border border-cyan-500/30 px-3 py-1 text-xs font-semibold text-cyan-200">
-                                Gate {String(snap.gate)}
-                              </span>
-                            )}
-                            {snap?.terminal && (
-                              <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-slate-200">
-                                Terminal {String(snap.terminal)}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Route Big Display */}
-                        <div className="mt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-                          <div>
-                            <div className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white font-[var(--font-sora)]">
-                              {route.origin}
-                            </div>
-                            <div className="text-xs font-medium text-slate-300 mt-0.5">{route.originCity}</div>
-                            <div className="text-sm text-cyan-300 font-semibold mt-2">
-                              {formatTime(w.departAt)}
-                            </div>
-                            <div className="text-xs text-slate-400">{formatDate(w.departAt)}</div>
-                          </div>
-
-                          {/* Center Airplane Indicator */}
-                          <div className="flex flex-1 max-w-xs flex-col items-center justify-center px-4">
-                            <div className="flex w-full items-center justify-between text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-                              <span>Depart</span>
-                              <span>Nonstop</span>
-                              <span>Arrive</span>
-                            </div>
-                            <div className="relative my-2 w-full">
-                              <div className="h-[2px] w-full bg-slate-700" />
-                              <div
-                                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-cyan-500 text-slate-950 shadow-md"
-                              >
-                                <svg className="h-4 w-4 rotate-90" fill="currentColor" viewBox="0 0 20 20">
-                                  <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
-                                </svg>
-                              </div>
-                            </div>
-                            <span className="text-[11px] text-slate-400 font-medium">Tracking Active</span>
-                          </div>
-
-                          <div className="sm:text-right">
-                            <div className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white font-[var(--font-sora)]">
-                              {route.destination}
-                            </div>
-                            <div className="text-xs font-medium text-slate-300 mt-0.5">{route.destinationCity}</div>
-                            <div className="text-sm text-cyan-300 font-semibold mt-2">
-                              {formatTime(w.arriveAt)}
-                            </div>
-                            <div className="text-xs text-slate-400">{formatDate(w.arriveAt)}</div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Card Body: Flight Details & Services */}
-                      <div className="p-6">
-                        {/* Trip & Airport Services */}
-                        {pollResult?.ancillary && (
-                          <div className="mb-5 grid grid-cols-2 sm:grid-cols-4 gap-3 rounded-xl bg-slate-50 p-3.5 border border-slate-200/70 text-xs">
-                            <div>
-                              <span className="block font-semibold text-slate-500">Destination Weather</span>
-                              <span className="mt-0.5 font-medium text-slate-900">
-                                {pollResult.ancillary.weather || "24°C · Clear Sky"}
-                              </span>
-                            </div>
-                            <div>
-                              <span className="block font-semibold text-slate-500">Hotel Check-in</span>
-                              <span className="mt-0.5 font-medium text-slate-900">
-                                {pollResult.ancillary.hotel || "Confirmed ready"}
-                              </span>
-                            </div>
-                            <div>
-                              <span className="block font-semibold text-slate-500">Airport Transfer</span>
-                              <span className="mt-0.5 font-medium text-slate-900">
-                                {pollResult.ancillary.transfer || "On standby"}
-                              </span>
-                            </div>
-                            <div>
-                              <span className="block font-semibold text-slate-500">Immigration Wait</span>
-                              <span className="mt-0.5 font-medium text-slate-900">
-                                {pollResult.ancillary.immigration || "~15 mins"}
-                              </span>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Booking Meta & Actions Row */}
-                        <div className="flex flex-wrap items-center justify-between gap-4 border-t border-slate-100 pt-4">
-                          <div className="text-xs text-slate-500 space-y-1">
-                            <div>
-                              Booking Reference:{" "}
-                              <Link
-                                href={`/checkout/${w.bookingId}`}
-                                className="font-mono font-semibold text-cyan-700 hover:underline"
-                              >
-                                {w.bookingId}
-                              </Link>
-                            </div>
-                            <div>
-                              Last updated:{" "}
-                              <span className="text-slate-700 font-medium">
-                                {w.lastPolledAt ? new Date(w.lastPolledAt).toLocaleTimeString() : "Just now"}
-                              </span>
-                            </div>
-                          </div>
-
-                          <div className="flex flex-wrap items-center gap-2.5">
-                            <Button
-                              size="sm"
-                              variant="secondary"
-                              disabled={isPolling && isCurrentBusy}
-                              onClick={async () => {
-                                setActiveWatchId(w.id);
-                                setMsg(null);
-                                try {
-                                  const r = (await poll(w.id).unwrap()) as PollResult;
-                                  setPollByWatch((prev) => ({ ...prev, [w.id]: r }));
-                                  setMsg({
-                                    text: "Flight status updated successfully.",
-                                    type: "success",
-                                  });
-                                  refetch();
-                                } catch {
-                                  setMsg({ text: "Could not refresh flight status. Please try again.", type: "error" });
-                                } finally {
-                                  setActiveWatchId(null);
-                                }
-                              }}
-                            >
-                              {isPolling && isCurrentBusy ? "Updating…" : "↻ Refresh Status"}
-                            </Button>
-
-                            <Button
-                              size="sm"
-                              variant="secondary"
-                              disabled={isLoadingAlts && isCurrentBusy}
-                              onClick={async () => {
-                                setActiveWatchId(w.id);
-                                setMsg(null);
-                                try {
-                                  const r = await alternatives(w.id).unwrap();
-                                  setAltsByWatch((prev) => ({
-                                    ...prev,
-                                    [w.id]: {
-                                      offers: Array.isArray(r.offers) ? r.offers : [],
-                                      note: r.note,
-                                    },
-                                  }));
-                                  setMsg({
-                                    text: r.autoBooked
-                                      ? "Alternative flights found."
-                                      : "Alternative flight options are ready.",
-                                    type: "info",
-                                  });
-                                } catch {
-                                  setMsg({ text: "No alternative routes available.", type: "error" });
-                                } finally {
-                                  setActiveWatchId(null);
-                                }
-                              }}
-                            >
-                              {isLoadingAlts && isCurrentBusy ? "Searching…" : "Alternative Flights"}
-                            </Button>
-
-                            <Button
-                              size="sm"
-                              variant="secondary"
-                              disabled={isEscalating && isCurrentBusy}
-                              onClick={async () => {
-                                setActiveWatchId(w.id);
-                                setMsg(null);
-                                try {
-                                  await escalate({
-                                    id: w.id,
-                                    reason: "Traveller requested human consultant help via Journey Dashboard",
-                                  }).unwrap();
-                                  setMsg({
-                                    text: "Help request received. A travel specialist will assist you shortly.",
-                                    type: "success",
-                                  });
-                                } catch {
-                                  setMsg({ text: "Could not send help request. Please try again.", type: "error" });
-                                } finally {
-                                  setActiveWatchId(null);
-                                }
-                              }}
-                            >
-                              {isEscalating && isCurrentBusy ? "Connecting…" : "Get Support"}
-                            </Button>
-
-                            <Link href={`/checkout/${w.bookingId}`}>
-                              <Button size="sm" variant="ghost">
-                                View Ticket →
-                              </Button>
-                            </Link>
-                          </div>
-                        </div>
-
-                        {/* Display Alternatives Drawer if loaded */}
-                        {altsByWatch[w.id]?.offers && altsByWatch[w.id].offers!.length > 0 && (
-                          <div className="mt-5 rounded-xl border border-cyan-100 bg-cyan-50/40 p-4">
-                            <div className="flex items-center justify-between">
-                              <span className="text-xs font-bold uppercase tracking-wider text-cyan-900">
-                                Alternative Flights ({altsByWatch[w.id].offers!.length})
-                              </span>
-                              <span className="text-xs text-slate-500">Live verified fares</span>
-                            </div>
-                            <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                              {altsByWatch[w.id].offers!.slice(0, 3).map((offer, idx) => {
-                                const snapId = offer.supplierOfferSnapshotId;
-                                if (!snapId) return null;
-                                return (
-                                  <div
-                                    key={snapId}
-                                    className="rounded-lg border border-slate-200 bg-white p-3 shadow-xs flex flex-col justify-between"
-                                  >
-                                    <div className="text-xs font-semibold text-slate-900">
-                                      Option #{idx + 1}
-                                    </div>
-                                    <Button
-                                      size="sm"
-                                      variant="secondary"
-                                      disabled={isRebooking}
-                                      className="mt-2 text-xs"
-                                      onClick={async () => {
-                                        setMsg(null);
-                                        try {
-                                          const r = await rebookHandoff({
-                                            id: w.id,
-                                            supplierOfferSnapshotId: snapId,
-                                          }).unwrap();
-                                          setMsg({
-                                            text: r.message || "Flight change confirmed.",
-                                            type: "success",
-                                          });
-                                        } catch {
-                                          setMsg({ text: "Could not apply flight change.", type: "error" });
-                                        }
-                                      }}
-                                    >
-                                      Select Option →
-                                    </Button>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+          {inProgress.length > 0 ? (
+            <section className="space-y-4">
+              <h2 className="text-lg font-bold tracking-tight text-slate-900 font-[var(--font-sora)]">
+                Active now ({inProgress.length})
+              </h2>
+              {inProgress.map(renderWatchCard)}
+            </section>
+          ) : null}
+          {upcoming.length > 0 ? (
+            <section className="space-y-4">
+              <h2 className="text-lg font-bold tracking-tight text-slate-900 font-[var(--font-sora)]">
+                Upcoming ({upcoming.length})
+              </h2>
+              {upcoming.map(renderWatchCard)}
+            </section>
+          ) : null}
+          {completed.length > 0 ? (
+            <section className="space-y-4 pt-4 border-t border-slate-200/80">
+              <h2 className="text-lg font-bold tracking-tight text-slate-900 font-[var(--font-sora)]">
+                Completed ({completed.length})
+              </h2>
+              {completed.map(renderWatchCard)}
+            </section>
+          ) : null}
+          {data && data.total > 20 ? (
+            <div className="flex justify-center gap-2">
+              <Button size="sm" variant="secondary" disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>
+                Previous
+              </Button>
+              <Button
+                size="sm"
+                variant="secondary"
+                disabled={page * 20 >= data.total}
+                onClick={() => setPage((p) => p + 1)}
+              >
+                Next
+              </Button>
             </div>
-          )}
-
-          {/* Section: Past Trips & History */}
-          {pastWatches.length > 0 && (
-            <div className="space-y-4 pt-4 border-t border-slate-200/80">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-bold tracking-tight text-slate-900 font-[var(--font-sora)]">
-                  Past Trips ({pastWatches.length})
-                </h2>
-                <span className="text-xs text-slate-500">Completed flight archives</span>
-              </div>
-
-              <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white divide-y divide-slate-100 shadow-sm">
-                {pastWatches.map((w) => {
-                  const route = resolveFlightRoute(w);
-                  return (
-                    <div
-                      key={w.id}
-                      className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:px-6 hover:bg-slate-50/80 transition-colors"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600 font-bold text-xs">
-                          {route.origin}
-                        </div>
-                        <div>
-                          <div className="text-sm font-semibold text-slate-900">
-                            {route.origin} → {route.destination} · {w.flightNumber || "Flight"}
-                          </div>
-                          <div className="text-xs text-slate-500">
-                            {formatDate(w.departAt)} · Booking {w.bookingId.slice(0, 10)}…
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-3 self-end sm:self-auto">
-                        <span className="rounded-full bg-slate-100 px-3 py-0.5 text-xs font-medium text-slate-600">
-                          Completed
-                        </span>
-                        <Link href={`/checkout/${w.bookingId}`}>
-                          <Button size="sm" variant="ghost">
-                            View Receipt →
-                          </Button>
-                        </Link>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+          ) : null}
         </div>
       )}
     </div>

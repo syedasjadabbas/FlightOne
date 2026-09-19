@@ -12,6 +12,7 @@ import { hasPermissionEff } from "../../lib/permissions.service.js";
 import {
   computeTierFromLifetime,
   creditMinorFromPoints,
+  getPublicRewardsPolicy,
   getRewardsPolicy,
   pointsFromBookingAmount,
   tierProgress,
@@ -44,7 +45,12 @@ const LEDGER_SELECT = {
   createdAt: true,
 };
 
-export { computeTierFromLifetime as computeTier, getRewardsPolicy, tierProgress };
+export {
+  computeTierFromLifetime as computeTier,
+  getPublicRewardsPolicy,
+  getRewardsPolicy,
+  tierProgress,
+};
 
 function generateReferralCode() {
   let code = "";
@@ -140,12 +146,7 @@ export async function getBalance(userId) {
     referralCode: account.referralCode,
     lifetimeEarned,
     progress,
-    policy: {
-      earnPointsPerHundredMinor: policy.earnPointsPerHundredMinor,
-      referralBonusPoints: policy.referralBonusPoints,
-      pointValueMinor: policy.pointValueMinor,
-      creditExpiryDays: policy.creditExpiryDays,
-    },
+    policy: getPublicRewardsPolicy(),
   };
 }
 
@@ -181,6 +182,30 @@ export async function listLedger(user, permissions, { userId, page, pageSize } =
     total,
     totalPages: total === 0 ? 0 : Math.ceil(total / take),
   };
+}
+
+export async function getLedgerEntry(user, permissions, entryId) {
+  if (!entryId || typeof entryId !== "string") {
+    throw new AppError(400, "entryId is required");
+  }
+
+  const entry = await prisma.rewardLedgerEntry.findUnique({
+    where: { id: entryId },
+    select: LEDGER_SELECT,
+  });
+  if (!entry) throw new AppError(404, "Ledger entry not found");
+
+  const account = await prisma.rewardAccount.findUnique({
+    where: { id: entry.accountId },
+    select: { userId: true },
+  });
+  if (!account) throw new AppError(404, "Ledger entry not found");
+
+  if (account.userId !== user.id && !hasPermissionEff(permissions, "rewards:read")) {
+    throw new AppError(404, "Ledger entry not found");
+  }
+
+  return entry;
 }
 
 export async function listMyReferrals(userId) {

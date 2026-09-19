@@ -1,5 +1,6 @@
 import { successResponse } from "../../lib/response.js";
 import * as mice from "./mice.service.js";
+import * as miceEnquiries from "./mice.enquiries.js";
 
 function handle(fn) {
   return async (req, res, next) => {
@@ -145,4 +146,31 @@ export const listSponsors = handle(async (req, res) => {
 export const getReport = handle(async (req, res) => {
   const data = await mice.getEventReport(req.params.id, req.user.id, req.permissions);
   return successResponse(res, "OK", data);
+});
+
+export const createMiceEnquiry = handle(async (req, res) => {
+  const data = await miceEnquiries.createMiceEnquiry(req.user.id, req.body);
+  return successResponse(res, "MICE enquiry submitted", data, 201);
+});
+
+export const listMyMiceEnquiries = handle(async (req, res) => {
+  const data = await miceEnquiries.listMyMiceEnquiries(req.user.id);
+  return successResponse(res, "OK", data);
+});
+
+export const getMiceEnquiry = handle(async (req, res) => {
+  const data = await miceEnquiries.getMiceEnquiry(req.user.id, req.params.enquiryId);
+  return successResponse(res, "OK", data);
+});
+
+export const updateMiceEnquiry = handle(async (req, res) => {
+  const data = await miceEnquiries.updateMiceEnquiry(req.user.id, req.params.enquiryId, req.body);
+  return successResponse(res, "MICE enquiry updated", data);
+});
+
+export const cancelMiceEnquiry = handle(async (req, res) => {
+  const data = await miceEnquiries.cancelMiceEnquiry(req.user.id, req.params.enquiryId, {
+    reason: req.body?.reason,
+  });
+  return successResponse(res, "MICE enquiry cancelled", data);
 });

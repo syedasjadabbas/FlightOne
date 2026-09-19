@@ -77,6 +77,7 @@ export async function runVaultRetentionPurge({ limit = 100, now = new Date() } =
     }
 
     await prisma.vaultShareLink.deleteMany({ where: { documentId: doc.id } });
+    await prisma.vaultVisaRecord.deleteMany({ where: { documentId: doc.id } }).catch(() => {});
     await prisma.vaultDocument.delete({ where: { id: doc.id } });
 
     await writeAudit({

@@ -1,7 +1,6 @@
-"use client";
+﻿"use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
 import { Button, Input, SearchableSelect, Spinner } from "@/components/ui";
 import { useAuthStore } from "@/store/auth.store";
 import {
@@ -22,6 +21,15 @@ import {
 } from "@/lib/api/vault.api";
 import { isIdentityVaultType } from "@/lib/profile/ocrReview";
 import { DocumentOcrPanel } from "@/app/profile/_components/DocumentOcrPanel";
+import { VAULT_TYPE_LABELS, VAULT_TYPE_ORDER, visaStatusLabel } from "@/lib/vault/visaStatus";
+import { DeleteDocumentConfirm } from "./_components/DeleteDocumentConfirm";
+import { VaultDocumentDetails } from "./_components/VaultDocumentDetails";
+import {
+  VisaMetaFields,
+  emptyVisaMetaForm,
+  visaMetaFormToInput,
+  type VisaMetaFormValue,
+} from "./_components/VisaMetaFields";
 
 type VaultCategory = "ALL" | "IDENTITIES" | "VISAS" | "LOYALTY" | "VOUCHERS" | "EXPIRING";
 
@@ -39,10 +47,12 @@ const UPLOAD_TYPES: Array<{ value: VaultDocType; label: string; category: string
   { value: "NATIONAL_ID", label: "National ID / CNIC", category: "Identification" },
   { value: "RESIDENCE_PERMIT", label: "Residence Permit", category: "Identification" },
   { value: "VISA", label: "Visa", category: "Travel Entry" },
+  { value: "TICKET", label: "Ticket", category: "Travel" },
+  { value: "HOTEL_VOUCHER", label: "Hotel Voucher", category: "Travel" },
+  { value: "INSURANCE", label: "Travel Insurance", category: "Coverage" },
   { value: "TRAVEL_CERT", label: "Travel Certificate", category: "Travel Entry" },
   { value: "FF_CARD", label: "Frequent Flyer Card", category: "Loyalty" },
   { value: "LOYALTY_CARD", label: "Hotel / Travel Loyalty Card", category: "Loyalty" },
-  { value: "INSURANCE", label: "Travel Insurance", category: "Coverage" },
   { value: "OTHER", label: "Other Document", category: "General" },
 ];
 
@@ -88,8 +98,13 @@ export function VaultPageClient() {
   // Upload Form State
   const [uploadTitle, setUploadTitle] = useState("");
   const [uploadType, setUploadType] = useState<VaultDocType>("PASSPORT");
+  const [uploadIssue, setUploadIssue] = useState("");
   const [uploadExpiry, setUploadExpiry] = useState("");
   const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploadVisa, setUploadVisa] = useState<VisaMetaFormValue>(emptyVisaMetaForm());
+  const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
+  const [selectedFallback, setSelectedFallback] = useState<VaultDocument | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<VaultDocument | null>(null);
 
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
@@ -166,7 +181,11 @@ export function VaultPageClient() {
         const matchesTitle = doc.title.toLowerCase().includes(q);
         const matchesType = doc.type.toLowerCase().includes(q);
         const matchesFile = (doc.originalFilename || "").toLowerCase().includes(q);
-        if (!matchesTitle && !matchesType && !matchesFile) return false;
+        const matchesDest = (doc.visaMeta?.destinationCode || "").toLowerCase().includes(q);
+        const matchesVisaType = (doc.visaMeta?.visaType || "").toLowerCase().includes(q);
+        if (!matchesTitle && !matchesType && !matchesFile && !matchesDest && !matchesVisaType) {
+          return false;
+        }
       }
 
       // Category tab filter
@@ -196,6 +215,27 @@ export function VaultPageClient() {
     });
   }, [rawItems, selectedCategory, searchQuery]);
 
+  const groupedItems = useMemo(() => {
+    const buckets = new Map<string, VaultDocument[]>();
+    for (const doc of filteredItems) {
+      const list = buckets.get(doc.type) ?? [];
+      list.push(doc);
+      buckets.set(doc.type, list);
+    }
+    const ordered: Array<{ type: string; items: VaultDocument[] }> = VAULT_TYPE_ORDER.filter(
+      (type) => buckets.has(type),
+    ).map((type) => ({
+      type,
+      items: buckets.get(type) ?? [],
+    }));
+    for (const [type, items] of buckets) {
+      if (!VAULT_TYPE_ORDER.includes(type as (typeof VAULT_TYPE_ORDER)[number])) {
+        ordered.push({ type, items });
+      }
+    }
+    return ordered;
+  }, [filteredItems]);
+
   async function ensureIdentityDocForVault(doc: VaultDocument): Promise<IdentityDocument | null> {
     if (!isIdentityVaultType(doc.type)) return null;
     const existing = identityDocByVaultId.get(doc.id) || ocrByVaultId[doc.id];
@@ -205,6 +245,13 @@ export function VaultPageClient() {
         type: doc.type,
         vaultDocumentId: doc.id,
         ...(doc.expiresAt ? { expiresAt: doc.expiresAt.slice(0, 10) } : {}),
+        ...(doc.issueDate ? { issuedAt: doc.issueDate.slice(0, 10) } : {}),
+        ...(doc.type === "VISA" && doc.visaMeta?.destinationCode
+          ? { countryCode: doc.visaMeta.destinationCode }
+          : {}),
+        ...(doc.type === "VISA" && doc.visaMeta?.visaType
+          ? { documentSubtype: doc.visaMeta.visaType }
+          : {}),
       }).unwrap();
       setOcrByVaultId((prev) => ({ ...prev, [doc.id]: created }));
       return created;
@@ -236,14 +283,20 @@ export function VaultPageClient() {
         contentType: uploadFile.type || "application/pdf",
         originalFilename: uploadFile.name,
         contentBase64,
+        ...(uploadIssue ? { issueDate: new Date(uploadIssue).toISOString() } : {}),
         ...(uploadExpiry ? { expiresAt: new Date(uploadExpiry).toISOString() } : {}),
+        ...(uploadType === "VISA" ? { visaMeta: visaMetaFormToInput(uploadVisa) } : {}),
       }).unwrap();
 
       setUploadTitle("");
+      setUploadIssue("");
       setUploadExpiry("");
       setUploadFile(null);
+      setUploadVisa(emptyVisaMetaForm());
       setShowUploadModal(false);
       setActionSuccess(`"${uploaded.title}" added to your Vault.`);
+      setSelectedFallback(uploaded);
+      setSelectedDocId(uploaded.id);
 
       if (isIdentityVaultType(uploaded.type) && uploaded.hasBinary) {
         const linked = await ensureIdentityDocForVault(uploaded);
@@ -322,12 +375,19 @@ export function VaultPageClient() {
 
   async function onDelete(doc: VaultDocument) {
     if (doc.isPlatformIssued) return;
-    if (!window.confirm(`Are you sure you want to remove "${doc.title}" from your vault?`)) return;
+    setPendingDelete(doc);
+  }
+
+  async function confirmDelete() {
+    const doc = pendingDelete;
+    if (!doc) return;
     setBusyId(doc.id);
     setActionError(null);
     try {
       await removeDoc(doc.id).unwrap();
       setActionSuccess(`"${doc.title}" deleted.`);
+      setPendingDelete(null);
+      if (selectedDocId === doc.id) setSelectedDocId(null);
     } catch {
       setActionError("Delete failed.");
     } finally {
@@ -492,8 +552,15 @@ export function VaultPageClient() {
           </Button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filteredItems.map((doc) => {
+        <div className="space-y-8">
+          {groupedItems.map((group) => (
+            <section key={group.type} className="space-y-3">
+              <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-500">
+                {VAULT_TYPE_LABELS[group.type] || group.type}
+                <span className="ml-2 text-slate-400 font-medium">{group.items.length}</span>
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {group.items.map((doc) => {
             const verification = verificationByVaultId.get(doc.id);
             const identityDoc = ocrByVaultId[doc.id] || identityDocByVaultId.get(doc.id) || null;
             const showOcr = ocrOpenVaultId === doc.id && identityDoc;
@@ -502,7 +569,7 @@ export function VaultPageClient() {
 
             // Status tag logic
             let expiryTone = "bg-emerald-50 text-emerald-700 border-emerald-200";
-            let expiryLabel = `Valid · Exp ${formatDate(doc.expiresAt)}`;
+            let expiryLabel = `Valid Â· Exp ${formatDate(doc.expiresAt)}`;
 
             if (daysUntil !== null) {
               if (daysUntil < 0) {
@@ -546,6 +613,12 @@ export function VaultPageClient() {
                       <span className="h-1.5 w-1.5 rounded-full bg-current" />
                       {expiryLabel}
                     </span>
+                    {doc.type === "VISA" && doc.visaMeta ? (
+                      <span className="inline-flex items-center rounded-full border border-cyan-200 bg-cyan-50 px-2.5 py-0.5 text-xs font-semibold text-cyan-800">
+                        {visaStatusLabel(doc.visaMeta.visaStatus)}
+                        {doc.visaMeta.destinationCode ? ` Â· ${doc.visaMeta.destinationCode}` : ""}
+                      </span>
+                    ) : null}
                   </div>
 
                   {/* Metadata Row */}
@@ -555,7 +628,7 @@ export function VaultPageClient() {
                       <span className="font-medium text-slate-700">
                         {doc.originalFilename || "Metadata only"}
                       </span>
-                      {doc.byteSize ? ` · ${(doc.byteSize / (1024 * 1024)).toFixed(2)} MB` : ""}
+                      {doc.byteSize ? ` Â· ${(doc.byteSize / (1024 * 1024)).toFixed(2)} MB` : ""}
                     </div>
 
                     {verification && (
@@ -569,6 +642,18 @@ export function VaultPageClient() {
                 {/* Card Actions Footer */}
                 <div className="mt-5 border-t border-slate-100 pt-4 flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-1.5">
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      disabled={isBusy}
+                      onClick={() => {
+                        setSelectedFallback(doc);
+                        setSelectedDocId(doc.id);
+                      }}
+                      className="text-xs px-2.5"
+                    >
+                      Details
+                    </Button>
                     {doc.hasBinary && doc.isActive && (
                       <Button
                         size="sm"
@@ -646,7 +731,10 @@ export function VaultPageClient() {
                 )}
               </div>
             );
-          })}
+                })}
+              </div>
+            </section>
+          ))}
         </div>
       )}
 
@@ -691,13 +779,25 @@ export function VaultPageClient() {
                 required
               />
 
-              <Input
-                label="Expiration Date (optional)"
-                type="date"
-                value={uploadExpiry}
-                onChange={(e) => setUploadExpiry(e.target.value)}
-                hint="Used for automatic renewal reminders"
-              />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <Input
+                  label="Issue date (optional)"
+                  type="date"
+                  value={uploadIssue}
+                  onChange={(e) => setUploadIssue(e.target.value)}
+                />
+                <Input
+                  label="Expiration Date (optional)"
+                  type="date"
+                  value={uploadExpiry}
+                  onChange={(e) => setUploadExpiry(e.target.value)}
+                  hint="Used for automatic renewal reminders"
+                />
+              </div>
+
+              {uploadType === "VISA" ? (
+                <VisaMetaFields value={uploadVisa} onChange={setUploadVisa} disabled={uploading} />
+              ) : null}
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
@@ -743,6 +843,33 @@ export function VaultPageClient() {
           </div>
         </div>
       )}
+
+      {selectedDocId && (selectedFallback || rawItems.find((d) => d.id === selectedDocId)) ? (
+        <VaultDocumentDetails
+          documentId={selectedDocId}
+          fallback={
+            (rawItems.find((d) => d.id === selectedDocId) ?? selectedFallback) as VaultDocument
+          }
+          busy={busyId === selectedDocId}
+          onClose={() => {
+            setSelectedDocId(null);
+            setSelectedFallback(null);
+          }}
+          onDownload={(doc) => void onDownload(doc)}
+          onShare={(doc) => void onShare(doc)}
+          onReplace={(doc) => void onReplace(doc)}
+          onDelete={(doc) => void onDelete(doc)}
+        />
+      ) : null}
+
+      {pendingDelete ? (
+        <DeleteDocumentConfirm
+          title={pendingDelete.title}
+          busy={busyId === pendingDelete.id}
+          onCancel={() => setPendingDelete(null)}
+          onConfirm={() => void confirmDelete()}
+        />
+      ) : null}
     </div>
   );
 }

@@ -152,6 +152,69 @@ describe("Module 14 Refund & Reissue Engine", () => {
     assert.equal(again.status, "SUBMITTED");
   });
 
+  it("lists only the caller's refundable bookings; hides unconfirmed amounts", async () => {
+    const a = await createUser("listA");
+    const b = await createUser("listB");
+    const own = await createBooking(a.id, { status: "TICKETED" });
+    await createBooking(a.id, { status: "CANCELLED" });
+    await createBooking(b.id, { status: "TICKETED" });
+    const listed = await refunds.listMyRefundableBookings(a);
+    assert.ok(listed.items.some((row) => row.bookingId === own.id));
+    assert.equal(listed.items.some((row) => row.status === "CANCELLED"), false);
+    assert.equal(
+      listed.items.some((row) => row.bookingId !== own.id && !listed.items.find((x) => x.bookingId === own.id)),
+      false,
+    );
+    const otherIds = listed.items.map((row) => row.bookingId);
+    const bBookings = await prisma.booking.findMany({ where: { userId: b.id }, select: { id: true } });
+    assert.equal(bBookings.some((row) => otherIds.includes(row.id)), false);
+    const confirmed = listed.items.find((row) => row.bookingId === own.id);
+    assert.equal(confirmed.confirmed, true);
+    assert.equal(typeof confirmed.refundableMinor, "number");
+
+    const opaque = await createBooking(a.id, { fareRules: {}, status: "TICKETED" });
+    const listed2 = await refunds.listMyRefundableBookings(a);
+    const hidden = listed2.items.find((row) => row.bookingId === opaque.id);
+    assert.equal(hidden.confirmed, false);
+    assert.equal(hidden.refundableMinor, null);
+  });
+
+  it("idempotency key cannot leak another user's case; unavailable calc stays manual", async () => {
+    const a = await createUser("idemA");
+    const b = await createUser("idemB");
+    const bookingA = await createBooking(a.id);
+    const calcA = await refunds.calculateRefund(a, permsWrite, { bookingId: bookingA.id });
+    const c = await refunds.createRefundCase(a, permsWrite, {
+      bookingId: bookingA.id,
+      calculationId: calcA.id,
+      idempotencyKey: `shared-key-${suffix}`,
+    });
+    caseIds.push(c.id);
+    const bookingB = await createBooking(b.id);
+    const calcB = await refunds.calculateRefund(b, permsWrite, { bookingId: bookingB.id });
+    await assert.rejects(
+      () =>
+        refunds.createRefundCase(b, permsWrite, {
+          bookingId: bookingB.id,
+          calculationId: calcB.id,
+          idempotencyKey: `shared-key-${suffix}`,
+        }),
+      (e) => e.statusCode === 409,
+    );
+
+    const opaqueBooking = await createBooking(a.id, { fareRules: {} });
+    const opaqueCalc = await refunds.calculateRefund(a, permsWrite, { bookingId: opaqueBooking.id });
+    assert.equal(opaqueCalc.dataStatus, "DATA_UNAVAILABLE");
+    const human = await refunds.createRefundCase(a, permsWrite, {
+      bookingId: opaqueBooking.id,
+      calculationId: opaqueCalc.id,
+    });
+    caseIds.push(human.id);
+    assert.equal(human.status, "REQUIRES_HUMAN");
+    const submittedHuman = await refunds.submitRefundCase(a, permsNone, human.id);
+    assert.equal(submittedHuman.status, "REQUIRES_HUMAN");
+  });
+
   it("customer isolation / IDOR", async () => {
     const a = await createUser("own");
     const b = await createUser("oth");
@@ -207,6 +270,84 @@ describe("Module 14 Refund & Reissue Engine", () => {
     // idempotent complete
     const again = await refunds.completeRefundCase(user, req, c.id);
     assert.equal(again.status, "COMPLETED");
+  });
+
+  it("owner submit auto-processes when payment data exists; never false-completes unconfigured gateway", async () => {
+    const owner = await createUser("autoOwn");
+    const booking = await createBooking(owner.id, { status: "TICKETED" });
+    await prisma.payment.create({
+      data: {
+        userId: owner.id,
+        bookingId: booking.id,
+        status: "CAPTURED",
+        provider: "SIMULATED",
+        currency: "USD",
+        amountMinor: 10000,
+        providerPaymentId: `sim_auto_${booking.id}`,
+        idempotencyKey: `pay-auto-${booking.id}`,
+      },
+    });
+    const calc = await refunds.calculateRefund(owner, permsNone, { bookingId: booking.id });
+    const opened = await refunds.createRefundCase(owner, permsNone, {
+      bookingId: booking.id,
+      calculationId: calc.id,
+      idempotencyKey: `owner-auto-${booking.id}`,
+    });
+    caseIds.push(opened.id);
+    const submitted = await refunds.submitRefundCase(owner, permsNone, opened.id);
+    assert.equal(submitted.status, "COMPLETED");
+    assert.equal(submitted.paymentRefundStatus, "PROVIDER_REFUNDED");
+    const again = await refunds.processRefundCase(owner, { permissions: permsNone }, opened.id, {
+      allowOwnerAuto: true,
+    });
+    assert.equal(again.status, "COMPLETED");
+
+    const queuedBooking = await createBooking(owner.id, { status: "TICKETED" });
+    const queuedCalc = await refunds.calculateRefund(owner, permsNone, {
+      bookingId: queuedBooking.id,
+    });
+    const queuedCase = await refunds.createRefundCase(owner, permsNone, {
+      bookingId: queuedBooking.id,
+      calculationId: queuedCalc.id,
+    });
+    caseIds.push(queuedCase.id);
+    const queued = await refunds.submitRefundCase(owner, permsNone, queuedCase.id);
+    assert.equal(queued.status, "SUBMITTED");
+    await assert.rejects(
+      () => refunds.processRefundCase(owner, { permissions: permsNone }, queuedCase.id),
+      (e) => e.statusCode === 403,
+    );
+
+    const prev = process.env.ALLOW_SIMULATED_PAYMENT;
+    process.env.ALLOW_SIMULATED_PAYMENT = "false";
+    delete process.env.STRIPE_SECRET_KEY;
+    const opaque = await createUser("autoFail");
+    const opaqueBooking = await createBooking(opaque.id, { status: "TICKETED" });
+    await prisma.payment.create({
+      data: {
+        userId: opaque.id,
+        bookingId: opaqueBooking.id,
+        status: "CAPTURED",
+        provider: "UNCONFIGURED",
+        currency: "USD",
+        amountMinor: 10000,
+        idempotencyKey: `pay-auto-fail-${opaqueBooking.id}`,
+      },
+    });
+    const opaqueCalc = await refunds.calculateRefund(opaque, permsNone, {
+      bookingId: opaqueBooking.id,
+    });
+    const humanCase = await refunds.createRefundCase(opaque, permsNone, {
+      bookingId: opaqueBooking.id,
+      calculationId: opaqueCalc.id,
+    });
+    caseIds.push(humanCase.id);
+    const manualQueued = await refunds.submitRefundCase(opaque, permsNone, humanCase.id);
+    assert.equal(manualQueued.status, "REQUIRES_HUMAN");
+    assert.notEqual(manualQueued.status, "COMPLETED");
+    const stillTicketed = await prisma.booking.findUnique({ where: { id: opaqueBooking.id } });
+    assert.equal(stillTicketed.status, "TICKETED");
+    process.env.ALLOW_SIMULATED_PAYMENT = prev;
   });
 
   it("unconfigured payment → REQUIRES_HUMAN (no fake complete)", async () => {

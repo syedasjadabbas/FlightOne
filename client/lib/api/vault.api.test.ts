@@ -9,6 +9,7 @@ describe("vault.api", () => {
         "getVaultCapability",
         "listVaultDocuments",
         "uploadVaultDocument",
+        "updateVaultDocument",
         "replaceVaultDocument",
         "deleteVaultDocument",
         "shareVaultDocument",

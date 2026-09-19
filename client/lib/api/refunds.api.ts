@@ -108,6 +108,27 @@ export const refundsApi = baseApi.injectEndpoints({
       query: (bookingId) => `/refunds/eligibility/${bookingId}`,
       providesTags: ["Refunds"],
     }),
+    listRefundableBookings: build.query<
+      {
+        items: Array<{
+          bookingId: string;
+          status: string;
+          product: string;
+          currency: string;
+          amountMinor: number;
+          createdAt: string;
+          eligible: boolean;
+          eligibilityStatus: string;
+          dataStatus: string;
+          refundableMinor: number | null;
+          confirmed: boolean;
+        }>;
+      },
+      void
+    >({
+      query: () => "/refunds/bookings",
+      providesTags: ["Refunds"],
+    }),
     calculateRefund: build.mutation<
       RefundCalculation,
       {
@@ -202,6 +223,7 @@ export const refundsApi = baseApi.injectEndpoints({
 
 export const {
   useGetRefundEligibilityQuery,
+  useListRefundableBookingsQuery,
   useCalculateRefundMutation,
   useCreateRefundCaseMutation,
   useListRefundCasesQuery,

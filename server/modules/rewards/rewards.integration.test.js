@@ -8,6 +8,7 @@ import bcrypt from "bcryptjs";
 
 dotenv.config();
 process.env.NODE_ENV = "test";
+process.env.FLIGHTONE_API_LISTEN = "false";
 if (!process.env.JWT_SECRET) {
   process.env.JWT_SECRET = "test-jwt-secret-min-32-characters-long";
 }
@@ -18,7 +19,7 @@ if (!process.env.FIELD_ENCRYPTION_KEY) {
 
 const { default: prisma } = await import("../../config/prisma.js");
 const rewards = await import("./rewards.service.js");
-const { computeTierFromLifetime, pointsFromBookingAmount, getRewardsPolicy } = await import(
+const { computeTierFromLifetime, pointsFromBookingAmount, getPublicRewardsPolicy, getRewardsPolicy } = await import(
   "./rewards.policy.js"
 );
 
@@ -85,6 +86,19 @@ describe("rewards.policy", () => {
   it("earn points from amount use configurable rate", () => {
     const policy = getRewardsPolicy({ REWARD_EARN_POINTS_PER_HUNDRED_MINOR: "1" });
     assert.equal(pointsFromBookingAmount(1050, policy), 10);
+  });
+
+  it("public policy lists live earning and checkout redemption only", () => {
+    const pub = getPublicRewardsPolicy();
+    assert.ok(pub.earningEvents.some((e) => e.id === "TICKETED_BOOKING"));
+    assert.ok(pub.earningEvents.some((e) => e.id === "REFERRAL_FIRST_TICKETED"));
+    assert.equal(pub.referralBonusPoints, pub.earningEvents.find((e) => e.id === "REFERRAL_FIRST_TICKETED").points);
+    assert.ok(pub.redemptionOptions.some((o) => o.id === "CHECKOUT_CREDIT" && o.status === "LIVE"));
+    assert.ok(pub.tierNotes.toLowerCase().includes("do not currently change earn rates"));
+    assert.equal(
+      pub.earningEvents.find((e) => e.id === "TICKETED_BOOKING").eligibleBookingStatuses.includes("QUOTED"),
+      false,
+    );
   });
 });
 
@@ -191,6 +205,25 @@ describe("rewards Module 10", () => {
     });
     const balB = await rewards.getBalance(b.id);
     assert.equal(balB.balance, 0);
+
+    const ledgerA = await rewards.listLedger({ id: a.id }, { global: [] }, {});
+    assert.ok(ledgerA.items.length >= 1);
+    await assert.rejects(
+      () => rewards.listLedger({ id: b.id }, { global: [] }, { userId: a.id }),
+      (err) => err.statusCode === 403,
+    );
+    const entry = ledgerA.items[0];
+    const own = await rewards.getLedgerEntry({ id: a.id }, { global: [] }, entry.id);
+    assert.equal(own.id, entry.id);
+    await assert.rejects(
+      () => rewards.getLedgerEntry({ id: b.id }, { global: [] }, entry.id),
+      (err) => err.statusCode === 404,
+    );
+    await assert.rejects(
+      () => rewards.getLedgerEntry({ id: b.id }, { global: [] }, "does-not-exist"),
+      (err) => err.statusCode === 404,
+    );
+    assert.equal(balB.policy.earningEvents[0].id, "TICKETED_BOOKING");
   });
 
   it("Ava context never invents for guests", async () => {
@@ -270,5 +303,53 @@ describe("rewards Module 10", () => {
     assert.ok(second.skipped >= 1 || second.expired === 0);
     await prisma.rewardLedgerEntry.deleteMany({ where: { accountId: account.id } });
     void lot;
+  });
+
+  it("HTTP summary and ledger require auth; policy is public", async () => {
+    const http = await import("node:http");
+    const { default: app } = await import("../../app.js");
+
+    function httpRequest(method, pathName, { headers = {}, body } = {}) {
+      return new Promise((resolve, reject) => {
+        const server = http.createServer(app);
+        server.listen(0, async () => {
+          const { port } = server.address();
+          try {
+            const res = await fetch(`http://127.0.0.1:${port}${pathName}`, {
+              method,
+              headers: {
+                Accept: "application/json",
+                ...(body ? { "Content-Type": "application/json" } : {}),
+                ...headers,
+              },
+              body: body ? JSON.stringify(body) : undefined,
+            });
+            const json = await res.json();
+            resolve({ status: res.status, body: json });
+          } catch (err) {
+            reject(err);
+          } finally {
+            server.close();
+          }
+        });
+      });
+    }
+
+    const unauth = await httpRequest("GET", "/api/v1/rewards");
+    assert.equal(unauth.status, 401);
+
+    const policy = await httpRequest("GET", "/api/v1/rewards/policy");
+    assert.equal(policy.status, 200);
+    assert.ok(policy.body.data.earningEvents.length >= 1);
+
+    const { signAccessToken } = await import("../../lib/jwt.js");
+    const user = await createUser("http");
+    const token = signAccessToken({ sub: user.id, email: user.email });
+    const summary = await httpRequest("GET", "/api/v1/rewards", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    assert.equal(summary.status, 200);
+    assert.equal(typeof summary.body.data.balance, "number");
+    assert.equal(summary.body.data.balance, 0);
   });
 });

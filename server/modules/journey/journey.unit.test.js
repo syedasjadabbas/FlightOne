@@ -4,6 +4,7 @@
 import { describe, it, after } from "node:test";
 import assert from "node:assert/strict";
 import {
+  classifyJourneyPhase,
   detectMeaningfulStatusChanges,
   journeyChangeDedupeKey,
   maybeBoardingReminder,
@@ -145,5 +146,27 @@ describe("journey.changes", () => {
       { now: new Date(), leadMinutes: 90 },
     );
     assert.equal(miss, null);
+  });
+});
+
+describe("classifyJourneyPhase", () => {
+  it("uses stored times and watch status only", () => {
+    const now = new Date("2026-09-19T12:00:00.000Z");
+    assert.equal(
+      classifyJourneyPhase({ status: "ACTIVE", departAt: new Date("2026-09-20T12:00:00.000Z") }, now),
+      "UPCOMING",
+    );
+    assert.equal(
+      classifyJourneyPhase(
+        {
+          status: "ACTIVE",
+          departAt: new Date("2026-09-19T08:00:00.000Z"),
+          arriveAt: new Date("2026-09-19T16:00:00.000Z"),
+        },
+        now,
+      ),
+      "IN_PROGRESS",
+    );
+    assert.equal(classifyJourneyPhase({ status: "COMPLETED" }, now), "COMPLETED");
   });
 });

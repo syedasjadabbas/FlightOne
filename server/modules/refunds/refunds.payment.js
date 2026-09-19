@@ -121,9 +121,11 @@ export async function attemptPaymentRefundForBooking(prisma, bookingId, { amount
         }
       } catch (e) {
         return {
-          status: "FAILED",
+          status: "PENDING_MANUAL",
           refs,
-          note: e?.message || "Stripe refund network error",
+          note:
+            e?.message ||
+            "Stripe refund network error or timeout — not retried automatically; outcome is unconfirmed",
           provider: "STRIPE",
         };
       }

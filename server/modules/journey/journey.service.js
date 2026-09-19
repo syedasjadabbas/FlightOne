@@ -19,6 +19,7 @@ import {
 } from "./journey.statusProvider.js";
 import {
   boardingReminderDedupeKey,
+  classifyJourneyPhase,
   detectMeaningfulStatusChanges,
   journeyChangeDedupeKey,
   maybeBoardingReminder,
@@ -43,6 +44,172 @@ import {
 const MAX_PAGE_SIZE = 100;
 
 const WATCHABLE_BOOKING_STATUSES = new Set(["TICKETED", "ACTIVE"]);
+
+const DISRUPTION_EVENT_TYPES = new Set([
+  "DELAY",
+  "CANCELLED",
+  "GATE_CHANGE",
+  "TERMINAL_CHANGE",
+  "WEATHER",
+]);
+
+const BOOKING_TRAVELLER_SELECT = {
+  id: true,
+  status: true,
+  product: true,
+  currency: true,
+  externalRef: true,
+  metadata: true,
+};
+
+export { classifyJourneyPhase };
+
+function itineraryFromStored({ watch, booking, fields, meta }) {
+  const items = [];
+  const origin = fields.origin || meta.origin || null;
+  const destination = fields.destination || meta.destination || null;
+  if (watch.flightNumber || origin || destination || booking?.product === "FLIGHT") {
+    items.push({
+      kind: "FLIGHT",
+      flightNumber: watch.flightNumber || null,
+      origin,
+      destination,
+      departAt: watch.departAt || fields.departAt || null,
+      arriveAt: watch.arriveAt || fields.arriveAt || null,
+    });
+  }
+  if (fields.checkInDate || fields.confirmationRef || booking?.product === "HOTEL") {
+    items.push({
+      kind: "HOTEL",
+      checkInDate: fields.checkInDate || meta.checkInDate || null,
+      checkOutDate: fields.checkOutDate || null,
+      confirmationRef: fields.confirmationRef || meta.confirmationRef || null,
+    });
+  }
+  if (fields.transferRef || fields.transferPickupAt) {
+    items.push({
+      kind: "TRANSFER",
+      transferRef: fields.transferRef || null,
+      pickupAt: fields.transferPickupAt || null,
+    });
+  }
+  return items;
+}
+
+function liveFlightFromMeta(meta) {
+  const lastPoll = asMeta(meta.lastPoll);
+  const snapshot = meta.lastStatusSnapshot || null;
+  if (lastPoll.isFact === true && snapshot) {
+    return {
+      confirmed: true,
+      dataStatus: lastPoll.dataStatus || "OK",
+      snapshot,
+      reason: lastPoll.reason || null,
+    };
+  }
+  return {
+    confirmed: false,
+    dataStatus: lastPoll.dataStatus || "UNAVAILABLE",
+    snapshot: null,
+    reason:
+      lastPoll.reason ||
+      "Live flight status is shown only after a verified provider poll. Ticketed itinerary times are not live telemetry.",
+  };
+}
+
+function toPublicJourney(watch, { booking = null, events = [] } = {}) {
+  const meta = asMeta(watch.metadata);
+  const fields = booking ? extractJourneyFieldsFromBooking(booking) : {};
+  const disruptions = events.filter(
+    (e) => DISRUPTION_EVENT_TYPES.has(e.type) || (typeof e.severity === "number" && e.severity >= 2),
+  );
+  return {
+    ...watch,
+    phase: classifyJourneyPhase(watch),
+    booking: booking
+      ? {
+          id: booking.id,
+          status: booking.status,
+          product: booking.product,
+          ticketRef: booking.externalRef || null,
+        }
+      : null,
+    itinerary: itineraryFromStored({ watch, booking, fields, meta }),
+    events,
+    disruptions,
+    liveFlight: liveFlightFromMeta(meta),
+    ancillaryAvailability: {
+      weather: asMeta(meta.lastWeatherPoll).dataStatus || asMeta(meta.lastPoll).weather || "UNAVAILABLE",
+      hotel: asMeta(meta.lastHotelPoll).dataStatus || "UNAVAILABLE",
+      transfer: asMeta(meta.lastTransferPoll).dataStatus || "UNAVAILABLE",
+      immigration: asMeta(meta.lastImmigrationPoll).dataStatus || "UNAVAILABLE",
+    },
+  };
+}
+
+async function enrichWatches(watches) {
+  if (!watches.length) return [];
+  const watchIds = watches.map((w) => w.id);
+  const bookingIds = [...new Set(watches.map((w) => w.bookingId).filter(Boolean))];
+  const [bookings, events] = await Promise.all([
+    bookingIds.length
+      ? prisma.booking.findMany({
+          where: { id: { in: bookingIds } },
+          select: BOOKING_TRAVELLER_SELECT,
+        })
+      : [],
+    prisma.journeyEvent.findMany({
+      where: { watchId: { in: watchIds } },
+      orderBy: { createdAt: "desc" },
+      take: 400,
+      select: EVENT_SELECT,
+    }),
+  ]);
+  const bookingById = new Map(bookings.map((b) => [b.id, b]));
+  const eventsByWatch = new Map();
+  for (const ev of events) {
+    const list = eventsByWatch.get(ev.watchId) || [];
+    if (list.length < 25) list.push(ev);
+    eventsByWatch.set(ev.watchId, list);
+  }
+  return watches.map((w) =>
+    toPublicJourney(w, {
+      booking: bookingById.get(w.bookingId) || null,
+      events: eventsByWatch.get(w.id) || [],
+    }),
+  );
+}
+
+/**
+ * Create watches for the traveller's ticketed/active bookings that have none.
+ * Failures (ineligible dates/status) are skipped — never invents a journey.
+ */
+export async function syncWatchesFromBookings(userId) {
+  if (!userId) throw new AppError(401, "Authentication required");
+  const bookings = await prisma.booking.findMany({
+    where: { userId, status: { in: [...WATCHABLE_BOOKING_STATUSES] } },
+    select: { id: true },
+    take: 50,
+    orderBy: { createdAt: "desc" },
+  });
+  if (!bookings.length) return { ensured: 0 };
+  const existing = await prisma.journeyWatch.findMany({
+    where: { userId, bookingId: { in: bookings.map((b) => b.id) } },
+    select: { bookingId: true },
+  });
+  const have = new Set(existing.map((e) => e.bookingId));
+  let ensured = 0;
+  for (const booking of bookings) {
+    if (have.has(booking.id)) continue;
+    try {
+      await ensureWatchForBooking({ bookingId: booking.id, userId });
+      ensured += 1;
+    } catch {
+      /* booking not eligible for monitoring */
+    }
+  }
+  return { ensured };
+}
 
 function notificationChannelsFromEnv(env = process.env) {
   const raw = env.JOURNEY_NOTIFICATION_CHANNELS?.trim();
@@ -331,7 +498,12 @@ export async function ensureWatchForBooking({
   return watch;
 }
 
-export async function listWatchesForUser(userId, { page, pageSize } = {}) {
+export async function listWatchesForUser(userId, { page, pageSize, sync } = {}) {
+  if (!userId) throw new AppError(401, "Authentication required");
+  if (sync !== false && sync !== "false") {
+    await syncWatchesFromBookings(userId);
+  }
+
   const take = Math.min(pageSize || DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);
   const currentPage = page || 1;
   const skip = (currentPage - 1) * take;
@@ -340,7 +512,7 @@ export async function listWatchesForUser(userId, { page, pageSize } = {}) {
   const [items, total] = await Promise.all([
     prisma.journeyWatch.findMany({
       where,
-      orderBy: { createdAt: "desc" },
+      orderBy: [{ departAt: "asc" }, { createdAt: "desc" }],
       skip,
       take,
       select: WATCH_SELECT,
@@ -348,17 +520,21 @@ export async function listWatchesForUser(userId, { page, pageSize } = {}) {
     prisma.journeyWatch.count({ where }),
   ]);
 
+  const enriched = await enrichWatches(items);
   return {
-    items,
+    items: enriched,
     page: currentPage,
     pageSize: take,
     total,
     totalPages: total === 0 ? 0 : Math.ceil(total / take),
+    capability: getJourneyCapability(),
   };
 }
 
 export async function getWatchForUser(userId, watchId, permissions) {
-  return getOwnedWatchOrThrow(userId, watchId, WATCH_SELECT, permissions);
+  const watch = await getOwnedWatchOrThrow(userId, watchId, WATCH_SELECT, permissions);
+  const [enriched] = await enrichWatches([watch]);
+  return enriched;
 }
 
 export async function listEventsForWatch(userId, watchId, { page, pageSize } = {}, permissions) {

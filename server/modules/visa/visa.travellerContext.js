@@ -18,6 +18,7 @@ export async function loadTravellerVisaContext(userId) {
       hasPassport: false,
       passports: [],
       visasHeld: [],
+      vaultVisasHeld: [],
       residencePermits: [],
       nationalIds: [],
       vaultDocuments: [],
@@ -51,6 +52,13 @@ export async function loadTravellerVisaContext(userId) {
         title: true,
         expiresAt: true,
         companionId: true,
+        visaRecord: {
+          select: {
+            destinationCode: true,
+            visaType: true,
+            holderStatus: true,
+          },
+        },
       },
       orderBy: { createdAt: "desc" },
     }),
@@ -82,6 +90,16 @@ export async function loadTravellerVisaContext(userId) {
       verificationStatus: d.verificationStatus,
       vaultDocumentId: d.vaultDocumentId,
     })),
+    vaultVisasHeld: vaultDocs
+      .filter((d) => d.type === "VISA")
+      .map((d) => ({
+        id: d.id,
+        destinationCode: d.visaRecord?.destinationCode ?? null,
+        visaType: d.visaRecord?.visaType ?? null,
+        holderStatus: d.visaRecord?.holderStatus ?? "ISSUED",
+        expiresAt: d.expiresAt,
+        expiry: computeExpiryStatus(d.expiresAt),
+      })),
     residencePermits: residence.map((d) => ({
       id: d.id,
       countryCode: d.countryCode,
@@ -144,8 +162,12 @@ export function buildDocumentChecklistGuidance(requiredDocuments, travellerConte
         ? "Residence permit on profile"
         : "No residence permit on profile";
     } else if (/visa/.test(lower)) {
-      matched = travellerContext.visasHeld.length > 0;
-      matchHint = matched ? "Visa document on profile" : "No visa document on profile";
+      matched =
+        travellerContext.visasHeld.length > 0 ||
+        (travellerContext.vaultVisasHeld || []).length > 0;
+      matchHint = matched
+        ? "Visa document on profile or vault"
+        : "No visa document on profile";
     } else if (/national.?id|cnic|id card/.test(lower)) {
       matched = travellerContext.nationalIds.length > 0;
       matchHint = matched ? "National ID on profile" : "No national ID on profile";
@@ -175,26 +197,47 @@ export function buildDocumentChecklistGuidance(requiredDocuments, travellerConte
  */
 export function summarizeHeldVisaValidity(travellerContext, destinationCode) {
   const dest = String(destinationCode || "").toUpperCase();
-  const matching = (travellerContext.visasHeld || []).filter(
+  const matchingIdentity = (travellerContext.visasHeld || []).filter(
     (v) => v.countryCode && String(v.countryCode).toUpperCase() === dest,
   );
-  if (!matching.length) {
+  const linkedVaultIds = new Set(
+    matchingIdentity.map((v) => v.vaultDocumentId).filter(Boolean),
+  );
+  const matchingVault = (travellerContext.vaultVisasHeld || []).filter(
+    (v) =>
+      v.destinationCode &&
+      String(v.destinationCode).toUpperCase() === dest &&
+      !linkedVaultIds.has(v.id),
+  );
+
+  if (!matchingIdentity.length && !matchingVault.length) {
     return {
       hasMatchingVisaOnFile: false,
       visas: [],
       note: "No destination-matching visa document on the traveller profile.",
     };
   }
+
   return {
     hasMatchingVisaOnFile: true,
-    visas: matching.map((v) => ({
-      id: v.id,
-      expiresAt: v.expiresAt,
-      expiryStatus: v.expiry?.status ?? null,
-      verificationStatus: v.verificationStatus,
-      // Do not claim the visa covers the trip purpose — guidance only.
-      coversTrip: null,
-    })),
+    visas: [
+      ...matchingIdentity.map((v) => ({
+        id: v.id,
+        expiresAt: v.expiresAt,
+        expiryStatus: v.expiry?.status ?? v.expiry?.state ?? null,
+        verificationStatus: v.verificationStatus,
+        coversTrip: null,
+        source: "profile",
+      })),
+      ...matchingVault.map((v) => ({
+        id: v.id,
+        expiresAt: v.expiresAt,
+        expiryStatus: v.expiry?.state ?? null,
+        verificationStatus: null,
+        coversTrip: null,
+        source: "vault",
+      })),
+    ],
     note: "Matching visa metadata found — validity shown from stored dates only; eligibility is not inferred.",
   };
 }

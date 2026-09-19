@@ -22,6 +22,8 @@ const router = Router();
 
 router.use(requireAuth);
 
+router.get("/bookings", refundsController.listRefundableBookings);
+
 router.get(
   "/eligibility/:bookingId",
   validateParams(bookingIdParamsSchema),

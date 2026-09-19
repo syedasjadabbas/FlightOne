@@ -142,3 +142,110 @@ export const sponsorSchema = z.object({
   deliverables: z.string().trim().max(2000).optional(),
   note: z.string().trim().max(1000).optional(),
 });
+
+const optionalDate = z.preprocess((v) => {
+  if (v === "" || v === null || v === undefined) return undefined;
+  return v;
+}, z.coerce.date().optional());
+
+const placeText = z.string().trim().min(2).max(80);
+
+export const createMiceEnquirySchema = z
+  .object({
+    name: z.string().trim().min(1).max(200),
+    type: z.enum(MICE_EVENT_TYPES),
+    organization: z.string().trim().max(200).optional().nullable(),
+    destination: placeText,
+    origin: z.string().trim().min(2).max(80).optional().nullable(),
+    venue: z.string().trim().max(300).optional().nullable(),
+    eventStartsAt: z.coerce.date(),
+    eventEndsAt: z.coerce.date(),
+    travelStartsAt: optionalDate,
+    travelEndsAt: optionalDate,
+    attendeeCount: z.coerce.number().int().min(1).max(5000),
+    budgetMinor: z.number().int().nonnegative().optional().nullable(),
+    currency: z
+      .string()
+      .trim()
+      .length(3)
+      .transform((v) => v.toUpperCase())
+      .optional()
+      .nullable(),
+    companyId: z.string().trim().min(1).optional().nullable(),
+    contactName: z.string().trim().min(1).max(200),
+    contactEmail: z.string().trim().email().max(320),
+    contactPhone: z.string().trim().max(40).optional().nullable(),
+    flightsRequired: z.boolean().optional(),
+    hotelsRequired: z.boolean().optional(),
+    transfersRequired: z.boolean().optional(),
+    meetingSpaceRequired: z.boolean().optional(),
+    cateringRequired: z.boolean().optional(),
+    visaAssistanceRequired: z.boolean().optional(),
+    accommodationNotes: z.string().trim().max(1000).optional().nullable(),
+    transportNotes: z.string().trim().max(1000).optional().nullable(),
+    flightNotes: z.string().trim().max(1000).optional().nullable(),
+    meetingNotes: z.string().trim().max(1000).optional().nullable(),
+    notes: z.string().trim().max(4000).optional().nullable(),
+    idempotencyKey: z.string().trim().min(8).max(120).optional(),
+  })
+  .superRefine((v, ctx) => {
+    if (!(v.eventEndsAt > v.eventStartsAt)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "eventEndsAt must be after eventStartsAt",
+        path: ["eventEndsAt"],
+      });
+    }
+    if (v.travelStartsAt && v.travelEndsAt && v.travelEndsAt < v.travelStartsAt) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "travelEndsAt cannot be before travelStartsAt",
+        path: ["travelEndsAt"],
+      });
+    }
+  });
+
+export const updateMiceEnquirySchema = z
+  .object({
+    name: z.string().trim().min(1).max(200).optional(),
+    organization: z.string().trim().max(200).optional().nullable(),
+    destination: placeText.optional(),
+    origin: z.string().trim().min(2).max(80).optional().nullable(),
+    venue: z.string().trim().max(300).optional().nullable(),
+    eventStartsAt: z.coerce.date().optional(),
+    eventEndsAt: z.coerce.date().optional(),
+    travelStartsAt: optionalDate,
+    travelEndsAt: optionalDate,
+    attendeeCount: z.coerce.number().int().min(1).max(5000).optional(),
+    budgetMinor: z.number().int().nonnegative().optional().nullable(),
+    currency: z
+      .string()
+      .trim()
+      .length(3)
+      .transform((v) => v.toUpperCase())
+      .optional()
+      .nullable(),
+    contactName: z.string().trim().min(1).max(200).optional(),
+    contactEmail: z.string().trim().email().max(320).optional(),
+    contactPhone: z.string().trim().max(40).optional().nullable(),
+    flightsRequired: z.boolean().optional(),
+    hotelsRequired: z.boolean().optional(),
+    transfersRequired: z.boolean().optional(),
+    meetingSpaceRequired: z.boolean().optional(),
+    cateringRequired: z.boolean().optional(),
+    visaAssistanceRequired: z.boolean().optional(),
+    accommodationNotes: z.string().trim().max(1000).optional().nullable(),
+    transportNotes: z.string().trim().max(1000).optional().nullable(),
+    flightNotes: z.string().trim().max(1000).optional().nullable(),
+    meetingNotes: z.string().trim().max(1000).optional().nullable(),
+    notes: z.string().trim().max(4000).optional().nullable(),
+  })
+  .refine((v) => Object.keys(v).length > 0, { message: "No fields to update" });
+
+export const cancelMiceEnquirySchema = z.object({
+  reason: z.string().trim().max(500).optional(),
+});
+
+export const miceEnquiryIdParamsSchema = z.object({
+  enquiryId: z.string().trim().min(1),
+});

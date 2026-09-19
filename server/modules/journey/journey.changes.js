@@ -17,6 +17,19 @@ export function boardingReminderDedupeKey(watchId, departAtIso) {
   return `journey-boarding:${watchId}:${departAtIso || "unknown"}`;
 }
 
+/** Traveller-facing phase from persisted watch times — never invented status. */
+export function classifyJourneyPhase(watch, now = new Date()) {
+  if (!watch) return "UNKNOWN";
+  if (watch.status === "COMPLETED") return "COMPLETED";
+  if (watch.status === "PAUSED") return "PAUSED";
+  const t = now.getTime();
+  const arrive = watch.arriveAt ? new Date(watch.arriveAt).getTime() : NaN;
+  const depart = watch.departAt ? new Date(watch.departAt).getTime() : NaN;
+  if (Number.isFinite(arrive) && t > arrive + 6 * 60 * 60 * 1000) return "COMPLETED";
+  if (Number.isFinite(depart) && t >= depart) return "IN_PROGRESS";
+  return "UPCOMING";
+}
+
 /**
  * Diff previous vs current attributed snapshots.
  * @returns {Array<{

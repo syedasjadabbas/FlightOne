@@ -5,11 +5,14 @@ import * as c from "./groups.controller.js";
 import {
   addMemberSchema,
   attendanceSchema,
+  cancelGroupTravelRequestSchema,
   createAnnouncementSchema,
   createGroupSchema,
+  createGroupTravelRequestSchema,
   createPollSchema,
   emergencySchema,
   groupIdParamsSchema,
+  groupTravelRequestIdParamsSchema,
   inviteMemberSchema,
   joinGroupSchema,
   photoIdParamsSchema,
@@ -17,6 +20,7 @@ import {
   shareBookingSchema,
   shareDocumentSchema,
   shareIdParamsSchema,
+  updateGroupTravelRequestSchema,
   uploadPhotoSchema,
   voteSchema,
   waypointIdParamsSchema,
@@ -29,6 +33,30 @@ router.use(requireAuth);
 router.post("/", validateBody(createGroupSchema), c.createGroup);
 router.get("/", c.listMyGroups);
 router.post("/join", validateBody(joinGroupSchema), c.joinGroup);
+
+router.get("/requests", c.listMyGroupTravelRequests);
+router.post(
+  "/requests",
+  validateBody(createGroupTravelRequestSchema),
+  c.createGroupTravelRequest,
+);
+router.get(
+  "/requests/:requestId",
+  validateParams(groupTravelRequestIdParamsSchema),
+  c.getGroupTravelRequest,
+);
+router.patch(
+  "/requests/:requestId",
+  validateParams(groupTravelRequestIdParamsSchema),
+  validateBody(updateGroupTravelRequestSchema),
+  c.updateGroupTravelRequest,
+);
+router.post(
+  "/requests/:requestId/cancel",
+  validateParams(groupTravelRequestIdParamsSchema),
+  validateBody(cancelGroupTravelRequestSchema),
+  c.cancelGroupTravelRequest,
+);
 
 router.get("/:id", validateParams(groupIdParamsSchema), c.getGroup);
 router.post("/:id/leave", validateParams(groupIdParamsSchema), c.leaveGroup);

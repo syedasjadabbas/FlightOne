@@ -12,6 +12,10 @@ export const createWatchSchema = z.object({
 export const listWatchesQuerySchema = z.object({
   page: z.coerce.number().int().min(1).optional(),
   pageSize: z.coerce.number().int().min(1).max(100).optional(),
+  sync: z
+    .union([z.boolean(), z.enum(["true", "false"])])
+    .optional()
+    .transform((v) => (v === false || v === "false" ? false : v == null ? undefined : true)),
 });
 
 export const watchIdParamsSchema = z.object({

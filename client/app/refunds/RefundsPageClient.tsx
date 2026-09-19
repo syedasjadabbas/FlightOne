@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Input, Spinner } from "@/components/ui";
 import { PermissionGate } from "@/components/PermissionGate";
 import {
@@ -18,6 +18,7 @@ import {
   useCalculateRefundMutation,
   useCreateRefundCaseMutation,
   useGetRefundEligibilityQuery,
+  useListRefundableBookingsQuery,
   useListRefundCasesQuery,
   useListServicingRequestsQuery,
   useListTravelCreditsQuery,
@@ -26,7 +27,6 @@ import {
   useScheduleChangeServicingMutation,
   useSubmitRefundCaseMutation,
 } from "@/lib/api/refunds.api";
-import { useListJourneyWatchesQuery } from "@/lib/api/journey.api";
 import { useAuthStore } from "@/store/auth.store";
 
 function formatMinor(minor: number | undefined, currency?: string) {
@@ -57,14 +57,23 @@ export function RefundsPageClient() {
 
   const [bookingId, setBookingId] = useState("");
   const [msg, setMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const fromJourney = new URLSearchParams(window.location.search).get("bookingId");
+    if (fromJourney) setBookingId(fromJourney);
+  }, []);
   const [casesPage, setCasesPage] = useState(1);
   const [partialRatio, setPartialRatio] = useState("");
   const [cancellationReason, setCancellationReason] = useState("Customer voluntary cancellation");
 
   const { data: cases, isLoading, refetch } = useListRefundCasesQuery(undefined, { skip });
+  const { data: refundableBookings, isLoading: bookingsLoading } = useListRefundableBookingsQuery(
+    undefined,
+    { skip },
+  );
   const { data: credits } = useListTravelCreditsQuery(undefined, { skip });
   const { data: servicing } = useListServicingRequestsQuery(undefined, { skip });
-  const { data: watches } = useListJourneyWatchesQuery(undefined, { skip });
 
   const activeBookingId = bookingId.trim();
   const { data: eligibility, isFetching: eligLoading } = useGetRefundEligibilityQuery(
@@ -93,7 +102,7 @@ export function RefundsPageClient() {
       <div className="space-y-8">
         <TravellerPageHeader
           title="Refunds, Cancellations & Servicing"
-          lede="Evaluate fare rule cancellation terms, calculate net refundable amounts, and manage airline travel credits."
+          lede="Refund amounts come only from stored fare rules and confirmed payment operations. Sign in to see your own bookings — this page never invents payouts."
           actions={
             <div className="flex gap-2">
               <Link href="/login?redirect=%2Frefunds">
@@ -108,24 +117,21 @@ export function RefundsPageClient() {
 
         <div className="grid gap-4 sm:grid-cols-3">
           <div className="rounded-xl border border-slate-200/80 bg-white/80 p-4 shadow-2xs">
-            <div className="text-lg mb-2">📜</div>
-            <p className="text-sm font-semibold text-slate-900">Deterministic Fare Rules</p>
+            <p className="text-sm font-semibold text-slate-900">Stored fare rules only</p>
             <p className="mt-1 text-xs text-slate-600 leading-relaxed">
-              Refund estimates are evaluated directly from airline fare rules and GDS contracts — never speculative estimates.
+              Eligibility and amounts are computed from your booking’s stored fare/cancellation rules. Missing rules are marked unavailable — not guessed.
             </p>
           </div>
           <div className="rounded-xl border border-slate-200/80 bg-white/80 p-4 shadow-2xs">
-            <div className="text-lg mb-2">⚡</div>
-            <p className="text-sm font-semibold text-slate-900">Involuntary Protection</p>
+            <p className="text-sm font-semibold text-slate-900">No false completion</p>
             <p className="mt-1 text-xs text-slate-600 leading-relaxed">
-              Airline cancellations or schedule modifications exceeding 60 minutes entitle passengers to full involuntary refunds.
+              A refund is complete only after the payment provider or a documented void actually succeeds. Timeouts do not count as success.
             </p>
           </div>
           <div className="rounded-xl border border-slate-200/80 bg-white/80 p-4 shadow-2xs">
-            <div className="text-lg mb-2">💳</div>
-            <p className="text-sm font-semibold text-slate-900">Fast Settlement</p>
+            <p className="text-sm font-semibold text-slate-900">Manual review when needed</p>
             <p className="mt-1 text-xs text-slate-600 leading-relaxed">
-              Approved refunds settle directly back to the original payment source or are issued as instant FlightOne Travel Credits.
+              Ticketed supplier voids and unconfigured gateways go to the servicing desk. Staff tools stay behind existing permissions and 2FA.
             </p>
           </div>
         </div>
@@ -162,18 +168,13 @@ export function RefundsPageClient() {
       }
     | undefined;
 
-  const recentBookingIds = Array.from(
-    new Set([
-      ...(watches?.items || []).map((w) => w.bookingId).filter(Boolean),
-      ...(cases?.items || []).map((c) => c.bookingId).filter(Boolean),
-    ]),
-  );
+  const amountsConfirmed = preview?.confirmed === true && preview.dataStatus === "OK";
 
   return (
     <>
       <TravellerPageHeader
         title="Refunds, Cancellations & Servicing"
-        lede="Amounts are computed strictly from stored airline fare rules and confirmed supplier settlements — never estimated without verified policy data."
+        lede="Amounts are shown only when stored fare rules confirm them. Completion requires a real payment/supplier result."
         actions={
           <div className="flex gap-2">
             <Link href="/chat">
@@ -192,34 +193,48 @@ export function RefundsPageClient() {
         }
       />
 
-      <TravellerSection title="Check Booking Eligibility" panel>
+      <TravellerSection title="Select a booking" panel>
         <div className="space-y-3">
-          <div>
-            <Input
-              value={bookingId}
-              onChange={(e) => setBookingId(e.target.value)}
-              placeholder="Enter Booking ID (e.g. bk_12345678)"
-            />
-            {recentBookingIds.length > 0 && (
-              <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                <span className="text-[11px] text-slate-500 mr-1">Your recent bookings:</span>
-                {recentBookingIds.slice(0, 4).map((id) => (
+          {bookingsLoading ? <Spinner /> : null}
+          {(refundableBookings?.items || []).length === 0 && !bookingsLoading ? (
+            <TravellerState title="No refundable bookings">
+              Quoted, reserved, ticketed, or active bookings you own will appear here. Completed or already refunded bookings are not listed.
+            </TravellerState>
+          ) : (
+            <ul className="fo-traveller__list">
+              {(refundableBookings?.items || []).map((b) => (
+                <li key={b.bookingId}>
                   <button
-                    key={id}
                     type="button"
-                    onClick={() => setBookingId(id)}
-                    className={`rounded-full px-2.5 py-0.5 text-[11px] font-mono font-medium transition-colors ${
-                      bookingId === id
-                        ? "bg-sky-600 text-white"
-                        : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                    className={`fo-traveller__row w-full text-left ${
+                      bookingId === b.bookingId ? "ring-1 ring-sky-500" : ""
                     }`}
+                    onClick={() => setBookingId(b.bookingId)}
                   >
-                    {id.slice(0, 12)}…
+                    <div className="fo-traveller__row-top">
+                      <span className="fo-traveller__row-title">
+                        {b.product} · {b.status}
+                      </span>
+                      <TravellerChip tone={b.eligible ? "warn" : "muted"}>
+                        {b.eligibilityStatus}
+                      </TravellerChip>
+                    </div>
+                    <p className="fo-traveller__row-meta font-mono">
+                      {b.bookingId}
+                      {b.confirmed && b.refundableMinor != null
+                        ? ` · confirmed refundable ${formatMinor(b.refundableMinor, b.currency)}`
+                        : " · amount shown only after fare-rule confirmation"}
+                    </p>
                   </button>
-                ))}
-              </div>
-            )}
-          </div>
+                </li>
+              ))}
+            </ul>
+          )}
+          <Input
+            value={bookingId}
+            onChange={(e) => setBookingId(e.target.value)}
+            placeholder="Or paste a booking ID you own"
+          />
 
           {eligLoading ? <Spinner /> : null}
 
@@ -243,39 +258,47 @@ export function RefundsPageClient() {
               {preview ? (
                 <dl className="fo-traveller__facts">
                   <div className="fo-traveller__fact">
-                    <dt>Data Status</dt>
+                    <dt>Data status</dt>
                     <dd>{preview.dataStatus}</dd>
                   </div>
                   <div className="fo-traveller__fact">
-                    <dt>Applied Rule</dt>
-                    <dd>{preview.formula?.rule || "Standard Carrier Policy"}</dd>
+                    <dt>Applied rule</dt>
+                    <dd>{preview.formula?.rule || "Not attributed"}</dd>
                   </div>
+                  {amountsConfirmed ? (
+                    <>
+                      <div className="fo-traveller__fact">
+                        <dt>Supplier penalty</dt>
+                        <dd>{formatMinor(preview.supplierPenaltyMinor, eligibility.currency)}</dd>
+                      </div>
+                      <div className="fo-traveller__fact">
+                        <dt>Agency fee</dt>
+                        <dd>{formatMinor(preview.agencyFeeMinor, eligibility.currency)}</dd>
+                      </div>
+                      <div className="fo-traveller__fact">
+                        <dt>Net refundable</dt>
+                        <dd className="font-semibold text-emerald-700">
+                          {formatMinor(preview.refundableMinor, eligibility.currency)} (confirmed)
+                        </dd>
+                      </div>
+                      <div className="fo-traveller__fact">
+                        <dt>Travel credit</dt>
+                        <dd>{formatMinor(preview.travelCreditMinor, eligibility.currency)}</dd>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="fo-traveller__fact">
+                      <dt>Expected amount</dt>
+                      <dd>Not shown — fare/refund data is {preview.dataStatus || "unavailable"}</dd>
+                    </div>
+                  )}
                   <div className="fo-traveller__fact">
-                    <dt>Supplier Penalty</dt>
-                    <dd>{formatMinor(preview.supplierPenaltyMinor, eligibility.currency)}</dd>
-                  </div>
-                  <div className="fo-traveller__fact">
-                    <dt>Agency Servicing Fee</dt>
-                    <dd>{formatMinor(preview.agencyFeeMinor, eligibility.currency)}</dd>
-                  </div>
-                  <div className="fo-traveller__fact">
-                    <dt>Net Refundable</dt>
-                    <dd className="font-semibold text-emerald-700">
-                      {formatMinor(preview.refundableMinor, eligibility.currency)}
-                      {preview.confirmed ? " (Confirmed)" : " (Subject to review)"}
-                    </dd>
-                  </div>
-                  <div className="fo-traveller__fact">
-                    <dt>Travel Credit Option</dt>
-                    <dd>{formatMinor(preview.travelCreditMinor, eligibility.currency)}</dd>
-                  </div>
-                  <div className="fo-traveller__fact">
-                    <dt>Processing Timeline</dt>
+                    <dt>Processing timeline</dt>
                     <dd>
                       {preview.processingTimelineStatus}
                       {preview.processingTimelineNote
                         ? ` — ${preview.processingTimelineNote}`
-                        : " (5–10 business days)"}
+                        : ""}
                     </dd>
                   </div>
                 </dl>
@@ -301,11 +324,15 @@ export function RefundsPageClient() {
                           bookingId: activeBookingId,
                           calculationId: calc.id,
                           reason: cancellationReason,
-                          idempotencyKey: `ui-refund:${activeBookingId}:${Date.now()}`,
+                          idempotencyKey: `ui-refund:${activeBookingId}`,
                         }).unwrap();
-                        await submitCase(c.id).unwrap();
+                        const submitted = await submitCase(c.id).unwrap();
                         setMsg(
-                          `Refund case #${c.id.slice(0, 8)} submitted successfully (${c.status}). Net refundable: ${formatMinor(calc.refundableMinor, calc.currency)}.`,
+                          `Refund case ${submitted.status}. ${
+                            calc.dataStatus === "OK"
+                              ? `Confirmed refundable ${formatMinor(calc.refundableMinor, calc.currency)}.`
+                              : "Amount is not confirmed until fare/payment data is available — this may stay in manual review."
+                          }`,
                         );
                         refetch();
                       } catch {
@@ -374,9 +401,13 @@ export function RefundsPageClient() {
                             partial: true,
                             idempotencyKey: `ui-partial:${activeBookingId}:${ratio}`,
                           }).unwrap();
-                          await submitCase(c.id).unwrap();
+                          const submitted = await submitCase(c.id).unwrap();
                           setMsg(
-                            `Partial refund case #${c.id.slice(0, 8)} submitted. Refundable: ${formatMinor(calc.refundableMinor, calc.currency)}.`,
+                            `Partial refund case #${c.id.slice(0, 8)} ${submitted.status}. ${
+                              calc.dataStatus === "OK"
+                                ? `Confirmed refundable ${formatMinor(calc.refundableMinor, calc.currency)}.`
+                                : "Amount unconfirmed — queued for review if data is missing."
+                            }`,
                           );
                           refetch();
                         } catch {
