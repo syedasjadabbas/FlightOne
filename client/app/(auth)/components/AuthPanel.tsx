@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { BrandMark } from "@/app/components/chat/BrandMark";
+import { cn } from "@/utils/cn";
 
 type AuthPanelProps = {
   title: string;
@@ -8,15 +9,16 @@ type AuthPanelProps = {
   leadRole?: "status" | "alert";
   children?: ReactNode;
   footer?: ReactNode;
+  className?: string;
 };
 
 /**
  * Auth form surface — FlightOne wordmark + cyan route rail as the signature,
  * Sora title for the single job. Not a generic SaaS card.
  */
-export function AuthPanel({ title, lead, leadRole, children, footer }: AuthPanelProps) {
+export function AuthPanel({ title, lead, leadRole, children, footer, className }: AuthPanelProps) {
   return (
-    <div className="fo-auth__panel anim-fade">
+    <div className={cn("fo-auth__panel anim-fade", className)}>
       <div className="fo-auth__brand">
         <BrandMark size="compact" />
         <span className="fo-auth__route" aria-hidden />

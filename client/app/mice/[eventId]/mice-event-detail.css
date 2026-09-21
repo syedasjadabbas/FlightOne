@@ -1,0 +1,186 @@
+/**
+ * MICE event desk — local polish on fo-gm.
+ * Navy / cyan / bone. No card mosaic, no glow.
+ */
+
+.fo-mice-event .fo-gm-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.fo-mice-event__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 0.4rem;
+  border: 1px solid var(--line);
+  background: color-mix(in oklab, var(--joby-surface) 70%, white);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--navy);
+  text-transform: uppercase;
+}
+
+.fo-mice-event__chip--role {
+  background: color-mix(in oklab, var(--horizon-cool) 65%, white);
+  border-color: color-mix(in oklab, var(--cyan) 22%, var(--line));
+  color: color-mix(in oklab, var(--navy) 78%, var(--cyan));
+  text-transform: none;
+  letter-spacing: 0.01em;
+}
+
+.fo-mice-event__chip--ok {
+  background: color-mix(in oklab, var(--horizon-cool) 55%, white);
+  border-color: color-mix(in oklab, var(--cyan) 28%, var(--line));
+  color: var(--navy);
+}
+
+.fo-mice-event__chip--warn {
+  background: color-mix(in oklab, var(--joby-surface) 80%, white);
+  border-color: color-mix(in oklab, var(--ink-faint) 35%, var(--line));
+  color: var(--ink-soft);
+}
+
+.fo-mice-event__chip--danger {
+  background: color-mix(in oklab, var(--danger) 8%, white);
+  border-color: color-mix(in oklab, var(--danger) 32%, var(--line));
+  color: var(--danger);
+}
+
+.fo-mice-event__meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--ink-soft);
+}
+
+.fo-mice-event__meta-item svg {
+  flex-shrink: 0;
+  color: var(--ink-faint);
+}
+
+.fo-mice-event__section-head {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.fo-mice-event__section-head svg {
+  flex-shrink: 0;
+  color: color-mix(in oklab, var(--cyan) 55%, var(--navy));
+}
+
+.fo-mice-event__facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+  gap: 0.65rem 1rem;
+  margin: 0;
+}
+
+.fo-mice-event__fact {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.fo-mice-event__fact dt {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.fo-mice-event__fact dd {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--navy);
+  word-break: break-word;
+}
+
+.fo-mice-event__status-list {
+  list-style: none;
+  margin: 0.35rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.fo-mice-event__status-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.8125rem;
+}
+
+.fo-mice-event__status-list li:last-child {
+  border-bottom: none;
+}
+
+.fo-mice-event__status-list span:last-child {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.fo-mice-event__empty-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.5rem;
+  background: color-mix(in oklab, var(--horizon-cool) 55%, white);
+  color: color-mix(in oklab, var(--cyan) 50%, var(--navy));
+  margin-bottom: 0.15rem;
+}
+
+.fo-mice-event__register {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 0.85rem;
+  border: 1px solid color-mix(in oklab, var(--cyan) 24%, var(--line));
+  background: color-mix(in oklab, var(--horizon-cool) 50%, white);
+}
+
+.fo-mice-event__register-copy {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--ink-soft);
+  max-width: 28rem;
+}
+
+.fo-mice-event__provider {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.65rem;
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--ink-faint);
+}
+
+.fo-mice-event__footer {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.fo-mice-event__footer svg {
+  color: var(--ink-faint);
+}

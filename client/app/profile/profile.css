@@ -1,0 +1,600 @@
+/**
+ * Traveller profile — dossier identity strip + tab panels.
+ * Tokens from globals.css (navy / blue / bone / cyan).
+ */
+
+.fo-profile {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.25rem, 2.4vw, 1.75rem);
+}
+
+.fo-profile__identity {
+  display: grid;
+  gap: 1.15rem;
+  padding-bottom: 1.1rem;
+  border-bottom: 1px solid color-mix(in oklab, var(--cyan) 16%, var(--line));
+}
+
+@media (min-width: 720px) {
+  .fo-profile__identity {
+    grid-template-columns: minmax(0, 1fr) minmax(12rem, 16rem);
+    align-items: start;
+  }
+}
+
+.fo-profile__person {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.25rem;
+}
+
+.fo-profile__avatar {
+  position: relative;
+  display: flex;
+  height: 4.5rem;
+  width: 4.5rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid color-mix(in oklab, var(--navy) 18%, var(--line));
+  border-radius: 0.5rem;
+  background: var(--navy);
+  color: var(--bone);
+  font-family: var(--font-hero);
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.fo-profile__avatar:hover,
+.fo-profile__avatar:focus-visible {
+  border-color: color-mix(in oklab, var(--cyan) 45%, var(--line));
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--cyan) 18%, transparent);
+  outline: none;
+}
+
+.fo-profile__avatar-edit {
+  position: absolute;
+  inset: auto 0.3rem 0.3rem auto;
+  display: inline-flex;
+  height: 1.5rem;
+  width: 1.5rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 0.3rem;
+  background: var(--white);
+  color: var(--navy);
+  pointer-events: none;
+}
+
+.fo-profile__bio {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.fo-profile__name {
+  margin: 0;
+  font-family: var(--font-hero);
+  font-size: clamp(1.35rem, 2.8vw, 1.65rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  color: var(--navy);
+}
+
+.fo-profile__email {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--ink-soft);
+}
+
+.fo-profile__facts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.85rem;
+  margin: 0.15rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.75rem;
+  color: var(--ink-faint);
+}
+
+.fo-profile__facts li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.fo-profile__facts strong {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.fo-profile__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--sky);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.fo-profile__link:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.fo-profile__link:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--sky) 45%, transparent);
+  outline-offset: 2px;
+}
+
+.fo-profile__readiness {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 0.85rem 0.95rem;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  background: color-mix(in oklab, white 94%, var(--horizon-cool));
+}
+
+.fo-profile__readiness-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.fo-profile__readiness-label {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.fo-profile__readiness-score {
+  margin: 0;
+  font-family: var(--font-hero);
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--navy);
+  font-variant-numeric: tabular-nums;
+}
+
+.fo-profile__readiness-note {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+
+.fo-profile__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.fo-profile__tabs .fo-traveller__toggle {
+  gap: 0.4rem;
+}
+
+.fo-profile__tabs .fo-traveller__toggle svg {
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
+.fo-profile__form-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.fo-profile__form-block + .fo-profile__form-block {
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--line);
+}
+
+.fo-profile__form-label {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.fo-profile__airline-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.fo-profile__airline-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 2rem;
+  padding: 0.3rem 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 0.35rem;
+  background: transparent;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition:
+    background 0.12s ease,
+    border-color 0.12s ease,
+    color 0.12s ease;
+}
+
+.fo-profile__airline-pill:hover {
+  border-color: color-mix(in oklab, var(--cyan) 35%, var(--line));
+  color: var(--navy);
+}
+
+.fo-profile__airline-pill:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--sky) 45%, transparent);
+  outline-offset: 2px;
+}
+
+.fo-profile__airline-pill[aria-pressed="true"] {
+  border-color: color-mix(in oklab, var(--cyan) 40%, var(--line));
+  background: color-mix(in oklab, var(--horizon-cool) 75%, white);
+  color: var(--navy);
+}
+
+.fo-profile__modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: color-mix(in oklab, var(--navy) 55%, transparent);
+}
+
+.fo-profile__modal {
+  width: 100%;
+  max-width: 26rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.15rem 1.2rem 1.2rem;
+  border: 1px solid var(--line);
+  border-radius: 0.65rem;
+  background: var(--white);
+  box-shadow: 0 18px 40px -24px color-mix(in oklab, var(--navy) 45%, transparent);
+}
+
+.fo-profile__modal-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.fo-profile__modal-title {
+  margin: 0;
+  font-family: var(--font-hero);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--navy);
+}
+
+.fo-profile__modal-lede {
+  margin: 0.25rem 0 0;
+  font-size: 0.75rem;
+  color: var(--ink-faint);
+}
+
+.fo-profile__modal-close {
+  display: inline-flex;
+  height: 2rem;
+  width: 2rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 0.35rem;
+  background: transparent;
+  color: var(--ink-faint);
+  cursor: pointer;
+}
+
+.fo-profile__modal-close:hover {
+  border-color: var(--line);
+  color: var(--navy);
+  background: color-mix(in oklab, var(--horizon-cool) 60%, white);
+}
+
+.fo-profile__modal-close:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--sky) 45%, transparent);
+  outline-offset: 2px;
+}
+
+.fo-profile__upload {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 0.95rem;
+  border: 1px dashed color-mix(in oklab, var(--cyan) 35%, var(--line));
+  border-radius: 0.5rem;
+  background: color-mix(in oklab, var(--cyan) 5%, white);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.12s ease,
+    background 0.12s ease;
+}
+
+.fo-profile__upload:hover:not(:disabled) {
+  border-color: color-mix(in oklab, var(--cyan) 55%, var(--line));
+  background: color-mix(in oklab, var(--cyan) 8%, white);
+}
+
+.fo-profile__upload:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.fo-profile__upload:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--sky) 45%, transparent);
+  outline-offset: 2px;
+}
+
+.fo-profile__upload-icon {
+  display: inline-flex;
+  height: 2.25rem;
+  width: 2.25rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.4rem;
+  background: color-mix(in oklab, var(--cyan) 14%, white);
+  color: var(--navy);
+}
+
+.fo-profile__upload-title {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.fo-profile__upload-hint {
+  margin: 0.15rem 0 0;
+  font-size: 0.7rem;
+  color: var(--ink-faint);
+}
+
+.fo-profile__presets {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.fo-profile__preset {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: 0.45rem;
+  background: transparent;
+  cursor: pointer;
+  transition:
+    border-color 0.12s ease,
+    background 0.12s ease;
+}
+
+.fo-profile__preset:hover:not(:disabled) {
+  border-color: color-mix(in oklab, var(--cyan) 40%, var(--line));
+  background: color-mix(in oklab, var(--horizon-cool) 55%, white);
+}
+
+.fo-profile__preset:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.fo-profile__preset:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--sky) 45%, transparent);
+  outline-offset: 2px;
+}
+
+.fo-profile__preset-img {
+  position: relative;
+  height: 3.25rem;
+  width: 3.25rem;
+  overflow: hidden;
+  border-radius: 0.4rem;
+  border: 1px solid var(--line);
+}
+
+.fo-profile__preset-name {
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: var(--ink-faint);
+  text-align: center;
+  line-height: 1.25;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fo-profile__modal-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--line);
+}
+
+.fo-profile__danger-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--danger);
+  cursor: pointer;
+}
+
+.fo-profile__danger-link:hover {
+  text-decoration: underline;
+}
+
+.fo-profile__danger-link:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.fo-profile__error {
+  margin: 0;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid color-mix(in oklab, var(--danger) 28%, var(--line));
+  border-radius: 0.45rem;
+  background: color-mix(in oklab, var(--danger) 5%, white);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--danger);
+}
+
+.fo-profile__2fa-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem 1rem;
+  padding: 0.95rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  background: color-mix(in oklab, white 94%, var(--horizon-cool));
+}
+
+.fo-profile__2fa-status-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.fo-profile__2fa-icon {
+  display: inline-flex;
+  height: 2.25rem;
+  width: 2.25rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.4rem;
+  border: 1px solid var(--line);
+  background: white;
+  color: var(--navy);
+}
+
+.fo-profile__2fa-icon--on {
+  border-color: color-mix(in oklab, var(--cyan) 35%, var(--line));
+  background: color-mix(in oklab, var(--cyan) 8%, white);
+  color: var(--sky);
+}
+
+.fo-profile__2fa-title {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.fo-profile__2fa-note {
+  margin: 0.25rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--ink-faint);
+}
+
+.fo-profile__2fa-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem 1.05rem;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  background: white;
+}
+
+.fo-profile__2fa-panel--warn {
+  border-color: color-mix(in oklab, var(--danger) 28%, var(--line));
+  background: color-mix(in oklab, var(--danger) 4%, white);
+}
+
+.fo-profile__2fa-panel--backup {
+  border-color: color-mix(in oklab, var(--electric, #c97820) 35%, var(--line));
+  background: color-mix(in oklab, var(--bone) 55%, white);
+}
+
+.fo-profile__codes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.4rem;
+}
+
+@media (min-width: 480px) {
+  .fo-profile__codes {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+.fo-profile__code {
+  padding: 0.4rem 0.35rem;
+  border: 1px solid var(--line);
+  border-radius: 0.3rem;
+  background: white;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-align: center;
+  color: var(--navy);
+  user-select: all;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fo-profile__avatar,
+  .fo-profile__airline-pill,
+  .fo-profile__upload,
+  .fo-profile__preset {
+    transition: none;
+  }
+}

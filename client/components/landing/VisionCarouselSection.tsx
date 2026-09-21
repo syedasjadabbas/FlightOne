@@ -60,43 +60,122 @@ const PARALLAX_RANGE = 220;
 
 type NarrativeBlock = {
   id: string;
-  caption: string;
+  step: string;
   body: string;
+  side: 'left' | 'right';
   topDesktop: number;
   topMobile: number;
-  leftDesktop: number;
-  leftMobile: number;
 };
 
+type SkyCallout = {
+  id: string;
+  label: string;
+  detail: string;
+  topDesktop: number;
+  topMobile: number;
+  side: 'left' | 'right';
+};
+
+type DestChip = {
+  id: string;
+  name: string;
+  meta: string;
+  topDesktop: number;
+  topMobile: number;
+  side: 'left' | 'right';
+};
+
+/** Story beats — placed clear of aircraft layers (~21% / ~38%) where possible. */
 const NARRATIVE_BLOCKS: NarrativeBlock[] = [
   {
-    id: 'fv-1',
-    caption: 'Future Vision — 1',
+    id: 'na-1',
+    step: '01',
+    body: 'Tell us where you want to go. We build the rest around your dates.',
+    side: 'left',
+    topDesktop: 15,
+    topMobile: 16,
+  },
+  {
+    id: 'na-2',
+    step: '02',
+    body: 'Flights, hotels, and daily plans in one clear itinerary — within 24 hours.',
+    side: 'right',
+    topDesktop: 26,
+    topMobile: 28,
+  },
+  {
+    id: 'na-3',
+    step: '03',
+    body: 'Visa files prepared honestly — including when a profile needs work first.',
+    side: 'left',
+    topDesktop: 42,
+    topMobile: 44,
+  },
+  {
+    id: 'na-4',
+    step: '04',
     body: 'Imagine a journey designed entirely around you.',
-    topDesktop: 58,
-    topMobile: 60,
-    leftDesktop: 2.8,
-    leftMobile: 4.3,
+    side: 'right',
+    topDesktop: 54,
+    topMobile: 56,
   },
   {
-    id: 'fv-2',
-    caption: 'Future Vision — 2',
+    id: 'na-5',
+    step: '05',
     body: 'Where every destination feels closer, simpler, and more memorable.',
-    topDesktop: 68.5,
-    topMobile: 71,
-    leftDesktop: 32.6,
-    leftMobile: 19.9,
+    side: 'left',
+    topDesktop: 66,
+    topMobile: 68,
   },
   {
-    id: 'fv-3',
-    caption: 'Future Vision — 3',
+    id: 'na-6',
+    step: '06',
     body: 'Where every trip becomes a story worth bringing home.',
-    topDesktop: 79,
-    topMobile: 82,
-    leftDesktop: 56.5,
-    leftMobile: 35.5,
+    side: 'right',
+    topDesktop: 78,
+    topMobile: 80,
   },
 ];
+
+const SKY_CALLOUTS: SkyCallout[] = [
+  {
+    id: 'sc-1',
+    label: '24-hour turnaround',
+    detail: 'Full itinerary with hotel names and final pricing',
+    topDesktop: 18,
+    topMobile: 20,
+    side: 'right',
+  },
+  {
+    id: 'sc-2',
+    label: 'Transparent quotes',
+    detail: "What's included — and what isn't — always in writing",
+    topDesktop: 36,
+    topMobile: 38,
+    side: 'right',
+  },
+  {
+    id: 'sc-3',
+    label: 'One WhatsApp contact',
+    detail: 'From first message to your flight home',
+    topDesktop: 60,
+    topMobile: 62,
+    side: 'left',
+  },
+];
+
+const DEST_CHIPS: DestChip[] = [
+  { id: 'dc-maldives', name: 'Maldives', meta: 'Honeymoon & beach', topDesktop: 21, topMobile: 22, side: 'left' },
+  { id: 'dc-dubai', name: 'Dubai', meta: 'First international', topDesktop: 33, topMobile: 34, side: 'left' },
+  { id: 'dc-turkey', name: 'Turkey', meta: 'Cappadocia & beyond', topDesktop: 48, topMobile: 50, side: 'right' },
+  { id: 'dc-thailand', name: 'Thailand', meta: 'e-Visa handled', topDesktop: 70, topMobile: 72, side: 'right' },
+];
+
+const ADVENTURE_STATS = [
+  { value: '9', label: 'Destinations' },
+  { value: '24h', label: 'Itinerary' },
+  { value: '3', label: 'Hotel tiers' },
+] as const;
 
 export default function VisionCarouselSection() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -312,54 +391,90 @@ export default function VisionCarouselSection() {
           </div>
         </div>
 
-        {/* ── 2. SUBTLE DIRECTIONAL GRADIENT OVERLAY ── */}
+        {/* ── 2. READABILITY SCRIM — lifts ivory type off bright clouds ── */}
         <div
+          className="vision-scrim"
           style={{
             position: 'absolute',
             inset: 0,
-            background:
-              'radial-gradient(ellipse at 50% 25%, rgba(7, 22, 44, 0.08) 0%, rgba(7, 22, 44, 0.3) 75%, rgba(7, 22, 44, 0.6) 100%)',
             pointerEvents: 'none',
             zIndex: 8,
           }}
         />
 
-        {/* ── 3. TEXT LAYER — Header ("Dream of Flight") + 3 Cascading Narratives ── */}
-        <div className="vision-text-layer" aria-hidden="true">
+        {/* ── 3. TEXT LAYER — branded panels over the illustration ── */}
+        <div className="vision-text-layer">
           <div ref={textStackRef} className="vision-text-stack" style={{ willChange: 'transform' }}>
-            {/* Header: eyebrow labels + huge centered Dream of Flight headline */}
             <div className="vision-header-container">
-              <div className="vision-topbar">
-                <span className="vision-eyebrow">Our future vision</span>
-                <span className="vision-eyebrow vision-topbar-right">Visa support included</span>
-              </div>
-              <div className="vision-headline-wrap">
-                <h2 className="vision-headline-desktop">Next Adventure</h2>
-                <h2 className="vision-headline-mobile">
-                  Next
-                  <br />
-                  Adventure
-                </h2>
+              <div className="vision-header-plate">
+                <div className="vision-headline-wrap">
+                  <h2 className="vision-headline-desktop">Next Adventure</h2>
+                  <h2 className="vision-headline-mobile">
+                    Next
+                    <br />
+                    Adventure
+                  </h2>
+                </div>
+                <p className="vision-subhead">
+                  Custom routes across nine destinations — itinerary in 24 hours, visa support included.
+                </p>
+                <div className="vision-stats" role="list">
+                  {ADVENTURE_STATS.map((stat) => (
+                    <div key={stat.label} className="vision-stat" role="listitem">
+                      <span className="vision-stat-value">{stat.value}</span>
+                      <span className="vision-stat-label">{stat.label}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 
-            {/* Three narrative states — cascading diagonally */}
-            {NARRATIVE_BLOCKS.map((block) => (
+            {SKY_CALLOUTS.map((callout) => (
               <div
+                key={callout.id}
+                className={`vision-text-block vision-plate vision-callout vision-side-${callout.side}`}
+                style={
+                  {
+                    '--top-d': `${callout.topDesktop}%`,
+                    '--top-m': `${callout.topMobile}%`,
+                  } as React.CSSProperties
+                }
+              >
+                <span className="vision-callout-label">{callout.label}</span>
+                <p className="vision-callout-detail">{callout.detail}</p>
+              </div>
+            ))}
+
+            {DEST_CHIPS.map((chip) => (
+              <div
+                key={chip.id}
+                className={`vision-text-block vision-dest-chip vision-side-${chip.side}`}
+                style={
+                  {
+                    '--top-d': `${chip.topDesktop}%`,
+                    '--top-m': `${chip.topMobile}%`,
+                  } as React.CSSProperties
+                }
+              >
+                <span className="vision-dest-name">{chip.name}</span>
+                <span className="vision-dest-meta">{chip.meta}</span>
+              </div>
+            ))}
+
+            {NARRATIVE_BLOCKS.map((block) => (
+              <article
                 key={block.id}
-                className="vision-text-block vision-narrative"
+                className={`vision-text-block vision-plate vision-narrative vision-side-${block.side}`}
                 style={
                   {
                     '--top-d': `${block.topDesktop}%`,
                     '--top-m': `${block.topMobile}%`,
-                    '--left-d': `${block.leftDesktop}%`,
-                    '--left-m': `${block.leftMobile}%`,
                   } as React.CSSProperties
                 }
               >
-                <span className="vision-caption">{block.caption}</span>
+                <span className="vision-caption">Next Adventure — {block.step}</span>
                 <p className="vision-narrative-body">{block.body}</p>
-              </div>
+              </article>
             ))}
           </div>
         </div>
@@ -374,7 +489,23 @@ export default function VisionCarouselSection() {
 
         .vision-overlay-layer { pointer-events: none; }
 
-        /* ── text layer ── */
+        .vision-scrim {
+          background:
+            linear-gradient(
+              180deg,
+              rgba(7, 22, 44, 0.55) 0%,
+              rgba(7, 22, 44, 0.18) 18%,
+              rgba(7, 22, 44, 0.12) 42%,
+              rgba(7, 22, 44, 0.28) 68%,
+              rgba(7, 22, 44, 0.62) 100%
+            ),
+            radial-gradient(
+              ellipse 90% 55% at 50% 8%,
+              rgba(7, 22, 44, 0.45) 0%,
+              transparent 70%
+            );
+        }
+
         .vision-text-layer {
           position: absolute;
           inset: 0;
@@ -391,108 +522,224 @@ export default function VisionCarouselSection() {
           top: 0;
           left: 0;
           width: 100%;
-          padding: clamp(4.5rem, 8.5vh, 7rem) clamp(1.5rem, 4vw, 3.5rem) 0;
+          padding: clamp(3.75rem, 7vh, 6rem) clamp(1.25rem, 3.5vw, 3rem) 0;
           box-sizing: border-box;
-          pointer-events: none;
-          z-index: 10;
-        }
-        .vision-topbar {
           display: flex;
-          justify-content: space-between;
-          align-items: center;
-          width: 100%;
-          margin-bottom: clamp(1rem, 2.5vh, 2.5rem);
+          justify-content: center;
+          z-index: 12;
         }
-        .vision-eyebrow {
-          font-family: var(--font-sans);
-          font-size: clamp(0.75rem, 0.85vw, 0.875rem);
-          font-weight: 500;
-          letter-spacing: -0.01em;
-          color: #F5F4DF;
-          white-space: nowrap;
+        .vision-header-plate {
+          width: min(100%, 46rem);
+          padding: clamp(1.1rem, 2.2vh, 1.65rem) clamp(1.15rem, 2.5vw, 1.85rem);
+          border-radius: 0.65rem;
+          background: color-mix(in oklab, #07162C 78%, transparent);
+          border: 1px solid color-mix(in oklab, #F5F4DF 16%, transparent);
+          box-shadow:
+            0 18px 48px -16px rgba(2, 8, 20, 0.65),
+            inset 0 1px 0 color-mix(in oklab, #F5F4DF 10%, transparent);
+          backdrop-filter: blur(14px) saturate(1.15);
+          -webkit-backdrop-filter: blur(14px) saturate(1.15);
+          text-align: center;
         }
         .vision-headline-wrap {
           width: 100%;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          text-align: center;
         }
         .vision-headline-desktop {
           margin: 0;
           font-family: var(--font-display);
-          font-size: clamp(4.5rem, 11vw, 11rem);
-          font-weight: 500;
-          letter-spacing: -0.03em;
-          line-height: 0.95;
+          font-size: clamp(2.75rem, 6.5vw, 5.5rem);
+          font-weight: 600;
+          letter-spacing: -0.035em;
+          line-height: 0.98;
           color: #F5F4DF;
-          text-shadow: 0 4px 36px rgba(7, 22, 44, 0.4);
-          text-align: center;
           white-space: nowrap;
         }
         .vision-headline-mobile {
           display: none;
           margin: 0;
           font-family: var(--font-display);
-          font-size: clamp(3.25rem, 14vw, 5.25rem);
-          font-weight: 500;
-          letter-spacing: -0.03em;
-          line-height: 0.95;
+          font-size: clamp(2.6rem, 12vw, 4rem);
+          font-weight: 600;
+          letter-spacing: -0.035em;
+          line-height: 0.98;
           color: #F5F4DF;
-          text-shadow: 0 4px 28px rgba(7, 22, 44, 0.4);
-          text-align: center;
+        }
+        .vision-subhead {
+          margin: 0.75rem auto 0;
+          max-width: 34ch;
+          font-family: var(--font-sans);
+          font-size: clamp(0.875rem, 1.2vw, 1.05rem);
+          font-weight: 500;
+          line-height: 1.4;
+          letter-spacing: -0.01em;
+          color: color-mix(in oklab, #F5F4DF 82%, #8FA0B2);
+        }
+        .vision-stats {
+          display: flex;
+          justify-content: center;
+          gap: clamp(1.1rem, 3vw, 2.25rem);
+          margin-top: 1.1rem;
+          padding-top: 0.95rem;
+          border-top: 1px solid color-mix(in oklab, #F5F4DF 12%, transparent);
+        }
+        .vision-stat {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 0.2rem;
+          min-width: 4.25rem;
+        }
+        .vision-stat-value {
+          font-family: var(--font-display);
+          font-size: clamp(1.35rem, 2.4vw, 1.85rem);
+          font-weight: 600;
+          letter-spacing: -0.03em;
+          line-height: 1;
+          color: #F5F4DF;
+        }
+        .vision-stat-label {
+          font-family: var(--font-sans);
+          font-size: 0.65rem;
+          font-weight: 600;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: color-mix(in oklab, #F5F4DF 62%, transparent);
         }
 
         .vision-text-block {
           position: absolute;
           top: var(--top-d);
-          left: var(--left-d, auto);
+          z-index: 11;
+        }
+        .vision-side-left {
+          left: clamp(1rem, 4vw, 3.25rem);
+          right: auto;
+        }
+        .vision-side-right {
+          right: clamp(1rem, 4vw, 3.25rem);
+          left: auto;
+        }
+
+        .vision-plate {
+          box-sizing: border-box;
+          padding: 1rem 1.15rem 1.1rem;
+          border-radius: 0.55rem;
+          background: color-mix(in oklab, #0E1620 86%, transparent);
+          border: 1px solid color-mix(in oklab, #F5F4DF 14%, transparent);
+          box-shadow:
+            0 16px 40px -14px rgba(2, 8, 20, 0.7),
+            inset 0 1px 0 color-mix(in oklab, #F5F4DF 8%, transparent);
+          backdrop-filter: blur(12px) saturate(1.1);
+          -webkit-backdrop-filter: blur(12px) saturate(1.1);
+        }
+
+        .vision-callout {
+          width: clamp(13.5rem, 22vw, 17.5rem);
+          border-left: 3px solid var(--joby-blue, #007AE5);
+        }
+        .vision-callout-label {
+          display: block;
+          font-family: var(--font-sans);
+          font-size: 0.6875rem;
+          font-weight: 700;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: color-mix(in oklab, #F5F4DF 72%, var(--cyan, #2EC4B6));
+          margin-bottom: 0.4rem;
+        }
+        .vision-callout-detail {
+          margin: 0;
+          font-family: var(--font-sans);
+          font-size: clamp(0.9rem, 1.15vw, 1.05rem);
+          font-weight: 500;
+          letter-spacing: -0.015em;
+          line-height: 1.35;
+          color: #F5F4DF;
+        }
+
+        .vision-dest-chip {
+          display: inline-flex;
+          flex-direction: column;
+          gap: 0.12rem;
+          padding: 0.55rem 0.8rem 0.6rem;
+          border-radius: 0.4rem;
+          background: #F5F4DF;
+          border: 1px solid color-mix(in oklab, #0E1620 10%, transparent);
+          box-shadow: 0 10px 28px -10px rgba(2, 8, 20, 0.55);
+          white-space: nowrap;
+        }
+        .vision-dest-name {
+          font-family: var(--font-sans);
+          font-size: 0.8125rem;
+          font-weight: 700;
+          letter-spacing: -0.015em;
+          color: #0E1620;
+        }
+        .vision-dest-meta {
+          font-family: var(--font-sans);
+          font-size: 0.6875rem;
+          font-weight: 500;
+          letter-spacing: 0.01em;
+          color: color-mix(in oklab, #0E1620 62%, #55606e);
         }
 
         .vision-narrative {
-          width: clamp(14rem, 34vw, 31.25rem);
-          max-width: calc(100% - var(--left-d, 0%) - 1.5rem);
-          box-sizing: border-box;
+          width: clamp(15rem, 34vw, 28rem);
+          max-width: min(28rem, calc(100vw - 2.5rem));
+          border-left: 3px solid var(--cyan, #2EC4B6);
         }
         .vision-caption {
           display: block;
           font-family: var(--font-sans);
-          font-size: clamp(0.7rem, 0.85vw, 0.8125rem);
-          font-weight: 500;
-          letter-spacing: -0.01em;
-          color: #F5F4DF;
-          margin-bottom: 0.85rem;
+          font-size: 0.6875rem;
+          font-weight: 700;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: color-mix(in oklab, #F5F4DF 68%, var(--cyan, #2EC4B6));
+          margin-bottom: 0.55rem;
         }
         .vision-narrative-body {
           margin: 0;
           font-family: var(--font-display);
-          font-size: clamp(1.35rem, 5vw, 2.5rem);
-          font-weight: 500;
-          letter-spacing: -0.01em;
-          line-height: 1.05;
+          font-size: clamp(1.15rem, 2.4vw, 1.85rem);
+          font-weight: 600;
+          letter-spacing: -0.025em;
+          line-height: 1.15;
           color: #F5F4DF;
-          text-shadow: 0 2px 20px rgba(7, 22, 44, 0.3);
         }
 
         @media (max-width: 768px) {
           .vision-header-container {
-            padding: 5rem 1.25rem 0;
+            padding: 4.5rem 1rem 0;
           }
           .vision-headline-desktop {
             display: none;
           }
           .vision-headline-mobile {
             display: block;
+            white-space: normal;
           }
-          .vision-topbar-right {
-            display: none;
+          .vision-stats {
+            gap: 0.85rem;
           }
           .vision-text-block {
             top: var(--top-m) !important;
           }
+          .vision-side-left,
+          .vision-side-right {
+            left: 1rem;
+            right: 1rem;
+            width: auto;
+            max-width: none;
+          }
+          .vision-callout,
           .vision-narrative {
-            left: var(--left-m) !important;
-            max-width: calc(100% - var(--left-m, 0%) - 1.25rem) !important;
+            width: auto;
+            max-width: none;
+          }
+          .vision-dest-chip {
+            left: 1rem !important;
+            right: auto !important;
           }
         }
       `}</style>

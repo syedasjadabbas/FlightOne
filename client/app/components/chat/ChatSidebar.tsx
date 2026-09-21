@@ -2,6 +2,20 @@
 
 import { useMemo, useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import {
+  Archive,
+  BedDouble,
+  Briefcase,
+  FileText,
+  Loader2,
+  Lock,
+  Mountain,
+  Plus,
+  Search,
+  Users,
+  X,
+  Plane,
+} from "lucide-react";
 import { useAuthStore } from "@/store/auth.store";
 import type { ConversationSummary } from "@/lib/api/conversations.api";
 import { requestConversationEscalation } from "@/lib/ask-ai/persistConversation";
@@ -60,49 +74,25 @@ function formatConversationTime(dateString: string): string {
   }
 }
 
-function getConversationIcon(title: string) {
+function ConversationIcon({ title }: { title: string }) {
   const t = title.toLowerCase();
+  const cls = "h-4 w-4";
   if (t.includes("hotel") || t.includes("stay") || t.includes("resort")) {
-    return (
-      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-      </svg>
-    );
+    return <BedDouble className={cls} strokeWidth={1.8} aria-hidden />;
   }
   if (t.includes("family") || t.includes("group") || t.includes("kids")) {
-    return (
-      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-      </svg>
-    );
+    return <Users className={cls} strokeWidth={1.8} aria-hidden />;
   }
   if (t.includes("business") || t.includes("corporate") || t.includes("work")) {
-    return (
-      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-      </svg>
-    );
+    return <Briefcase className={cls} strokeWidth={1.8} aria-hidden />;
   }
   if (t.includes("visa") || t.includes("passport") || t.includes("document") || t.includes("policy")) {
-    return (
-      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-      </svg>
-    );
+    return <FileText className={cls} strokeWidth={1.8} aria-hidden />;
   }
   if (t.includes("japan") || t.includes("mountain") || t.includes("ski") || t.includes("nature")) {
-    return (
-      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-      </svg>
-    );
+    return <Mountain className={cls} strokeWidth={1.8} aria-hidden />;
   }
-  // Default flight / trip icon
-  return (
-    <svg className="h-4 w-4 -rotate-45" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-    </svg>
-  );
+  return <Plane className={`${cls} -rotate-45`} strokeWidth={1.8} aria-hidden />;
 }
 
 function getConversationSubtitle(title: string, summary?: string): string {
@@ -255,51 +245,40 @@ export function ChatSidebar({
 
       {/* Main Sidebar Panel */}
       <aside
-        className={`fo-chat-sidebar flex flex-col h-full bg-[#081726] border-r border-[#0e2740] text-slate-200 select-none z-50 transition-all duration-300 ease-in-out shrink-0 ${
+        className={`fo-chat-sidebar z-50 flex h-full shrink-0 select-none flex-col border-r border-[color-mix(in_oklab,var(--electric)_12%,#0e2740)] bg-[var(--fo-nav-bg)] text-slate-200 transition-all duration-300 ease-in-out ${
           isOpen
-            ? "translate-x-0 w-72 max-w-[85vw] lg:w-[260px] xl:w-[270px] lg:static fixed inset-y-0 left-0 shadow-2xl lg:shadow-none"
-            : "-translate-x-full lg:translate-x-0 lg:w-0 lg:overflow-hidden fixed inset-y-0 left-0"
+            ? "fixed inset-y-0 left-0 w-72 max-w-[85vw] translate-x-0 shadow-2xl lg:static lg:w-[260px] lg:shadow-none xl:w-[270px]"
+            : "fixed inset-y-0 left-0 -translate-x-full lg:w-0 lg:translate-x-0 lg:overflow-hidden"
         }`}
         role="complementary"
         aria-label="Past conversations"
       >
         {/* Top Actions: New Chat & Search Input */}
-        <div className="flex flex-col gap-2.5 p-3 border-b border-[#0f2842] shrink-0">
-          {/* New Chat Button */}
+        <div className="flex shrink-0 flex-col gap-2.5 border-b border-white/10 p-3">
           <button
             type="button"
             onClick={onNewChat}
-            className="group flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#009ee2] to-[#00b4d8] hover:from-[#008ecb] hover:to-[#00a3c4] px-3.5 py-2.5 text-xs font-bold text-white shadow-md shadow-cyan-950/40 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 transition-all active:scale-[0.98]"
+            className="group flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--electric)] px-3.5 py-2.5 text-xs font-bold text-white transition-colors hover:bg-[color-mix(in_oklab,var(--electric)_88%,white)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--electric)]/50 active:scale-[0.98]"
             aria-label="Start a new chat"
           >
-            <svg className="h-4 w-4 stroke-[2.5]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-            </svg>
-            <span className="tracking-tight text-[13px]">New Chat</span>
+            <Plus className="h-4 w-4" strokeWidth={2.4} aria-hidden />
+            <span className="text-[13px] tracking-tight">New chat</span>
           </button>
 
-          {/* Search Conversations Input */}
           <div className="relative">
             <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
+              <Search className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
             </div>
             <input
               ref={searchInputRef}
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search conversations..."
-              className="w-full rounded-xl border border-white/10 bg-white/[0.05] py-1.5 pl-8 pr-7 text-xs text-slate-100 placeholder-slate-400 focus:border-cyan-500 focus:bg-white/[0.08] focus:outline-none focus:ring-1 focus:ring-cyan-500 transition-colors"
+              placeholder="Search conversations…"
+              className="w-full rounded-xl border border-white/10 bg-white/[0.05] py-1.5 pl-8 pr-7 text-xs text-slate-100 placeholder-slate-400 transition-colors focus:border-[var(--electric)] focus:bg-white/[0.08] focus:outline-none focus:ring-1 focus:ring-[var(--electric)]"
               aria-label="Search conversations"
             />
-            {searchQuery && (
+            {searchQuery ? (
               <button
                 type="button"
                 onClick={() => {
@@ -309,59 +288,40 @@ export function ChatSidebar({
                 className="absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-400 hover:text-slate-200"
                 aria-label="Clear search"
               >
-                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <X className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
               </button>
-            )}
+            ) : null}
           </div>
         </div>
 
         {/* Scrollable Conversation List */}
-        <div className="flex-1 overflow-y-auto px-2.5 py-3 space-y-4 fo-scrollbar-subtle min-h-0">
-          {/* Guest State Callout */}
+        <div className="fo-scrollbar-subtle min-h-0 flex-1 space-y-4 overflow-y-auto px-2.5 py-3">
           {!accessToken ? (
             <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3 text-center">
-              <div className="mx-auto mb-2 flex h-7 w-7 items-center justify-center rounded-lg bg-cyan-500/15 text-cyan-400">
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="1.8"
-                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                  />
-                </svg>
+              <div className="mx-auto mb-2 flex h-7 w-7 items-center justify-center rounded-lg bg-[color-mix(in_oklab,var(--electric)_18%,transparent)] text-[var(--electric)]">
+                <Lock className="h-4 w-4" strokeWidth={1.8} aria-hidden />
               </div>
-              <p className="text-xs font-bold text-slate-100">Save Your Travel Chats</p>
+              <p className="text-xs font-bold text-slate-100">Save your travel chats</p>
               <p className="mt-1 text-[10.5px] leading-relaxed text-slate-400">
                 Sign in to save trip searches, restore quotes, and access conversations across devices.
               </p>
               <Link
                 href="/login?redirect=/chat"
-                className="mt-2.5 inline-flex w-full items-center justify-center rounded-lg bg-cyan-600/20 border border-cyan-500/30 px-2.5 py-1.5 text-xs font-semibold text-cyan-300 hover:bg-cyan-500/30 transition-colors"
+                className="mt-2.5 inline-flex w-full items-center justify-center rounded-lg border border-[color-mix(in_oklab,var(--electric)_35%,transparent)] bg-[color-mix(in_oklab,var(--electric)_16%,transparent)] px-2.5 py-1.5 text-xs font-semibold text-[color-mix(in_oklab,var(--electric)_70%,white)] transition-colors hover:bg-[color-mix(in_oklab,var(--electric)_28%,transparent)]"
               >
-                Log In to FlightOne
+                Log in to FlightOne
               </Link>
             </div>
           ) : isLoading ? (
-            /* Shimmer Loading Skeleton */
             <div className="space-y-3 px-1">
               {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="h-12 rounded-xl bg-white/[0.04] animate-pulse" />
+                <div key={i} className="h-12 animate-pulse rounded-xl bg-white/[0.04]" />
               ))}
             </div>
           ) : filteredConversations.length === 0 ? (
-            /* Empty State */
-            <div className="py-12 px-3 text-center">
+            <div className="px-3 py-12 text-center">
               <div className="mx-auto mb-2 flex h-8 w-8 items-center justify-center rounded-lg bg-white/[0.05] text-slate-500">
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                  />
-                </svg>
+                <Archive className="h-4 w-4" strokeWidth={1.9} aria-hidden />
               </div>
               <p className="text-xs font-medium text-slate-400">
                 {searchQuery ? `No chats matching "${searchQuery}"` : "No conversations yet"}
@@ -370,7 +330,7 @@ export function ChatSidebar({
                 <button
                   type="button"
                   onClick={() => setSearchQuery("")}
-                  className="mt-2 text-[11px] font-semibold text-cyan-400 hover:underline"
+                  className="mt-2 text-[11px] font-semibold text-[var(--electric)] hover:underline"
                 >
                   Clear search
                 </button>
@@ -393,14 +353,13 @@ export function ChatSidebar({
                   const isMenuOpen = conv.id === menuOpenId;
                   const title = conv.title || "FlightOne Chat";
                   const subtitle = getConversationSubtitle(title);
-                  const icon = getConversationIcon(title);
 
                   return (
                     <div
                       key={conv.id}
                       className={`group relative flex items-center justify-between rounded-xl transition-all ${
                         isActive
-                          ? "bg-[#0d2a45] text-white shadow-xs ring-1 ring-cyan-500/30"
+                          ? "bg-[#0d2a45] text-white shadow-xs ring-1 ring-[color-mix(in_oklab,var(--electric)_35%,transparent)]"
                           : "text-slate-300 hover:bg-white/[0.05] hover:text-slate-100"
                       }`}
                     >
@@ -409,24 +368,20 @@ export function ChatSidebar({
                         onClick={() => handleSelect(conv.id)}
                         disabled={isResuming}
                         aria-current={isActive ? "true" : undefined}
-                        className="flex flex-1 min-w-0 items-center gap-3 p-2.5 text-left text-xs focus:outline-none"
+                        className="flex min-w-0 flex-1 items-center gap-3 p-2.5 text-left text-xs focus:outline-none"
                         title={title}
                       >
-                        {/* Circular Icon Container */}
                         <div
                           className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors ${
                             isActive
-                              ? "bg-cyan-500 text-slate-950 font-bold shadow-xs"
-                              : "bg-white/[0.07] text-cyan-300 group-hover:bg-cyan-500/20 group-hover:text-cyan-200"
+                              ? "bg-[var(--electric)] font-bold text-[var(--navy)] shadow-xs"
+                              : "bg-white/[0.07] text-[color-mix(in_oklab,var(--electric)_75%,white)] group-hover:bg-[color-mix(in_oklab,var(--electric)_20%,transparent)] group-hover:text-[color-mix(in_oklab,var(--electric)_85%,white)]"
                           }`}
                         >
                           {isResuming ? (
-                            <svg className="h-4 w-4 animate-spin text-cyan-400" fill="none" viewBox="0 0 24 24">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                            </svg>
+                            <Loader2 className="h-4 w-4 animate-spin text-[var(--electric)]" strokeWidth={2} aria-hidden />
                           ) : (
-                            icon
+                            <ConversationIcon title={title} />
                           )}
                         </div>
 
@@ -511,7 +466,7 @@ export function ChatSidebar({
                               type="button"
                               role="menuitem"
                               onClick={(e) => void handleEscalate(conv.id, e)}
-                              className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs text-cyan-300 hover:bg-slate-800 transition-colors"
+                              className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs text-[color-mix(in_oklab,var(--electric)_70%,white)] transition-colors hover:bg-slate-800"
                             >
                               <svg className="h-3.5 w-3.5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path
@@ -606,7 +561,7 @@ export function ChatSidebar({
                 className="flex items-center gap-2.5 min-w-0 rounded-lg p-1 hover:bg-slate-800/80 transition-colors"
                 title="View Profile"
               >
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-cyan-600 to-cyan-400 text-xs font-bold text-white shadow-sm">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--electric)] text-xs font-bold text-white">
                   {userInitials}
                 </div>
                 <div className="min-w-0">

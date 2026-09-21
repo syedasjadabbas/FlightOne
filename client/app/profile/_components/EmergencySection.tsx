@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button, Input, Spinner } from "@/components/ui";
-import { TravellerSection, TravellerState } from "@/app/components/traveller";
+import { TravellerChip, TravellerSection, TravellerState } from "@/app/components/traveller";
 import {
   useCreateEmergencyContactMutation,
   useDeleteEmergencyContactMutation,
@@ -45,13 +45,9 @@ export function EmergencySection() {
             <li key={c.id} className="fo-traveller__row">
               <div className="fo-traveller__row-top">
                 <div>
-                  <p className="fo-traveller__row-title">
+                  <p className="fo-traveller__row-title inline-flex flex-wrap items-center gap-2">
                     {c.fullName}
-                    {c.isPrimary ? (
-                      <span className="ml-2 text-[11px] font-semibold uppercase tracking-wide text-[var(--sky)]">
-                        Primary
-                      </span>
-                    ) : null}
+                    {c.isPrimary ? <TravellerChip>Primary</TravellerChip> : null}
                   </p>
                   <p className="fo-traveller__row-meta">
                     {c.phone}

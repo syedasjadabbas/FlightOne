@@ -8,6 +8,30 @@ import {
 } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+  Bell,
+  Briefcase,
+  Car,
+  ChevronDown,
+  Hotel,
+  LayoutDashboard,
+  Lock,
+  LogOut,
+  Map,
+  Menu,
+  MessageCircle,
+  Mic,
+  Plane,
+  Sparkles,
+  Stamp,
+  Star,
+  Undo2,
+  User,
+  Users,
+  X,
+  Zap,
+  type LucideIcon,
+} from "lucide-react";
 import { useAuthStore } from "@/store/auth.store";
 import { useLogoutMutation } from "@/lib/api/auth.api";
 
@@ -15,22 +39,23 @@ import { useLogoutMutation } from "@/lib/api/auth.api";
    Types & Static Data (Harmonized with Landing Page)
 ───────────────────────────────────────────────────────────────────────────── */
 type DropdownId = "explore" | "services" | "account" | "notifications" | null;
+type NavIcon = LucideIcon;
 
-const EXPLORE_ITEMS = [
-  { label: "Flights", href: "/#search", icon: "✈", desc: "Search & compare live fares" },
-  { label: "Stays",   href: "/#search", icon: "🏨", desc: "Hotels, villas & resorts" },
-  { label: "Cars",    href: "/#search", icon: "🚗", desc: "Hire at 1 000+ destinations" },
+const EXPLORE_ITEMS: { label: string; href: string; icon: NavIcon; desc: string }[] = [
+  { label: "Flights", href: "/#search", icon: Plane, desc: "Search & compare live fares" },
+  { label: "Stays",   href: "/#search", icon: Hotel, desc: "Hotels, villas & resorts" },
+  { label: "Cars",    href: "/#search", icon: Car, desc: "Hire at 1 000+ destinations" },
 ];
 
-const SERVICE_ITEMS = [
-  { label: "Visa Advisory",    href: "/visa",        icon: "🛂", desc: "End-to-end visa processing" },
-  { label: "Corporate Travel", href: "/corporate",   icon: "💼", desc: "Managed business trips" },
-  { label: "Group Bookings",   href: "/groups",      icon: "👥", desc: "Parties of 10 or more" },
-  { label: "MICE & Events",    href: "/mice",        icon: "🎤", desc: "Conferences & incentives" },
-  { label: "Rewards & Points", href: "/rewards",     icon: "⭐", desc: "Earn miles on every trip" },
-  { label: "Support & Help",   href: "/escalations", icon: "💬", desc: "Live agent assistance" },
-  { label: "Refunds & Claims", href: "/refunds",     icon: "↩",  desc: "Manage cancellations" },
-  { label: "Operations Desk",  href: "/ops",         icon: "⚡",  desc: "Supplier queues & revalidations" },
+const SERVICE_ITEMS: { label: string; href: string; icon: NavIcon; desc: string }[] = [
+  { label: "Visa Advisory",    href: "/visa",        icon: Stamp, desc: "End-to-end visa processing" },
+  { label: "Corporate Travel", href: "/corporate",   icon: Briefcase, desc: "Managed business trips" },
+  { label: "Group Bookings",   href: "/groups",      icon: Users, desc: "Parties of 10 or more" },
+  { label: "MICE & Events",    href: "/mice",        icon: Mic, desc: "Conferences & incentives" },
+  { label: "Rewards & Points", href: "/rewards",     icon: Star, desc: "Earn miles on every trip" },
+  { label: "Support & Help",   href: "/escalations", icon: MessageCircle, desc: "Live agent assistance" },
+  { label: "Refunds & Claims", href: "/refunds",     icon: Undo2, desc: "Manage cancellations" },
+  { label: "Operations Desk",  href: "/ops",         icon: Zap, desc: "Supplier queues & revalidations" },
 ];
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -215,19 +240,16 @@ export function SiteNav({
       }
     >
       {label}
-      <svg
-        width="10"
-        height="10"
-        viewBox="0 0 10 10"
-        fill="none"
+      <ChevronDown
+        size={12}
+        strokeWidth={2}
+        aria-hidden
         style={{
           transform: openDropdown === id ? "rotate(180deg)" : "rotate(0deg)",
           transition: "transform 0.2s",
           opacity: 0.7,
         }}
-      >
-        <path d="M2 3.5L5 6.5L8 3.5" stroke={textColor} strokeWidth="1.5" strokeLinecap="round" />
-      </svg>
+      />
     </button>
   );
 
@@ -309,12 +331,12 @@ export function SiteNav({
   /* ── Dropdown Item ── */
   const DropItem = ({
     href,
-    icon,
+    icon: Icon,
     label,
     desc,
   }: {
     href: string;
-    icon: string;
+    icon: NavIcon;
     label: string;
     desc?: string;
   }) => (
@@ -339,8 +361,18 @@ export function SiteNav({
         ((e.currentTarget as HTMLElement).style.backgroundColor = "transparent")
       }
     >
-      <span style={{ fontSize: "16px", lineHeight: 1, marginTop: "1px", flexShrink: 0 }}>
-        {icon}
+      <span
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          marginTop: "1px",
+          flexShrink: 0,
+          color: textColor,
+          opacity: 0.85,
+        }}
+      >
+        <Icon size={16} strokeWidth={1.75} aria-hidden />
       </span>
       <span style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
         <span style={{ color: textColor, fontSize: "13px", fontWeight: 500 }}>{label}</span>
@@ -560,14 +592,7 @@ export function SiteNav({
                     position: "relative",
                   }}
                 >
-                  <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="1.8"
-                      d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                    />
-                  </svg>
+                  <Bell size={17} strokeWidth={1.8} aria-hidden />
                   {unreadCount > 0 && (
                     <span
                       style={{
@@ -716,9 +741,7 @@ export function SiteNav({
                   <span style={{ fontSize: "13px", fontWeight: 500 }}>
                     {userLabel?.split("@")[0] || "Account"}
                   </span>
-                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                    <path d="M2 3.5L5 6.5L8 3.5" stroke={textColor} strokeWidth="1.5" strokeLinecap="round" />
-                  </svg>
+                  <ChevronDown size={12} strokeWidth={2} aria-hidden style={{ opacity: 0.7 }} />
                 </button>
 
                 {openDropdown === "account" && (
@@ -752,9 +775,9 @@ export function SiteNav({
                       )}
                     </div>
                     <div style={{ padding: "4px 0" }}>
-                      <DropItem href="/profile" icon="👤" label="Profile & Preferences" />
-                      <DropItem href="/vault" icon="🔒" label="Travel Vault" />
-                      <DropItem href="/dashboard" icon="⚡" label="Management Dashboard" />
+                      <DropItem href="/profile" icon={User} label="Profile & Preferences" />
+                      <DropItem href="/vault" icon={Lock} label="Travel Vault" />
+                      <DropItem href="/dashboard" icon={LayoutDashboard} label="Management Dashboard" />
                     </div>
                     <div style={{ borderTop: dropdownDivider, paddingTop: "4px" }}>
                       <button
@@ -784,7 +807,7 @@ export function SiteNav({
                           (e.currentTarget.style.backgroundColor = "transparent")
                         }
                       >
-                        <span style={{ fontSize: "15px" }}>🚪</span>
+                        <LogOut size={15} strokeWidth={1.75} aria-hidden />
                         {isLoggingOut ? "Signing out…" : "Log Out"}
                       </button>
                     </div>
@@ -845,34 +868,18 @@ export function SiteNav({
               border: "none",
               cursor: "pointer",
               padding: "8px",
-              flexDirection: "column",
-              gap: "5px",
               alignItems: "center",
               justifyContent: "center",
               width: "36px",
               height: "36px",
+              color: textColor,
             }}
           >
-            {[0, 1, 2].map((i) => (
-              <span
-                key={i}
-                style={{
-                  display: "block",
-                  width: "20px",
-                  height: "1.5px",
-                  backgroundColor: textColor,
-                  borderRadius: "2px",
-                  transition: "transform 0.25s, opacity 0.25s",
-                  transform:
-                    mobileOpen && i === 0
-                      ? "translateY(6.5px) rotate(45deg)"
-                      : mobileOpen && i === 2
-                      ? "translateY(-6.5px) rotate(-45deg)"
-                      : "none",
-                  opacity: mobileOpen && i === 1 ? 0 : 1,
-                }}
-              />
-            ))}
+            {mobileOpen ? (
+              <X size={20} strokeWidth={1.75} color={textColor} aria-hidden />
+            ) : (
+              <Menu size={20} strokeWidth={1.75} color={textColor} aria-hidden />
+            )}
           </button>
         </div>
       </header>
@@ -952,7 +959,7 @@ export function SiteNav({
                 marginBottom: "4px",
               }}
             >
-              <span>+</span> Chat with Ava
+              <Sparkles size={16} strokeWidth={1.75} aria-hidden /> Chat with Ava
             </Link>
 
             {/* Explore accordion */}
@@ -1005,8 +1012,8 @@ export function SiteNav({
 
             {/* Direct links */}
             {[
-              { label: "My Journey", href: "/journey", icon: "🗺" },
-              { label: "Travel Vault", href: "/vault", icon: "🔒" },
+              { label: "My Journey", href: "/journey", icon: Map },
+              { label: "Travel Vault", href: "/vault", icon: Lock },
             ].map((item) => (
               <MobileLink
                 key={item.label}
@@ -1035,7 +1042,7 @@ export function SiteNav({
                   <MobileLink
                     href="/profile"
                     label="Profile & Preferences"
-                    icon="👤"
+                    icon={User}
                     textColor={textColor}
                     hoverBg={dropdownItemHover}
                     onClose={() => setMobileOpen(false)}
@@ -1043,7 +1050,7 @@ export function SiteNav({
                   <MobileLink
                     href="/dashboard"
                     label="Management Dashboard"
-                    icon="⚡"
+                    icon={LayoutDashboard}
                     textColor={textColor}
                     hoverBg={dropdownItemHover}
                     onClose={() => setMobileOpen(false)}
@@ -1065,7 +1072,9 @@ export function SiteNav({
                       textAlign: "left",
                     }}
                   >
-                    <span style={{ width: "20px", textAlign: "center" }}>🚪</span>
+                    <span style={{ width: "20px", display: "flex", justifyContent: "center" }}>
+                      <LogOut size={15} strokeWidth={1.75} aria-hidden />
+                    </span>
                     Log Out
                   </button>
                 </>
@@ -1178,19 +1187,16 @@ function MobileAccordion({
         }}
       >
         {label}
-        <svg
-          width="12"
-          height="12"
-          viewBox="0 0 12 12"
-          fill="none"
+        <ChevronDown
+          size={14}
+          strokeWidth={2}
+          aria-hidden
           style={{
             transform: open ? "rotate(180deg)" : "none",
             transition: "transform 0.2s",
             opacity: 0.6,
           }}
-        >
-          <path d="M2 4.5L6 8L10 4.5" stroke={textColor} strokeWidth="1.5" strokeLinecap="round" />
-        </svg>
+        />
       </button>
       {open && (
         <div
@@ -1212,14 +1218,14 @@ function MobileAccordion({
 function MobileLink({
   href,
   label,
-  icon,
+  icon: Icon,
   textColor,
   hoverBg = "rgba(14, 22, 32, 0.05)",
   onClose,
 }: {
   href: string;
   label: string;
-  icon: string;
+  icon: NavIcon;
   textColor: string;
   hoverBg?: string;
   onClose: () => void;
@@ -1245,7 +1251,17 @@ function MobileLink({
       onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = hoverBg)}
       onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = "transparent")}
     >
-      <span style={{ width: "20px", textAlign: "center", fontSize: "15px" }}>{icon}</span>
+      <span
+        style={{
+          width: "20px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          opacity: 0.85,
+        }}
+      >
+        <Icon size={15} strokeWidth={1.75} aria-hidden />
+      </span>
       {label}
     </Link>
   );

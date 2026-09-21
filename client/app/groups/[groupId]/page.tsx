@@ -4,6 +4,7 @@ import { GroupDetailClient } from "./GroupDetailClient";
 
 export const metadata = {
   title: "Group — FlightOne",
+  description: "Trip group desk — members, itinerary, check-ins, and shared documents.",
 };
 
 export default async function GroupDetailPage({

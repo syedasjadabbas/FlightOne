@@ -1,0 +1,96 @@
+/**
+ * Ops refunds desk — calm queue chrome on fo-desk / fo-ops tokens.
+ * Navy / cyan / bone. No glow, no badge soup.
+ */
+
+.fo-ops-refunds {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.fo-ops-refunds__kind {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 600;
+  color: var(--navy);
+  text-decoration: none;
+}
+
+.fo-ops-refunds__kind:hover {
+  color: var(--cyan);
+}
+
+.fo-ops-refunds__kind:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--cyan) 55%, transparent);
+  outline-offset: 2px;
+  border-radius: 0.2rem;
+}
+
+.fo-ops-refunds__kind svg {
+  color: var(--cyan);
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
+.fo-ops-refunds__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.fo-ops-refunds__idle {
+  color: var(--fo-desk-faint);
+  font-size: 0.8125rem;
+}
+
+.fo-ops-refunds__meta {
+  margin: 0.15rem 0 0;
+  font-size: 0.6875rem;
+  color: var(--fo-desk-faint);
+  line-height: 1.35;
+}
+
+.fo-ops-refunds__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.55rem;
+  padding: 1.15rem 1.25rem;
+}
+
+.fo-ops-refunds__empty-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.4rem;
+  background: color-mix(in oklab, var(--horizon-cool) 70%, white);
+  color: var(--cyan);
+}
+
+.fo-ops-refunds__empty-title {
+  margin: 0;
+  font-family: var(--font-hero);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--navy);
+}
+
+.fo-ops-refunds__empty-body {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  max-width: 36rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fo-ops-refunds__kind {
+    transition: none;
+  }
+}

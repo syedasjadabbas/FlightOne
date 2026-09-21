@@ -10,7 +10,7 @@ export function AuthShell({ children }: { children: ReactNode }) {
         <span className="fo-auth__horizon" />
         <span className="fo-auth__routes" />
       </div>
-      <div className="fo-auth__chrome relative z-10 flex min-h-screen flex-1 flex-col justify-between">
+      <div className="fo-auth__chrome relative z-10 flex min-h-dvh flex-1 flex-col justify-between">
         <SiteNav />
         <div className="fo-auth__frame">
           <div className="fo-auth__column">{children}</div>

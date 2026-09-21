@@ -77,7 +77,6 @@ export default function HeroExperienceSequence() {
 
   // Direct DOM Refs for 120fps hardware acceleration
   const videoFrameRef = useRef<HTMLDivElement>(null);
-  const scoopsContainerRef = useRef<HTMLDivElement>(null);
   const heroSlide0Ref = useRef<HTMLDivElement>(null);
   const heroSlide1Ref = useRef<HTMLDivElement>(null);
   const heroSlide2Ref = useRef<HTMLDivElement>(null);
@@ -142,7 +141,6 @@ export default function HeroExperienceSequence() {
         /* ────────────────────────────────────────────────
            PHASE 1: IMMERSIVE HERO VIDEO & SLIDES (p: 0.00 -> 0.38)
         ────────────────────────────────────────────────── */
-        const maxEntranceRadius = Math.min(Math.max(w * 0.16, 120), 220);
         const maxEntranceMargin = Math.min(Math.max(h * 0.15, 110), 160);
 
         // Smooth Scroll-Driven Video Playback across full 20-second video
@@ -171,34 +169,19 @@ export default function HeroExperienceSequence() {
         const expandProgress = smoothstep(0.00, 0.035, p);
 
         // Video exit (0.30 -> 0.38) — video lifts off and fades as ivory stage arrives
-        const exitCurveProgress = smoothstep(0.30, 0.35, p);
         const videoExitProgress = smoothstep(0.30, 0.38, p);
         const videoTy = -videoExitProgress * 110;
         const videoOp = 1 - smoothstep(0.34, 0.38, p);
 
         const currentMargin = (1 - expandProgress) * maxEntranceMargin;
-        const currentRadius = (1 - expandProgress) * maxEntranceRadius + exitCurveProgress * maxEntranceRadius;
 
         if (videoFrameRef.current) {
           videoFrameRef.current.style.bottom = `${currentMargin}px`;
-          videoFrameRef.current.style.borderBottomLeftRadius = `${currentRadius}px`;
-          videoFrameRef.current.style.borderBottomRightRadius = `${currentRadius}px`;
+          videoFrameRef.current.style.borderBottomLeftRadius = '0px';
+          videoFrameRef.current.style.borderBottomRightRadius = '0px';
           videoFrameRef.current.style.transform = `translate3d(0, ${videoTy}%, 0)`;
           videoFrameRef.current.style.opacity = `${videoOp}`;
           videoFrameRef.current.style.display = videoOp <= 0.001 ? 'none' : 'block';
-        }
-
-        // Corner scoops
-        if (scoopsContainerRef.current) {
-          const entranceScoopsOp = 1 - expandProgress;
-          const exitScoopsOp = exitCurveProgress * (1 - smoothstep(0.34, 0.38, p));
-          const scoopsOp = entranceScoopsOp + exitScoopsOp;
-
-          scoopsContainerRef.current.style.bottom = `${currentMargin}px`;
-          scoopsContainerRef.current.style.height = `${Math.max(currentRadius, 1)}px`;
-          scoopsContainerRef.current.style.transform = `translate3d(0, ${videoTy}%, 0)`;
-          scoopsContainerRef.current.style.opacity = `${scoopsOp}`;
-          scoopsContainerRef.current.style.display = scoopsOp <= 0.001 ? 'none' : 'flex';
         }
 
         // Hero Slides:
@@ -670,15 +653,15 @@ export default function HeroExperienceSequence() {
             left: 0,
             right: 0,
             bottom: 'clamp(110px, 15vh, 160px)',
-            borderBottomLeftRadius: 'clamp(120px, 16vw, 220px)',
-            borderBottomRightRadius: 'clamp(120px, 16vw, 220px)',
+            borderBottomLeftRadius: 0,
+            borderBottomRightRadius: 0,
             overflow: 'hidden',
             backgroundColor: '#0E1620',
             zIndex: 10,
             isolation: 'isolate',
             WebkitMaskImage: '-webkit-radial-gradient(white, black)',
             boxShadow: '0 24px 60px rgba(0,0,0,0.45)',
-            willChange: 'transform, opacity, bottom, border-radius',
+            willChange: 'transform, opacity, bottom',
           }}
         >
           {/* HD Video */}
@@ -723,8 +706,8 @@ export default function HeroExperienceSequence() {
               transform: 'translate3d(-50%, -50%, 0)',
               textAlign: 'center',
               width: '100%',
-              maxWidth: 'clamp(340px, 82vw, 1040px)',
-              padding: '0 1.25rem',
+              maxWidth: 'clamp(300px, 88vw, 920px)',
+              padding: '0 1.5rem',
               pointerEvents: 'none',
               zIndex: 20,
               willChange: 'transform, opacity',
@@ -737,20 +720,34 @@ export default function HeroExperienceSequence() {
                    global --font-display / Space Grotesk). Every other
                    heading and all body/UI text keeps Space Grotesk. */
                 fontFamily: 'var(--font-hero-heading)',
-                fontSize: 'clamp(2.6rem, 5.6vw, 5.75rem)',
+                fontSize: 'clamp(2.15rem, 4.4vw, 4.25rem)',
                 fontWeight: 700,
-                lineHeight: 1.05,
-                letterSpacing: '0.02em',
+                lineHeight: 1.12,
+                letterSpacing: '-0.01em',
                 color: '#F5F4DF',
                 /* Tight near-shadow for crisp edge definition over bright
                    patches of the video, plus a larger soft shadow to lift
                    the whole headline off the footage regardless of what's
                    behind it — stronger than a single soft glow alone. */
                 textShadow: '0 2px 6px rgba(0,0,0,0.55), 0 18px 48px rgba(0,0,0,0.5)',
-                textWrap: 'balance',
+                margin: 0,
               }}
             >
-              Custom Tour Packages from Pakistan,<br />Designed Around You.
+              <span style={{ display: 'block' }}>Custom Tour Packages</span>
+              <span style={{ display: 'block' }}>Around the World</span>
+              <span
+                style={{
+                  display: 'block',
+                  marginTop: '0.42em',
+                  fontSize: '0.62em',
+                  fontWeight: 600,
+                  letterSpacing: '0.06em',
+                  textTransform: 'uppercase',
+                  opacity: 0.92,
+                }}
+              >
+                Designed Around You
+              </span>
             </h1>
           </div>
 
@@ -791,7 +788,7 @@ export default function HeroExperienceSequence() {
                   textShadow: '0 2px 14px rgba(0,0,0,0.6)',
                 }}
               >
-                FlightOne designs custom international tour packages from Pakistan with transparent pricing, visa support and a complete itinerary within 24 hours.
+                FlightOne designs custom international tour packages globally with transparent pricing, visa support and a complete itinerary within 24 hours.
               </p>
             </div>
           </div>
@@ -861,47 +858,7 @@ export default function HeroExperienceSequence() {
           </div>
         </div>
 
-        {/* ── Vector SVG Corner Scoops ── */}
-        <div
-          ref={scoopsContainerRef}
-          style={{
-            position: 'absolute',
-            bottom: 'clamp(110px, 15vh, 160px)',
-            left: 0,
-            right: 0,
-            maxWidth: '100%',
-            overflow: 'hidden',
-            boxSizing: 'border-box',
-            height: 'clamp(120px, 16vw, 220px)',
-            pointerEvents: 'none',
-            zIndex: 15,
-            display: 'flex',
-            justifyContent: 'space-between',
-            willChange: 'transform, opacity, bottom, height',
-          }}
-        >
-          <svg
-            style={{ width: 'clamp(120px, 16vw, 220px)', height: '100%', display: 'block' }}
-            viewBox="0 0 100 100"
-            fill="none"
-          >
-            <path
-              d="M 0 0 C 0 55.23 44.77 100 100 100 L 0 100 Z"
-              fill="#007AE5"
-            />
-          </svg>
-
-          <svg
-            style={{ width: 'clamp(120px, 16vw, 220px)', height: '100%', display: 'block' }}
-            viewBox="0 0 100 100"
-            fill="none"
-          >
-            <path
-              d="M 100 0 C 100 55.23 55.23 100 0 100 L 100 100 Z"
-              fill="#007AE5"
-            />
-          </svg>
-        </div>
+        {/* Corner scoops removed — full-bleed square video edges */}
 
         {/* ═════════════════════════════════════════════════════════════════
             "Popular Destinations, Available Worldwide" HEADLINE (Large Edge-to-Edge Typography)

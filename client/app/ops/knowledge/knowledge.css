@@ -1,0 +1,150 @@
+/**
+ * Ops knowledge desk — local form chrome on fo-desk / fo-ops tokens.
+ */
+
+.fo-kb__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.fo-kb__field--inline {
+  flex: 0 1 auto;
+}
+
+.fo-kb__label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+.fo-kb__input,
+.fo-kb__textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--fo-desk-line);
+  border-radius: 0.375rem;
+  background: var(--white);
+  padding: 0.55rem 0.75rem;
+  font-size: 0.875rem;
+  color: var(--navy);
+  line-height: 1.35;
+}
+
+.fo-kb__input--grow {
+  flex: 1 1 10rem;
+  min-width: 10rem;
+}
+
+.fo-kb__textarea {
+  min-height: 8rem;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.fo-kb__input::placeholder,
+.fo-kb__textarea::placeholder {
+  color: var(--ink-faint);
+}
+
+.fo-kb__input:hover,
+.fo-kb__textarea:hover {
+  border-color: var(--fo-desk-line-strong);
+}
+
+.fo-kb__input:focus,
+.fo-kb__textarea:focus {
+  outline: none;
+  border-color: color-mix(in oklab, var(--cyan) 55%, var(--fo-desk-line));
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--cyan) 14%, transparent);
+}
+
+.fo-kb__search {
+  display: flex;
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.fo-kb__search--flex {
+  flex: 1 1 14rem;
+}
+
+.fo-kb__check {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.8125rem;
+  color: var(--ink-soft);
+  cursor: pointer;
+  user-select: none;
+  padding-top: 1.15rem;
+}
+
+.fo-kb__check input {
+  accent-color: var(--cyan);
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.fo-kb__hint {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--fo-desk-muted);
+}
+
+.fo-kb__preview {
+  margin: 0;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--fo-desk-line);
+  border-radius: 0.375rem;
+  background: color-mix(in oklab, var(--bone) 55%, white);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--navy);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.fo-kb__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.35rem 0;
+}
+
+.fo-kb__empty-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.4rem;
+  background: color-mix(in oklab, var(--horizon-cool) 70%, white);
+  color: var(--cyan);
+}
+
+.fo-kb__count {
+  font-size: 0.75rem;
+  color: var(--fo-desk-faint);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.fo-kb__code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.75rem;
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.25rem;
+  background: color-mix(in oklab, var(--navy) 4%, white);
+  color: var(--navy);
+}
+
+@media (max-width: 640px) {
+  .fo-kb__check {
+    padding-top: 0;
+  }
+}

@@ -16,7 +16,20 @@ export default function ChatPage() {
         <SiteNav />
       </div>
       <div className="fo-chat-app relative z-10 flex min-w-0 flex-col overflow-x-clip">
-        <Suspense fallback={<div className="flex flex-1 items-center justify-center py-20 text-xs text-slate-400">Connecting to travel consultant…</div>}>
+        <Suspense
+          fallback={
+            <div
+              className="flex flex-1 flex-col items-center justify-center gap-2 py-20"
+              role="status"
+              aria-live="polite"
+            >
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--electric)]" aria-hidden />
+              <p className="text-xs font-medium text-[var(--ink-faint)]">
+                Connecting to Ava…
+              </p>
+            </div>
+          }
+        >
           <ChatConsole />
         </Suspense>
       </div>

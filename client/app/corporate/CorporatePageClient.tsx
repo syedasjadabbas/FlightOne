@@ -2,6 +2,18 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import {
+  Building2,
+  CheckCircle2,
+  ClipboardList,
+  CreditCard,
+  FileText,
+  FolderKanban,
+  Lock,
+  ScrollText,
+  ShieldCheck,
+  Users,
+} from "lucide-react";
 import { Button, Input, Pagination, Spinner, pageCountFor, paginateItems } from "@/components/ui";
 import { PermissionGate } from "@/components/PermissionGate";
 import {
@@ -30,12 +42,32 @@ import { CorporatePortalSection } from "./_components/CorporatePortalSection";
 import { CorporateExpensesSection } from "./_components/CorporateExpensesSection";
 import { CorporateCarbonSection } from "./_components/CorporateCarbonSection";
 import { CorporateAnalyticsSection } from "./_components/CorporateAnalyticsSection";
+import { DeskSectionHead, DeskStatus } from "./_components/DeskSectionHead";
 
 const TABLE_PAGE_SIZE = 10;
 
 function money(minor: number | undefined, currency?: string | null) {
   if (minor == null) return "—";
   return `${currency || ""} ${(minor / 100).toFixed(2)}`.trim();
+}
+
+function invoiceTone(status: string): "neutral" | "ok" | "warn" {
+  if (/PAID|SETTLED/i.test(status)) return "ok";
+  if (/VOID|FAIL|CANCEL/i.test(status)) return "warn";
+  return "neutral";
+}
+
+function MsgLine({ msg }: { msg: string | null }) {
+  if (!msg) return null;
+  return (
+    <p
+      className="inline-flex items-center gap-1.5 text-[13px] text-[var(--ink-soft)]"
+      role="status"
+    >
+      <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-[var(--cyan)]" aria-hidden />
+      {msg}
+    </p>
+  );
 }
 
 export function CorporatePageClient() {
@@ -125,63 +157,88 @@ export function CorporatePageClient() {
 
   if (!accessToken) {
     return (
-      <div className="space-y-8">
-        <header className="border-b border-slate-200/80 pb-6">
-          <p className="text-xs font-semibold uppercase tracking-wider text-cyan-600">Enterprise & Business Travel Management</p>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl font-[var(--font-sora)]">
-            FlightOne Corporate
-          </h1>
-          <p className="mt-2 text-sm text-slate-600 max-w-2xl leading-relaxed">
-            Centralized billing, credit facilities, multi-level booking approval workflows, and corporate travel policy compliance.
+      <div className="fo-desk__stack" style={{ gap: "1.25rem" }}>
+        <header className="fo-desk__header">
+          <div className="flex items-center gap-2.5">
+            <span className="inline-flex h-9 w-9 items-center justify-center rounded-[var(--fo-desk-radius)] border border-[var(--fo-desk-line)] bg-[var(--fo-desk-wash)] text-[var(--cyan)]">
+              <Building2 className="h-4 w-4" aria-hidden />
+            </span>
+            <h1 className="fo-desk__title">Corporate travel</h1>
+          </div>
+          <p className="fo-desk__lede">
+            Company credit, booking approvals, invoices, and travel policy. Sign in to open your
+            company desk — server policy stays authoritative.
           </p>
-          <div className="mt-4 flex gap-3">
+          <div className="fo-desk__toolbar" style={{ marginTop: "0.25rem" }}>
             <Link href="/login?redirect=/corporate">
-              <Button size="sm">Sign in to company desk</Button>
+              <Button size="sm">Sign in</Button>
+            </Link>
+            <Link href="/signup">
+              <Button size="sm" variant="secondary">
+                Create account
+              </Button>
             </Link>
             <Link href="/chat">
-              <Button size="sm" variant="secondary">Book with Ava</Button>
+              <Button size="sm" variant="ghost">
+                Book with Ava
+              </Button>
             </Link>
           </div>
         </header>
 
-        <div className="grid gap-4 sm:grid-cols-3">
-          <div className="rounded-xl border border-slate-200/80 bg-white/80 p-4 shadow-2xs">
-            <div className="text-lg mb-2">💼</div>
-            <p className="text-sm font-semibold text-slate-900">Credit Lines & Invoicing</p>
-            <p className="mt-1 text-xs text-slate-600 leading-relaxed">
-              Approved corporate credit limits with itemized monthly consolidated statements and instant GST/tax invoicing.
-            </p>
+        <section className="fo-desk__panel" style={{ padding: 0 }}>
+          <div className="fo-desk__row" style={{ padding: "0.85rem 1rem" }}>
+            <div className="flex items-start gap-3">
+              <CreditCard className="mt-0.5 h-4 w-4 shrink-0 text-[var(--cyan)]" aria-hidden />
+              <div>
+                <p className="text-sm font-semibold text-[var(--navy)]">Credit & invoicing</p>
+                <p className="mt-0.5 text-xs text-[var(--ink-soft)]">
+                  Corporate credit limits, consolidated statements, and invoice PDFs.
+                </p>
+              </div>
+            </div>
           </div>
-          <div className="rounded-xl border border-slate-200/80 bg-white/80 p-4 shadow-2xs">
-            <div className="text-lg mb-2">🛡️</div>
-            <p className="text-sm font-semibold text-slate-900">Policy Compliance</p>
-            <p className="mt-1 text-xs text-slate-600 leading-relaxed">
-              Configurable travel policies with automatic budget capping, cabin class rules, and manager approval queues.
-            </p>
+          <div className="fo-desk__row" style={{ padding: "0.85rem 1rem" }}>
+            <div className="flex items-start gap-3">
+              <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[var(--cyan)]" aria-hidden />
+              <div>
+                <p className="text-sm font-semibold text-[var(--navy)]">Policy & approvals</p>
+                <p className="mt-0.5 text-xs text-[var(--ink-soft)]">
+                  Cabin and spend rules with manager approval queues before ticket.
+                </p>
+              </div>
+            </div>
           </div>
-          <div className="rounded-xl border border-slate-200/80 bg-white/80 p-4 shadow-2xs">
-            <div className="text-lg mb-2">⚡</div>
-            <p className="text-sm font-semibold text-slate-900">Duty of Care</p>
-            <p className="mt-1 text-xs text-slate-600 leading-relaxed">
-              Real-time traveler locator, automated delay protection, disruption rebooking, and priority 24/7 account manager support.
-            </p>
+          <div className="fo-desk__row" style={{ padding: "0.85rem 1rem" }}>
+            <div className="flex items-start gap-3">
+              <ClipboardList className="mt-0.5 h-4 w-4 shrink-0 text-[var(--cyan)]" aria-hidden />
+              <div>
+                <p className="text-sm font-semibold text-[var(--navy)]">Duty of care</p>
+                <p className="mt-0.5 text-xs text-[var(--ink-soft)]">
+                  Traveller visibility and disruption handling through FlightOne ops.
+                </p>
+              </div>
+            </div>
           </div>
-        </div>
+        </section>
 
-        <div className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-xs">
-          <h2 className="text-base font-semibold text-slate-900">Corporate Administrator Access</h2>
-          <p className="mt-1 text-xs text-slate-600">
-            Sign in to switch company profiles, approve employee booking requests, review statement ledgers, and download invoices.
+        <section className="fo-desk__panel fo-desk__stack">
+          <DeskSectionHead icon={Lock} title="Company desk access" />
+          <p className="text-sm text-[var(--ink-soft)]" style={{ margin: 0 }}>
+            Switch company profiles, approve bookings, review ledgers, and download invoices after
+            sign-in.
           </p>
-          <div className="mt-4 flex gap-3">
+          <div className="fo-desk__toolbar">
             <Link href="/login?redirect=/corporate">
               <Button size="sm">Log in to company account</Button>
             </Link>
             <Link href="/signup">
-              <Button size="sm" variant="ghost">Register company</Button>
+              <Button size="sm" variant="ghost">
+                Register company
+              </Button>
             </Link>
           </div>
-        </div>
+        </section>
       </div>
     );
   }
@@ -189,11 +246,23 @@ export function CorporatePageClient() {
   return (
     <div className="fo-desk__stack" style={{ gap: "1.25rem" }}>
       <header className="fo-desk__header">
-        <h1 className="fo-desk__title">Corporate travel</h1>
-        <p className="fo-desk__lede">
-          Switch profile, review credit, approve bookings, and manage company settings. Server policy
-          remains authoritative.
-        </p>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0">
+            <div className="mb-1.5 flex items-center gap-2">
+              <span className="inline-flex h-8 w-8 items-center justify-center rounded-[var(--fo-desk-radius)] border border-[var(--fo-desk-line)] bg-[var(--fo-desk-wash)] text-[var(--cyan)]">
+                <Building2 className="h-4 w-4" aria-hidden />
+              </span>
+              <h1 className="fo-desk__title">Corporate travel</h1>
+            </div>
+            <p className="fo-desk__lede">
+              Switch profile, review credit, approve bookings, and manage company settings. Server
+              policy remains authoritative.
+            </p>
+          </div>
+          {profile?.membership?.role ? (
+            <DeskStatus tone={isAdmin ? "ok" : "neutral"}>{profile.membership.role}</DeskStatus>
+          ) : null}
+        </div>
       </header>
 
       <section className="fo-desk__profile">
@@ -233,18 +302,6 @@ export function CorporatePageClient() {
               {profile.company ? ` · ${profile.company.name}` : ""}
               {profile.membership?.role ? ` · ${profile.membership.role}` : ""}
             </p>
-            {profile.company ? (
-              <p>
-                Credit{" "}
-                <strong>
-                  {money(profile.company.creditUsedMinor, profile.company.currency)}
-                </strong>{" "}
-                used / {money(profile.company.creditLimitMinor, profile.company.currency)} · available{" "}
-                <strong>
-                  {money(profile.company.creditAvailableMinor, profile.company.currency)}
-                </strong>
-              </p>
-            ) : null}
             {profile.policy ? (
               <p>
                 Policy: cabin {profile.policy.maxCabin || "—"} · max{" "}
@@ -258,9 +315,41 @@ export function CorporatePageClient() {
         ) : null}
       </section>
 
+      {profile?.company ? (
+        <div className="fo-desk__kpi-strip" aria-label="Company credit">
+          <div className="fo-desk__kpi">
+            <p className="fo-desk__kpi-label">Credit used</p>
+            <p className="fo-desk__kpi-value">
+              {money(profile.company.creditUsedMinor, profile.company.currency)}
+            </p>
+          </div>
+          <div className="fo-desk__kpi">
+            <p className="fo-desk__kpi-label">Available</p>
+            <p className="fo-desk__kpi-value">
+              {money(profile.company.creditAvailableMinor, profile.company.currency)}
+            </p>
+          </div>
+          <div className="fo-desk__kpi">
+            <p className="fo-desk__kpi-label">Limit</p>
+            <p className="fo-desk__kpi-value">
+              {money(profile.company.creditLimitMinor, profile.company.currency)}
+            </p>
+          </div>
+          <div className="fo-desk__kpi">
+            <p className="fo-desk__kpi-label">Pending approvals</p>
+            <p className="fo-desk__kpi-value">
+              {isApprover ? (approvals?.items?.length ?? 0) : "—"}
+            </p>
+            {!isApprover ? (
+              <p className="fo-desk__kpi-note">Approver role required</p>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
+
       {companies.length === 0 ? (
         <section className="fo-desk__panel fo-desk__stack">
-          <h2 className="fo-desk__section-label">Create company</h2>
+          <DeskSectionHead icon={Building2} title="Create company" />
           <p className="fo-desk__empty" style={{ padding: 0 }}>
             No company memberships yet. Create a company to become its ADMIN.
           </p>
@@ -293,12 +382,16 @@ export function CorporatePageClient() {
 
       {activeCompanyId && isApprover ? (
         <section className="fo-desk__panel fo-desk__panel--flush">
-          <div className="fo-desk__panel-head" style={{ padding: "0.75rem 1rem 0" }}>
-            <h2 className="fo-desk__section-label">Pending approvals</h2>
-            {approvals?.items?.length ? (
-              <span className="fo-desk__status fo-desk__status--warn">{approvals.items.length}</span>
-            ) : null}
-          </div>
+          <DeskSectionHead
+            icon={ShieldCheck}
+            title="Pending approvals"
+            flush
+            trailing={
+              approvals?.items?.length ? (
+                <DeskStatus tone="warn">{approvals.items.length}</DeskStatus>
+              ) : null
+            }
+          />
           {!approvals?.items?.length ? (
             <p className="fo-desk__empty">No pending approvals.</p>
           ) : (
@@ -317,7 +410,9 @@ export function CorporatePageClient() {
                     <tr key={a.id}>
                       <td className="fo-desk__mono">{a.bookingId.slice(0, 10)}…</td>
                       <td>{money(a.amountMinor, a.currency)}</td>
-                      <td>{a.status}</td>
+                      <td>
+                        <DeskStatus tone="warn">{a.status}</DeskStatus>
+                      </td>
                       <td>
                         <div className="fo-desk__toolbar">
                           <Button
@@ -362,7 +457,7 @@ export function CorporatePageClient() {
 
       {activeCompanyId ? (
         <section className="fo-desk__panel fo-desk__stack">
-          <h2 className="fo-desk__section-label">Request approval</h2>
+          <DeskSectionHead icon={ClipboardList} title="Request approval" />
           <Input
             label="Booking ID"
             value={bookingIdForApproval}
@@ -394,9 +489,7 @@ export function CorporatePageClient() {
 
       {activeCompanyId ? (
         <section className="fo-desk__panel fo-desk__panel--flush">
-          <div className="fo-desk__panel-head" style={{ padding: "0.75rem 1rem 0" }}>
-            <h2 className="fo-desk__section-label">Company bookings</h2>
-          </div>
+          <DeskSectionHead icon={FileText} title="Company bookings" flush />
           {!bookings?.items?.length ? (
             <p className="fo-desk__empty">No company bookings yet.</p>
           ) : (
@@ -417,7 +510,9 @@ export function CorporatePageClient() {
                         <td>
                           <Link href={`/checkout/${b.id}`}>{b.id.slice(0, 10)}…</Link>
                         </td>
-                        <td>{b.status}</td>
+                        <td>
+                          <DeskStatus>{b.status}</DeskStatus>
+                        </td>
                         <td>{money(b.amountMinor, b.currency)}</td>
                         <td>{b.metadata?.projectCode || "—"}</td>
                       </tr>
@@ -439,9 +534,7 @@ export function CorporatePageClient() {
 
       {activeCompanyId ? (
         <section className="fo-desk__panel fo-desk__panel--flush">
-          <div className="fo-desk__panel-head" style={{ padding: "0.75rem 1rem 0" }}>
-            <h2 className="fo-desk__section-label">Invoices</h2>
-          </div>
+          <DeskSectionHead icon={CreditCard} title="Invoices" flush />
           {!invoices?.items?.length ? (
             <p className="fo-desk__empty">No invoices yet.</p>
           ) : (
@@ -459,98 +552,100 @@ export function CorporatePageClient() {
                   </thead>
                   <tbody>
                     {paginateItems(invoices.items, invoicesPage, TABLE_PAGE_SIZE).map((inv) => (
-                    <tr key={inv.id}>
-                      <td>
-                        <span className="font-medium">{inv.invoiceNumber}</span>
-                        {inv.projectCode ? (
-                          <span className="text-ink-faint"> · {inv.projectCode}</span>
-                        ) : null}
-                        <div className="text-[11px] text-ink-faint">
-                          {inv.issuedAt ? String(inv.issuedAt).slice(0, 10) : "—"}
-                        </div>
-                      </td>
-                      <td>{inv.status}</td>
-                      <td>{money(inv.amountMinor, inv.currency)}</td>
-                      <td className="fo-desk__mono">{inv.bookingId.slice(0, 10)}…</td>
-                      <td>
-                        <div className="fo-desk__toolbar">
-                          <Button
-                            size="sm"
-                            variant="secondary"
-                            type="button"
-                            onClick={async () => {
-                              try {
-                                const pdf = await fetchInvoicePdf({
-                                  companyId: activeCompanyId,
-                                  invoiceId: inv.id,
-                                }).unwrap();
-                                const bin = atob(pdf.contentBase64);
-                                const bytes = new Uint8Array(bin.length);
-                                for (let i = 0; i < bin.length; i += 1) bytes[i] = bin.charCodeAt(i);
-                                const blob = new Blob([bytes], {
-                                  type: pdf.contentType || "application/pdf",
-                                });
-                                const url = URL.createObjectURL(blob);
-                                const a = document.createElement("a");
-                                a.href = url;
-                                a.download = pdf.filename || `${inv.invoiceNumber}.pdf`;
-                                a.click();
-                                URL.revokeObjectURL(url);
-                              } catch {
-                                setMsg("Could not download invoice PDF");
-                              }
-                            }}
-                          >
-                            PDF
-                          </Button>
-                          {isAdmin && inv.status === "ISSUED" ? (
-                            <Button
-                              size="sm"
-                              type="button"
-                              onClick={async () => {
-                                try {
-                                  await updateInvoiceStatus({
-                                    companyId: activeCompanyId,
-                                    invoiceId: inv.id,
-                                    status: "PAID",
-                                  }).unwrap();
-                                  setMsg("Invoice marked paid");
-                                } catch {
-                                  setMsg("Could not update invoice");
-                                }
-                              }}
-                            >
-                              Mark paid
-                            </Button>
+                      <tr key={inv.id}>
+                        <td>
+                          <span className="font-medium text-[var(--navy)]">{inv.invoiceNumber}</span>
+                          {inv.projectCode ? (
+                            <span className="text-[var(--ink-faint)]"> · {inv.projectCode}</span>
                           ) : null}
-                          {isAdmin && inv.status !== "VOID" ? (
+                          <div className="text-[11px] text-[var(--ink-faint)]">
+                            {inv.issuedAt ? String(inv.issuedAt).slice(0, 10) : "—"}
+                          </div>
+                        </td>
+                        <td>
+                          <DeskStatus tone={invoiceTone(inv.status)}>{inv.status}</DeskStatus>
+                        </td>
+                        <td>{money(inv.amountMinor, inv.currency)}</td>
+                        <td className="fo-desk__mono">{inv.bookingId.slice(0, 10)}…</td>
+                        <td>
+                          <div className="fo-desk__toolbar">
                             <Button
                               size="sm"
                               variant="secondary"
                               type="button"
                               onClick={async () => {
                                 try {
-                                  await updateInvoiceStatus({
+                                  const pdf = await fetchInvoicePdf({
                                     companyId: activeCompanyId,
                                     invoiceId: inv.id,
-                                    status: "VOID",
                                   }).unwrap();
-                                  setMsg("Invoice voided");
+                                  const bin = atob(pdf.contentBase64);
+                                  const bytes = new Uint8Array(bin.length);
+                                  for (let i = 0; i < bin.length; i += 1) bytes[i] = bin.charCodeAt(i);
+                                  const blob = new Blob([bytes], {
+                                    type: pdf.contentType || "application/pdf",
+                                  });
+                                  const url = URL.createObjectURL(blob);
+                                  const a = document.createElement("a");
+                                  a.href = url;
+                                  a.download = pdf.filename || `${inv.invoiceNumber}.pdf`;
+                                  a.click();
+                                  URL.revokeObjectURL(url);
                                 } catch {
-                                  setMsg("Could not void invoice");
+                                  setMsg("Could not download invoice PDF");
                                 }
                               }}
                             >
-                              Void
+                              PDF
                             </Button>
-                          ) : null}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                            {isAdmin && inv.status === "ISSUED" ? (
+                              <Button
+                                size="sm"
+                                type="button"
+                                onClick={async () => {
+                                  try {
+                                    await updateInvoiceStatus({
+                                      companyId: activeCompanyId,
+                                      invoiceId: inv.id,
+                                      status: "PAID",
+                                    }).unwrap();
+                                    setMsg("Invoice marked paid");
+                                  } catch {
+                                    setMsg("Could not update invoice");
+                                  }
+                                }}
+                              >
+                                Mark paid
+                              </Button>
+                            ) : null}
+                            {isAdmin && inv.status !== "VOID" ? (
+                              <Button
+                                size="sm"
+                                variant="secondary"
+                                type="button"
+                                onClick={async () => {
+                                  try {
+                                    await updateInvoiceStatus({
+                                      companyId: activeCompanyId,
+                                      invoiceId: inv.id,
+                                      status: "VOID",
+                                    }).unwrap();
+                                    setMsg("Invoice voided");
+                                  } catch {
+                                    setMsg("Could not void invoice");
+                                  }
+                                }}
+                              >
+                                Void
+                              </Button>
+                            ) : null}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
               <Pagination
                 page={invoicesPage}
                 pageCount={pageCountFor(invoices.items.length, TABLE_PAGE_SIZE)}
@@ -561,7 +656,10 @@ export function CorporatePageClient() {
             </>
           )}
           {isAdmin ? (
-            <div className="fo-desk__stack" style={{ padding: "0.85rem 1rem", borderTop: "1px solid var(--fo-desk-line)" }}>
+            <div
+              className="fo-desk__stack"
+              style={{ padding: "0.85rem 1rem", borderTop: "1px solid var(--fo-desk-line)" }}
+            >
               <Input
                 label="Booking ID to invoice"
                 value={bookingIdForInvoice}
@@ -597,13 +695,13 @@ export function CorporatePageClient() {
 
       {activeCompanyId ? (
         <section className="fo-desk__panel fo-desk__stack">
-          <h2 className="fo-desk__section-label">Travel policies</h2>
+          <DeskSectionHead icon={ScrollText} title="Travel policies" />
           {!policyList.length ? (
             <p className="fo-desk__empty" style={{ padding: 0 }}>
               No policies listed (ADMIN configures via API).
             </p>
           ) : (
-            <div className="fo-desk__table-wrap">
+            <div className="fo-desk__table-wrap -mx-1">
               <table className="fo-desk__table">
                 <thead>
                   <tr>
@@ -617,7 +715,11 @@ export function CorporatePageClient() {
                     <tr key={p.id}>
                       <td>{p.maxCabin || "—"}</td>
                       <td>{money(p.maxAmountMinor ?? undefined, profile?.company?.currency)}</td>
-                      <td>{p.isActive === false ? "inactive" : "active"}</td>
+                      <td>
+                        <DeskStatus tone={p.isActive === false ? "neutral" : "ok"}>
+                          {p.isActive === false ? "inactive" : "active"}
+                        </DeskStatus>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -629,9 +731,7 @@ export function CorporatePageClient() {
 
       {activeCompanyId ? (
         <section className="fo-desk__panel fo-desk__panel--flush">
-          <div className="fo-desk__panel-head" style={{ padding: "0.75rem 1rem 0" }}>
-            <h2 className="fo-desk__section-label">Project codes</h2>
-          </div>
+          <DeskSectionHead icon={FolderKanban} title="Project codes" flush />
           {!projectCodes.length ? (
             <p className="fo-desk__empty">No project codes yet.</p>
           ) : (
@@ -648,9 +748,13 @@ export function CorporatePageClient() {
                 <tbody>
                   {projectCodes.map((pc) => (
                     <tr key={pc.id}>
-                      <td className="font-medium">{pc.code}</td>
+                      <td className="font-medium text-[var(--navy)]">{pc.code}</td>
                       <td>{pc.name}</td>
-                      <td>{pc.isActive ? "active" : "inactive"}</td>
+                      <td>
+                        <DeskStatus tone={pc.isActive ? "ok" : "neutral"}>
+                          {pc.isActive ? "active" : "inactive"}
+                        </DeskStatus>
+                      </td>
                       {isAdmin ? (
                         <td>
                           <Button
@@ -685,7 +789,10 @@ export function CorporatePageClient() {
             </div>
           )}
           {isAdmin ? (
-            <div className="fo-desk__stack" style={{ padding: "0.85rem 1rem", borderTop: "1px solid var(--fo-desk-line)" }}>
+            <div
+              className="fo-desk__stack"
+              style={{ padding: "0.85rem 1rem", borderTop: "1px solid var(--fo-desk-line)" }}
+            >
               <Input
                 label="Code"
                 value={newProjectCode}
@@ -727,10 +834,8 @@ export function CorporatePageClient() {
         </section>
       ) : null}
 
-      {activeCompanyId && isAdmin ? (
+      {activeCompanyId ? (
         <CorporatePortalSection companyId={activeCompanyId} isAdmin={isAdmin} />
-      ) : activeCompanyId ? (
-        <CorporatePortalSection companyId={activeCompanyId} isAdmin={false} />
       ) : null}
 
       {activeCompanyId ? (
@@ -749,13 +854,13 @@ export function CorporatePageClient() {
 
       {activeCompanyId && isAdmin ? (
         <section className="fo-desk__panel fo-desk__stack">
-          <h2 className="fo-desk__section-label">Admin — credit & members</h2>
+          <DeskSectionHead icon={Users} title="Admin — credit & members" />
           <PermissionGate
             anyOf={["corporate:company:write"]}
             companyId={activeCompanyId}
             mode="fallback"
             fallback={
-              <p className="text-[13px] text-ink-soft">
+              <p className="text-[13px] text-[var(--ink-soft)]" style={{ margin: 0 }}>
                 Credit limit changes require `corporate:company:write`. Company ADMIN can still
                 manage members below.
               </p>
@@ -800,7 +905,7 @@ export function CorporatePageClient() {
                 No members returned.
               </p>
             ) : (
-              <div className="fo-desk__table-wrap">
+              <div className="fo-desk__table-wrap -mx-1">
                 <table className="fo-desk__table">
                   <thead>
                     <tr>
@@ -817,7 +922,11 @@ export function CorporatePageClient() {
                             m.traveller?.email ||
                             m.userId.slice(0, 8)}
                         </td>
-                        <td>{m.role}</td>
+                        <td>
+                          <DeskStatus tone={m.role === "ADMIN" ? "ok" : "neutral"}>
+                            {m.role}
+                          </DeskStatus>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -830,9 +939,7 @@ export function CorporatePageClient() {
 
       {activeCompanyId && isAdmin ? (
         <section className="fo-desk__panel fo-desk__panel--flush">
-          <div className="fo-desk__panel-head" style={{ padding: "0.75rem 1rem 0" }}>
-            <h2 className="fo-desk__section-label">Company audit</h2>
-          </div>
+          <DeskSectionHead icon={ScrollText} title="Company audit" flush />
           {!audit?.items?.length ? (
             <p className="fo-desk__empty">No audit entries yet.</p>
           ) : (
@@ -869,7 +976,7 @@ export function CorporatePageClient() {
         </section>
       ) : null}
 
-      {msg ? <p className="text-[13px] text-ink-soft">{msg}</p> : null}
+      <MsgLine msg={msg} />
     </div>
   );
 }

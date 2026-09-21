@@ -1,8 +1,17 @@
 "use client";
 
 import Link from "next/link";
+import {
+  ArrowLeft,
+  ClipboardList,
+  Hash,
+  MessageSquareText,
+  ScrollText,
+  Shield,
+  Wrench,
+} from "lucide-react";
 import { useState } from "react";
-import { Button, Input, SearchableSelect, Spinner } from "@/components/ui";
+import { Button, SearchableSelect } from "@/components/ui";
 import { PermissionGate } from "@/components/PermissionGate";
 import {
   useApplyConsultantActionMutation,
@@ -15,6 +24,17 @@ import {
 } from "@/lib/api/escalations.api";
 import { usePermissions } from "@/lib/permissions/usePermissions";
 import { useAuthStore } from "@/store/auth.store";
+import { OpsField, OpsStatusPill } from "../../_components";
+import {
+  CaseFacts,
+  CaseLoadError,
+  CaseLoading,
+  CasePermissionGate,
+  CaseSection,
+  CaseSignInGate,
+  CaseStatusStrip,
+  CaseThread,
+} from "./_components";
 
 const OUTCOMES: EscalationResolutionOutcome[] = [
   "RESOLVED_NO_CHANGE",
@@ -30,6 +50,20 @@ const OUTCOME_OPTIONS = OUTCOMES.map((o) => ({
   value: o,
   label: o.replaceAll("_", " "),
 }));
+
+function labelize(value: string) {
+  return value.replaceAll("_", " ");
+}
+
+function caseStatusClass(status: string): string {
+  if (status === "RESOLVED" || status === "IN_PROGRESS" || status === "ASSIGNED") {
+    return "fo-desk__status fo-desk__status--ok";
+  }
+  if (status === "OPEN" || status === "CANCELLED") {
+    return "fo-desk__status fo-desk__status--warn";
+  }
+  return "fo-desk__status";
+}
 
 export function OpsEscalationDetailClient({ id }: { id: string }) {
   const hasHydrated = useAuthStore((s) => s.hasHydrated);
@@ -55,50 +89,16 @@ export function OpsEscalationDetailClient({ id }: { id: string }) {
   const [snapshotId, setSnapshotId] = useState("");
   const [localMsg, setLocalMsg] = useState<string | null>(null);
 
-  if (!hasHydrated) {
-    return (
-      <div className="flex justify-center py-16">
-        <Spinner />
-      </div>
-    );
-  }
-
-  if (!accessToken) {
-    return (
-      <div className="fo-desk__panel">
-        <p className="fo-desk__empty">Sign in required.</p>
-      </div>
-    );
-  }
-
-  if (!canRead) {
-    return (
-      <div className="fo-desk__panel">
-        <p className="fo-desk__empty">Not authorized to view this escalation.</p>
-      </div>
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center py-16">
-        <Spinner />
-      </div>
-    );
-  }
-
+  if (!hasHydrated) return <CaseLoading />;
+  if (!accessToken) return <CaseSignInGate />;
+  if (!canRead) return <CasePermissionGate />;
+  if (isLoading) return <CaseLoading label="Loading escalation" />;
   if (isError || !data) {
     return (
-      <div className="fo-desk__panel fo-desk__stack">
-        <p className="fo-desk__empty" style={{ padding: 0 }}>
-          {(error as { status?: number })?.status === 404
-            ? "Escalation not found."
-            : "Could not load escalation."}
-        </p>
-        <Button size="sm" onClick={() => refetch()}>
-          Retry
-        </Button>
-      </div>
+      <CaseLoadError
+        notFound={(error as { status?: number })?.status === 404}
+        onRetry={() => refetch()}
+      />
     );
   }
 
@@ -107,6 +107,11 @@ export function OpsEscalationDetailClient({ id }: { id: string }) {
     : [];
   const writeBackActions = Array.isArray(data.writeBackActions) ? data.writeBackActions : [];
   const canService = ["ASSIGNED", "IN_PROGRESS"].includes(data.status);
+  const queueOpen = !["RESOLVED", "CANCELLED"].includes(data.status);
+  const feedbackWarn =
+    !!localMsg &&
+    (/failed|EXTERNAL_DEPENDENCY|incomplete/i.test(localMsg) ||
+      localMsg.startsWith("Consultant action failed"));
 
   async function runAction(
     actionType:
@@ -139,109 +144,80 @@ export function OpsEscalationDetailClient({ id }: { id: string }) {
     }
   }
 
-  return (
-    <div className="fo-desk__stack" style={{ gap: "1.25rem" }}>
-      <div className="fo-desk__links">
-        <Link href="/ops/escalations">← Queue</Link>
-      </div>
+  const factItems = [
+    { label: "Customer", value: data.userId, mono: true },
+    { label: "Conversation", value: data.conversationId, mono: true },
+    ...(data.bookingId
+      ? [{ label: "Booking", value: data.bookingId, mono: true as const }]
+      : []),
+    { label: "Priority", value: String(data.priority) },
+    {
+      label: "Assigned",
+      value: data.assignedToUserId ? (
+        <span className="fo-ops-case__mono">{data.assignedToUserId}</span>
+      ) : (
+        "Unassigned"
+      ),
+    },
+    ...(data.lastWriteBackAction
+      ? [
+          {
+            label: "Last write-back",
+            value: (
+              <>
+                {labelize(data.lastWriteBackAction)} · {data.lastWriteBackStatus}
+                {data.lastWriteBackAt
+                  ? ` · ${new Date(data.lastWriteBackAt).toLocaleString()}`
+                  : ""}
+              </>
+            ),
+          },
+        ]
+      : [{ label: "Last write-back", value: "None yet" }]),
+    ...(data.resolutionOutcome
+      ? [{ label: "Outcome", value: labelize(String(data.resolutionOutcome)) }]
+      : []),
+  ];
 
-      <header className="fo-desk__header">
-        <h1 className="fo-desk__title">{data.trigger.replaceAll("_", " ")}</h1>
-        <p className="fo-desk__meta">
-          {data.status} · priority {data.priority} · case {data.id}
-          {data.routingPool ? ` · pool ${data.routingPool}` : ""}
-          {data.routingStatus ? ` · ${data.routingStatus}` : ""}
+  const reasonDetail =
+    typeof data.contextSnapshot?.reasonDetail === "string" && data.contextSnapshot.reasonDetail
+      ? { label: "Reason detail", body: data.contextSnapshot.reasonDetail }
+      : null;
+
+  const poolLabel = data.routing?.pool || data.routingPool;
+
+  return (
+    <div className="fo-ops-case">
+      <Link href="/ops/escalations" className="fo-ops-case__back">
+        <ArrowLeft className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
+        Queue
+      </Link>
+
+      <header className="fo-ops-case__header">
+        <p className="fo-ops-case__eyebrow">Consultant case</p>
+        <div className="fo-ops-case__title-row">
+          <h1 className="fo-ops-case__title">{labelize(data.trigger)}</h1>
+          <div className="fo-ops-case__pills">
+            <span className={caseStatusClass(data.status)}>{labelize(data.status)}</span>
+            {poolLabel ? <span className="fo-desk__status">{poolLabel}</span> : null}
+          </div>
+        </div>
+        <p className="fo-ops-case__id">
+          <Hash className="h-3 w-3" strokeWidth={2} aria-hidden />
+          {data.id}
         </p>
       </header>
 
-      <section className="fo-desk__panel fo-desk__stack text-[14px]">
-        <p>
-          Customer userId: <span className="fo-desk__mono">{data.userId}</span>
-        </p>
-        <p>
-          Conversation: <span className="fo-desk__mono">{data.conversationId}</span>
-        </p>
-        {data.bookingId ? (
-          <p>
-            Booking: <span className="fo-desk__mono">{data.bookingId}</span>
-          </p>
-        ) : null}
-        {data.routing ? (
-          <p>
-            Routing:{" "}
-            <span className="font-medium">
-              {data.routing.pool} · {data.routing.status}
-            </span>
-            {typeof data.routing.eligibleConsultantCount === "number"
-              ? ` · eligible consultants (entitled): ${data.routing.eligibleConsultantCount}`
-              : ""}
-            <br />
-            <span className="text-[12px] text-ink-faint">
-              {data.routing.reason || "Pool routing from trigger/permissions"}
-              {" · "}
-              availability not claimed · auto-assign off
-            </span>
-          </p>
-        ) : null}
-        {data.routingStatus === "UNROUTED_NO_ELIGIBLE" ? (
-          <p className="text-[13px] text-[var(--danger)]">
-            No eligible consultant in this pool — keep visible for manual Ops claim
-            (`ops:escalations:write`).
-          </p>
-        ) : null}
-        {data.assignedToUserId ? (
-          <p>
-            Assigned to: <span className="fo-desk__mono">{data.assignedToUserId}</span>
-          </p>
-        ) : (
-          <p className="text-ink-soft">Unassigned</p>
-        )}
-        <p>
-          Handoff:{" "}
-          <span className="font-medium">{data.handoff?.mode || data.handoffMode || "COLD"}</span>
-          {" · warm "}
-          <span className="fo-desk__mono">
-            {data.handoff?.warmStatus || "PRODUCT_DECISION_DEFERRED"}
-          </span>
-          <br />
-          <span className="text-[12px] text-ink-faint">
-            {data.handoff?.note ||
-              "PRD Module 13 requires full conversation transfer only; warm co-presence is not specified."}
-          </span>
-        </p>
-        {data.lastWriteBackAction ? (
-          <p>
-            Last write-back:{" "}
-            <span className="font-medium">
-              {data.lastWriteBackAction} · {data.lastWriteBackStatus}
-            </span>
-            {data.lastWriteBackAt
-              ? ` · ${new Date(data.lastWriteBackAt).toLocaleString()}`
-              : ""}
-          </p>
-        ) : (
-          <p className="text-ink-soft">No booking/service write-back yet</p>
-        )}
-        {data.resolutionOutcome ? (
-          <p>
-            Resolution outcome: <span className="font-medium">{data.resolutionOutcome}</span>
-          </p>
-        ) : null}
-        {typeof data.contextSnapshot?.reasonDetail === "string" &&
-        data.contextSnapshot.reasonDetail ? (
-          <p>
-            <span className="text-ink-faint">Reason detail</span>
-            <br />
-            {data.contextSnapshot.reasonDetail}
-          </p>
-        ) : null}
-      </section>
+      <CaseStatusStrip data={data} />
+
+      <CaseSection icon={ClipboardList} title="Case facts">
+        <CaseFacts items={factItems} note={reasonDetail} />
+      </CaseSection>
 
       <PermissionGate anyOf={["ops:escalations:write"]}>
-        {!["RESOLVED", "CANCELLED"].includes(data.status) ? (
-          <section className="fo-desk__panel fo-desk__stack">
-            <p className="fo-desk__section-label">Queue actions</p>
-            <div className="flex flex-wrap gap-2">
+        {queueOpen ? (
+          <CaseSection icon={Shield} title="Queue actions">
+            <div className="fo-ops-case__actions">
               {data.status === "OPEN" ? (
                 <Button
                   size="sm"
@@ -294,11 +270,13 @@ export function OpsEscalationDetailClient({ id }: { id: string }) {
                 Cancel
               </Button>
             </div>
-            <div className="space-y-2">
-              <Input
+            <div className="fo-ops-case__fields">
+              <OpsField
+                label="Resolution note"
+                id="ops-esc-note"
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                placeholder="Resolution note (required to resolve)"
+                placeholder="Required to resolve"
               />
               <SearchableSelect
                 label="Resolution outcome"
@@ -307,108 +285,127 @@ export function OpsEscalationDetailClient({ id }: { id: string }) {
                 onChange={(v) => setOutcome(v as EscalationResolutionOutcome)}
                 searchable={false}
               />
-              <Button
-                size="sm"
-                disabled={resolveState.isLoading || note.trim().length < 1}
-                onClick={async () => {
-                  setLocalMsg(null);
-                  try {
-                    await resolve({
-                      id,
-                      resolutionNote: note.trim(),
-                      outcome,
-                    }).unwrap();
-                    setLocalMsg("Resolved.");
-                  } catch {
-                    setLocalMsg("Resolve failed.");
-                  }
-                }}
-              >
-                Resolve
-              </Button>
+              <div className="fo-ops-case__actions">
+                <Button
+                  size="sm"
+                  disabled={resolveState.isLoading || note.trim().length < 1}
+                  onClick={async () => {
+                    setLocalMsg(null);
+                    try {
+                      await resolve({
+                        id,
+                        resolutionNote: note.trim(),
+                        outcome,
+                      }).unwrap();
+                      setLocalMsg("Resolved.");
+                    } catch {
+                      setLocalMsg("Resolve failed.");
+                    }
+                  }}
+                >
+                  Resolve
+                </Button>
+              </div>
             </div>
-            {localMsg ? <p className="text-[13px] text-ink-soft">{localMsg}</p> : null}
-          </section>
+          </CaseSection>
         ) : null}
 
         {canService ? (
-          <section className="fo-desk__panel fo-desk__stack">
-            <p className="fo-desk__section-label">Booking / service write-back</p>
-            <p className="text-[12px] text-ink-faint">
-              Uses Module 03 / 09 / 14 state machines. Assigned consultant only. Provider steps
-              report EXTERNAL_DEPENDENCY when credentials are absent — never invents success.
-            </p>
-            <Input
-              value={actionReason}
-              onChange={(e) => setActionReason(e.target.value)}
-              placeholder="Reason (optional)"
-            />
-            <div className="flex flex-wrap gap-2">
-              <Button
-                size="sm"
-                disabled={actionState.isLoading || !data.bookingId}
-                onClick={() => runAction("CANCEL_BOOKING")}
-              >
-                Cancel booking
-              </Button>
+          <CaseSection
+            icon={Wrench}
+            title="Booking / service write-back"
+            note="Uses Module 03 / 09 / 14 state machines. Assigned consultant only. Provider steps report EXTERNAL_DEPENDENCY when credentials are absent — never invents success."
+          >
+            <div className="fo-ops-case__fields">
+              <OpsField
+                label="Reason"
+                id="ops-esc-action-reason"
+                value={actionReason}
+                onChange={(e) => setActionReason(e.target.value)}
+                placeholder="Optional"
+              />
+              <div className="fo-ops-case__actions">
+                <Button
+                  size="sm"
+                  disabled={actionState.isLoading || !data.bookingId}
+                  onClick={() => runAction("CANCEL_BOOKING")}
+                >
+                  Cancel booking
+                </Button>
+              </div>
+              <OpsField
+                label="Refund case id"
+                id="ops-esc-refund-case"
+                value={refundCaseId}
+                onChange={(e) => setRefundCaseId(e.target.value)}
+                placeholder="Or REQUIRES_HUMAN case on booking"
+              />
+              <div className="fo-ops-case__actions">
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  disabled={actionState.isLoading || !canRefund}
+                  onClick={() => runAction("REFUND_PROCESS")}
+                >
+                  Process refund
+                </Button>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  disabled={actionState.isLoading || !canRefund}
+                  onClick={() => runAction("REFUND_REJECT")}
+                >
+                  Reject refund
+                </Button>
+              </div>
+              {!canRefund ? (
+                <p className="fo-ops-case__section-note">
+                  Refund write-back needs <code>refunds:write</code> in addition to escalation
+                  write.
+                </p>
+              ) : null}
+              <OpsField
+                label="Journey watch id"
+                id="ops-esc-watch"
+                value={watchId}
+                onChange={(e) => setWatchId(e.target.value)}
+              />
+              <OpsField
+                label="Supplier offer snapshot id"
+                id="ops-esc-snapshot"
+                value={snapshotId}
+                onChange={(e) => setSnapshotId(e.target.value)}
+              />
+              <div className="fo-ops-case__actions">
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  disabled={actionState.isLoading || !watchId.trim() || !snapshotId.trim()}
+                  onClick={() => runAction("JOURNEY_REBOOK_HANDOFF")}
+                >
+                  Journey rebook handoff
+                </Button>
+              </div>
             </div>
-            <Input
-              value={refundCaseId}
-              onChange={(e) => setRefundCaseId(e.target.value)}
-              placeholder="Refund case id (or REQUIRES_HUMAN case on booking)"
-            />
-            <div className="flex flex-wrap gap-2">
-              <Button
-                size="sm"
-                variant="secondary"
-                disabled={actionState.isLoading || !canRefund}
-                onClick={() => runAction("REFUND_PROCESS")}
-              >
-                Process refund
-              </Button>
-              <Button
-                size="sm"
-                variant="secondary"
-                disabled={actionState.isLoading || !canRefund}
-                onClick={() => runAction("REFUND_REJECT")}
-              >
-                Reject refund
-              </Button>
-            </div>
-            {!canRefund ? (
-              <p className="text-[12px] text-ink-faint">
-                Refund write-back needs `refunds:write` in addition to escalation write.
-              </p>
-            ) : null}
-            <Input
-              value={watchId}
-              onChange={(e) => setWatchId(e.target.value)}
-              placeholder="Journey watch id"
-            />
-            <Input
-              value={snapshotId}
-              onChange={(e) => setSnapshotId(e.target.value)}
-              placeholder="Supplier offer snapshot id"
-            />
-            <Button
-              size="sm"
-              variant="secondary"
-              disabled={actionState.isLoading || !watchId.trim() || !snapshotId.trim()}
-              onClick={() => runAction("JOURNEY_REBOOK_HANDOFF")}
-            >
-              Journey rebook handoff
-            </Button>
-          </section>
+          </CaseSection>
         ) : null}
       </PermissionGate>
 
+      {localMsg ? (
+        <p
+          className={`fo-ops-case__feedback${feedbackWarn ? " fo-ops-case__feedback--warn" : ""}`}
+          role="status"
+        >
+          {localMsg}
+        </p>
+      ) : null}
+
       {writeBackActions.length ? (
-        <section className="fo-desk__panel fo-desk__panel--flush">
-          <div className="fo-desk__panel-head" style={{ padding: "0.75rem 1rem 0" }}>
-            <h2 className="fo-desk__section-label">
-              Write-back log ({writeBackActions.length})
-            </h2>
-          </div>
+        <CaseSection
+          icon={ScrollText}
+          title={`Write-back log (${writeBackActions.length})`}
+          flush
+        >
           <div className="fo-desk__table-wrap">
             <table className="fo-desk__table">
               <thead>
@@ -428,45 +425,21 @@ export function OpsEscalationDetailClient({ id }: { id: string }) {
                         <p className="mt-1 text-[12px] text-[var(--danger)]">{a.error}</p>
                       ) : null}
                     </td>
-                    <td>{a.status}</td>
+                    <td>
+                      <OpsStatusPill state={a.status} />
+                    </td>
                     <td>{new Date(a.createdAt).toLocaleString()}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-        </section>
+        </CaseSection>
       ) : null}
 
-      <section className="fo-desk__panel fo-desk__panel--flush">
-        <div className="fo-desk__panel-head" style={{ padding: "0.75rem 1rem 0" }}>
-          <h2 className="fo-desk__section-label">
-            Conversation ({messages.length} messages)
-          </h2>
-        </div>
-        {!messages.length ? (
-          <p className="fo-desk__empty">
-            No messages were present at handoff time (empty conversation snapshot).
-          </p>
-        ) : (
-          <ul>
-            {messages.map((m) => (
-              <li key={m.id} className="fo-desk__queue-link" style={{ cursor: "default" }}>
-                <div className="flex justify-between gap-2 text-[11px] text-ink-faint">
-                  <span>
-                    {m.role}
-                    {m.provider ? ` · ${m.provider}` : ""}
-                  </span>
-                  <span>{new Date(m.createdAt).toLocaleString()}</span>
-                </div>
-                <p className="mt-1 whitespace-pre-wrap text-[13px] text-ink">{m.content}</p>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      <CaseSection icon={MessageSquareText} title={`Conversation (${messages.length})`} flush>
+        <CaseThread messages={messages} />
+      </CaseSection>
     </div>
   );
 }
-
-

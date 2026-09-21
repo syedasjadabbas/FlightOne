@@ -31,8 +31,8 @@ export interface CompanyInfo {
 export const COMPANY_INFO: CompanyInfo = {
   name: 'FlightOne',
   legalName: 'FlightOne Travel Services',
-  tagline: 'Custom Tour Packages from Pakistan, Designed Around You',
-  mission: 'FlightOne designs custom international tour packages from Pakistan with transparent pricing, visa support and a complete itinerary within 24 hours.',
+  tagline: 'Custom Tour Packages Around the World, Designed Around You',
+  mission: 'FlightOne designs custom international tour packages globally with transparent pricing, visa support and a complete itinerary within 24 hours.',
   address: {
     street: '71 C3, Facing Qarshi Park',
     area: 'Gulberg III',

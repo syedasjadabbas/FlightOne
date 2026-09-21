@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Check } from "lucide-react";
 import { Button, Input, SearchableSelect, Spinner } from "@/components/ui";
+import { TravellerSection } from "@/app/components/traveller";
 import {
   useUpdateProfileMutation,
   type ProfilePatch,
@@ -9,18 +11,18 @@ import {
 } from "@/lib/api/profile.api";
 
 const CABIN_OPTIONS = [
-  { value: "", label: "No preference (Any cabin)" },
+  { value: "", label: "No preference" },
   { value: "ECONOMY", label: "Economy" },
   { value: "PREMIUM_ECONOMY", label: "Premium Economy" },
-  { value: "BUSINESS", label: "Business Class" },
-  { value: "FIRST", label: "First Class" },
+  { value: "BUSINESS", label: "Business" },
+  { value: "FIRST", label: "First" },
 ];
 
 const COMMON_AIRLINES = [
   { code: "EK", name: "Emirates" },
-  { code: "QR", name: "Qatar Airways" },
+  { code: "QR", name: "Qatar" },
   { code: "PK", name: "PIA" },
-  { code: "TK", name: "Turkish Airlines" },
+  { code: "TK", name: "Turkish" },
   { code: "BA", name: "British Airways" },
   { code: "EY", name: "Etihad" },
   { code: "SV", name: "Saudia" },
@@ -110,57 +112,46 @@ export function PreferencesForm({ profile }: { profile: TravellerProfile }) {
     .filter(Boolean);
 
   return (
-    <div className="rounded-3xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
-      <div className="border-b border-slate-100 pb-5">
-        <h2 className="text-xl font-bold text-slate-900 tracking-tight font-[var(--font-sora)]">
-          Travel & Personal Preferences
-        </h2>
-        <p className="mt-1 text-sm text-slate-500">
-          Ava consults these preferences to rank flights and personalize seat, meal, and airline recommendations automatically.
-        </p>
-      </div>
-
-      <form onSubmit={onSave} className="mt-6 space-y-8" aria-busy={isLoading || undefined}>
-        {/* Section 1: Personal Details */}
-        <div className="space-y-4">
-          <div className="text-xs font-bold uppercase tracking-wider text-cyan-800">
-            1. Personal Identification
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <TravellerSection
+      title="Travel preferences"
+      note="Used to rank flights and prefill seat, meal, and airline choices."
+      panel
+    >
+      <form onSubmit={onSave} className="space-y-0" aria-busy={isLoading || undefined}>
+        <div className="fo-profile__form-block">
+          <p className="fo-profile__form-label">Identity</p>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <Input
-              label="Display Name"
+              label="Display name"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
-              placeholder="e.g. Asjad Abbas"
+              placeholder="Asjad Abbas"
               required
             />
             <Input
-              label="Phone Number"
+              label="Phone"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="+92 300 1234567"
-              hint="Required for ticketing & SMS alerts"
+              hint="For ticketing and SMS alerts"
             />
             <Input
-              label="Nationality (ISO Code)"
+              label="Nationality"
               value={nationality}
               onChange={(e) => setNationality(e.target.value)}
               placeholder="PK"
               maxLength={2}
-              hint="2-letter country code (e.g. PK, US, GB)"
+              hint="ISO 2-letter code"
             />
           </div>
         </div>
 
-        {/* Section 2: In-Flight Preferences */}
-        <div className="space-y-4 border-t border-slate-100 pt-6">
-          <div className="text-xs font-bold uppercase tracking-wider text-cyan-800">
-            2. Flight & Seating Preferences
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="fo-profile__form-block">
+          <p className="fo-profile__form-label">Flight preferences</p>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Preferred Cabin
+              <label className="mb-1 block text-[13px] font-medium text-ink-soft">
+                Preferred cabin
               </label>
               <SearchableSelect
                 options={CABIN_OPTIONS}
@@ -168,73 +159,57 @@ export function PreferencesForm({ profile }: { profile: TravellerProfile }) {
                 onChange={setCabin}
                 searchable={false}
                 clearable
-                placeholder="Any Cabin"
+                placeholder="Any cabin"
               />
             </div>
-
             <Input
-              label="Seat Preference"
+              label="Seat"
               value={seatPref}
               onChange={(e) => setSeatPref(e.target.value)}
-              placeholder="e.g. Aisle, Window, Front"
-              hint="Preferred seating zone"
+              placeholder="Aisle, window…"
             />
-
             <Input
-              label="Meal Preference"
+              label="Meal"
               value={mealPref}
               onChange={(e) => setMealPref(e.target.value)}
-              placeholder="e.g. Halal, Vegetarian, Vegan"
-              hint="Airline special meal code"
+              placeholder="Halal, vegetarian…"
             />
-
             <Input
-              label="Max Layover (Hours)"
+              label="Max layover (hours)"
               type="number"
               min={0}
               step={1}
               value={maxLayoverHours}
               onChange={(e) => setMaxLayoverHours(e.target.value)}
-              placeholder="e.g. 4"
-              hint="Max transit stopover"
+              placeholder="4"
             />
           </div>
         </div>
 
-        {/* Section 3: Preferred Airlines */}
-        <div className="space-y-4 border-t border-slate-100 pt-6">
-          <div className="flex items-center justify-between">
-            <div className="text-xs font-bold uppercase tracking-wider text-cyan-800">
-              3. Preferred Airlines (IATA)
-            </div>
-            <span className="text-xs text-slate-400">Soft preference in Ava ranking</span>
-          </div>
-
+        <div className="fo-profile__form-block">
+          <p className="fo-profile__form-label">Preferred airlines</p>
           <Input
-            label="Airline IATA Codes (comma-separated)"
+            label="IATA codes"
             value={airlines}
             onChange={(e) => setAirlines(e.target.value)}
-            placeholder="EK, QR, PK, BA"
+            placeholder="EK, QR, PK"
+            hint="Comma-separated · soft preference in search ranking"
           />
-
-          {/* Quick Select Airline Pills */}
           <div>
-            <span className="block text-xs text-slate-500 mb-2">Tap to add/remove common carriers:</span>
-            <div className="flex flex-wrap gap-2">
+            <p className="fo-traveller__field-hint mb-2">Quick add</p>
+            <div className="fo-profile__airline-pills">
               {COMMON_AIRLINES.map((a) => {
                 const selected = selectedAirlinesList.includes(a.code);
                 return (
                   <button
                     key={a.code}
                     type="button"
+                    aria-pressed={selected}
                     onClick={() => toggleAirlinePill(a.code)}
-                    className={`rounded-xl px-3 py-1 text-xs font-medium border transition-all ${
-                      selected
-                        ? "bg-cyan-600 text-white border-cyan-600 shadow-xs"
-                        : "bg-slate-50 text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-100"
-                    }`}
+                    className="fo-profile__airline-pill"
                   >
-                    {a.name} ({a.code}) {selected ? "✓" : "+"}
+                    {selected ? <Check size={12} strokeWidth={2.25} aria-hidden /> : null}
+                    {a.name} ({a.code})
                   </button>
                 );
               })}
@@ -242,33 +217,31 @@ export function PreferencesForm({ profile }: { profile: TravellerProfile }) {
           </div>
         </div>
 
-        {/* Action Status and Submit */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t border-slate-100 pt-6">
+        <div className="fo-profile__form-block flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            {error && (
-              <p className="text-xs font-semibold text-rose-600" role="alert">
-                Could not save preferences. Please review inputs.
+            {error ? (
+              <p className="text-[13px] font-medium text-[var(--danger)]" role="alert">
+                Could not save. Check fields and try again.
               </p>
-            )}
-            {isSuccess && (
-              <p className="text-xs font-semibold text-emerald-700" role="status">
-                ✓ Preferences updated and synced with Ava.
+            ) : null}
+            {isSuccess ? (
+              <p className="text-[13px] font-medium text-[var(--sky)]" role="status">
+                Preferences saved.
               </p>
-            )}
+            ) : null}
           </div>
-
-          <Button type="submit" disabled={isLoading} className="px-8 shadow-sm">
+          <Button type="submit" disabled={isLoading} size="sm">
             {isLoading ? (
               <>
                 <Spinner size="sm" className="border-white/30 border-t-white" label={null} />
-                Saving Changes…
+                Saving…
               </>
             ) : (
-              "Save Preferences"
+              "Save preferences"
             )}
           </Button>
         </div>
       </form>
-    </div>
+    </TravellerSection>
   );
 }

@@ -1,0 +1,307 @@
+/**
+ * Refund case detail — ledger clarity, navy/cyan/bone.
+ * Signature: refundable amount as the primary figure. No card mosaic.
+ */
+
+.fo-refund-detail {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.25rem, 2.4vw, 1.75rem);
+}
+
+.fo-refund-detail__back {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-bottom: -0.35rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--ink-faint);
+  text-decoration: none;
+}
+
+.fo-refund-detail__back:hover {
+  color: var(--sky);
+}
+
+.fo-refund-detail__back:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--sky) 45%, transparent);
+  outline-offset: 2px;
+}
+
+.fo-refund-detail__lede {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.75rem;
+  letter-spacing: -0.01em;
+  color: var(--ink-faint);
+}
+
+.fo-refund-detail__lede svg {
+  flex-shrink: 0;
+  color: var(--ink-faint);
+}
+
+/* ── Status strip ──────────────────────────────────────────── */
+
+.fo-refund-detail__status {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 0.85rem 0;
+  border-top: 1px solid color-mix(in oklab, var(--cyan) 16%, var(--line));
+  border-bottom: 1px solid color-mix(in oklab, var(--cyan) 16%, var(--line));
+}
+
+.fo-refund-detail__status-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.4rem;
+  background: color-mix(in oklab, var(--horizon-cool) 65%, white);
+  color: var(--sky);
+}
+
+.fo-refund-detail__status-icon--ok {
+  background: color-mix(in oklab, var(--emerald) 12%, white);
+  color: var(--emerald);
+}
+
+.fo-refund-detail__status-icon--wait {
+  background: color-mix(in oklab, var(--cyan) 10%, white);
+  color: var(--signal);
+}
+
+.fo-refund-detail__status-icon--warn {
+  background: color-mix(in oklab, var(--danger) 8%, white);
+  color: var(--danger);
+}
+
+.fo-refund-detail__status-body {
+  min-width: 0;
+  display: grid;
+  gap: 0.2rem;
+}
+
+.fo-refund-detail__status-title {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.fo-refund-detail__status-copy {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.fo-refund-detail__status-meta {
+  margin: 0.15rem 0 0;
+  font-size: 0.6875rem;
+  letter-spacing: 0.01em;
+  color: var(--ink-faint);
+}
+
+/* ── Notes ─────────────────────────────────────────────────── */
+
+.fo-refund-detail__notes {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.fo-refund-detail__note {
+  display: flex;
+  gap: 0.45rem;
+  align-items: flex-start;
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.fo-refund-detail__note svg {
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+  color: var(--ink-faint);
+}
+
+.fo-refund-detail__note--warn {
+  color: color-mix(in oklab, var(--navy) 70%, #b45309);
+}
+
+.fo-refund-detail__note--warn svg {
+  color: #b45309;
+}
+
+/* ── Ledger (calculation) ──────────────────────────────────── */
+
+.fo-refund-detail__ledger {
+  display: grid;
+  gap: 1rem;
+}
+
+.fo-refund-detail__payout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 1.25rem;
+  padding: 0.9rem 0;
+  border-bottom: 1px solid color-mix(in oklab, var(--navy) 14%, transparent);
+}
+
+.fo-refund-detail__payout-label {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.fo-refund-detail__payout-value {
+  margin: 0;
+  font-family: var(--font-hero, ui-sans-serif, system-ui, sans-serif);
+  font-size: clamp(1.5rem, 3vw, 1.85rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  color: var(--navy);
+  font-variant-numeric: tabular-nums;
+}
+
+.fo-refund-detail__payout-hint {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--ink-faint);
+}
+
+.fo-refund-detail__facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+  gap: 0.65rem 1rem;
+  margin: 0;
+}
+
+.fo-refund-detail__fact {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.fo-refund-detail__fact dt {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.fo-refund-detail__fact dd {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  word-break: break-word;
+}
+
+.fo-refund-detail__fact dd.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+/* ── Audit timeline ────────────────────────────────────────── */
+
+.fo-refund-detail__timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--line);
+}
+
+.fo-refund-detail__event {
+  display: grid;
+  grid-template-columns: 1.25rem 1fr;
+  gap: 0.35rem 0.65rem;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid color-mix(in oklab, var(--line) 75%, transparent);
+}
+
+.fo-refund-detail__event:last-child {
+  border-bottom: none;
+}
+
+.fo-refund-detail__event-dot {
+  display: flex;
+  justify-content: center;
+  padding-top: 0.35rem;
+}
+
+.fo-refund-detail__event-dot span {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: color-mix(in oklab, var(--cyan) 55%, var(--navy));
+}
+
+.fo-refund-detail__event-title {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.fo-refund-detail__event-meta {
+  margin: 0.1rem 0 0;
+  font-size: 0.6875rem;
+  color: var(--ink-faint);
+}
+
+.fo-refund-detail__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.fo-refund-detail__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--sky);
+  text-decoration: none;
+}
+
+.fo-refund-detail__link:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.fo-refund-detail__link:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--sky) 45%, transparent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fo-refund-detail__back,
+  .fo-refund-detail__link {
+    transition: none;
+  }
+}

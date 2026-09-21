@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { Leaf } from "lucide-react";
 import { Input } from "@/components/ui";
 import { useGetCarbonDashboardQuery, useGetCarbonNudgesQuery } from "@/lib/api/corporate.api";
+import { DeskSectionHead, DeskStatus } from "./DeskSectionHead";
 
 function kg(grams: number | null | undefined) {
   if (grams == null) return "—";
@@ -21,38 +23,48 @@ export function CorporateCarbonSection({ companyId }: { companyId: string }) {
 
   return (
     <section className="fo-desk__panel fo-desk__stack">
-      <h2 className="fo-desk__section-label">Carbon reporting</h2>
-      <p className="text-xs text-slate-600">{data?.method.note}</p>
+      <DeskSectionHead icon={Leaf} title="Carbon reporting" />
+      {data?.method.note ? (
+        <p className="text-xs text-[var(--ink-soft)]">{data.method.note}</p>
+      ) : null}
       <div className="grid gap-2 sm:grid-cols-2">
         <Input label="From (YYYY-MM-DD)" value={from} onChange={(e) => setFrom(e.target.value)} />
         <Input label="To (YYYY-MM-DD)" value={to} onChange={(e) => setTo(e.target.value)} />
       </div>
       {isLoading || !data ? (
-        <p className="fo-desk__empty">Loading carbon dashboard…</p>
+        <p className="fo-desk__empty" style={{ padding: 0 }}>
+          Loading carbon dashboard…
+        </p>
       ) : (
         <>
-          <div className="grid gap-2 sm:grid-cols-3">
-            <p className="text-sm">
-              Total
-              <strong className="block">{kg(data.totals.gramsCo2e)}</strong>
-            </p>
-            <p className="text-sm">
-              Flights
-              <strong className="block">{kg(data.totals.flightGramsCo2e)}</strong>
-            </p>
-            <p className="text-sm">
-              Hotels
-              <strong className="block">{kg(data.totals.hotelGramsCo2e)}</strong>
-            </p>
+          <div className="fo-desk__kpi-strip">
+            <div className="fo-desk__kpi">
+              <p className="fo-desk__kpi-label">Total</p>
+              <p className="fo-desk__kpi-value">{kg(data.totals.gramsCo2e)}</p>
+            </div>
+            <div className="fo-desk__kpi">
+              <p className="fo-desk__kpi-label">Flights</p>
+              <p className="fo-desk__kpi-value">{kg(data.totals.flightGramsCo2e)}</p>
+            </div>
+            <div className="fo-desk__kpi">
+              <p className="fo-desk__kpi-label">Hotels</p>
+              <p className="fo-desk__kpi-value">{kg(data.totals.hotelGramsCo2e)}</p>
+            </div>
+            <div className="fo-desk__kpi">
+              <p className="fo-desk__kpi-label">Coverage</p>
+              <p className="fo-desk__kpi-value">
+                {data.totals.estimatedCount}/{data.totals.bookingCount}
+              </p>
+              <p className="fo-desk__kpi-note">
+                estimated
+                {data.totals.insufficientCount
+                  ? ` · ${data.totals.insufficientCount} insufficient`
+                  : ""}
+              </p>
+            </div>
           </div>
-          <p className="text-xs text-slate-500">
-            {data.totals.estimatedCount} estimated / {data.totals.bookingCount} company bookings
-            {data.totals.insufficientCount
-              ? ` · ${data.totals.insufficientCount} without enough data (not invented)`
-              : ""}
-          </p>
           {data.breakdown.length ? (
-            <div className="fo-desk__table-wrap">
+            <div className="fo-desk__table-wrap -mx-1">
               <table className="fo-desk__table">
                 <thead>
                   <tr>
@@ -65,31 +77,46 @@ export function CorporateCarbonSection({ companyId }: { companyId: string }) {
                 <tbody>
                   {data.breakdown.slice(0, 12).map((row) => (
                     <tr key={row.bookingId}>
-                      <td>{row.bookingId.slice(0, 8)}</td>
+                      <td className="fo-desk__mono">{row.bookingId.slice(0, 8)}</td>
                       <td>{row.product}</td>
-                      <td>{row.status}</td>
-                      <td>{row.status === "AVAILABLE" ? kg(row.gramsCo2e) : row.reason || "Insufficient data"}</td>
+                      <td>
+                        <DeskStatus tone={row.status === "AVAILABLE" ? "ok" : "neutral"}>
+                          {row.status}
+                        </DeskStatus>
+                      </td>
+                      <td>
+                        {row.status === "AVAILABLE"
+                          ? kg(row.gramsCo2e)
+                          : row.reason || "Insufficient data"}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
           ) : (
-            <p className="fo-desk__empty">No verified company bookings in this period.</p>
+            <p className="fo-desk__empty" style={{ padding: 0 }}>
+              No verified company bookings in this period.
+            </p>
           )}
         </>
       )}
       {nudges?.items?.length ? (
-        <ul className="space-y-2">
+        <ul className="m-0 list-none space-y-2 p-0">
           {nudges.items.map((n) => (
-            <li key={n.kind + n.title} className="rounded-lg border border-slate-200 p-3">
-              <p className="text-sm font-medium text-slate-900">{n.title}</p>
-              <p className="text-xs text-slate-600">{n.body}</p>
+            <li
+              key={n.kind + n.title}
+              className="rounded-[var(--fo-desk-radius)] border border-[var(--fo-desk-line)] bg-[var(--white)] p-3"
+            >
+              <p className="text-sm font-medium text-[var(--navy)]">{n.title}</p>
+              <p className="mt-0.5 text-xs text-[var(--ink-soft)]">{n.body}</p>
             </li>
           ))}
         </ul>
       ) : (
-        <p className="text-xs text-slate-500">{nudges?.emptyReason || "No policy nudges."}</p>
+        <p className="text-xs text-[var(--ink-faint)]">
+          {nudges?.emptyReason || "No policy nudges."}
+        </p>
       )}
     </section>
   );

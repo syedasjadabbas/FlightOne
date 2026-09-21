@@ -571,6 +571,444 @@
   color: var(--ink-faint);
 }
 
+/* ── Journey (trip timeline) ───────────────────────────────── */
+
+.fo-journey__stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1.35rem;
+}
+
+.fo-journey__watch {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.05rem 0 1.25rem;
+  border-top: 1px solid var(--line);
+}
+
+.fo-journey__watch:last-child {
+  padding-bottom: 0.35rem;
+}
+
+.fo-journey__watch-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.55rem 1rem;
+}
+
+.fo-journey__watch-identity {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.65rem;
+}
+
+.fo-journey__flight {
+  margin: 0;
+  font-family: var(--font-hero);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--navy);
+}
+
+.fo-journey__watch-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.75rem;
+}
+
+.fo-journey__fact {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+.fo-journey__fact--muted {
+  color: var(--ink-faint);
+  font-weight: 400;
+}
+
+.fo-journey__route {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.65rem 0.85rem;
+  padding: 0.35rem 0 0.15rem;
+}
+
+.fo-journey__endpoint--arrive {
+  text-align: right;
+}
+
+.fo-journey__iata {
+  margin: 0;
+  font-family: var(--font-hero);
+  font-size: clamp(1.55rem, 3.4vw, 1.9rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: var(--navy);
+}
+
+.fo-journey__when {
+  margin: 0.4rem 0 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--sky);
+}
+
+.fo-journey__day {
+  margin: 0.15rem 0 0;
+  font-size: 0.6875rem;
+  color: var(--ink-faint);
+}
+
+.fo-journey__route-mid {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 4.5rem;
+  color: color-mix(in oklab, var(--cyan) 45%, var(--ink-faint));
+}
+
+.fo-journey__route-line {
+  flex: 1;
+  height: 1px;
+  background: color-mix(in oklab, var(--cyan) 28%, var(--line));
+}
+
+.fo-journey__route-arrow {
+  flex-shrink: 0;
+}
+
+.fo-journey__muted {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--ink-faint);
+}
+
+.fo-journey__block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.fo-journey__block-title {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.fo-journey__block--warn {
+  padding: 0.75rem 0.85rem;
+  border: 1px solid color-mix(in oklab, var(--danger) 22%, var(--line));
+  border-radius: 0.5rem;
+  background: color-mix(in oklab, var(--danger) 4%, white);
+}
+
+.fo-journey__legs {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.fo-journey__leg {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+
+.fo-journey__leg-icon {
+  display: inline-flex;
+  margin-top: 0.15rem;
+  color: color-mix(in oklab, var(--cyan) 55%, var(--navy));
+}
+
+.fo-journey__leg-sep {
+  margin: 0 0.35rem;
+  color: var(--ink-faint);
+}
+
+.fo-journey__disruptions {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.fo-journey__disruptions li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  font-size: 0.8125rem;
+  color: var(--ink);
+}
+
+/* Timeline — calm vertical rail */
+
+.fo-journey__timeline {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.fo-journey__timeline-item {
+  display: grid;
+  grid-template-columns: 1.1rem minmax(0, 1fr);
+  gap: 0 0.7rem;
+  position: relative;
+}
+
+.fo-journey__timeline-rail {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding-top: 0.15rem;
+}
+
+.fo-journey__timeline-rail::after {
+  content: "";
+  position: absolute;
+  top: 1.05rem;
+  bottom: -0.15rem;
+  left: 50%;
+  width: 1px;
+  transform: translateX(-50%);
+  background: color-mix(in oklab, var(--line) 85%, var(--cyan));
+}
+
+.fo-journey__timeline-item--last .fo-journey__timeline-rail::after {
+  display: none;
+}
+
+.fo-journey__timeline-node {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--cyan) 28%, var(--line));
+  background: color-mix(in oklab, var(--horizon-cool) 65%, white);
+  color: color-mix(in oklab, var(--cyan) 50%, var(--navy));
+}
+
+.fo-journey__timeline-item--attention .fo-journey__timeline-node {
+  border-color: color-mix(in oklab, var(--ink-soft) 40%, var(--line));
+  background: color-mix(in oklab, var(--mist) 70%, white);
+  color: var(--ink-soft);
+}
+
+.fo-journey__timeline-item--critical .fo-journey__timeline-node {
+  border-color: color-mix(in oklab, var(--danger) 35%, var(--line));
+  background: color-mix(in oklab, var(--danger) 7%, white);
+  color: var(--danger);
+}
+
+.fo-journey__timeline-body {
+  padding: 0 0 1rem;
+  min-width: 0;
+}
+
+.fo-journey__timeline-item--last .fo-journey__timeline-body {
+  padding-bottom: 0.15rem;
+}
+
+.fo-journey__timeline-title {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.fo-journey__timeline-copy {
+  margin: 0.2rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+
+.fo-journey__timeline-meta {
+  margin: 0.25rem 0 0;
+  font-size: 0.6875rem;
+  letter-spacing: 0.01em;
+  color: var(--ink-faint);
+}
+
+.fo-journey__watch-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid color-mix(in oklab, var(--line) 80%, transparent);
+}
+
+.fo-journey__booking-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.75rem;
+  color: var(--ink-faint);
+}
+
+.fo-journey__booking-meta p {
+  margin: 0;
+}
+
+.fo-journey__booking-link {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-weight: 600;
+  color: var(--sky);
+  text-decoration: none;
+}
+
+.fo-journey__booking-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.12em;
+}
+
+.fo-journey__booking-link:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--sky) 45%, transparent);
+  outline-offset: 2px;
+}
+
+.fo-journey__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.fo-journey__alts {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 0.85rem 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  background: color-mix(in oklab, white 94%, var(--horizon-cool));
+}
+
+.fo-journey__alt-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+}
+
+.fo-journey__alt {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 0.65rem 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: 0.4rem;
+  background: white;
+}
+
+.fo-journey__alt-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.fo-journey__flash {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--ink);
+  background: color-mix(in oklab, var(--horizon-cool) 55%, white);
+}
+
+.fo-journey__flash--success {
+  border-color: color-mix(in oklab, var(--cyan) 30%, var(--line));
+  background: color-mix(in oklab, var(--horizon-cool) 70%, white);
+}
+
+.fo-journey__flash--error {
+  border-color: color-mix(in oklab, var(--danger) 28%, var(--line));
+  background: color-mix(in oklab, var(--danger) 5%, white);
+  color: var(--danger);
+}
+
+.fo-journey__flash--info {
+  border-color: color-mix(in oklab, var(--sky) 28%, var(--line));
+}
+
+.fo-journey__flash-dismiss {
+  border: 0;
+  background: transparent;
+  font-size: 0.75rem;
+  color: var(--ink-faint);
+  cursor: pointer;
+}
+
+.fo-journey__flash-dismiss:hover {
+  color: var(--navy);
+}
+
+.fo-journey__flash-dismiss:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--sky) 45%, transparent);
+  outline-offset: 2px;
+}
+
+.fo-journey__empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.35rem;
+}
+
+@media (max-width: 480px) {
+  .fo-journey__route {
+    grid-template-columns: 1fr;
+    gap: 0.55rem;
+  }
+
+  .fo-journey__route-mid {
+    min-width: 0;
+    max-width: 8rem;
+  }
+
+  .fo-journey__endpoint--arrive {
+    text-align: left;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .fo-traveller__progress > span,
   .fo-traveller__row-link,

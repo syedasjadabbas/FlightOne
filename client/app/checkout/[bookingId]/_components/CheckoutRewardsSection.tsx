@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Gift } from "lucide-react";
 import { Button, Input } from "@/components/ui";
 
 export function CheckoutRewardsSection({
@@ -19,26 +20,29 @@ export function CheckoutRewardsSection({
   if (balance <= 0) return null;
 
   return (
-    <div className="rounded-2xl border border-emerald-200/80 bg-white p-5 shadow-xs space-y-3">
-      <div className="flex items-center justify-between">
+    <div className="fo-desk__panel space-y-3">
+      <div className="fo-desk__panel-head mb-0">
         <div className="flex items-center gap-2">
-          <span className="text-[16px]">🎁</span>
-          <h3 className="text-[14px] font-bold text-slate-900">FlightOne Rewards</h3>
+          <Gift className="h-4 w-4 text-[var(--cyan)]" aria-hidden />
+          <h3 className="m-0 text-[14px] font-semibold text-[var(--navy)]">Rewards credit</h3>
         </div>
-        <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-800 border border-emerald-200">
-          {balance.toLocaleString()} pts available
+        <span className="fo-desk__status fo-desk__status--ok">
+          {balance.toLocaleString()} pts
         </span>
       </div>
 
-      <p className="text-[12px] text-slate-500 leading-relaxed">
-        Redeem reward points directly as checkout credits to reduce your total fare.{" "}
-        <Link href="/rewards" className="text-blue-600 underline hover:text-blue-700">
-          View rewards balance
+      <p className="m-0 text-[12px] leading-relaxed text-[var(--ink-soft)]">
+        Apply points as checkout credit.{" "}
+        <Link
+          href="/rewards"
+          className="font-medium text-[var(--cyan)] underline-offset-2 hover:underline"
+        >
+          View balance
         </Link>
       </p>
 
-      <div className="flex flex-wrap items-end gap-2 pt-1">
-        <div className="flex-1 min-w-[140px]">
+      <div className="flex flex-wrap items-end gap-2">
+        <div className="min-w-[140px] flex-1">
           <Input
             label="Points to redeem"
             value={rewardPoints}
@@ -50,11 +54,10 @@ export function CheckoutRewardsSection({
           type="button"
           size="sm"
           variant="secondary"
-          className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 py-2.5 h-[42px]"
           disabled={busy || !rewardPoints}
           onClick={onApply}
         >
-          Apply Credits
+          Apply
         </Button>
       </div>
     </div>

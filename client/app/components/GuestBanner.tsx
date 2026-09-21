@@ -11,12 +11,16 @@ export function GuestBanner() {
   if (!hasHydrated || isAuthenticated) return null;
 
   return (
-    <div className="inline-flex items-center gap-2.5 rounded-full border border-slate-200/90 bg-white/90 backdrop-blur-xs px-3.5 py-1.5 text-xs text-slate-600 shadow-2xs">
-      <span className="h-1.5 w-1.5 rounded-full bg-cyan-500 ring-2 ring-cyan-500/20" aria-hidden />
-      <span>Chats aren&apos;t saved until you sign in.</span>
+    <div className="inline-flex items-center gap-2 rounded-lg border border-[var(--line)] bg-white/95 px-3 py-1.5 text-xs text-[var(--ink-soft)]">
+      <span
+        className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--electric)]"
+        aria-hidden
+      />
+      <span className="hidden sm:inline">Chats aren&apos;t saved until you sign in.</span>
+      <span className="sm:hidden">Sign in to save chats</span>
       <Link
         href="/login?redirect=/chat"
-        className="font-semibold text-cyan-600 hover:text-cyan-700 hover:underline ml-1"
+        className="font-semibold text-[var(--electric)] underline-offset-2 hover:underline"
       >
         Sign in
       </Link>

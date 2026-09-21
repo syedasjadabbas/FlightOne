@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { Plane } from "lucide-react";
 import type { UiMessage } from "./chat.types";
 import { isTravelSearchError } from "./chat/SearchErrorFooter";
 
@@ -42,6 +43,7 @@ export function MessageBubble({
     >
       {!isUser && showIdentity ? (
         <span className="message-row__label mb-1.5 pl-1">
+          <Plane className="message-row__label-icon h-3 w-3" strokeWidth={2.2} aria-hidden />
           Ava
           {identityFull ? (
             <span className="chat-page__ava-role">Travel consultant</span>

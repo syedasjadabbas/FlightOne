@@ -1,11 +1,11 @@
 import { SiteNav } from "@/components/SiteNav";
 import { TravellerShell } from "@/app/components/traveller";
 import { MorePageClient } from "./MorePageClient";
+import "./more.css";
 
 export const metadata = {
-  title: "Account & Platform Hub — FlightOne",
-  description:
-    "Explore all FlightOne travel services, specialized programs, operations tools, and account settings in one place.",
+  title: "More — FlightOne",
+  description: "Desks and tools for trips, documents, account, and operations.",
 };
 
 export default function MorePage() {

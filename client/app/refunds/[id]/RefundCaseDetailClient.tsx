@@ -1,6 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import {
+  ArrowLeft,
+  LogIn,
+  RefreshCw,
+  Ticket,
+} from "lucide-react";
 import { Button, Spinner } from "@/components/ui";
 import {
   TravellerChip,
@@ -10,11 +16,15 @@ import {
 } from "@/app/components/traveller";
 import { useGetRefundCaseQuery } from "@/lib/api/refunds.api";
 import { useAuthStore } from "@/store/auth.store";
-
-function formatMinor(minor: number | undefined | null, currency?: string | null) {
-  if (minor == null || !Number.isFinite(minor)) return "—";
-  return `${(minor / 100).toFixed(2)} ${currency || ""}`.trim();
-}
+import {
+  RefundAuditList,
+  RefundCalcLedger,
+  RefundCaseFacts,
+  RefundStatusStrip,
+  labelize,
+  statusTone,
+} from "./_components";
+import "./refund-case-detail.css";
 
 export function RefundCaseDetailClient({ id }: { id: string }) {
   const hasHydrated = useAuthStore((s) => s.hasHydrated);
@@ -24,43 +34,57 @@ export function RefundCaseDetailClient({ id }: { id: string }) {
 
   if (!hasHydrated) {
     return (
-      <div className="flex justify-center py-16">
+      <div className="flex justify-center py-16" role="status" aria-label="Loading">
         <Spinner />
       </div>
     );
   }
+
   if (!accessToken) {
     return (
-      <TravellerState title="Sign in required">
-        <Link href="/login" className="text-[var(--sky)] underline-offset-2 hover:underline">
-          Sign in
-        </Link>
-      </TravellerState>
+      <TravellerPageHeader
+        title="Refund case"
+        lede="Sign in to view this case."
+        actions={
+          <Link href="/login">
+            <Button size="sm">
+              <LogIn size={14} strokeWidth={1.75} aria-hidden />
+              Sign in
+            </Button>
+          </Link>
+        }
+      />
     );
   }
+
   if (isLoading) {
     return (
-      <div className="flex justify-center py-16">
+      <div className="flex justify-center py-16" role="status" aria-label="Loading case">
         <Spinner />
       </div>
     );
   }
+
   if (isError || !data) {
+    const status = (error as { status?: number } | undefined)?.status;
     return (
       <TravellerState
         variant="error"
-        title={
-          (error as { status?: number })?.status === 404
-            ? "Case not found"
-            : "Case unavailable"
-        }
+        title={status === 404 ? "Case not found" : "Case unavailable"}
         action={
-          <Button size="sm" onClick={() => refetch()}>
-            Retry
-          </Button>
+          <div className="fo-refund-detail__actions">
+            <Button size="sm" onClick={() => refetch()}>
+              <RefreshCw size={14} strokeWidth={1.75} aria-hidden />
+              Retry
+            </Button>
+            <Link href="/refunds" className="fo-refund-detail__link">
+              <ArrowLeft size={14} strokeWidth={1.75} aria-hidden />
+              Back to refunds
+            </Link>
+          </div>
         }
       >
-        {(error as { status?: number })?.status === 404
+        {status === 404
           ? "This case does not exist or belongs to another account."
           : "Could not load this refund case."}
       </TravellerState>
@@ -68,105 +92,58 @@ export function RefundCaseDetailClient({ id }: { id: string }) {
   }
 
   const calc = data.calculation;
+  const audit = data.audit?.length ? data.audit : null;
 
   return (
-    <>
+    <div className="fo-refund-detail">
+      <Link href="/refunds" className="fo-refund-detail__back">
+        <ArrowLeft size={14} strokeWidth={1.75} aria-hidden />
+        Refunds
+      </Link>
+
       <TravellerPageHeader
-        backHref="/refunds"
-        backLabel="Refunds"
-        title={(data.kind || "REFUND").replaceAll("_", " ")}
-        lede={`Case ${data.id}`}
-        meta={<TravellerChip>{data.status}</TravellerChip>}
+        title={labelize(data.kind || "REFUND")}
+        lede={
+          <span className="fo-refund-detail__lede">
+            <Ticket size={13} strokeWidth={1.75} aria-hidden />
+            {data.id}
+          </span>
+        }
+        meta={
+          <TravellerChip tone={statusTone(data.status)}>
+            {labelize(data.status)}
+          </TravellerChip>
+        }
+      />
+
+      <RefundStatusStrip
+        status={data.status}
+        paymentRefundStatus={data.paymentRefundStatus}
       />
 
       <TravellerSection title="Case">
-        <dl className="fo-traveller__facts">
-          <div className="fo-traveller__fact">
-            <dt>Booking</dt>
-            <dd className="font-mono text-[12px]">{data.bookingId}</dd>
-          </div>
-          {data.paymentRefundStatus ? (
-            <div className="fo-traveller__fact">
-              <dt>Payment refund</dt>
-              <dd>{data.paymentRefundStatus}</dd>
-            </div>
-          ) : null}
-        </dl>
-        {data.supplierOperationNote ? (
-          <p className="fo-traveller__row-body">Supplier: {data.supplierOperationNote}</p>
-        ) : null}
-        {data.failureReason ? (
-          <p className="fo-traveller__row-body">Note: {data.failureReason}</p>
-        ) : null}
-        {data.status === "REQUIRES_HUMAN" ? (
-          <p className="text-[14px] font-medium text-amber-800">
-            Manual review — automation could not safely complete this refund. It is not a payout.
-          </p>
-        ) : data.status === "COMPLETED" ? (
-          <p className="text-[14px] font-medium text-ink">
-            Refund completed after payment confirmation.
-          </p>
-        ) : (
-          <p className="fo-traveller__section-note">
-            This case is not a completed payout unless status is COMPLETED and payment status
-            confirms it.
-          </p>
-        )}
+        <RefundCaseFacts
+          bookingId={data.bookingId}
+          paymentRefundStatus={data.paymentRefundStatus}
+          supplierOperationNote={data.supplierOperationNote}
+          failureReason={data.failureReason}
+        />
       </TravellerSection>
-
-      {data.audit?.length ? (
-        <TravellerSection title="History">
-          <ul className="fo-traveller__list">
-            {data.audit.map((row) => (
-              <li key={row.id} className="fo-traveller__row">
-                <p className="fo-traveller__row-title">{row.action}</p>
-                <p className="fo-traveller__row-meta">{new Date(row.createdAt).toLocaleString()}</p>
-              </li>
-            ))}
-          </ul>
-        </TravellerSection>
-      ) : null}
 
       {calc ? (
         <TravellerSection title="Calculation">
-          <dl className="fo-traveller__facts">
-            <div className="fo-traveller__fact">
-              <dt>dataStatus</dt>
-              <dd>{calc.dataStatus}</dd>
-            </div>
-            <div className="fo-traveller__fact">
-              <dt>Gross paid</dt>
-              <dd>{formatMinor(calc.grossPaidMinor, calc.currency)}</dd>
-            </div>
-            <div className="fo-traveller__fact">
-              <dt>Supplier penalty</dt>
-              <dd>{formatMinor(calc.supplierPenaltyMinor, calc.currency)}</dd>
-            </div>
-            <div className="fo-traveller__fact">
-              <dt>Agency fee</dt>
-              <dd>{formatMinor(calc.agencyFeeMinor, calc.currency)}</dd>
-            </div>
-            <div className="fo-traveller__fact">
-              <dt>Refundable</dt>
-              <dd>
-                {formatMinor(calc.refundableMinor, calc.currency)}
-                {calc.dataStatus === "OK" ? "" : " (unconfirmed)"}
-              </dd>
-            </div>
-            <div className="fo-traveller__fact">
-              <dt>Travel credit</dt>
-              <dd>{formatMinor(calc.travelCreditMinor, calc.currency)}</dd>
-            </div>
-            <div className="fo-traveller__fact">
-              <dt>Timeline</dt>
-              <dd>
-                {calc.processingTimelineStatus}
-                {calc.processingTimelineNote ? ` — ${calc.processingTimelineNote}` : ""}
-              </dd>
-            </div>
-          </dl>
+          <RefundCalcLedger calc={calc} />
         </TravellerSection>
       ) : null}
-    </>
+
+      {audit ? (
+        <TravellerSection
+          title="History"
+          note={`${audit.length} event${audit.length === 1 ? "" : "s"}`}
+        >
+          <RefundAuditList rows={audit} />
+        </TravellerSection>
+      ) : null}
+    </div>
   );
 }

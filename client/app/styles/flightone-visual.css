@@ -1133,7 +1133,7 @@
 
 .results-msg-cta__btn {
   border-radius: 0.5rem;
-  background: var(--navy);
+  background: var(--electric);
   padding: 0.5rem 1rem;
   font-size: 0.8125rem;
   letter-spacing: -0.01em;
@@ -1141,7 +1141,7 @@
 }
 
 .results-msg-cta__btn:hover {
-  background: var(--sky);
+  background: color-mix(in oklab, var(--electric) 82%, var(--navy));
   transform: none;
 }
 
@@ -2204,14 +2204,14 @@
 
 .results-empty__primary {
   border-radius: 0.45rem;
-  background: var(--navy);
+  background: var(--electric);
   color: white;
   font-weight: 600;
   padding: 0.45rem 0.95rem;
 }
 
 .results-empty__primary:hover {
-  background: color-mix(in oklab, var(--navy) 88%, black);
+  background: color-mix(in oklab, var(--electric) 82%, var(--navy));
 }
 
 /* ── Fare summary (View Deal) ───────────────────────────────── */

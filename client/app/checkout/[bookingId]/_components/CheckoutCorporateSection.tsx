@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Building2 } from "lucide-react";
 import { Button, SearchableSelect } from "@/components/ui";
 import {
   useListProjectCodesQuery,
@@ -57,22 +58,31 @@ export function CheckoutCorporateSection({
   const canSelect = bookingStatus === "QUOTED" && Boolean(companyId);
 
   return (
-    <div className="rounded-2xl border border-indigo-200/80 bg-white p-5 shadow-xs space-y-3">
+    <div className="fo-desk__profile space-y-3">
       <div className="flex items-center gap-2">
-        <span className="text-[16px]">🏢</span>
-        <h3 className="text-[14px] font-bold text-slate-900">Corporate Approval & Spend</h3>
+        <Building2 className="h-4 w-4 text-[var(--cyan)]" aria-hidden />
+        <h3 className="m-0 text-[14px] font-semibold text-[var(--navy)]">
+          Corporate approval
+        </h3>
       </div>
-      <p className="text-[12px] text-slate-600">
-        Status: <strong className="text-slate-900">{approvalGate.approvalStatus || "REQUIRED"}</strong> ·{" "}
-        {approvalGate.canProceed ? "can proceed" : "blocked until approved"}
+
+      <p className="m-0 text-[12px] text-[var(--ink-soft)]">
+        Status:{" "}
+        <strong className="font-semibold text-[var(--navy)]">
+          {approvalGate.approvalStatus || "REQUIRED"}
+        </strong>
+        {" · "}
+        {approvalGate.canProceed ? "Can proceed" : "Blocked until approved"}
       </p>
+
       {approvalGate.policyEvaluation && !approvalGate.policyEvaluation.withinPolicy ? (
-        <ul className="text-[12px] text-[var(--danger)]">
+        <ul className="m-0 list-disc space-y-1 pl-4 text-[12px] text-[var(--danger)]">
           {(approvalGate.policyEvaluation.violations || []).map((v) => (
             <li key={v.code}>{v.message}</li>
           ))}
         </ul>
       ) : null}
+
       {!approvalGate.canProceed &&
       (approvalGate.approvalStatus === "REQUIRED" || !approvalGate.approvalStatus) &&
       companyId ? (
@@ -80,7 +90,11 @@ export function CheckoutCorporateSection({
           Request approval
         </Button>
       ) : null}
-      <Link href="/corporate" className="block text-[12px] text-[var(--sky)] underline">
+
+      <Link
+        href="/corporate"
+        className="inline-block text-[12px] font-medium text-[var(--cyan)] underline-offset-2 hover:underline"
+      >
         Corporate desk
       </Link>
 
@@ -96,26 +110,30 @@ export function CheckoutCorporateSection({
         />
       ) : null}
 
-      {corpMode === "CORPORATE" ? (
-        <label className="mt-2 flex items-center gap-2 text-[13px] text-ink-soft">
+      <div className="space-y-2 border-t border-[var(--fo-desk-line)] pt-3">
+        {corpMode === "CORPORATE" ? (
+          <label className="flex items-center gap-2 text-[13px] text-[var(--ink-soft)]">
+            <input
+              type="radio"
+              name="payMethod"
+              checked={payMethod === "corporate_credit"}
+              onChange={() => setPayMethod("corporate_credit")}
+              className="accent-[var(--cyan)]"
+            />
+            Corporate credit
+          </label>
+        ) : null}
+        <label className="flex items-center gap-2 text-[13px] text-[var(--ink-soft)]">
           <input
             type="radio"
             name="payMethod"
-            checked={payMethod === "corporate_credit"}
-            onChange={() => setPayMethod("corporate_credit")}
+            checked={payMethod === "card"}
+            onChange={() => setPayMethod("card")}
+            className="accent-[var(--cyan)]"
           />
-          Pay with corporate credit
+          Card token
         </label>
-      ) : null}
-      <label className="flex items-center gap-2 text-[13px] text-ink-soft">
-        <input
-          type="radio"
-          name="payMethod"
-          checked={payMethod === "card"}
-          onChange={() => setPayMethod("card")}
-        />
-        Pay with card token
-      </label>
+      </div>
     </div>
   );
 }
@@ -144,19 +162,19 @@ function ProjectCodePicker({
   const [setProjectCode, { isLoading: saving, error }] = useSetBookingProjectCodeMutation();
 
   return (
-    <div className="mt-2 space-y-1.5 border-t border-line/70 pt-2">
-      <p className="text-[12px] font-medium text-ink">Project code</p>
+    <div className="space-y-1.5 border-t border-[var(--fo-desk-line)] pt-3">
+      <p className="m-0 text-[12px] font-medium text-[var(--navy)]">Project code</p>
       {attachedCode ? (
-        <p className="text-[12px] text-ink-soft">
+        <p className="m-0 text-[12px] text-[var(--ink-soft)]">
           {attachedCode}
           {attachedName ? ` — ${attachedName}` : ""}
         </p>
       ) : null}
       {canSelect ? (
         isLoading ? (
-          <p className="text-[12px] text-ink-faint">Loading project codes…</p>
+          <p className="m-0 text-[12px] text-[var(--ink-faint)]">Loading project codes…</p>
         ) : !codes.length ? (
-          <p className="text-[12px] text-ink-faint">
+          <p className="m-0 text-[12px] text-[var(--ink-faint)]">
             No active project codes. Ask a company admin to add one on /corporate.
           </p>
         ) : (
@@ -184,7 +202,7 @@ function ProjectCodePicker({
         )
       ) : null}
       {error ? (
-        <p className="text-[12px] text-[var(--danger)]">Could not attach project code.</p>
+        <p className="m-0 text-[12px] text-[var(--danger)]">Could not attach project code.</p>
       ) : null}
     </div>
   );

@@ -34,17 +34,19 @@ export function CompletenessCard({ profile }: { profile: TravellerProfile }) {
   ].filter(Boolean);
 
   return (
-    <TravellerSection title="Profile completeness">
+    <TravellerSection
+      title="Missing for readiness"
+      note={
+        c.readyForHandsFreeBooking
+          ? "Required fields are complete for hands-free booking prep."
+          : "Finish the required items below."
+      }
+    >
       <p className="fo-traveller__score">
         {c.score}
         <span className="ml-1.5 text-[0.875rem] font-medium tracking-normal text-ink-faint">
           % ready
         </span>
-      </p>
-      <p className="fo-traveller__section-note">
-        {c.readyForHandsFreeBooking
-          ? "Enough for hands-free booking prep."
-          : "Finish required items below."}
       </p>
       <div
         className="fo-traveller__progress"

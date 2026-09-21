@@ -261,7 +261,7 @@ export default function CompanyPreviewSection() {
                   margin: 0,
                 }}
               >
-                FlightOne builds custom tour packages from Pakistan for travellers tired of pre-made options that never fit. Tell us your destination, group size and comfort level, and we design a complete trip around it.
+                FlightOne builds custom tour packages globally for travellers tired of pre-made options that never fit. Tell us your destination, group size and comfort level, and we design a complete trip around it.
               </p>
             </div>
           </div>

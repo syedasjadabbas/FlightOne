@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { Download, FileText, Share2, X } from "lucide-react";
 import { Button, Input, Spinner } from "@/components/ui";
 import {
   useGetVaultDocumentQuery,
@@ -9,25 +10,13 @@ import {
   type VaultDocument,
 } from "@/lib/api/vault.api";
 import { VAULT_TYPE_LABELS, visaStatusLabel } from "@/lib/vault/visaStatus";
+import { formatByteSize, formatVaultDateTime } from "./vaultFormat";
 import {
   VisaMetaFields,
   visaMetaFormFromInput,
   visaMetaFormToInput,
   type VisaMetaFormValue,
 } from "./VisaMetaFields";
-
-function formatDate(value: string | null | undefined) {
-  if (!value) return "—";
-  try {
-    return new Date(value).toLocaleString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  } catch {
-    return "—";
-  }
-}
 
 function asStringList(value: unknown): string[] {
   if (Array.isArray(value)) return value.map((x) => String(x));
@@ -109,31 +98,34 @@ export function VaultDocumentDetails({
 
   const requiredDocs = asStringList(intelligence?.requiredDocuments);
   const embassy = embassyLines(intelligence?.embassyInfo);
+  const size = formatByteSize(doc.byteSize);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/60 backdrop-blur-xs">
+    <div className="fo-vault__overlay" role="presentation" onClick={onClose}>
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="vault-detail-title"
-        className="relative w-full max-w-2xl max-h-[92dvh] overflow-y-auto rounded-t-3xl sm:rounded-3xl bg-white p-6 sm:p-8 shadow-2xl border border-slate-200"
+        className="fo-vault__dialog fo-vault__dialog--wide"
+        onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-start justify-between gap-3 border-b border-slate-100 pb-4">
+        <div className="fo-vault__dialog-head">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-cyan-700">
+            <p className="fo-vault__dialog-kicker">
+              <FileText size={11} strokeWidth={2} aria-hidden />
               {VAULT_TYPE_LABELS[doc.type] || doc.type}
             </p>
-            <h3 id="vault-detail-title" className="mt-1 text-lg font-bold text-slate-900 font-[var(--font-sora)]">
+            <h3 id="vault-detail-title" className="fo-vault__dialog-title">
               {doc.title}
             </h3>
           </div>
           <button
             type="button"
+            className="fo-vault__close"
             onClick={onClose}
-            className="rounded-lg p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100"
             aria-label="Close document details"
           >
-            ✕
+            <X size={16} strokeWidth={2} />
           </button>
         </div>
 
@@ -142,97 +134,110 @@ export function VaultDocumentDetails({
             <Spinner label="Loading document…" />
           </div>
         ) : isError ? (
-          <div className="mt-5 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800">
-            Could not load full document details.
-            <Button size="sm" variant="secondary" className="ml-3" onClick={() => void refetch()}>
-              Retry
-            </Button>
+          <div className="fo-vault__dialog-body">
+            <div className="fo-vault__flash fo-vault__flash--err" role="alert">
+              <span>Could not load full document details.</span>
+              <Button size="sm" variant="secondary" onClick={() => void refetch()}>
+                Retry
+              </Button>
+            </div>
           </div>
         ) : (
-          <div className="mt-5 space-y-5">
-            <div className="flex flex-wrap gap-2 text-xs">
-              <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-0.5 font-semibold text-slate-700">
-                {doc.lifecycleStatus || (doc.isActive ? "ACTIVE" : "SUPERSEDED")}
+          <div className="fo-vault__dialog-body">
+            <div className="fo-vault__status-line">
+              <span>
+                Status{" "}
+                <strong>
+                  {doc.lifecycleStatus || (doc.isActive ? "ACTIVE" : "SUPERSEDED")}
+                </strong>
               </span>
               {doc.expiryStatus ? (
-                <span className="rounded-full border border-slate-200 bg-white px-2.5 py-0.5 font-semibold text-slate-700">
-                  Expiry: {doc.expiryStatus.replaceAll("_", " ")}
+                <span>
+                  Expiry <strong>{doc.expiryStatus.replaceAll("_", " ")}</strong>
                 </span>
               ) : null}
               {doc.type === "VISA" && doc.visaMeta ? (
-                <span className="rounded-full border border-cyan-200 bg-cyan-50 px-2.5 py-0.5 font-semibold text-cyan-800">
-                  {visaStatusLabel(doc.visaMeta.visaStatus)}
-                  {doc.visaMeta.destinationCode ? ` · ${doc.visaMeta.destinationCode}` : ""}
+                <span>
+                  Visa{" "}
+                  <strong>
+                    {visaStatusLabel(doc.visaMeta.visaStatus)}
+                    {doc.visaMeta.destinationCode ? ` · ${doc.visaMeta.destinationCode}` : ""}
+                  </strong>
                 </span>
               ) : null}
               {doc.isPlatformIssued ? (
-                <span className="rounded-full border border-cyan-200 bg-cyan-50 px-2.5 py-0.5 font-semibold text-cyan-800">
-                  Platform issued — immutable
+                <span>
+                  <strong>Platform issued</strong> — immutable
                 </span>
               ) : null}
             </div>
 
-            <dl className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-              <div>
-                <dt className="text-xs uppercase tracking-wider text-slate-500">Issue date</dt>
-                <dd className="font-medium text-slate-800">{formatDate(doc.issueDate)}</dd>
+            <dl className="fo-vault__facts">
+              <div className="fo-vault__fact">
+                <dt>Issue date</dt>
+                <dd>{formatVaultDateTime(doc.issueDate)}</dd>
               </div>
-              <div>
-                <dt className="text-xs uppercase tracking-wider text-slate-500">Expiry</dt>
-                <dd className="font-medium text-slate-800">{formatDate(doc.expiresAt)}</dd>
+              <div className="fo-vault__fact">
+                <dt>Expiry</dt>
+                <dd>{formatVaultDateTime(doc.expiresAt)}</dd>
               </div>
-              <div>
-                <dt className="text-xs uppercase tracking-wider text-slate-500">File</dt>
-                <dd className="font-medium text-slate-800">
+              <div className="fo-vault__fact">
+                <dt>File</dt>
+                <dd>
                   {doc.originalFilename || "Metadata only"}
-                  {doc.byteSize ? ` · ${(doc.byteSize / (1024 * 1024)).toFixed(2)} MB` : ""}
+                  {size ? ` · ${size}` : ""}
                 </dd>
               </div>
-              <div>
-                <dt className="text-xs uppercase tracking-wider text-slate-500">Version</dt>
-                <dd className="font-medium text-slate-800">{doc.version}</dd>
+              <div className="fo-vault__fact">
+                <dt>Version</dt>
+                <dd>{doc.version}</dd>
               </div>
             </dl>
 
             {doc.type === "VISA" && intelligence ? (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 space-y-3">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="text-sm font-semibold text-slate-900">Visa guidance</p>
-                  <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+              <div className="fo-vault__guidance">
+                <div className="fo-vault__guidance-head">
+                  <p className="fo-vault__guidance-title">Visa guidance</p>
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--ink-faint)]">
                     {intelligence.isFact ? "Attributed fact" : "Guidance only"}
                     {intelligence.dataStatus ? ` · ${intelligence.dataStatus}` : ""}
                   </span>
                 </div>
-                <p className="text-xs text-slate-600">{intelligence.confidenceNote}</p>
+                <p className="m-0 text-xs text-[var(--ink-soft)]">{intelligence.confidenceNote}</p>
                 {intelligence.processingDaysMin != null || intelligence.processingDaysMax != null ? (
-                  <p className="text-xs text-slate-700">
+                  <p className="m-0 text-xs text-[var(--ink-soft)]">
                     Processing time on file: {intelligence.processingDaysMin ?? "—"}–
                     {intelligence.processingDaysMax ?? "—"} days
                     {intelligence.source ? ` (source: ${intelligence.source})` : ""}.
                   </p>
                 ) : (
-                  <p className="text-xs text-slate-500">
+                  <p className="m-0 text-xs text-[var(--ink-faint)]">
                     No attributed processing-time estimate is on file. Times are not invented.
                   </p>
                 )}
                 {embassy.length ? (
                   <div>
-                    <p className="text-xs font-semibold text-slate-700">Embassy / authority on file</p>
-                    <ul className="mt-1 space-y-0.5 text-xs text-slate-600">
+                    <p className="m-0 text-xs font-semibold text-[var(--navy)]">
+                      Embassy / authority on file
+                    </p>
+                    <ul className="mt-1 space-y-0.5 text-xs text-[var(--ink-soft)]">
                       {embassy.map((line) => (
                         <li key={line}>{line}</li>
                       ))}
                     </ul>
                   </div>
                 ) : (
-                  <p className="text-xs text-slate-500">
-                    No attributed embassy directory entry is on file for this nationality × destination.
+                  <p className="m-0 text-xs text-[var(--ink-faint)]">
+                    No attributed embassy directory entry is on file for this nationality ×
+                    destination.
                   </p>
                 )}
                 {requiredDocs.length ? (
                   <div>
-                    <p className="text-xs font-semibold text-slate-700">Required-document list on file</p>
-                    <ul className="mt-1 list-disc pl-4 text-xs text-slate-600">
+                    <p className="m-0 text-xs font-semibold text-[var(--navy)]">
+                      Required-document list on file
+                    </p>
+                    <ul className="mt-1 list-disc pl-4 text-xs text-[var(--ink-soft)]">
                       {requiredDocs.map((item) => (
                         <li key={item}>{item}</li>
                       ))}
@@ -240,19 +245,22 @@ export function VaultDocumentDetails({
                   </div>
                 ) : null}
                 {intelligence.linkedApplication ? (
-                  <p className="text-xs text-slate-700">
+                  <p className="m-0 text-xs text-[var(--ink-soft)]">
                     Linked application {intelligence.linkedApplication.status}
                     {intelligence.linkedApplication.appointmentAt
-                      ? ` · appointment ${formatDate(intelligence.linkedApplication.appointmentAt)}`
+                      ? ` · appointment ${formatVaultDateTime(intelligence.linkedApplication.appointmentAt)}`
                       : ""}
                     {intelligence.linkedApplication.appointmentLocation
                       ? ` · ${intelligence.linkedApplication.appointmentLocation}`
                       : ""}
                   </p>
                 ) : null}
-                <p className="text-[11px] text-slate-400">
+                <p className="m-0 text-[11px] text-[var(--ink-faint)]">
                   Live government/Timatic verification is not claimed.{" "}
-                  <Link href="/visa" className="underline underline-offset-2 text-cyan-800">
+                  <Link
+                    href="/visa"
+                    className="text-[var(--electric)] underline underline-offset-2"
+                  >
                     Open Visa Intelligence
                   </Link>
                 </p>
@@ -267,7 +275,7 @@ export function VaultDocumentDetails({
                   onChange={(e) => setTitle(e.target.value)}
                   required
                 />
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <Input
                     label="Issue date"
                     type="date"
@@ -282,31 +290,51 @@ export function VaultDocumentDetails({
                   />
                 </div>
                 {doc.type === "VISA" ? (
-                  <VisaMetaFields value={visaForm} onChange={setVisaForm} disabled={updateState.isLoading} />
+                  <VisaMetaFields
+                    value={visaForm}
+                    onChange={setVisaForm}
+                    disabled={updateState.isLoading}
+                  />
                 ) : null}
-                {formError ? <p className="text-xs font-semibold text-rose-600">{formError}</p> : null}
-                {formSuccess ? <p className="text-xs font-semibold text-emerald-700">{formSuccess}</p> : null}
+                {formError ? (
+                  <p className="text-xs font-semibold text-[var(--danger)]">{formError}</p>
+                ) : null}
+                {formSuccess ? (
+                  <p className="text-xs font-semibold text-[var(--cyan)]">{formSuccess}</p>
+                ) : null}
                 <Button type="submit" disabled={updateState.isLoading}>
                   {updateState.isLoading ? "Saving…" : "Save metadata"}
                 </Button>
               </form>
             ) : (
-              <p className="text-xs text-slate-500">
+              <p className="m-0 text-xs text-[var(--ink-faint)]">
                 {doc.isPlatformIssued
                   ? "Platform-issued tickets and vouchers cannot be edited."
                   : "Superseded documents are retained for audit and cannot be edited."}
               </p>
             )}
 
-            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-4">
-              <div className="flex flex-wrap gap-2">
+            <div className="fo-vault__dialog-foot">
+              <div className="fo-vault__action-group">
                 {doc.hasBinary && doc.isActive ? (
-                  <Button size="sm" variant="secondary" disabled={busy} onClick={() => onDownload(doc)}>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    disabled={busy}
+                    onClick={() => onDownload(doc)}
+                    icon={<Download size={13} strokeWidth={2} aria-hidden />}
+                  >
                     Download
                   </Button>
                 ) : null}
                 {doc.isActive ? (
-                  <Button size="sm" variant="ghost" disabled={busy} onClick={() => onShare(doc)}>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    disabled={busy}
+                    onClick={() => onShare(doc)}
+                    icon={<Share2 size={13} strokeWidth={2} aria-hidden />}
+                  >
                     Share
                   </Button>
                 ) : null}
@@ -317,7 +345,13 @@ export function VaultDocumentDetails({
                 ) : null}
               </div>
               {canEdit ? (
-                <Button size="sm" variant="ghost" disabled={busy} onClick={() => onDelete(doc)} className="text-rose-700">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  disabled={busy}
+                  onClick={() => onDelete(doc)}
+                  className="text-[var(--danger)]"
+                >
                   Delete
                 </Button>
               ) : null}

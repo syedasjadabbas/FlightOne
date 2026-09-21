@@ -1,0 +1,352 @@
+/**
+ * Ops escalation case — consultant desk case file.
+ * Navy / cyan / bone. Flat facts, quiet thread. No badge soup.
+ */
+
+.fo-ops-case {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.fo-ops-case__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: fit-content;
+  font-size: 0.8125rem;
+  color: var(--cyan);
+  text-decoration: none;
+  line-height: 1.2;
+}
+
+.fo-ops-case__back:hover {
+  color: var(--navy);
+}
+
+.fo-ops-case__back:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--cyan) 55%, transparent);
+  outline-offset: 2px;
+  border-radius: 0.25rem;
+}
+
+.fo-ops-case__header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--fo-desk-line);
+}
+
+.fo-ops-case__eyebrow {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cyan);
+}
+
+.fo-ops-case__title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 0.85rem;
+}
+
+.fo-ops-case__title {
+  margin: 0;
+  font-family: var(--font-hero);
+  font-size: clamp(1.35rem, 2.2vw, 1.65rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+  color: var(--navy);
+}
+
+.fo-ops-case__pills {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.fo-ops-case__id {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.75rem;
+  letter-spacing: -0.01em;
+  color: var(--fo-desk-faint);
+}
+
+.fo-ops-case__strip {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 0.85rem 0.95rem;
+  border: 1px solid var(--fo-desk-line);
+  border-left: 3px solid var(--cyan);
+  border-radius: var(--fo-desk-radius);
+  background: var(--white);
+}
+
+.fo-ops-case__strip--warn {
+  border-left-color: var(--danger);
+  background: color-mix(in oklab, var(--danger) 4%, white);
+}
+
+.fo-ops-case__strip-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.4rem;
+  background: color-mix(in oklab, var(--horizon-cool) 70%, white);
+  color: var(--cyan);
+}
+
+.fo-ops-case__strip--warn .fo-ops-case__strip-icon {
+  background: color-mix(in oklab, var(--danger) 8%, white);
+  color: var(--danger);
+}
+
+.fo-ops-case__strip-body {
+  min-width: 0;
+  display: grid;
+  gap: 0.2rem;
+}
+
+.fo-ops-case__strip-title {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.fo-ops-case__strip-copy {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--fo-desk-muted);
+}
+
+.fo-ops-case__strip-meta {
+  margin: 0.1rem 0 0;
+  font-size: 0.6875rem;
+  color: var(--fo-desk-faint);
+}
+
+.fo-ops-case__facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11.5rem, 1fr));
+  gap: 0.75rem 1rem;
+  margin: 0;
+}
+
+.fo-ops-case__fact {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.fo-ops-case__fact dt {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--fo-desk-faint);
+}
+
+.fo-ops-case__fact dd {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: var(--navy);
+  word-break: break-word;
+}
+
+.fo-ops-case__fact dd.fo-ops-case__mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.75rem;
+  letter-spacing: -0.01em;
+}
+
+.fo-ops-case__note {
+  margin: 0.85rem 0 0;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--fo-desk-line);
+}
+
+.fo-ops-case__note-label {
+  margin: 0 0 0.25rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--fo-desk-faint);
+}
+
+.fo-ops-case__note-body {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--navy);
+}
+
+.fo-ops-case__section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.fo-ops-case__section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.35rem 0.75rem;
+}
+
+.fo-ops-case__section-title {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-hero);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fo-desk-faint);
+}
+
+.fo-ops-case__section-title svg {
+  color: var(--cyan);
+  flex-shrink: 0;
+}
+
+.fo-ops-case__section-note {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--fo-desk-faint);
+}
+
+.fo-ops-case__section-note code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.6875rem;
+  padding: 0.1rem 0.3rem;
+  border-radius: 0.25rem;
+  background: color-mix(in oklab, var(--navy) 4%, white);
+  color: var(--navy);
+}
+
+.fo-ops-case__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.fo-ops-case__fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.fo-ops-case__feedback {
+  margin: 0;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--fo-desk-line);
+  border-left: 3px solid var(--cyan);
+  border-radius: var(--fo-desk-radius);
+  background: color-mix(in oklab, var(--bone) 55%, white);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: var(--navy);
+}
+
+.fo-ops-case__feedback--warn {
+  border-left-color: var(--danger);
+  background: color-mix(in oklab, var(--danger) 5%, white);
+}
+
+.fo-ops-case__thread {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 22rem;
+  overflow: auto;
+  border-top: 1px solid var(--fo-desk-line);
+  scrollbar-gutter: stable;
+}
+
+.fo-ops-case__msg {
+  display: grid;
+  grid-template-columns: 1.5rem 1fr;
+  gap: 0.35rem 0.65rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid color-mix(in oklab, var(--fo-desk-line) 80%, transparent);
+}
+
+.fo-ops-case__msg:last-child {
+  border-bottom: none;
+}
+
+.fo-ops-case__msg-icon {
+  margin-top: 0.15rem;
+  color: var(--fo-desk-faint);
+}
+
+.fo-ops-case__msg-icon--user {
+  color: var(--cyan);
+}
+
+.fo-ops-case__msg-icon--assistant {
+  color: var(--navy);
+}
+
+.fo-ops-case__msg-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.25rem 0.75rem;
+  font-size: 0.6875rem;
+  color: var(--fo-desk-faint);
+}
+
+.fo-ops-case__msg-role {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--fo-desk-muted);
+}
+
+.fo-ops-case__msg-body {
+  grid-column: 2;
+  margin: 0;
+  white-space: pre-wrap;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--navy);
+}
+
+.fo-ops-case__empty {
+  margin: 0;
+  padding: 1rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--fo-desk-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fo-ops-case__back {
+    transition: none;
+  }
+}

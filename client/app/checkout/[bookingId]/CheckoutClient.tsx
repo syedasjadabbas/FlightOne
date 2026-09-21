@@ -2,6 +2,15 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  User,
+  CreditCard,
+  Ticket,
+  AlertCircle,
+} from "lucide-react";
 import { Button, Spinner } from "@/components/ui";
 import {
   parsePriceChangedError,
@@ -61,103 +70,74 @@ function CheckoutProgressBar({
 }) {
   const isQuoted = status === "QUOTED";
   const isReserved = status === "RESERVED";
-  const isTicketed = status === "TICKETED" || status === "ACTIVE" || status === "COMPLETED";
+  const isTicketed =
+    status === "TICKETED" || status === "ACTIVE" || status === "COMPLETED";
 
   const isStep1Done = (isQuoted && quotedStep === "PAYMENT") || isReserved || isTicketed;
   const isStep1Active = isQuoted && quotedStep === "TRAVELLER";
-
   const isStep2Done = isTicketed;
   const isStep2Active = (isQuoted && quotedStep === "PAYMENT") || isReserved;
 
+  const steps = [
+    {
+      label: "Traveller",
+      done: isStep1Done,
+      active: isStep1Active,
+      Icon: User,
+    },
+    {
+      label: "Payment",
+      done: isStep2Done,
+      active: isStep2Active,
+      Icon: CreditCard,
+    },
+    {
+      label: "Ticket",
+      done: isTicketed,
+      active: false,
+      Icon: Ticket,
+    },
+  ] as const;
+
   return (
-    <div className="grid grid-cols-3 gap-2 sm:gap-4 py-3 sm:py-4 border-y border-slate-200/80">
-      {/* Step 1: Traveller */}
-      <div className="flex items-center gap-2.5 sm:gap-3">
-        <div
-          className={`flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-full text-[12px] sm:text-[13px] font-bold transition-colors ${
-            isStep1Done
-              ? "bg-emerald-600 text-white shadow-xs"
-              : isStep1Active
-                ? "bg-blue-600 text-white ring-4 ring-blue-50"
-                : "bg-slate-100 text-slate-400 border border-slate-200"
+    <ol className="fo-checkout__steps" aria-label="Checkout progress">
+      {steps.map(({ label, done, active, Icon }) => (
+        <li
+          key={label}
+          className={`fo-checkout__step ${
+            done ? "fo-checkout__step--done" : active ? "fo-checkout__step--active" : ""
           }`}
         >
-          {isStep1Done ? (
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
-          ) : (
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-              <circle cx="12" cy="7" r="4" />
-            </svg>
-          )}
-        </div>
-        <div className="min-w-0">
-          <p className={`text-[12px] sm:text-[13px] font-bold truncate ${isStep1Active || isStep1Done ? "text-slate-900" : "text-slate-500"}`}>
-            1. Traveller
-          </p>
-          <p className="text-[11px] text-slate-500 truncate hidden sm:block">Passenger details</p>
-        </div>
-      </div>
+          <span className="inline-flex items-center gap-1.5">
+            {done ? (
+              <Check className="h-3 w-3" aria-hidden />
+            ) : (
+              <Icon className="h-3 w-3" aria-hidden />
+            )}
+            {label}
+          </span>
+        </li>
+      ))}
+    </ol>
+  );
+}
 
-      {/* Step 2: Payment */}
-      <div className="flex items-center gap-2.5 sm:gap-3">
-        <div
-          className={`flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-full text-[12px] sm:text-[13px] font-bold transition-colors ${
-            isStep2Done
-              ? "bg-emerald-600 text-white shadow-xs"
-              : isStep2Active
-                ? "bg-blue-600 text-white ring-4 ring-blue-50"
-                : "bg-slate-100 text-slate-400 border border-slate-200"
-          }`}
-        >
-          {isStep2Done ? (
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
-          ) : (
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="2" y="5" width="20" height="14" rx="2" />
-              <line x1="2" y1="10" x2="22" y2="10" />
-            </svg>
-          )}
-        </div>
-        <div className="min-w-0">
-          <p className={`text-[12px] sm:text-[13px] font-bold truncate ${isStep2Active || isStep2Done ? "text-slate-900" : "text-slate-500"}`}>
-            2. Payment
-          </p>
-          <p className="text-[11px] text-slate-500 truncate hidden sm:block">Secure payment</p>
-        </div>
-      </div>
-
-      {/* Step 3: Ticket */}
-      <div className="flex items-center gap-2.5 sm:gap-3">
-        <div
-          className={`flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-full text-[12px] sm:text-[13px] font-bold transition-colors ${
-            isTicketed
-              ? "bg-emerald-600 text-white ring-4 ring-emerald-50"
-              : "bg-slate-100 text-slate-400 border border-slate-200"
-          }`}
-        >
-          {isTicketed ? (
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
-          ) : (
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M15 5l-3 3-3-3" />
-              <circle cx="12" cy="12" r="9" />
-            </svg>
-          )}
-        </div>
-        <div className="min-w-0">
-          <p className={`text-[12px] sm:text-[13px] font-bold truncate ${isTicketed ? "text-slate-900" : "text-slate-500"}`}>
-            3. Ticket
-          </p>
-          <p className="text-[11px] text-slate-500 truncate hidden sm:block">Confirmation</p>
-        </div>
-      </div>
+function CheckoutStatePanel({
+  children,
+  tone = "default",
+}: {
+  children: React.ReactNode;
+  tone?: "default" | "danger";
+}) {
+  return (
+    <div
+      className={`fo-desk__panel space-y-4 text-center ${
+        tone === "danger"
+          ? "border-[color-mix(in_oklab,var(--danger)_28%,var(--fo-desk-line))]"
+          : ""
+      }`}
+    >
+      {children}
     </div>
   );
 }
@@ -205,7 +185,6 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
 
   const [hasInitializedAutoFill, setHasInitializedAutoFill] = useState(false);
 
-  // Auto-fill primary traveller from Profile & Vault once loaded
   useEffect(() => {
     if (!hasInitializedAutoFill && (profile || documents || user)) {
       const primary = resolvePrimaryTraveller(profile, documents, user);
@@ -261,46 +240,47 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
 
   if (!hasHydrated) {
     return (
-      <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center shadow-xs">
+      <CheckoutStatePanel>
         <Spinner label="Loading session…" />
-      </div>
+      </CheckoutStatePanel>
     );
   }
 
   if (!accessToken) {
     return (
-      <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center space-y-4 shadow-xs">
-        <p className="text-[15px] text-slate-700">
+      <CheckoutStatePanel>
+        <p className="m-0 text-[14px] text-[var(--ink-soft)]">
           Sign in to continue checkout. Guests cannot book.
         </p>
         <Link
           href={`/login?redirect=${encodeURIComponent(`/checkout/${bookingId}`)}`}
-          className="inline-block rounded-xl bg-blue-600 px-6 py-2.5 text-[14px] font-semibold text-white hover:bg-blue-700 transition-colors"
+          className="inline-flex items-center justify-center rounded-[var(--fo-desk-radius)] bg-[var(--navy)] px-5 py-2.5 text-[13px] font-semibold text-[var(--white)] transition-colors hover:bg-[color-mix(in_oklab,var(--navy)_88%,var(--cyan))]"
         >
           Log in
         </Link>
-      </div>
+      </CheckoutStatePanel>
     );
   }
 
   if (isLoading) {
     return (
-      <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center shadow-xs">
-        <Spinner label="Loading booking details…" />
-      </div>
+      <CheckoutStatePanel>
+        <Spinner label="Loading booking…" />
+      </CheckoutStatePanel>
     );
   }
 
   if (isError || !booking) {
     return (
-      <div className="rounded-2xl border border-red-200 bg-white p-8 text-center space-y-4 shadow-xs">
-        <p className="text-[15px] font-medium text-red-600" role="alert">
+      <CheckoutStatePanel tone="danger">
+        <p className="m-0 flex items-center justify-center gap-2 text-[14px] font-medium text-[var(--danger)]" role="alert">
+          <AlertCircle className="h-4 w-4 shrink-0" aria-hidden />
           {apiErrorMessage(error) || "Booking not found"}
         </p>
         <Button variant="secondary" onClick={() => void refetch()}>
           Retry
         </Button>
-      </div>
+      </CheckoutStatePanel>
     );
   }
 
@@ -383,7 +363,9 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
       const payRes = await pay({
         id: bookingId,
         paymentMethodToken: payMethod === "card" ? paymentToken.trim() : undefined,
-        accountNumber: ["jazzcash", "easypaisa"].includes(payMethod) ? accountNumber.trim() : undefined,
+        accountNumber: ["jazzcash", "easypaisa"].includes(payMethod)
+          ? accountNumber.trim()
+          : undefined,
         method: payMethod,
       }).unwrap();
 
@@ -395,7 +377,6 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
           travellerSnapshot,
         }).unwrap();
 
-        // 1Link IBFT creates a PENDING hold — ticketing is NOT triggered until bank confirmation
         if (supplierCap?.canTicket && payRes.status !== "PENDING") {
           try {
             await ticket({ id: bookingId, clientAmountMinor: serverAmountMinor }).unwrap();
@@ -486,49 +467,25 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
   const checkoutBlockedByPriceChange = Boolean(priceChange);
 
   return (
-    <div className="w-full space-y-6 pb-12">
-      {/* ── 1. PAGE HEADER ───────────────────────────────── */}
-      <div className="flex flex-wrap items-start justify-between gap-4 pt-1">
-        <div className="space-y-1.5">
-          <Link
-            href="/chat"
-            className="inline-flex items-center gap-1.5 text-[13px] font-medium text-slate-500 hover:text-slate-900 transition-colors"
-          >
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M19 12H5M12 19l-7-7 7-7" />
-            </svg>
-            Back to search
-          </Link>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
-            Complete Your Reservation
-          </h1>
-          <p className="text-[13px] sm:text-[14px] text-slate-500 max-w-2xl">
-            Almost there! Review your details and complete the payment to confirm your booking.
-          </p>
-        </div>
+    <div className="fo-checkout w-full pb-10">
+      <header className="fo-desk__header">
+        <Link
+          href="/chat"
+          className="inline-flex items-center gap-1.5 text-[13px] font-medium text-[var(--ink-soft)] transition-colors hover:text-[var(--navy)]"
+        >
+          <ArrowLeft className="h-4 w-4" aria-hidden />
+          Back to search
+        </Link>
+        <h1 className="fo-desk__title">Checkout</h1>
+        <p className="fo-desk__lede">
+          Confirm traveller details and payment for this booking.
+        </p>
+      </header>
 
-        {/* Security indicator badge */}
-        <div className="flex items-center gap-3 rounded-xl border border-slate-200/80 bg-white px-3.5 py-2.5 shadow-2xs">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-            </svg>
-          </div>
-          <div>
-            <p className="text-[12px] font-bold text-slate-900 leading-tight">Your information is secure</p>
-            <p className="text-[11px] text-slate-500">Encrypted and protected</p>
-          </div>
-        </div>
-      </div>
-
-      {/* ── 2. BOOKING PROGRESS BAR ──────────────────────── */}
       <CheckoutProgressBar status={booking.status} quotedStep={quotedStep} />
 
-      {/* ── 3. MAIN RESPONSIVE TWO-COLUMN LAYOUT ──────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* ── LEFT COLUMN (~65%) ─────────────────────────── */}
-        <div className="lg:col-span-7 xl:col-span-8 flex flex-col gap-6">
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-12 lg:gap-8">
+        <div className="flex flex-col gap-4 lg:col-span-7 xl:col-span-8">
           {approvalGate && (booking.status !== "QUOTED" || quotedStep === "PAYMENT") ? (
             <CheckoutCorporateSection
               bookingId={bookingId}
@@ -589,13 +546,14 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
           ) : null}
 
           {!payCap?.configured ? (
-            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-[13px] text-amber-800">
-              Payment gateway unconfigured — live card capture is unavailable until credentials are set.
+            <div className="fo-checkout__notice text-[13px] text-[var(--ink-soft)]">
+              Payment gateway unconfigured — live card capture is unavailable until credentials are
+              set.
             </div>
           ) : null}
 
           {actionError ? (
-            <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-[13px] text-red-700" role="alert">
+            <div className="fo-checkout__alert text-[13px] text-[var(--danger)]" role="alert">
               {actionError}
             </div>
           ) : null}
@@ -666,37 +624,32 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
           ) : null}
 
           {booking.status === "TICKETED" ? (
-            <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-6 text-center space-y-2">
-              <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 mb-2">
-                <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
+            <div className="fo-desk__panel space-y-3 text-center">
+              <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-[var(--fo-desk-wash)] text-[var(--cyan)]">
+                <Check className="h-5 w-5" aria-hidden />
               </div>
-              <h3 className="text-[17px] font-bold text-emerald-950">Ticket Successfully Issued!</h3>
-              <p className="text-[13px] text-emerald-800 max-w-md mx-auto">
-                Confirmed with supplier {booking.externalRef ? `(PNR: ${booking.externalRef})` : ""}.
-                Your e-tickets and receipt have been delivered to your email and stored in your Traveller Vault.
+              <h3 className="m-0 text-[16px] font-semibold text-[var(--navy)]">Ticket issued</h3>
+              <p className="mx-auto m-0 max-w-md text-[13px] text-[var(--ink-soft)]">
+                Confirmed with supplier
+                {booking.externalRef ? ` (PNR ${booking.externalRef})` : ""}. E-tickets are in your
+                email and Traveller Vault.
               </p>
-              <div className="pt-3">
+              <div className="pt-1">
                 <Link
                   href="/journey"
-                  className="inline-block rounded-xl bg-emerald-600 px-6 py-2.5 text-[14px] font-semibold text-white hover:bg-emerald-700 transition-colors shadow-xs"
+                  className="inline-flex items-center gap-1.5 rounded-[var(--fo-desk-radius)] bg-[var(--navy)] px-5 py-2.5 text-[13px] font-semibold text-[var(--white)] transition-colors hover:bg-[color-mix(in_oklab,var(--navy)_88%,var(--cyan))]"
                 >
-                  View in My Journey →
+                  View in My Journey
+                  <ArrowRight className="h-4 w-4" aria-hidden />
                 </Link>
               </div>
             </div>
           ) : null}
         </div>
 
-        {/* ── RIGHT COLUMN (~35%, Sticky) ────────────────── */}
-        <div className="lg:col-span-5 xl:col-span-4 flex flex-col gap-6 lg:sticky lg:top-6">
-          <CheckoutBookingSummary
-            booking={booking}
-            tickets={tickets}
-            vouchers={vouchers}
-          />
-        </div>
+        <aside className="flex flex-col gap-4 lg:sticky lg:top-6 lg:col-span-5 xl:col-span-4">
+          <CheckoutBookingSummary booking={booking} tickets={tickets} vouchers={vouchers} />
+        </aside>
       </div>
     </div>
   );

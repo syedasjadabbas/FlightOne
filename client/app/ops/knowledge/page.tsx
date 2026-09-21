@@ -1,6 +1,8 @@
 import { SiteNav } from "@/components/SiteNav";
 import { DeskShell } from "@/components/DeskShell";
 import { OpsKnowledgeClient } from "./OpsKnowledgeClient";
+import "../ops-hub.css";
+import "./knowledge.css";
 
 export const metadata = { title: "Knowledge — FlightOne Ops" };
 

@@ -1,7 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import {
+  User,
+  Check,
+  ChevronDown,
+  CreditCard,
+  Smartphone,
+  Landmark,
+  ArrowRight,
+  ArrowLeft,
+  AlertCircle,
+  Clock,
+} from "lucide-react";
 import { Button, Input } from "@/components/ui";
 import { formatMinor } from "@/lib/bookings/checkoutDisplay";
 import type { Companion } from "@/lib/api/profile.api";
@@ -18,6 +29,13 @@ export type PaymentMethodOption =
   | "onelink_ibft";
 
 export type QuotedProgressionStep = "TRAVELLER" | "PAYMENT";
+
+const payMethodClass = (active: boolean) =>
+  `flex flex-col items-center text-center rounded-[var(--fo-desk-radius)] border p-3 transition-colors ${
+    active
+      ? "border-[var(--cyan)] bg-[var(--fo-desk-wash)] ring-1 ring-[var(--cyan)]"
+      : "border-[var(--fo-desk-line)] bg-[var(--white)] hover:border-[var(--fo-desk-line-strong)]"
+  }`;
 
 export function CheckoutQuotedActions({
   formData,
@@ -71,664 +89,428 @@ export function CheckoutQuotedActions({
   onBackToTraveller?: () => void;
 }) {
   const hasCompanions = savedCompanions.length > 0;
-  const [saveProfileInfo, setSaveProfileInfo] = useState(true);
-  const [saveCard, setSaveCard] = useState(true);
   const [isPassengerOpen, setIsPassengerOpen] = useState(true);
-  const [isContactOpen, setIsContactOpen] = useState(false);
-  const [isSpecialReqOpen, setIsSpecialReqOpen] = useState(false);
-  const [mealPref, setMealPref] = useState("standard");
-  const [seatPref, setSeatPref] = useState("any");
-  const [specialNotes, setSpecialNotes] = useState("");
   const [validationError, setValidationError] = useState<string | null>(null);
 
   const formattedPayAmount = amountMinor > 0 ? formatMinor(amountMinor, currency) : "";
+  const fieldDisabled = busy || checkoutBlockedByPriceChange;
 
-  return (
-    <div className="flex flex-col gap-6">
-      {/* ── STEP 1: TRAVELLER & PASSENGER DETAILS CARD ───── */}
-      {quotedStep === "TRAVELLER" ? (
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs transition-shadow hover:shadow-sm">
-          {/* Card Header */}
-          <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-100 pb-4">
-            <div className="flex items-start gap-3">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                  <circle cx="12" cy="7" r="4" />
-                </svg>
-              </div>
-              <div>
-                <h2 className="text-[17px] font-bold tracking-tight text-slate-900">
-                  Traveller & Passenger Details
-                </h2>
-                <p className="text-[12px] text-slate-500 mt-0.5 leading-relaxed">
-                  These details will be used for your ticket issuance. Make sure they match your travel documents.
-                </p>
-              </div>
+  const inputFocus =
+    "w-full rounded-[var(--fo-desk-radius)] border border-[var(--fo-desk-line)] bg-[var(--white)] px-3.5 py-2.5 text-[13px] text-[var(--navy)] placeholder:text-[var(--ink-faint)] outline-none transition-colors focus:border-[var(--cyan)] focus:ring-1 focus:ring-[var(--cyan)]";
+
+  if (quotedStep === "TRAVELLER") {
+    return (
+      <div className="fo-desk__panel space-y-4">
+        <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[var(--fo-desk-line)] pb-4">
+          <div className="flex items-start gap-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--fo-desk-radius)] bg-[var(--fo-desk-wash)] text-[var(--cyan)]">
+              <User className="h-4 w-4" aria-hidden />
             </div>
-
-            {formData.isAutoFilled ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-cyan-50 px-3 py-1 text-[11px] font-semibold text-cyan-800 border border-cyan-200/60 shadow-2xs">
-                <svg className="h-3.5 w-3.5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
-                </svg>
-                Auto-filled from {formData.sourceLabel || "Profile & Vault"}
-              </span>
-            ) : null}
+            <div>
+              <h2 className="m-0 text-[16px] font-semibold tracking-tight text-[var(--navy)]">
+                Traveller details
+              </h2>
+              <p className="mt-0.5 text-[12px] leading-relaxed text-[var(--ink-soft)]">
+                Must match the passport or travel document used for ticketing.
+              </p>
+            </div>
           </div>
 
-          {/* Companion Switcher */}
-          {hasCompanions ? (
-            <div className="mt-4 flex flex-wrap items-center gap-2 rounded-xl bg-slate-50/80 p-2 border border-slate-100">
-              <span className="text-[12px] font-medium text-slate-500 pl-1">Select Profile:</span>
-              <button
-                type="button"
-                disabled={busy || checkoutBlockedByPriceChange}
-                onClick={onSelectPrimary}
-                className={`rounded-lg px-3 py-1 text-[12px] font-semibold transition-all ${
-                  !formData.companionId
-                    ? "bg-slate-900 text-white shadow-xs"
-                    : "bg-white text-slate-700 hover:bg-slate-100 border border-slate-200"
-                }`}
-              >
-                Primary (Self)
-              </button>
-              {savedCompanions.map((comp) => (
-                <button
-                  key={comp.id}
-                  type="button"
-                  disabled={busy || checkoutBlockedByPriceChange}
-                  onClick={() => onSelectCompanion(comp)}
-                  className={`rounded-lg px-3 py-1 text-[12px] font-semibold transition-all ${
-                    formData.companionId === comp.id
-                      ? "bg-slate-900 text-white shadow-xs"
-                      : "bg-white text-slate-700 hover:bg-slate-100 border border-slate-200"
-                  }`}
-                >
-                  {comp.fullName}
-                  {comp.relationship ? ` (${comp.relationship})` : ""}
-                </button>
-              ))}
-            </div>
+          {formData.isAutoFilled ? (
+            <span className="fo-desk__status fo-desk__status--ok inline-flex items-center gap-1">
+              <Check className="h-3 w-3" aria-hidden />
+              From {formData.sourceLabel || "Profile & Vault"}
+            </span>
           ) : null}
+        </div>
 
-          {/* Passenger 1 Box */}
-          <div className="mt-5 rounded-xl border border-slate-200/90 bg-slate-50/30 overflow-hidden">
-            {/* Passenger Box Header */}
+        {hasCompanions ? (
+          <div className="flex flex-wrap items-center gap-2 rounded-[var(--fo-desk-radius)] border border-[var(--fo-desk-line)] bg-[var(--fo-desk-wash)] p-2">
+            <span className="pl-1 text-[12px] font-medium text-[var(--ink-soft)]">Traveller:</span>
             <button
               type="button"
-              onClick={() => setIsPassengerOpen((v) => !v)}
-              className="flex w-full items-center justify-between p-3.5 bg-slate-50 hover:bg-slate-100/70 transition-colors text-left cursor-pointer"
+              disabled={fieldDisabled}
+              onClick={onSelectPrimary}
+              className={`fo-desk__chip ${!formData.companionId ? "fo-desk__chip--active" : ""}`}
             >
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-200 text-slate-700 text-[11px] font-bold">
-                  1
-                </div>
-                <div>
-                  <span className="text-[13px] font-bold text-slate-900">Passenger 1 (Adult)</span>
-                  <span className="text-[11px] text-slate-500 ml-2 font-medium">Primary traveller</span>
-                </div>
-              </div>
-              <svg
-                className={`h-4 w-4 text-slate-500 transition-transform ${isPassengerOpen ? "rotate-180" : ""}`}
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <polyline points="6 9 12 15 18 9" />
-              </svg>
+              Primary
             </button>
+            {savedCompanions.map((comp) => (
+              <button
+                key={comp.id}
+                type="button"
+                disabled={fieldDisabled}
+                onClick={() => onSelectCompanion(comp)}
+                className={`fo-desk__chip ${
+                  formData.companionId === comp.id ? "fo-desk__chip--active" : ""
+                }`}
+              >
+                {comp.fullName}
+                {comp.relationship ? ` (${comp.relationship})` : ""}
+              </button>
+            ))}
+          </div>
+        ) : null}
 
-            {isPassengerOpen ? (
-              <div className="p-4 sm:p-5 space-y-4 bg-white">
-                {/* Form Grid */}
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <Input
-                    label="Given name *"
-                    value={formData.givenName}
-                    onChange={(e) => {
-                      setValidationError(null);
-                      setFormData((prev) => ({ ...prev, givenName: e.target.value }));
-                    }}
-                    placeholder="First / Given names"
-                    disabled={busy || checkoutBlockedByPriceChange}
-                    required
-                  />
-                  <Input
-                    label="Surname *"
-                    value={formData.surname}
-                    onChange={(e) => {
-                      setValidationError(null);
-                      setFormData((prev) => ({ ...prev, surname: e.target.value }));
-                    }}
-                    placeholder="Last / Family name"
-                    disabled={busy || checkoutBlockedByPriceChange}
-                    required
-                  />
-                </div>
+        <div className="overflow-hidden rounded-[var(--fo-desk-radius)] border border-[var(--fo-desk-line)]">
+          <button
+            type="button"
+            onClick={() => setIsPassengerOpen((v) => !v)}
+            className="flex w-full cursor-pointer items-center justify-between bg-[var(--fo-desk-wash)] p-3.5 text-left transition-colors hover:bg-[color-mix(in_oklab,var(--cyan)_8%,var(--white))]"
+            aria-expanded={isPassengerOpen}
+          >
+            <div className="flex items-center gap-2.5">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--navy)] text-[11px] font-bold text-[var(--white)]">
+                1
+              </span>
+              <div>
+                <span className="text-[13px] font-semibold text-[var(--navy)]">Passenger 1</span>
+                <span className="ml-2 text-[11px] font-medium text-[var(--ink-faint)]">Adult</span>
+              </div>
+            </div>
+            <ChevronDown
+              className={`h-4 w-4 text-[var(--ink-soft)] transition-transform ${
+                isPassengerOpen ? "rotate-180" : ""
+              }`}
+              aria-hidden
+            />
+          </button>
 
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div>
-                    <label className="block text-[12px] font-semibold text-slate-700 mb-1.5">
-                      Nationality *
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.nationality}
-                      onChange={(e) => {
-                        setValidationError(null);
-                        setFormData((prev) => ({
-                          ...prev,
-                          nationality: e.target.value.toUpperCase().slice(0, 3),
-                        }));
-                      }}
-                      placeholder="e.g. PK (Pakistan), US, GB"
-                      disabled={busy || checkoutBlockedByPriceChange}
-                      className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-[13px] text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 outline-none transition-all"
-                    />
-                  </div>
+          {isPassengerOpen ? (
+            <div className="space-y-4 bg-[var(--white)] p-4 sm:p-5">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <Input
+                  label="Given name *"
+                  value={formData.givenName}
+                  onChange={(e) => {
+                    setValidationError(null);
+                    setFormData((prev) => ({ ...prev, givenName: e.target.value }));
+                  }}
+                  placeholder="First / given names"
+                  disabled={fieldDisabled}
+                  required
+                />
+                <Input
+                  label="Surname *"
+                  value={formData.surname}
+                  onChange={(e) => {
+                    setValidationError(null);
+                    setFormData((prev) => ({ ...prev, surname: e.target.value }));
+                  }}
+                  placeholder="Last / family name"
+                  disabled={fieldDisabled}
+                  required
+                />
+              </div>
 
-                  <Input
-                    label="Date of birth *"
-                    type="date"
-                    value={formData.dateOfBirth}
-                    onChange={(e) => {
-                      setValidationError(null);
-                      setFormData((prev) => ({ ...prev, dateOfBirth: e.target.value }));
-                    }}
-                    disabled={busy || checkoutBlockedByPriceChange}
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <Input
-                    label="Passport number *"
-                    value={formData.passportNumber}
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="mb-1.5 block text-[12px] font-semibold text-[var(--navy)]">
+                    Nationality *
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.nationality}
                     onChange={(e) => {
                       setValidationError(null);
                       setFormData((prev) => ({
                         ...prev,
-                        passportNumber: e.target.value.toUpperCase(),
+                        nationality: e.target.value.toUpperCase().slice(0, 3),
                       }));
                     }}
-                    placeholder="Passport / Document ID"
-                    disabled={busy || checkoutBlockedByPriceChange}
-                  />
-                  <Input
-                    label="Passport expiry date *"
-                    type="date"
-                    value={formData.passportExpiry}
-                    onChange={(e) => {
-                      setValidationError(null);
-                      setFormData((prev) => ({ ...prev, passportExpiry: e.target.value }));
-                    }}
-                    disabled={busy || checkoutBlockedByPriceChange}
+                    placeholder="e.g. PK, US, GB"
+                    disabled={fieldDisabled}
+                    className={inputFocus}
                   />
                 </div>
-
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <Input
-                    label="Phone number *"
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => {
-                      setValidationError(null);
-                      setFormData((prev) => ({ ...prev, phone: e.target.value }));
-                    }}
-                    placeholder="+92 300 1234567"
-                    disabled={busy || checkoutBlockedByPriceChange}
-                  />
-                  <Input
-                    label="Email address *"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => {
-                      setValidationError(null);
-                      setFormData((prev) => ({ ...prev, email: e.target.value }));
-                    }}
-                    placeholder="traveller@example.com"
-                    disabled={busy || checkoutBlockedByPriceChange}
-                  />
-                </div>
-
-                {/* Checkbox Save Info */}
-                <div className="pt-2">
-                  <label className="flex items-start gap-2.5 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={saveProfileInfo}
-                      onChange={(e) => setSaveProfileInfo(e.target.checked)}
-                      className="mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <div>
-                      <span className="text-[13px] font-medium text-slate-800">
-                        Save this information to my profile for faster booking next time
-                      </span>
-                      <p className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
-                        <svg className="h-3 w-3 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                        </svg>
-                        Your data is encrypted and stored securely
-                      </p>
-                    </div>
-                  </label>
-                </div>
+                <Input
+                  label="Date of birth *"
+                  type="date"
+                  value={formData.dateOfBirth}
+                  onChange={(e) => {
+                    setValidationError(null);
+                    setFormData((prev) => ({ ...prev, dateOfBirth: e.target.value }));
+                  }}
+                  disabled={fieldDisabled}
+                />
               </div>
-            ) : null}
-          </div>
 
-          {/* ── COLLAPSIBLE SECTIONS ─────────────────────────── */}
-          <div className="mt-4 space-y-3">
-            {/* Section 1: Contact Information */}
-            <div className="rounded-xl border border-slate-200/80 bg-white overflow-hidden">
-              <button
-                type="button"
-                onClick={() => setIsContactOpen((v) => !v)}
-                className="flex w-full items-center justify-between p-3.5 hover:bg-slate-50 transition-colors text-left cursor-pointer"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
-                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                      <polyline points="22,6 12,13 2,6" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 className="text-[13px] font-bold text-slate-900">Contact Information</h4>
-                    <p className="text-[11px] text-slate-500">For booking updates and travel notifications</p>
-                  </div>
-                </div>
-                <svg
-                  className={`h-4 w-4 text-slate-400 transition-transform ${isContactOpen ? "rotate-180" : ""}`}
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <polyline points="6 9 12 15 18 9" />
-                </svg>
-              </button>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <Input
+                  label="Passport number *"
+                  value={formData.passportNumber}
+                  onChange={(e) => {
+                    setValidationError(null);
+                    setFormData((prev) => ({
+                      ...prev,
+                      passportNumber: e.target.value.toUpperCase(),
+                    }));
+                  }}
+                  placeholder="Passport / document ID"
+                  disabled={fieldDisabled}
+                />
+                <Input
+                  label="Passport expiry *"
+                  type="date"
+                  value={formData.passportExpiry}
+                  onChange={(e) => {
+                    setValidationError(null);
+                    setFormData((prev) => ({ ...prev, passportExpiry: e.target.value }));
+                  }}
+                  disabled={fieldDisabled}
+                />
+              </div>
 
-              {isContactOpen ? (
-                <div className="border-t border-slate-100 p-4 bg-slate-50/50 space-y-3 text-[12px] text-slate-600">
-                  <p>
-                    Flight status updates, gate changes, and e-tickets will be delivered to{" "}
-                    <strong className="text-slate-900">{formData.email || "your email"}</strong> and via SMS to{" "}
-                    <strong className="text-slate-900">{formData.phone || "your phone number"}</strong>.
-                  </p>
-                  <p className="text-[11px] text-slate-500">
-                    You can update notification channels anytime in Profile & Journey Watch.
-                  </p>
-                </div>
-              ) : null}
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <Input
+                  label="Phone *"
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => {
+                    setValidationError(null);
+                    setFormData((prev) => ({ ...prev, phone: e.target.value }));
+                  }}
+                  placeholder="+92 300 1234567"
+                  disabled={fieldDisabled}
+                />
+                <Input
+                  label="Email *"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => {
+                    setValidationError(null);
+                    setFormData((prev) => ({ ...prev, email: e.target.value }));
+                  }}
+                  placeholder="traveller@example.com"
+                  disabled={fieldDisabled}
+                />
+              </div>
             </div>
+          ) : null}
+        </div>
 
-            {/* Section 2: Special Requests */}
-            <div className="rounded-xl border border-slate-200/80 bg-white overflow-hidden">
-              <button
-                type="button"
-                onClick={() => setIsSpecialReqOpen((v) => !v)}
-                className="flex w-full items-center justify-between p-3.5 hover:bg-slate-50 transition-colors text-left cursor-pointer"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
-                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <line x1="4" y1="21" x2="4" y2="14" />
-                      <line x1="4" y1="10" x2="4" y2="3" />
-                      <line x1="12" y1="21" x2="12" y2="12" />
-                      <line x1="12" y1="8" x2="12" y2="3" />
-                      <line x1="20" y1="21" x2="20" y2="16" />
-                      <line x1="20" y1="12" x2="20" y2="3" />
-                      <line x1="1" y1="14" x2="7" y2="14" />
-                      <line x1="9" y1="8" x2="15" y2="8" />
-                      <line x1="17" y1="16" x2="23" y2="16" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 className="text-[13px] font-bold text-slate-900">Special Requests (Optional)</h4>
-                    <p className="text-[11px] text-slate-500">Seats, meals, assistance and more</p>
-                  </div>
-                </div>
-                <svg
-                  className={`h-4 w-4 text-slate-400 transition-transform ${isSpecialReqOpen ? "rotate-180" : ""}`}
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <polyline points="6 9 12 15 18 9" />
-                </svg>
-              </button>
-
-              {isSpecialReqOpen ? (
-                <div className="border-t border-slate-100 p-4 bg-slate-50/50 space-y-3">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                        Meal Preference
-                      </label>
-                      <select
-                        value={mealPref}
-                        onChange={(e) => setMealPref(e.target.value)}
-                        className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-[12px] text-slate-900 focus:border-blue-600 outline-none"
-                      >
-                        <option value="standard">Standard Airline Meal</option>
-                        <option value="halal">Halal Meal (MOML)</option>
-                        <option value="vegetarian">Vegetarian Meal (VGML)</option>
-                        <option value="diabetic">Diabetic Meal (DBML)</option>
-                        <option value="child">Child Meal (CHML)</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                        Seat Preference
-                      </label>
-                      <select
-                        value={seatPref}
-                        onChange={(e) => setSeatPref(e.target.value)}
-                        className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-[12px] text-slate-900 focus:border-blue-600 outline-none"
-                      >
-                        <option value="any">No Preference</option>
-                        <option value="window">Window Seat</option>
-                        <option value="aisle">Aisle Seat</option>
-                        <option value="extra_legroom">Extra Legroom (Subject to airline)</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                      Special Assistance Notes
-                    </label>
-                    <input
-                      type="text"
-                      value={specialNotes}
-                      onChange={(e) => setSpecialNotes(e.target.value)}
-                      placeholder="e.g. Wheelchair assistance, medical equipment"
-                      className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-[12px] text-slate-900 placeholder:text-slate-400 focus:border-blue-600 outline-none"
-                    />
-                  </div>
-                </div>
-              ) : null}
-            </div>
+        {validationError ? (
+          <div
+            className="fo-checkout__alert flex items-center gap-2 text-[12px] font-medium text-[var(--danger)]"
+            role="alert"
+          >
+            <AlertCircle className="h-4 w-4 shrink-0" aria-hidden />
+            <span>{validationError}</span>
           </div>
+        ) : null}
 
-          {/* Validation error message if any */}
-          {validationError ? (
-            <div className="mt-4 rounded-xl border border-rose-200 bg-rose-50 p-3.5 text-[12px] text-rose-700 font-medium flex items-center gap-2">
-              <svg className="h-4 w-4 shrink-0 text-rose-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="12" cy="12" r="10" />
-                <line x1="12" y1="8" x2="12" y2="12" />
-                <line x1="12" y1="16" x2="12.01" y2="16" />
-              </svg>
-              <span>{validationError}</span>
+        <div className="fo-checkout__actions flex-row flex-wrap items-center justify-between gap-3">
+          <p className="fo-checkout__note m-0">
+            Review passenger details before payment.
+          </p>
+          <Button
+            type="button"
+            className="inline-flex min-w-[200px] items-center justify-center gap-2"
+            disabled={fieldDisabled}
+            onClick={() => {
+              const validation = validateTravellerFormData(formData);
+              if (!validation.isValid) {
+                setValidationError("Given name and surname are required");
+                return;
+              }
+              setValidationError(null);
+              onContinueToCheckout?.();
+            }}
+          >
+            Continue to payment
+            <ArrowRight className="h-4 w-4" aria-hidden />
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="fo-desk__panel flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-[var(--fo-desk-radius)] bg-[var(--fo-desk-wash)] text-[var(--cyan)]">
+            <User className="h-4 w-4" aria-hidden />
+          </div>
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="m-0 text-[13px] font-semibold text-[var(--navy)]">
+                {formData.givenName} {formData.surname}
+              </p>
+              <span className="fo-desk__status fo-desk__status--ok inline-flex items-center gap-1">
+                <Check className="h-3 w-3" aria-hidden />
+                Ready
+              </span>
+            </div>
+            <p className="m-0 text-[11px] text-[var(--ink-faint)]">
+              {[
+                formData.nationality ? formData.nationality : null,
+                formData.passportNumber ? `Passport ${formData.passportNumber}` : null,
+                formData.phone || null,
+              ]
+                .filter(Boolean)
+                .join(" · ") || "Passenger on file"}
+            </p>
+          </div>
+        </div>
+        {onBackToTraveller ? (
+          <button
+            type="button"
+            onClick={onBackToTraveller}
+            className="inline-flex cursor-pointer items-center gap-1 text-[12px] font-semibold text-[var(--cyan)] underline-offset-2 hover:underline"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
+            Edit traveller
+          </button>
+        ) : null}
+      </div>
+
+      <div className="fo-desk__panel space-y-4">
+        <div className="flex items-start gap-3 border-b border-[var(--fo-desk-line)] pb-4">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--fo-desk-radius)] bg-[var(--fo-desk-wash)] text-[var(--cyan)]">
+            <CreditCard className="h-4 w-4" aria-hidden />
+          </div>
+          <div>
+            <h2 className="m-0 text-[16px] font-semibold tracking-tight text-[var(--navy)]">
+              Payment
+            </h2>
+            <p className="mt-0.5 text-[12px] text-[var(--ink-soft)]">
+              Choose a method to pay or hold this booking.
+            </p>
+          </div>
+        </div>
+
+        {setPayMethod ? (
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            <button
+              type="button"
+              disabled={busy || corporateBlocked}
+              onClick={() => setPayMethod("card")}
+              className={payMethodClass(payMethod === "card")}
+            >
+              <CreditCard className="mb-1.5 h-4 w-4 text-[var(--cyan)]" aria-hidden />
+              <span className="text-[13px] font-semibold text-[var(--navy)]">Card</span>
+              <span className="mt-0.5 text-[10px] text-[var(--ink-faint)]">Visa / Mastercard</span>
+            </button>
+            <button
+              type="button"
+              disabled={busy || corporateBlocked}
+              onClick={() => setPayMethod("jazzcash")}
+              className={payMethodClass(payMethod === "jazzcash")}
+            >
+              <Smartphone className="mb-1.5 h-4 w-4 text-[var(--cyan)]" aria-hidden />
+              <span className="text-[13px] font-semibold text-[var(--navy)]">JazzCash</span>
+              <span className="mt-0.5 text-[10px] text-[var(--ink-faint)]">Mobile wallet</span>
+            </button>
+            <button
+              type="button"
+              disabled={busy || corporateBlocked}
+              onClick={() => setPayMethod("easypaisa")}
+              className={payMethodClass(payMethod === "easypaisa")}
+            >
+              <Smartphone className="mb-1.5 h-4 w-4 text-[var(--cyan)]" aria-hidden />
+              <span className="text-[13px] font-semibold text-[var(--navy)]">Easypaisa</span>
+              <span className="mt-0.5 text-[10px] text-[var(--ink-faint)]">Mobile account</span>
+            </button>
+            <button
+              type="button"
+              disabled={busy || corporateBlocked}
+              onClick={() => setPayMethod("onelink_ibft")}
+              className={payMethodClass(payMethod === "onelink_ibft")}
+            >
+              <Landmark className="mb-1.5 h-4 w-4 text-[var(--cyan)]" aria-hidden />
+              <span className="text-[13px] font-semibold text-[var(--navy)]">1Link IBFT</span>
+              <span className="mt-0.5 text-[10px] text-[var(--ink-faint)]">1Bill transfer</span>
+            </button>
+          </div>
+        ) : null}
+
+        <div className="space-y-4">
+          {payMethod === "card" ? (
+            <Input
+              label="Card token *"
+              value={paymentToken}
+              onChange={(e) => setPaymentToken(e.target.value)}
+              placeholder="pm_card_visa or test token"
+              disabled={busy || !canCapture || checkoutBlockedByPriceChange || corporateBlocked}
+            />
+          ) : null}
+
+          {payMethod === "jazzcash" ? (
+            <div className="space-y-2">
+              <Input
+                label="JazzCash mobile number *"
+                value={accountNumber}
+                onChange={(e) => setAccountNumber?.(e.target.value)}
+                placeholder="03001234567"
+                disabled={busy || checkoutBlockedByPriceChange || corporateBlocked}
+              />
+              <p className="fo-checkout__note">
+                You will receive an MPIN prompt on this number.
+              </p>
             </div>
           ) : null}
 
-          {/* Explicit "Continue to Checkout" Progression Button */}
-          <div className="mt-6 pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p className="text-[11px] text-slate-500">
-              Please review passenger details before continuing to payment.
-            </p>
+          {payMethod === "easypaisa" ? (
+            <div className="space-y-2">
+              <Input
+                label="Easypaisa mobile number *"
+                value={accountNumber}
+                onChange={(e) => setAccountNumber?.(e.target.value)}
+                placeholder="03451234567"
+                disabled={busy || checkoutBlockedByPriceChange || corporateBlocked}
+              />
+              <p className="fo-checkout__note">
+                You will receive an OTP / PIN prompt on this number.
+              </p>
+            </div>
+          ) : null}
+
+          {payMethod === "onelink_ibft" ? (
+            <div className="fo-checkout__notice space-y-1 text-[12px]">
+              <p className="m-0 font-semibold text-[var(--navy)]">1Bill / 1Link bank transfer</p>
+              <p className="m-0 text-[var(--ink-soft)]">
+                Pay generates a 1Bill consumer number. Complete transfer via any Pakistani banking
+                app within the hold window to issue the ticket.
+              </p>
+            </div>
+          ) : null}
+
+          {payMethod === "corporate_credit" ? (
+            <div className="fo-checkout__notice text-[12px] text-[var(--ink-soft)]">
+              Corporate credit selected — verified server-side.
+            </div>
+          ) : null}
+
+          <div className="fo-checkout__cta-row pt-1">
             <Button
               type="button"
-              className="w-full sm:w-auto min-w-[220px] py-3.5 text-[14px] font-bold shadow-md transition-transform active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer"
-              disabled={busy || checkoutBlockedByPriceChange}
-              onClick={() => {
-                const validation = validateTravellerFormData(formData);
-                if (!validation.isValid) {
-                  setValidationError("Given name and surname are required to proceed to checkout");
-                  return;
-                }
-                setValidationError(null);
-                onContinueToCheckout?.();
-              }}
+              className="flex-1"
+              disabled={
+                busy ||
+                (!canCapture && payMethod === "card") ||
+                checkoutBlockedByPriceChange ||
+                corporateBlocked
+              }
+              onClick={onPay}
             >
-              <span>Continue to Checkout</span>
-              <span aria-hidden="true">→</span>
+              {paying
+                ? "Processing…"
+                : formattedPayAmount
+                  ? `Pay ${formattedPayAmount}`
+                  : "Pay & confirm"}
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={busy || checkoutBlockedByPriceChange || corporateBlocked}
+              onClick={onReserve}
+            >
+              {reserving ? "Holding…" : "Hold seat"}
             </Button>
           </div>
         </div>
-      ) : (
-        /* ── STEP 2: PAYMENT METHOD CARD ──────────────────── */
-        <div className="space-y-6">
-          {/* Passenger Summary Chip when in Payment Step */}
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200/90 bg-slate-50/80 p-4 shadow-2xs">
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-100 text-blue-700">
-                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                  <circle cx="12" cy="7" r="4" />
-                </svg>
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <p className="text-[13px] font-bold text-slate-900">
-                    {formData.givenName} {formData.surname}
-                  </p>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 px-2 py-0.2 text-[10px] font-semibold text-emerald-800">
-                    ✓ Passenger details verified
-                  </span>
-                </div>
-                <p className="text-[11px] text-slate-500">
-                  {formData.nationality ? `Nationality: ${formData.nationality}` : "PK"}
-                  {formData.passportNumber ? ` · Passport: ${formData.passportNumber}` : ""}
-                  {formData.phone ? ` · ${formData.phone}` : ""}
-                </p>
-              </div>
-            </div>
-            {onBackToTraveller ? (
-              <button
-                type="button"
-                onClick={onBackToTraveller}
-                className="text-[12px] font-semibold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer flex items-center gap-1"
-              >
-                <span>←</span>
-                <span>Edit Passenger Details</span>
-              </button>
-            ) : null}
-          </div>
-
-          <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs transition-shadow hover:shadow-sm">
-            <div className="flex items-start gap-3 border-b border-slate-100 pb-4">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="2" y="5" width="20" height="14" rx="2" />
-                  <line x1="2" y1="10" x2="22" y2="10" />
-                </svg>
-              </div>
-              <div>
-                <h2 className="text-[17px] font-bold tracking-tight text-slate-900">Payment Method</h2>
-                <p className="text-[12px] text-slate-500 mt-0.5">
-                  Choose your preferred payment method to complete this booking.
-                </p>
-              </div>
-            </div>
-
-            {/* Selectable Payment Method Cards */}
-            {setPayMethod ? (
-              <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                {/* Card */}
-                <button
-                  type="button"
-                  disabled={busy || corporateBlocked}
-                  onClick={() => setPayMethod("card")}
-                  className={`flex flex-col items-center text-center p-3.5 rounded-xl border transition-all cursor-pointer ${
-                    payMethod === "card"
-                      ? "border-blue-600 bg-blue-50/40 ring-1 ring-blue-600 shadow-2xs"
-                      : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
-                  }`}
-                >
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100/70 text-blue-700 mb-2">
-                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <rect x="2" y="5" width="20" height="14" rx="2" />
-                      <line x1="2" y1="10" x2="22" y2="10" />
-                    </svg>
-                  </div>
-                  <span className="text-[13px] font-bold text-slate-900">Card</span>
-                  <span className="text-[10px] text-slate-500 mt-0.5">Visa / Mastercard</span>
-                </button>
-
-                {/* JazzCash */}
-                <button
-                  type="button"
-                  disabled={busy || corporateBlocked}
-                  onClick={() => setPayMethod("jazzcash")}
-                  className={`flex flex-col items-center text-center p-3.5 rounded-xl border transition-all cursor-pointer ${
-                    payMethod === "jazzcash"
-                      ? "border-amber-600 bg-amber-50/40 ring-1 ring-amber-600 shadow-2xs"
-                      : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
-                  }`}
-                >
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-100/70 text-amber-700 mb-2">
-                    <span className="text-[14px]">📱</span>
-                  </div>
-                  <span className="text-[13px] font-bold text-slate-900">JazzCash</span>
-                  <span className="text-[10px] text-slate-500 mt-0.5">Mobile Wallet</span>
-                </button>
-
-                {/* Easypaisa */}
-                <button
-                  type="button"
-                  disabled={busy || corporateBlocked}
-                  onClick={() => setPayMethod("easypaisa")}
-                  className={`flex flex-col items-center text-center p-3.5 rounded-xl border transition-all cursor-pointer ${
-                    payMethod === "easypaisa"
-                      ? "border-emerald-600 bg-emerald-50/40 ring-1 ring-emerald-600 shadow-2xs"
-                      : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
-                  }`}
-                >
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100/70 text-emerald-700 mb-2">
-                    <span className="text-[14px]">📱</span>
-                  </div>
-                  <span className="text-[13px] font-bold text-slate-900">Easypaisa</span>
-                  <span className="text-[10px] text-slate-500 mt-0.5">Mobile Account</span>
-                </button>
-
-                {/* 1Link IBFT */}
-                <button
-                  type="button"
-                  disabled={busy || corporateBlocked}
-                  onClick={() => setPayMethod("onelink_ibft")}
-                  className={`flex flex-col items-center text-center p-3.5 rounded-xl border transition-all cursor-pointer ${
-                    payMethod === "onelink_ibft"
-                      ? "border-blue-800 bg-blue-50/40 ring-1 ring-blue-800 shadow-2xs"
-                      : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
-                  }`}
-                >
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100/70 text-blue-900 mb-2">
-                    <span className="text-[14px]">🏛️</span>
-                  </div>
-                  <span className="text-[13px] font-bold text-slate-900">1Link IBFT</span>
-                  <span className="text-[10px] text-slate-500 mt-0.5">1Bill Bank Transfer</span>
-                </button>
-              </div>
-            ) : null}
-
-            {/* Payment Fields */}
-            <div className="mt-6 space-y-4">
-              {payMethod === "card" ? (
-                <div className="space-y-3">
-                  <Input
-                    label="Card number / token *"
-                    value={paymentToken}
-                    onChange={(e) => setPaymentToken(e.target.value)}
-                    placeholder="pm_card_visa or test token"
-                    disabled={busy || !canCapture || checkoutBlockedByPriceChange || corporateBlocked}
-                  />
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      id="saveCard"
-                      checked={saveCard}
-                      onChange={(e) => setSaveCard(e.target.checked)}
-                      className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-                    />
-                    <label htmlFor="saveCard" className="text-[12px] text-slate-600 select-none cursor-pointer">
-                      Save card for future faster bookings
-                    </label>
-                  </div>
-                </div>
-              ) : null}
-
-              {payMethod === "jazzcash" ? (
-                <div className="space-y-2">
-                  <Input
-                    label="JazzCash Mobile Account Number *"
-                    value={accountNumber}
-                    onChange={(e) => setAccountNumber?.(e.target.value)}
-                    placeholder="03001234567"
-                    disabled={busy || checkoutBlockedByPriceChange || corporateBlocked}
-                  />
-                  <p className="text-[11px] text-slate-500">
-                    Enter your JazzCash registered mobile number. You will receive an MPIN confirmation prompt on your phone.
-                  </p>
-                </div>
-              ) : null}
-
-              {payMethod === "easypaisa" ? (
-                <div className="space-y-2">
-                  <Input
-                    label="Easypaisa Mobile Account Number *"
-                    value={accountNumber}
-                    onChange={(e) => setAccountNumber?.(e.target.value)}
-                    placeholder="03451234567"
-                    disabled={busy || checkoutBlockedByPriceChange || corporateBlocked}
-                  />
-                  <p className="text-[11px] text-slate-500">
-                    Enter your Easypaisa mobile number. You will receive an OTP / PIN authorization prompt.
-                  </p>
-                </div>
-              ) : null}
-
-              {payMethod === "onelink_ibft" ? (
-                <div className="rounded-xl border border-blue-200 bg-blue-50/50 p-4 text-[12px] text-blue-900 space-y-1">
-                  <p className="font-semibold text-[13px]">1Bill / 1Link Direct Bank Transfer</p>
-                  <p className="text-slate-600">
-                    Clicking &ldquo;Pay with 1Link&rdquo; generates a unique 1Bill consumer number. Pay via any Pakistani banking app (HBL, Meezan, UBL, Alfalah, etc.) within the hold window to issue your confirmed ticket.
-                  </p>
-                </div>
-              ) : null}
-
-              {payMethod === "corporate_credit" ? (
-                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-[12px] text-slate-700">
-                  Corporate credit selected — company credit is verified server-side.
-                </div>
-              ) : null}
-
-              {/* Action Buttons */}
-              <div className="pt-3 flex flex-col sm:flex-row gap-3">
-                <Button
-                  type="button"
-                  className="flex-1 py-4 text-[15px] font-bold shadow-md cursor-pointer"
-                  disabled={
-                    busy ||
-                    (!canCapture && payMethod === "card") ||
-                    checkoutBlockedByPriceChange ||
-                    corporateBlocked
-                  }
-                  onClick={onPay}
-                >
-                  {paying ? "Processing payment…" : `Pay ${formattedPayAmount} & Confirm Booking →`}
-                </Button>
-
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="py-4 px-6 text-[14px] font-semibold border-slate-300 hover:bg-slate-50 text-slate-700 cursor-pointer"
-                  disabled={busy || checkoutBlockedByPriceChange || corporateBlocked}
-                  onClick={onReserve}
-                >
-                  {reserving ? "Holding seat…" : "Hold / Reserve Booking"}
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      </div>
     </div>
   );
 }
@@ -778,127 +560,103 @@ export function CheckoutReservedActions({
   const formattedPayAmount = amountMinor > 0 ? formatMinor(amountMinor, currency) : "";
 
   return (
-    <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs">
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-4">
+    <div className="fo-desk__panel space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--fo-desk-line)] pb-4">
         <div>
-          <h2 className="text-[17px] font-bold text-slate-900">
+          <h2 className="m-0 text-[16px] font-semibold text-[var(--navy)]">
             {hasPayment
-              ? "Supplier Reservation & Ticketing"
+              ? "Issue ticket"
               : isPending1Link
-                ? "1Link IBFT Clearance Pending"
-                : "Payment for Reserved Hold"}
+                ? "Awaiting 1Link clearance"
+                : "Pay reserved hold"}
           </h2>
-          <p className="text-[12px] text-slate-500 mt-0.5">
+          <p className="mt-0.5 text-[12px] text-[var(--ink-soft)]">
             {hasPayment
-              ? "Payment is authorized. Proceed to issue your ticket."
+              ? "Payment authorized. Issue the supplier ticket."
               : isPending1Link
-                ? "Your seat is held. Complete bank transfer to confirm ticket."
-                : "Your seat is held with the supplier. Complete payment to issue your ticket."}
+                ? "Seat held. Complete bank transfer to confirm."
+                : "Seat held with supplier. Complete payment to ticket."}
           </p>
         </div>
 
         {hasPayment ? (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-semibold text-emerald-800 border border-emerald-200">
-            <svg className="h-3.5 w-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
-            </svg>
-            Payment confirmed
+          <span className="fo-desk__status fo-desk__status--ok inline-flex items-center gap-1">
+            <Check className="h-3 w-3" aria-hidden />
+            Paid
           </span>
         ) : isPending1Link ? (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-[11px] font-semibold text-blue-700 border border-blue-200">
-            ⏳ Awaiting bank clearance
+          <span className="fo-desk__status inline-flex items-center gap-1">
+            <Clock className="h-3 w-3" aria-hidden />
+            Pending bank
           </span>
         ) : (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-[11px] font-semibold text-amber-800 border border-amber-200">
-            Payment required
-          </span>
+          <span className="fo-desk__status fo-desk__status--warn">Payment required</span>
         )}
       </div>
 
       {isPending1Link ? (
-        <div className="mt-5 space-y-3 rounded-xl border border-blue-200 bg-blue-50/50 p-4 text-[13px]">
-          <div className="flex items-center justify-between">
-            <span className="font-semibold text-blue-900">1Bill Consumer Number:</span>
-            <span className="font-mono text-[15px] font-bold text-white bg-blue-800 px-3 py-1 rounded-md shadow-2xs">
+        <div className="fo-checkout__notice space-y-3 text-[13px]">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span className="font-semibold text-[var(--navy)]">1Bill consumer number</span>
+            <span className="rounded-[var(--fo-desk-radius)] bg-[var(--navy)] px-3 py-1 font-mono text-[14px] font-bold text-[var(--white)]">
               {pendingPaymentDetails?.consumerNumber}
             </span>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[12px] pt-2 border-t border-blue-200/60">
+          <div className="grid grid-cols-1 gap-2 border-t border-[var(--fo-desk-line)] pt-2 text-[12px] sm:grid-cols-2">
             <div>
-              <span className="text-slate-500">Bank:</span> {pendingPaymentDetails?.bankName}
+              <span className="text-[var(--ink-faint)]">Bank:</span>{" "}
+              {pendingPaymentDetails?.bankName}
             </div>
             <div>
-              <span className="text-slate-500">Account Title:</span> {pendingPaymentDetails?.accountTitle}
+              <span className="text-[var(--ink-faint)]">Account:</span>{" "}
+              {pendingPaymentDetails?.accountTitle}
             </div>
             <div className="sm:col-span-2">
-              <span className="text-slate-500">IBAN:</span>{" "}
-              <span className="font-mono font-semibold text-slate-900">{pendingPaymentDetails?.iban}</span>
+              <span className="text-[var(--ink-faint)]">IBAN:</span>{" "}
+              <span className="font-mono font-semibold text-[var(--navy)]">
+                {pendingPaymentDetails?.iban}
+              </span>
             </div>
           </div>
-          <p className="text-[12px] text-blue-800/90 pt-1">
-            Your seat is reserved in hold. As soon as your bank confirms the 1Bill or IBFT transfer, your ticket will be issued automatically.
+          <p className="m-0 text-[12px] text-[var(--ink-soft)]">
+            Ticket issues automatically once the bank confirms the transfer.
           </p>
         </div>
       ) : null}
 
       {!hasPayment && !isPending1Link ? (
-        <div className="mt-5 space-y-4">
+        <div className="space-y-4">
           {setPayMethod ? (
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-              <button
-                type="button"
-                disabled={busy || corporateBlocked}
-                onClick={() => setPayMethod("card")}
-                className={`rounded-xl p-2.5 text-[12px] font-bold border transition-all ${
-                  payMethod === "card"
-                    ? "border-blue-600 bg-blue-50/40 text-blue-900"
-                    : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-                }`}
-              >
-                💳 Card
-              </button>
-              <button
-                type="button"
-                disabled={busy || corporateBlocked}
-                onClick={() => setPayMethod("jazzcash")}
-                className={`rounded-xl p-2.5 text-[12px] font-bold border transition-all ${
-                  payMethod === "jazzcash"
-                    ? "border-amber-600 bg-amber-50/40 text-amber-900"
-                    : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-                }`}
-              >
-                📱 JazzCash
-              </button>
-              <button
-                type="button"
-                disabled={busy || corporateBlocked}
-                onClick={() => setPayMethod("easypaisa")}
-                className={`rounded-xl p-2.5 text-[12px] font-bold border transition-all ${
-                  payMethod === "easypaisa"
-                    ? "border-emerald-600 bg-emerald-50/40 text-emerald-900"
-                    : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-                }`}
-              >
-                📱 Easypaisa
-              </button>
-              <button
-                type="button"
-                disabled={busy || corporateBlocked}
-                onClick={() => setPayMethod("onelink_ibft")}
-                className={`rounded-xl p-2.5 text-[12px] font-bold border transition-all ${
-                  payMethod === "onelink_ibft"
-                    ? "border-blue-800 bg-blue-50/40 text-blue-900"
-                    : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-                }`}
-              >
-                🏛️ 1Link IBFT
-              </button>
+              {(
+                [
+                  ["card", "Card", CreditCard],
+                  ["jazzcash", "JazzCash", Smartphone],
+                  ["easypaisa", "Easypaisa", Smartphone],
+                  ["onelink_ibft", "1Link", Landmark],
+                ] as const
+              ).map(([id, label, Icon]) => (
+                <button
+                  key={id}
+                  type="button"
+                  disabled={busy || corporateBlocked}
+                  onClick={() => setPayMethod(id)}
+                  className={`inline-flex items-center justify-center gap-1.5 rounded-[var(--fo-desk-radius)] border p-2.5 text-[12px] font-semibold transition-colors ${
+                    payMethod === id
+                      ? "border-[var(--cyan)] bg-[var(--fo-desk-wash)] text-[var(--navy)]"
+                      : "border-[var(--fo-desk-line)] bg-[var(--white)] text-[var(--ink-soft)] hover:border-[var(--fo-desk-line-strong)]"
+                  }`}
+                >
+                  <Icon className="h-3.5 w-3.5" aria-hidden />
+                  {label}
+                </button>
+              ))}
             </div>
           ) : null}
 
           {payMethod === "card" ? (
             <Input
-              label="Card number / token *"
+              label="Card token *"
               value={paymentToken}
               onChange={(e) => setPaymentToken(e.target.value)}
               placeholder="pm_… (tokenized)"
@@ -908,7 +666,7 @@ export function CheckoutReservedActions({
 
           {payMethod === "jazzcash" ? (
             <Input
-              label="JazzCash Mobile Number *"
+              label="JazzCash mobile number *"
               value={accountNumber}
               onChange={(e) => setAccountNumber?.(e.target.value)}
               placeholder="03001234567"
@@ -918,7 +676,7 @@ export function CheckoutReservedActions({
 
           {payMethod === "easypaisa" ? (
             <Input
-              label="Easypaisa Mobile Number *"
+              label="Easypaisa mobile number *"
               value={accountNumber}
               onChange={(e) => setAccountNumber?.(e.target.value)}
               placeholder="03451234567"
@@ -927,14 +685,14 @@ export function CheckoutReservedActions({
           ) : null}
 
           {payMethod === "onelink_ibft" ? (
-            <div className="rounded-xl border border-blue-200 bg-blue-50/50 p-3 text-[12px] text-blue-900">
-              Generates a 1Bill voucher number to complete your bank transfer before the hold expiration.
+            <div className="fo-checkout__notice text-[12px] text-[var(--ink-soft)]">
+              Generates a 1Bill number for bank transfer before the hold expires.
             </div>
           ) : null}
 
           <Button
             type="button"
-            className="w-full py-4 text-[15px] font-bold shadow-md"
+            className="w-full"
             disabled={
               busy ||
               (!canCapture && payMethod === "card") ||
@@ -943,22 +701,26 @@ export function CheckoutReservedActions({
             }
             onClick={onPay}
           >
-            {paying ? "Processing payment…" : `Pay ${formattedPayAmount} to Issue Ticket →`}
+            {paying
+              ? "Processing…"
+              : formattedPayAmount
+                ? `Pay ${formattedPayAmount}`
+                : "Pay to issue ticket"}
           </Button>
         </div>
       ) : hasPayment ? (
-        <div className="mt-5 space-y-3">
+        <div className="space-y-3">
           <Button
             type="button"
-            className="w-full py-4 text-[15px] font-bold shadow-md bg-emerald-600 hover:bg-emerald-700 text-white"
+            className="w-full"
             disabled={busy || !canTicket || checkoutBlockedByPriceChange}
             onClick={onTicket}
           >
-            {ticketing ? "Ticketing in Progress…" : "Issue Ticket / Voucher →"}
+            {ticketing ? "Issuing…" : "Issue ticket"}
           </Button>
           {!canTicket ? (
-            <p className="text-[12px] text-slate-500 text-center">
-              Ticketing stays blocked until the supplier can issue a live confirmed ticket.
+            <p className="fo-checkout__note text-center">
+              Ticketing stays blocked until the supplier can issue a live ticket.
             </p>
           ) : null}
         </div>

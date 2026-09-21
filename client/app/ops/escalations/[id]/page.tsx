@@ -1,6 +1,8 @@
 import { SiteNav } from "@/components/SiteNav";
 import { DeskShell } from "@/components/DeskShell";
 import { OpsEscalationDetailClient } from "./OpsEscalationDetailClient";
+import "../../ops-hub.css";
+import "./ops-escalation-detail.css";
 
 export const metadata = {
   title: "Escalation detail — FlightOne",

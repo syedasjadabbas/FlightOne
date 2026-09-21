@@ -10,7 +10,7 @@ export default function GroupsPage() {
   return (
     <main className="fo-stage fo-stage--desk relative flex min-h-[100dvh] flex-col">
       <SiteNav />
-      <DeskShell canvas>
+      <DeskShell canvas canvasWide>
         <GroupsPageClient />
       </DeskShell>
     </main>

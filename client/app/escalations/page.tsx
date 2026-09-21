@@ -3,7 +3,7 @@ import { TravellerShell } from "@/app/components/traveller";
 import { EscalationsPageClient } from "./EscalationsPageClient";
 
 export const metadata = {
-  title: "Escalations — FlightOne",
+  title: "Support — FlightOne",
 };
 
 export default function EscalationsPage() {

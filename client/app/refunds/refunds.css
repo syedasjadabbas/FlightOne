@@ -1,0 +1,201 @@
+/**
+ * Refunds & servicing list — calm desk layout on FlightOne tokens.
+ * Open list rails; no card stacks or badge clusters.
+ */
+
+.fo-refunds {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.25rem, 2.5vw, 1.85rem);
+}
+
+.fo-refunds__principles {
+  padding: 0.15rem 0 0.35rem;
+}
+
+.fo-refunds__principle-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.fo-refunds__principle {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid color-mix(in oklab, var(--cyan) 12%, var(--line));
+}
+
+.fo-refunds__principle:first-child {
+  border-top: 1px solid color-mix(in oklab, var(--cyan) 12%, var(--line));
+}
+
+.fo-refunds__principle-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 1.85rem;
+  height: 1.85rem;
+  margin-top: 0.1rem;
+  border-radius: 0.35rem;
+  background: color-mix(in oklab, var(--horizon-cool) 70%, white);
+  color: var(--sky);
+}
+
+.fo-refunds__principle-title {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.fo-refunds__principle-body {
+  margin: 0.2rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--ink-soft);
+  max-width: 40rem;
+}
+
+.fo-refunds__guest-cta {
+  padding: 0.85rem 0 0.25rem;
+  border-top: 1px solid color-mix(in oklab, var(--cyan) 14%, var(--line));
+}
+
+.fo-refunds__guest-cta-title {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.fo-refunds__guest-cta-body {
+  margin: 0.3rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--ink-soft);
+  max-width: 36rem;
+}
+
+.fo-refunds__booking {
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  margin-inline: -0.35rem;
+  padding-inline: 0.5rem;
+  border-radius: 0.25rem;
+  transition: background-color 0.15s ease;
+}
+
+.fo-refunds__booking--selected {
+  background: color-mix(in oklab, var(--horizon-cool) 55%, white);
+  box-shadow: inset 3px 0 0 var(--sky);
+}
+
+.fo-refunds__booking:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--sky) 45%, transparent);
+  outline-offset: 2px;
+}
+
+.fo-refunds__eligibility {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-top: 0.35rem;
+  padding: 0.85rem 0 0.15rem;
+  border-top: 1px solid color-mix(in oklab, var(--cyan) 14%, var(--line));
+}
+
+.fo-refunds__elig-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+
+.fo-refunds__elig-kicker {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.fo-refunds__elig-status {
+  margin: 0.15rem 0 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--navy);
+  font-family: var(--font-hero);
+  letter-spacing: -0.02em;
+}
+
+.fo-refunds__amount-ok {
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.fo-refunds__advanced {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid color-mix(in oklab, var(--cyan) 12%, var(--line));
+}
+
+.fo-refunds__advanced-title {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.fo-refunds__flash {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid color-mix(in oklab, var(--sky) 28%, var(--line));
+  border-radius: 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--ink);
+  background: color-mix(in oklab, var(--horizon-cool) 55%, white);
+}
+
+.fo-refunds__flash--error {
+  border-color: color-mix(in oklab, var(--danger) 28%, var(--line));
+  background: color-mix(in oklab, var(--danger) 5%, white);
+  color: var(--danger);
+}
+
+.fo-refunds__flash-dismiss {
+  border: 0;
+  background: transparent;
+  font-size: 0.75rem;
+  color: var(--ink-faint);
+  cursor: pointer;
+}
+
+.fo-refunds__flash-dismiss:hover {
+  color: var(--navy);
+}
+
+.fo-refunds__flash-dismiss:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--sky) 45%, transparent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fo-refunds__booking {
+    transition: none;
+  }
+}

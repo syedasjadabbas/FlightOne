@@ -1,8 +1,10 @@
 "use client";
 
 import { useMemo } from "react";
+import { BarChart3 } from "lucide-react";
 import { useGetCompanyAnalyticsQuery } from "@/lib/api/corporate.api";
 import { AdvancedAnalyticsPanel } from "@/app/dashboard/AdvancedAnalyticsPanel";
+import { DeskSectionHead } from "./DeskSectionHead";
 
 export function CorporateAnalyticsSection({
   companyId,
@@ -24,9 +26,11 @@ export function CorporateAnalyticsSection({
 
   if (!canRead) {
     return (
-      <section className="fo-desk__panel">
-        <h2 className="fo-desk__section-label">Company analytics</h2>
-        <p className="fo-desk__empty">Only company ADMIN or APPROVER can view organization analytics.</p>
+      <section className="fo-desk__panel fo-desk__stack">
+        <DeskSectionHead icon={BarChart3} title="Company analytics" />
+        <p className="fo-desk__empty" style={{ padding: 0 }}>
+          Only company ADMIN or APPROVER can view organization analytics.
+        </p>
       </section>
     );
   }

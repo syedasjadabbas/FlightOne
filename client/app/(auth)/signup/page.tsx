@@ -1,7 +1,9 @@
 import { Suspense } from "react";
 import { AuthShell } from "../components/AuthShell";
-import { LoginFormSkeleton } from "../login/components/LoginFormSkeleton";
 import { SignupForm } from "./components/SignupForm";
+import { SignupFormSkeleton } from "./components/SignupFormSkeleton";
+import "../auth-form.css";
+import "./signup.css";
 
 export const metadata = {
   title: "Sign up — FlightOne",
@@ -16,7 +18,7 @@ export default function SignupPage() {
             <p role="status" className="sr-only">
               Loading signup form
             </p>
-            <LoginFormSkeleton />
+            <SignupFormSkeleton />
           </>
         }
       >

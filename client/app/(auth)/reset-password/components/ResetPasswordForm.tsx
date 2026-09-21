@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { CheckCircle2, KeyRound } from "lucide-react";
 import { Button, Input, Spinner } from "@/components/ui";
 import { AuthPanel } from "../../components/AuthPanel";
 import { useResetPasswordForm } from "../hooks/useResetPasswordForm";
 
-/** Colocated to `/reset-password` — matches login visual language. */
+/** Colocated to `/reset-password` — code + new password, one job. */
 export function ResetPasswordForm() {
   const {
     email,
@@ -28,7 +29,7 @@ export function ResetPasswordForm() {
       <AuthPanel
         title="Password updated"
         leadRole="status"
-        lead="Your password was changed successfully. Log in with your new password."
+        lead="You can log in with your new password."
         footer={
           <p>
             <Link href="/login" className="fo-auth__link">
@@ -36,23 +37,29 @@ export function ResetPasswordForm() {
             </Link>
           </p>
         }
-      />
+      >
+        <CheckCircle2
+          className="size-6 text-sky"
+          strokeWidth={1.75}
+          aria-hidden
+        />
+      </AuthPanel>
     );
   }
 
   return (
     <AuthPanel
-      title="Verify code & reset password"
+      title="Set a new password"
       lead={
         isEmailLocked
-          ? `Enter the 6-digit code sent to ${email} along with your new password.`
-          : "Enter the 6-digit code sent to your email along with your new password."
+          ? `Enter the code sent to ${email}, then choose a new password.`
+          : "Enter the 6-digit code from your email, then choose a new password."
       }
       footer={
         <p>
           Need a code?{" "}
           <Link href="/forgot-password" className="fo-auth__link">
-            {isEmailLocked ? "Change email or request new code" : "Request a new code"}
+            {isEmailLocked ? "Request a new one" : "Request a code"}
           </Link>
           <span className="fo-auth__sep" aria-hidden>
             ·
@@ -64,54 +71,69 @@ export function ResetPasswordForm() {
       }
     >
       <form onSubmit={handleSubmit} className="fo-auth__form" aria-busy={isLoading || undefined}>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3.5 gap-y-2.5">
-          <Input
-            label={isEmailLocked ? "Email (confirmed)" : "Email"}
-            type="email"
-            required
-            autoComplete="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
-            disabled={isLoading}
-            readOnly={isEmailLocked}
-            className={isEmailLocked ? "bg-slate-50 text-ink-soft cursor-default select-all" : undefined}
-          />
+        <Input
+          label="Email"
+          type="email"
+          required
+          autoComplete="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="name@email.com"
+          disabled={isLoading}
+          readOnly={isEmailLocked}
+          className={
+            isEmailLocked
+              ? "cursor-default select-all bg-paper-elevated text-ink-soft"
+              : undefined
+          }
+          hint={isEmailLocked ? "From your reset link" : undefined}
+        />
 
-          <Input
-            label="6-Digit Verification Code"
-            type="text"
-            required
-            inputMode="numeric"
-            maxLength={6}
-            value={token}
-            onChange={(e) => setToken(e.target.value.replace(/\D/g, ""))}
-            placeholder="123456"
-            disabled={isLoading}
-          />
+        <Input
+          label="Verification code"
+          type="text"
+          required
+          inputMode="numeric"
+          autoComplete="one-time-code"
+          maxLength={6}
+          value={token}
+          onChange={(e) => setToken(e.target.value.replace(/\D/g, "").slice(0, 6))}
+          placeholder="000000"
+          disabled={isLoading}
+          className="font-mono text-center text-lg tracking-[0.35em] tabular-nums"
+        />
 
-          <Input
-            label="New password"
-            type="password"
-            required
-            autoComplete="new-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Min 8 characters"
-            disabled={isLoading}
-          />
-
-          <Input
-            label="Confirm password"
-            type="password"
-            required
-            autoComplete="new-password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            placeholder="••••••••"
-            disabled={isLoading}
-          />
+        <div
+          className="my-0.5 flex items-center gap-2"
+          aria-hidden
+        >
+          <span className="h-px flex-1 bg-[color-mix(in_oklab,var(--navy)_8%,transparent)]" />
+          <KeyRound className="size-3.5 text-sky" strokeWidth={1.75} />
+          <span className="h-px flex-1 bg-[color-mix(in_oklab,var(--navy)_8%,transparent)]" />
         </div>
+
+        <Input
+          label="New password"
+          type="password"
+          required
+          autoComplete="new-password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="••••••••"
+          disabled={isLoading}
+          hint="At least 8 characters"
+        />
+
+        <Input
+          label="Confirm password"
+          type="password"
+          required
+          autoComplete="new-password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          placeholder="••••••••"
+          disabled={isLoading}
+        />
 
         {errorMessage && (
           <p className="fo-auth__alert anim-alert" role="alert">
@@ -123,10 +145,10 @@ export function ResetPasswordForm() {
           {isLoading ? (
             <>
               <Spinner size="sm" className="border-white/30 border-t-white" label={null} />
-              Resetting password…
+              Updating…
             </>
           ) : (
-            "Reset password"
+            "Update password"
           )}
         </Button>
       </form>

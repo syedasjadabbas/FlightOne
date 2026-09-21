@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowRight } from "lucide-react";
 import type { ChatResultsState } from "@/lib/ask-ai/chatResultsState";
 
 export function ResultsMessageFooter({
@@ -22,7 +23,6 @@ export function ResultsMessageFooter({
   }
 
   const destPhrase = destinationLabel ? ` for ${destinationLabel}` : "";
-  const pricePhrase = fromPrice ? ` from ${fromPrice}` : "";
 
   return (
     <div className="results-msg-cta space-y-2.5">
@@ -32,7 +32,7 @@ export function ResultsMessageFooter({
           {resultCount} live {resultNoun}
         </span>
         {destPhrase}
-        {pricePhrase ? (
+        {fromPrice ? (
           <>
             {" "}
             from <span className="results-msg-cta__highlight">{fromPrice}</span>
@@ -43,10 +43,10 @@ export function ResultsMessageFooter({
       <button
         type="button"
         onClick={onOpenResults}
-        className="results-msg-cta__btn inline-flex items-center gap-1.5 text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sky)]/40"
+        className="results-msg-cta__btn inline-flex items-center gap-1.5 text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--electric)]/40"
       >
         View results
-        <span aria-hidden>→</span>
+        <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.2} aria-hidden />
       </button>
     </div>
   );

@@ -11,12 +11,12 @@ import VisionCarouselSection from '@/components/landing/VisionCarouselSection';
 import Footer from '@/components/landing/Footer';
 
 export const metadata: Metadata = {
-  title: 'FlightOne – Custom Tour Packages from Pakistan, Designed Around You',
+  title: 'FlightOne – Custom Tour Packages Around the World, Designed Around You',
   description:
-    'FlightOne designs custom international tour packages from Pakistan with transparent pricing, visa support and a complete itinerary within 24 hours.',
+    'FlightOne designs custom international tour packages globally with transparent pricing, visa support and a complete itinerary within 24 hours.',
   keywords: [
     'FlightOne',
-    'tour packages from Pakistan',
+    'global tour packages',
     'visa assistance',
     'Maldives packages',
     'Dubai packages',
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
  * 4. NewsPreviewSection (3-column featured destinations)
  * 5. PartnersSection (Travel styles category cycler)
  * 6. CompanyPreviewSection (Expanding card: "Designed around you" / WhatsApp contact panels)
- * 7. VisionCarouselSection (Future vision narrative stack & curtain-lift reveal)
+ * 7. VisionCarouselSection (Next Adventure scroll story)
  */
 export default function Home() {
   return (
@@ -57,7 +57,7 @@ export default function Home() {
         {/* 6. Company story */}
         <CompanyPreviewSection />
 
-        {/* 7. Future vision */}
+        {/* 7. Next Adventure */}
         <VisionCarouselSection />
       </main>
       <Footer />

@@ -93,10 +93,8 @@ export function VisaMetaFields({
       : [...VISA_TYPE_OPTIONS];
 
   return (
-    <div className="space-y-4 rounded-2xl border border-cyan-100 bg-cyan-50/40 p-4">
-      <p className="text-xs font-semibold uppercase tracking-wider text-cyan-800">
-        Visa details
-      </p>
+    <div className="fo-vault__visa-block">
+      <p className="fo-vault__visa-label">Visa details</p>
       <SearchableSelect
         label="Destination country"
         options={destOptions}
@@ -160,7 +158,7 @@ export function VisaMetaFields({
         placeholder="Embassy / VAC city"
         disabled={disabled}
       />
-      <label className="flex items-center gap-2 text-xs font-medium text-slate-700">
+      <label className="flex items-center gap-2 text-xs font-medium text-[var(--ink-soft)]">
         <input
           type="checkbox"
           checked={value.remindersEnabled}

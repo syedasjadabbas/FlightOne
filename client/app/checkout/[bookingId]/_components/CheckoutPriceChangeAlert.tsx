@@ -1,5 +1,6 @@
 "use client";
 
+import { AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui";
 import { formatMinor, type PriceChangedDetails } from "@/lib/bookings/checkoutDisplay";
 
@@ -15,27 +16,32 @@ export function CheckoutPriceChangeAlert({
   onAccept: () => void;
 }) {
   return (
-    <div className="rounded-2xl border border-amber-300 bg-amber-50/80 p-5 shadow-xs space-y-3" role="alert">
-      <div className="flex items-center gap-2 text-amber-900 font-bold">
-        <span className="text-[16px]">⚠️</span>
-        <h3 className="text-[15px]">Price Updated by Airline / Supplier</h3>
+    <div
+      className="fo-desk__panel space-y-3 border-[color-mix(in_oklab,var(--danger)_28%,var(--fo-desk-line))] bg-[color-mix(in_oklab,var(--danger)_5%,var(--white))]"
+      role="alert"
+    >
+      <div className="flex items-start gap-2.5">
+        <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-[var(--danger)]" aria-hidden />
+        <div className="min-w-0 space-y-2">
+          <h3 className="text-[14px] font-semibold text-[var(--navy)]">Fare updated by supplier</h3>
+          <p className="text-[13px] leading-relaxed text-[var(--ink-soft)]">
+            Server fare changed from{" "}
+            <strong className="font-semibold text-[var(--navy)]">
+              {formatMinor(priceChange.previousAmountMinor, priceChange.currency)}
+            </strong>{" "}
+            to{" "}
+            <strong className="font-semibold text-[var(--navy)]">
+              {formatMinor(priceChange.newAmountMinor, priceChange.currency)}
+            </strong>
+            . Accept the new amount to continue.
+          </p>
+          <Button type="button" disabled={busy} onClick={onAccept}>
+            {accepting
+              ? "Accepting…"
+              : `Accept ${formatMinor(priceChange.newAmountMinor, priceChange.currency)}`}
+          </Button>
+        </div>
       </div>
-      <p className="text-[13px] text-amber-900/90 leading-relaxed">
-        The authoritative server fare has updated from{" "}
-        <strong className="text-amber-950 font-bold">{formatMinor(priceChange.previousAmountMinor, priceChange.currency)}</strong> to{" "}
-        <strong className="text-amber-950 font-bold">{formatMinor(priceChange.newAmountMinor, priceChange.currency)}</strong>. You
-        must accept the new price to proceed with reservation.
-      </p>
-      <Button
-        type="button"
-        className="bg-amber-600 hover:bg-amber-700 text-white font-semibold shadow-xs"
-        disabled={busy}
-        onClick={onAccept}
-      >
-        {accepting
-          ? "Accepting Updated Fare…"
-          : `Accept ${formatMinor(priceChange.newAmountMinor, priceChange.currency)} →`}
-      </Button>
     </div>
   );
 }

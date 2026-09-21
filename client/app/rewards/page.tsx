@@ -1,9 +1,11 @@
 import { SiteNav } from "@/components/SiteNav";
 import { TravellerShell } from "@/app/components/traveller";
 import { RewardsPageClient } from "./RewardsPageClient";
+import "./rewards.css";
 
 export const metadata = {
   title: "Rewards — FlightOne",
+  description: "Ledger-based loyalty points from ticketed bookings. View balance, tiers, referrals, and history.",
 };
 
 export default function RewardsPage() {

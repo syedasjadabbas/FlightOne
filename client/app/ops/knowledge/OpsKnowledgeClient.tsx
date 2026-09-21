@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useMemo, useState } from "react";
-import { Button, Pagination, SearchableSelect, Spinner, pageCountFor, paginateItems } from "@/components/ui";
+import { CheckCircle2, AlertCircle } from "lucide-react";
+import { Spinner } from "@/components/ui";
 import { PermissionGate } from "@/components/PermissionGate";
 import {
   useArchiveKnowledgeDocumentMutation,
@@ -17,39 +17,35 @@ import {
 } from "@/lib/api/knowledge.api";
 import { usePermissions } from "@/lib/permissions/usePermissions";
 import { useAuthStore } from "@/store/auth.store";
-
-const CATEGORIES: KnowledgeCategory[] = [
-  "SOP",
-  "AIRLINE_POLICY",
-  "SUPPLIER_RULE",
-  "CORPORATE_TRAVEL_POLICY",
-  "VISA_RULE",
-  "SUPPLIER_CONTRACT",
-  "VISA_PROCEDURE",
-  "CORPORATE_AGREEMENT",
-  "TRAVEL_POLICY",
-];
-
-const CATEGORY_OPTIONS = CATEGORIES.map((c) => ({ value: c, label: c.replaceAll("_", " ") }));
-
-const STATUS_OPTIONS: { value: KnowledgeStatus | ""; label: string }[] = [
-  { value: "", label: "All statuses" },
-  { value: "DRAFT", label: "DRAFT" },
-  { value: "PUBLISHED", label: "PUBLISHED" },
-  { value: "ARCHIVED", label: "ARCHIVED" },
-  { value: "EXPIRED", label: "EXPIRED" },
-];
-
-const VISIBILITY_OPTIONS: { value: KnowledgeVisibility; label: string }[] = [
-  { value: "CUSTOMER_SAFE", label: "CUSTOMER_SAFE" },
-  { value: "INTERNAL", label: "INTERNAL" },
-  { value: "RESTRICTED", label: "RESTRICTED" },
-];
-
-const inputClass =
-  "rounded border border-[var(--fo-desk-line)] bg-white px-2 py-1.5 text-[13px]";
+import { OpsSignInGate } from "../_components";
+import {
+  KnowledgeCreatePanel,
+  KnowledgeDocsEmpty,
+  KnowledgeDocsTable,
+  KnowledgeFilters,
+  KnowledgeHeader,
+  KnowledgePermissionFallback,
+  KnowledgeRetrievePanel,
+} from "./_components";
 
 const PAGE_SIZE_DEFAULT = 10;
+
+function MsgBanner({ msg }: { msg: string | null }) {
+  if (!msg) return null;
+  const warn = /fail/i.test(msg);
+  return (
+    <p className={`fo-ops__msg${warn ? " fo-ops__msg--warn" : ""}`} role="status">
+      <span className="inline-flex items-start gap-2">
+        {warn ? (
+          <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
+        ) : (
+          <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--cyan)]" aria-hidden />
+        )}
+        <span>{msg}</span>
+      </span>
+    </p>
+  );
+}
 
 export function OpsKnowledgeClient() {
   const hasHydrated = useAuthStore((s) => s.hasHydrated);
@@ -73,6 +69,8 @@ export function OpsKnowledgeClient() {
   const [previewResult, setPreviewResult] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(PAGE_SIZE_DEFAULT);
+  const [creating, setCreating] = useState(false);
+  const [retrieving, setRetrieving] = useState(false);
 
   const listParams = useMemo(
     () => ({
@@ -100,305 +98,153 @@ export function OpsKnowledgeClient() {
     );
   }
   if (!accessToken) {
-    return (
-      <div className="fo-desk__panel">
-        <p className="fo-desk__empty">Sign in required.</p>
-      </div>
-    );
+    return <OpsSignInGate />;
   }
 
   return (
     <PermissionGate
       anyOf={["knowledge:read", "knowledge:write", "ops:dashboard:read"]}
       mode="fallback"
-      fallback={
-        <header className="fo-desk__header">
-          <h1 className="fo-desk__title">Knowledge</h1>
-          <p className="fo-desk__lede">
-            Missing `knowledge:read` / `ops:dashboard:read` permission.
-          </p>
-          <div className="fo-desk__links">
-            <Link href="/ops">Operations</Link>
-          </div>
-        </header>
-      }
+      fallback={<KnowledgePermissionFallback />}
     >
-      <div className="fo-desk__stack" style={{ gap: "1.25rem" }}>
-        <header className="fo-desk__header">
-          <h1 className="fo-desk__title">Knowledge</h1>
-          <p className="fo-desk__lede">
-            Internal SOPs and policies for Ava grounding. Not Traveller Vault — do not invent policy
-            content.
-          </p>
-          <div className="fo-desk__links">
-            <Link href="/ops">← Operations</Link>
-          </div>
-        </header>
+      <div className="fo-ops">
+        <KnowledgeHeader />
+        <MsgBanner msg={msg} />
 
-        {msg ? <p className="text-[13px] text-ink-soft">{msg}</p> : null}
-
-        <section className="fo-desk__panel fo-desk__stack">
-          <p className="fo-desk__section-label">Filters</p>
-          <div className="fo-desk__toolbar">
-            <SearchableSelect
-              className="min-w-[10rem]"
-              options={[{ value: "", label: "All categories" }, ...CATEGORY_OPTIONS]}
-              value={category}
-              onChange={(v) => {
-                setCategory(v as KnowledgeCategory | "");
-                setPage(1);
-              }}
-              placeholder="All categories"
-              clearable
-            />
-            <SearchableSelect
-              className="min-w-[9rem]"
-              options={STATUS_OPTIONS}
-              value={status}
-              onChange={(v) => {
-                setStatus(v as KnowledgeStatus | "");
-                setPage(1);
-              }}
-              searchable={false}
-              placeholder="All statuses"
-              clearable
-            />
-            <input
-              className={`min-w-[10rem] flex-1 ${inputClass} px-3`}
-              placeholder="Search title/content"
-              value={q}
-              onChange={(e) => {
-                setQ(e.target.value);
-                setPage(1);
-              }}
-            />
-          </div>
-        </section>
+        <KnowledgeFilters
+          category={category}
+          status={status}
+          q={q}
+          onCategoryChange={(v) => {
+            setCategory(v);
+            setPage(1);
+          }}
+          onStatusChange={(v) => {
+            setStatus(v);
+            setPage(1);
+          }}
+          onQueryChange={(v) => {
+            setQ(v);
+            setPage(1);
+          }}
+        />
 
         {canWrite ? (
-          <section className="fo-desk__panel fo-desk__stack">
-            <p className="fo-desk__section-label">Create document</p>
-            <input
-              className={`w-full ${inputClass} px-3 py-2 text-[14px]`}
-              placeholder="Title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-            <div className="fo-desk__toolbar">
-              <SearchableSelect
-                className="min-w-[10rem]"
-                options={CATEGORY_OPTIONS}
-                value={createCategory}
-                onChange={(v) => setCreateCategory(v as KnowledgeCategory)}
-              />
-              <SearchableSelect
-                className="min-w-[9rem]"
-                options={VISIBILITY_OPTIONS}
-                value={visibility}
-                onChange={(v) => setVisibility(v as KnowledgeVisibility)}
-                searchable={false}
-              />
-              <label className="flex items-center gap-2 text-[13px] text-ink-soft">
-                <input
-                  type="checkbox"
-                  checked={publishOnCreate}
-                  onChange={(e) => setPublishOnCreate(e.target.checked)}
-                />
-                Publish immediately
-              </label>
-            </div>
-            <textarea
-              className={`min-h-[8rem] w-full ${inputClass} px-3 py-2 text-[14px]`}
-              placeholder="Paste authoritative content only — never invent policy"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-            />
-            <Button
-              size="sm"
-              onClick={async () => {
-                setMsg(null);
-                try {
-                  const r = await createDoc({
-                    title,
-                    category: createCategory,
-                    visibility,
-                    content,
-                    publish: publishOnCreate,
-                  }).unwrap();
-                  setMsg(`Created ${r.id} · ${r.status} v${r.version}`);
-                  setTitle("");
-                  setContent("");
-                  refetch();
-                } catch {
-                  setMsg("Create failed.");
-                }
-              }}
-            >
-              Create
-            </Button>
-          </section>
+          <KnowledgeCreatePanel
+            title={title}
+            createCategory={createCategory}
+            visibility={visibility}
+            content={content}
+            publishOnCreate={publishOnCreate}
+            busy={creating}
+            onTitleChange={setTitle}
+            onCategoryChange={setCreateCategory}
+            onVisibilityChange={setVisibility}
+            onContentChange={setContent}
+            onPublishChange={setPublishOnCreate}
+            onSubmit={async () => {
+              setMsg(null);
+              setCreating(true);
+              try {
+                const r = await createDoc({
+                  title,
+                  category: createCategory,
+                  visibility,
+                  content,
+                  publish: publishOnCreate,
+                }).unwrap();
+                setMsg(`Created ${r.id} · ${r.status} v${r.version}`);
+                setTitle("");
+                setContent("");
+                refetch();
+              } catch {
+                setMsg("Create failed.");
+              } finally {
+                setCreating(false);
+              }
+            }}
+          />
         ) : null}
 
-        <section className="fo-desk__panel fo-desk__stack">
-          <p className="fo-desk__section-label">Retrieval preview</p>
-          <div className="fo-desk__toolbar">
-            <input
-              className={`min-w-[12rem] flex-1 ${inputClass} px-3 py-2 text-[14px]`}
-              placeholder="Test query"
-              value={previewQuery}
-              onChange={(e) => setPreviewQuery(e.target.value)}
-            />
-            <Button
-              size="sm"
-              variant="secondary"
-              onClick={async () => {
-                setPreviewResult(null);
-                try {
-                  const r = await retrieve({
-                    query: previewQuery,
-                    mode: "ops",
-                    limit: 5,
-                  }).unwrap();
-                  setPreviewResult(
-                    `coverage=${r.coverage} conflict=${Boolean(r.possibleConflict)} hits=${r.hits.length}\n` +
-                      r.hits
-                        .map((h) => `- ${h.title} v${h.version} (${h.category}) score=${h.score}`)
-                        .join("\n"),
-                  );
-                } catch {
-                  setPreviewResult("Retrieve failed.");
-                }
-              }}
-            >
-              Retrieve
-            </Button>
-          </div>
-          {previewResult ? (
-            <pre className="whitespace-pre-wrap text-[12px] text-ink-soft">{previewResult}</pre>
-          ) : null}
-        </section>
+        <KnowledgeRetrievePanel
+          previewQuery={previewQuery}
+          previewResult={previewResult}
+          busy={retrieving}
+          onQueryChange={setPreviewQuery}
+          onRetrieve={async () => {
+            setPreviewResult(null);
+            setRetrieving(true);
+            try {
+              const r = await retrieve({
+                query: previewQuery,
+                mode: "ops",
+                limit: 5,
+              }).unwrap();
+              setPreviewResult(
+                `coverage=${r.coverage} conflict=${Boolean(r.possibleConflict)} hits=${r.hits.length}\n` +
+                  r.hits
+                    .map((h) => `- ${h.title} v${h.version} (${h.category}) score=${h.score}`)
+                    .join("\n"),
+              );
+            } catch {
+              setPreviewResult("Retrieve failed.");
+            } finally {
+              setRetrieving(false);
+            }
+          }}
+        />
 
         {isLoading ? (
-          <Spinner />
-        ) : !data?.items?.length ? (
-          <div className="fo-desk__panel">
-            <p className="fo-desk__empty">
-              No knowledge documents. Create published content before Ava can ground policy answers.
-            </p>
+          <div className="flex justify-center py-12">
+            <Spinner />
           </div>
+        ) : !data?.items?.length ? (
+          <KnowledgeDocsEmpty />
         ) : (
-          <section className="fo-desk__panel fo-desk__panel--flush">
-            <div className="fo-desk__table-wrap">
-              <table className="fo-desk__table">
-                <thead>
-                  <tr>
-                    <th>Title</th>
-                    <th>Category</th>
-                    <th>Status</th>
-                    <th>Visibility</th>
-                    <th>Chunks</th>
-                    {canWrite ? <th>Actions</th> : null}
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginateItems(data.items, page, pageSize).map((d) => (
-                    <tr key={d.id}>
-                      <td>
-                        <span className="font-medium">{d.title}</span>{" "}
-                        <span className="text-ink-faint">v{d.version}</span>
-                      </td>
-                      <td>{d.category}</td>
-                      <td>
-                        <span
-                          className={
-                            d.status === "PUBLISHED"
-                              ? "fo-desk__status fo-desk__status--ok"
-                              : "fo-desk__status"
-                          }
-                        >
-                          {d.status}
-                        </span>
-                      </td>
-                      <td>{d.visibility}</td>
-                      <td>{d.chunkCount ?? 0}</td>
-                      {canWrite ? (
-                        <td>
-                          <div className="fo-desk__toolbar">
-                            {d.status !== "PUBLISHED" ? (
-                              <Button
-                                size="sm"
-                                onClick={async () => {
-                                  setMsg(null);
-                                  try {
-                                    await publishDoc(d.id).unwrap();
-                                    setMsg(`Published ${d.title}`);
-                                    refetch();
-                                  } catch {
-                                    setMsg("Publish failed.");
-                                  }
-                                }}
-                              >
-                                Publish
-                              </Button>
-                            ) : null}
-                            {d.status === "PUBLISHED" ? (
-                              <Button
-                                size="sm"
-                                variant="secondary"
-                                onClick={async () => {
-                                  setMsg(null);
-                                  try {
-                                    await archiveDoc(d.id).unwrap();
-                                    setMsg(`Archived ${d.title}`);
-                                    refetch();
-                                  } catch {
-                                    setMsg("Archive failed.");
-                                  }
-                                }}
-                              >
-                                Archive
-                              </Button>
-                            ) : null}
-                            <Button
-                              size="sm"
-                              variant="secondary"
-                              onClick={async () => {
-                                const next = window.prompt("New version content (required)");
-                                if (!next?.trim()) return;
-                                setMsg(null);
-                                try {
-                                  const r = await createVersion({
-                                    id: d.id,
-                                    content: next,
-                                    publish: true,
-                                  }).unwrap();
-                                  setMsg(`Version ${r.version} published`);
-                                  refetch();
-                                } catch {
-                                  setMsg("Version create failed.");
-                                }
-                              }}
-                            >
-                              New version
-                            </Button>
-                          </div>
-                        </td>
-                      ) : null}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <Pagination
-              page={page}
-              pageCount={pageCountFor(data.items.length, pageSize)}
-              onPageChange={setPage}
-              pageSize={pageSize}
-              onPageSizeChange={setPageSize}
-              totalItems={data.items.length}
-              label="Knowledge documents"
-            />
-          </section>
+          <KnowledgeDocsTable
+            items={data.items}
+            page={page}
+            pageSize={pageSize}
+            canWrite={canWrite}
+            onPageChange={setPage}
+            onPageSizeChange={setPageSize}
+            onPublish={async (id, docTitle) => {
+              setMsg(null);
+              try {
+                await publishDoc(id).unwrap();
+                setMsg(`Published ${docTitle}`);
+                refetch();
+              } catch {
+                setMsg("Publish failed.");
+              }
+            }}
+            onArchive={async (id, docTitle) => {
+              setMsg(null);
+              try {
+                await archiveDoc(id).unwrap();
+                setMsg(`Archived ${docTitle}`);
+                refetch();
+              } catch {
+                setMsg("Archive failed.");
+              }
+            }}
+            onNewVersion={async (id) => {
+              const next = window.prompt("New version content (required)");
+              if (!next?.trim()) return;
+              setMsg(null);
+              try {
+                const r = await createVersion({
+                  id,
+                  content: next,
+                  publish: true,
+                }).unwrap();
+                setMsg(`Version ${r.version} published`);
+                refetch();
+              } catch {
+                setMsg("Version create failed.");
+              }
+            }}
+          />
         )}
       </div>
     </PermissionGate>

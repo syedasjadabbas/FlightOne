@@ -1,0 +1,376 @@
+/**
+ * Rewards — calm loyalty ledger.
+ * Navy / bone / cyan / electric blue. No glow, no badge soup.
+ */
+
+.fo-rewards {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.35rem, 2.8vw, 2rem);
+}
+
+.fo-rewards__hero {
+  display: grid;
+  gap: 1.15rem;
+  padding: 1.15rem 0 1.25rem;
+  border-bottom: 1px solid color-mix(in oklab, var(--cyan) 14%, var(--line));
+}
+
+@media (min-width: 640px) {
+  .fo-rewards__hero {
+    grid-template-columns: 1fr minmax(12rem, 38%);
+    align-items: end;
+    gap: 1.5rem;
+  }
+}
+
+.fo-rewards__balance-label {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.fo-rewards__balance {
+  margin: 0.35rem 0 0;
+  font-family: var(--font-hero);
+  font-size: clamp(2.25rem, 6vw, 2.85rem);
+  font-weight: 700;
+  letter-spacing: -0.045em;
+  line-height: 1;
+  color: var(--joby-navy);
+  font-variant-numeric: tabular-nums;
+}
+
+.fo-rewards__balance span {
+  margin-left: 0.4rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--ink-faint);
+}
+
+.fo-rewards__balance-meta {
+  margin: 0.55rem 0 0;
+  max-width: 28rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+
+.fo-rewards__tier {
+  padding: 0.85rem 1rem;
+  border: 1px solid color-mix(in oklab, var(--line) 80%, var(--cyan));
+  border-radius: 0.45rem;
+  background: color-mix(in oklab, var(--joby-surface) 72%, white);
+}
+
+.fo-rewards__tier-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.fo-rewards__tier-name {
+  margin: 0;
+  font-family: var(--font-hero);
+  font-size: 1.05rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  color: var(--joby-navy);
+}
+
+.fo-rewards__tier-life {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.fo-rewards__tier-note {
+  margin: 0.4rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+.fo-rewards__progress {
+  margin-top: 0.65rem;
+  height: 0.3rem;
+  overflow: hidden;
+  border-radius: 1px;
+  background: color-mix(in oklab, var(--cyan) 12%, white);
+}
+
+.fo-rewards__progress > span {
+  display: block;
+  height: 100%;
+  border-radius: 1px;
+  background: var(--cyan);
+  transition: width 0.3s var(--ease-standard);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fo-rewards__progress > span {
+    transition: none;
+  }
+}
+
+.fo-rewards__steps {
+  display: grid;
+  gap: 0;
+  border-top: 1px solid var(--line);
+}
+
+@media (min-width: 720px) {
+  .fo-rewards__steps {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .fo-rewards__step + .fo-rewards__step {
+    border-left: 1px solid color-mix(in oklab, var(--line) 85%, transparent);
+  }
+}
+
+.fo-rewards__step {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.7rem;
+  padding: 0.95rem 0.15rem;
+  border-bottom: 1px solid var(--line);
+}
+
+@media (min-width: 720px) {
+  .fo-rewards__step {
+    padding: 0.95rem 0.9rem 0.95rem 0.15rem;
+    border-bottom: none;
+  }
+
+  .fo-rewards__step:last-child {
+    padding-right: 0.15rem;
+  }
+}
+
+.fo-rewards__step-icon {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  margin-top: 0.05rem;
+  border-radius: 0.3rem;
+  border: 1px solid color-mix(in oklab, var(--cyan) 22%, var(--line));
+  background: color-mix(in oklab, var(--joby-surface) 70%, white);
+  color: var(--cyan);
+}
+
+.fo-rewards__step-title {
+  margin: 0;
+  font-family: var(--font-hero);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--joby-navy);
+}
+
+.fo-rewards__step-body {
+  margin: 0.3rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.fo-rewards__notice {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.75rem;
+  padding: 0.95rem 0;
+  border-top: 1px solid color-mix(in oklab, var(--cyan) 16%, var(--line));
+  border-bottom: 1px solid color-mix(in oklab, var(--cyan) 16%, var(--line));
+}
+
+.fo-rewards__notice-icon {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.3rem;
+  background: color-mix(in oklab, var(--joby-navy) 92%, var(--cyan));
+  color: var(--joby-surface);
+}
+
+.fo-rewards__notice-title {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--joby-navy);
+}
+
+.fo-rewards__notice-body {
+  margin: 0.3rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.fo-rewards__notice-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.7rem;
+}
+
+.fo-rewards__code {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.fo-rewards__code-value {
+  margin: 0;
+  padding: 0.4rem 0.7rem;
+  font-family: var(--font-hero);
+  font-size: 0.9375rem;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  color: var(--joby-navy);
+  background: color-mix(in oklab, var(--joby-surface) 75%, white);
+  border: 1px solid color-mix(in oklab, var(--line) 75%, var(--cyan));
+  border-radius: 0.35rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.fo-rewards__copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0;
+  border: none;
+  background: none;
+  font-size: 0.8125rem;
+  font-weight: 550;
+  color: var(--joby-blue);
+  cursor: pointer;
+  text-underline-offset: 0.15em;
+}
+
+.fo-rewards__copy:hover {
+  text-decoration: underline;
+}
+
+.fo-rewards__copy:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--joby-blue) 45%, transparent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.fo-rewards__ledger-btn {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+}
+
+.fo-rewards__ledger-btn:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--joby-blue) 45%, transparent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.fo-rewards__pts {
+  flex-shrink: 0;
+  font-family: var(--font-hero);
+  font-size: 0.9375rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--joby-navy);
+}
+
+.fo-rewards__pts--credit {
+  color: var(--cyan);
+}
+
+.fo-rewards__detail {
+  margin-top: 0.65rem;
+  padding: 0.75rem 0 0.15rem;
+  border-top: 1px dashed color-mix(in oklab, var(--line) 90%, var(--cyan));
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+}
+
+.fo-rewards__detail dl {
+  display: grid;
+  gap: 0.55rem 1.25rem;
+  margin: 0;
+}
+
+@media (min-width: 520px) {
+  .fo-rewards__detail dl {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.fo-rewards__detail dt {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.fo-rewards__detail dd {
+  margin: 0.15rem 0 0;
+  color: var(--joby-navy);
+  word-break: break-all;
+}
+
+.fo-rewards__detail dd.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.72rem;
+}
+
+.fo-rewards__foot {
+  margin: 0;
+  padding-top: 0.25rem;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--ink-faint);
+}
+
+.fo-rewards__panel-body {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.fo-rewards__attach {
+  margin-top: 0.85rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.fo-rewards__status {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+}

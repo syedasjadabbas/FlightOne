@@ -1,0 +1,207 @@
+/* Signup-only chrome. Shared panel surface lives in ../auth-form.css (.fo-auth-form). */
+
+.fo-signup {
+  --fo-signup-navy: var(--joby-navy);
+  --fo-signup-blue: var(--joby-blue);
+  --fo-signup-cyan: var(--cyan);
+}
+
+/* Quiet two-step route (account → verify) */
+.fo-signup__progress {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-bottom: 0.15rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.fo-signup__progress-label {
+  flex-shrink: 0;
+}
+
+.fo-signup__progress-label.is-active {
+  color: var(--fo-signup-navy);
+}
+
+.fo-signup__progress-label.is-done {
+  color: var(--fo-signup-cyan);
+}
+
+.fo-signup__progress-rail {
+  position: relative;
+  flex: 1 1 auto;
+  height: 2px;
+  border-radius: 1px;
+  background: color-mix(in oklab, var(--fo-signup-navy) 10%, transparent);
+  overflow: hidden;
+}
+
+.fo-signup__progress-rail > span {
+  display: block;
+  height: 100%;
+  width: 50%;
+  background: linear-gradient(
+    90deg,
+    var(--fo-signup-blue),
+    var(--fo-signup-cyan)
+  );
+  transition: width 0.35s var(--ease-standard, ease);
+}
+
+.fo-signup__progress-rail[data-step="verify"] > span {
+  width: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fo-signup__progress-rail > span {
+    transition: none;
+  }
+}
+
+.fo-signup__fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.fo-signup__row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.7rem;
+}
+
+@media (min-width: 480px) {
+  .fo-signup__row--passwords {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.65rem;
+  }
+}
+
+.fo-signup__checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.85rem;
+  margin: -0.05rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fo-signup__check {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  line-height: 1.2;
+  color: var(--ink-faint);
+}
+
+.fo-signup__check svg {
+  flex-shrink: 0;
+}
+
+.fo-signup__check.is-met {
+  color: var(--fo-signup-cyan);
+  font-weight: 500;
+}
+
+.fo-signup__status {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0.55rem 0.7rem;
+  border-radius: 0.55rem;
+  border: 1px solid color-mix(in oklab, var(--fo-signup-cyan) 28%, transparent);
+  background: color-mix(in oklab, var(--fo-signup-cyan) 8%, white);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: color-mix(in oklab, var(--fo-signup-navy) 72%, var(--fo-signup-cyan));
+  font-weight: 500;
+}
+
+.fo-signup__status svg {
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+  color: var(--fo-signup-cyan);
+}
+
+.fo-signup__alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+}
+
+.fo-signup__alert svg {
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.fo-signup__code-wrap input {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 1.35rem !important;
+  font-weight: 700;
+  letter-spacing: 0.35em;
+  text-align: center;
+  padding-inline: 0.75rem !important;
+}
+
+.fo-signup__footer-actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem 0;
+}
+
+.fo-signup__footer-btn {
+  font: inherit;
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  border-radius: 0.25rem;
+  color: color-mix(in oklab, var(--fo-signup-navy) 55%, var(--fo-signup-blue));
+}
+
+.fo-signup__footer-btn:hover:not(:disabled) {
+  color: var(--fo-signup-blue);
+}
+
+.fo-signup__footer-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.fo-signup__footer-btn:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--fo-signup-blue) 45%, transparent);
+  outline-offset: 2px;
+}
+
+/* Skeleton matches four-field signup layout */
+.fo-signup .fo-auth__skel-stack--signup {
+  gap: 0.75rem;
+}
+
+.fo-signup .fo-auth__skel-stack--signup .fo-auth__skel--field {
+  height: 2.55rem;
+  margin-bottom: 0;
+}
+
+.fo-signup .fo-auth__skel--row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+@media (max-width: 479px) {
+  .fo-signup .fo-auth__skel--row {
+    grid-template-columns: 1fr;
+  }
+}

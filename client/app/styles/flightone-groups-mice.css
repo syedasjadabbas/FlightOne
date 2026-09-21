@@ -19,7 +19,7 @@
 }
 
 .fo-gm__canvas--wide {
-  max-width: 48rem;
+  max-width: 52rem;
 }
 
 .fo-gm-page {
@@ -84,6 +84,12 @@
   letter-spacing: 0.01em;
 }
 
+.fo-gm-back--icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
 .fo-gm-back:hover {
   color: var(--sky);
   text-decoration: underline;
@@ -133,11 +139,70 @@
   color: var(--ink-soft);
 }
 
+.fo-gm-meta--chips {
+  align-items: center;
+  gap: 0.4rem;
+}
+
 .fo-gm-meta__code {
   font-variant-numeric: tabular-nums;
   font-weight: 600;
   color: var(--navy);
   letter-spacing: 0.04em;
+}
+
+.fo-gm-invite-code {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.65rem;
+  margin-top: 0.35rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: 0.65rem;
+  border: 1px solid color-mix(in oklab, var(--cyan) 22%, var(--line));
+  background: color-mix(in oklab, var(--horizon-cool) 45%, white);
+  max-width: 22rem;
+}
+
+.fo-gm-invite-code__label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.fo-gm-invite-code__value {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
+  color: var(--navy);
+}
+
+.fo-gm-invite-code__copy {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.4rem;
+  border: 1px solid var(--line);
+  background: var(--white);
+  color: var(--ink-soft);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.fo-gm-invite-code__copy:hover {
+  border-color: color-mix(in oklab, var(--sky) 35%, var(--line));
+  color: var(--navy);
+}
+
+.fo-gm-invite-code__copy:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--sky) 45%, transparent);
+  outline-offset: 1px;
 }
 
 .fo-gm-msg {
@@ -182,11 +247,71 @@
   color: var(--navy);
 }
 
+.fo-gm-section__title--icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.fo-gm-section__icon {
+  width: 0.9rem;
+  height: 0.9rem;
+  flex-shrink: 0;
+  color: var(--cyan);
+}
+
 .fo-gm-section__hint {
   margin: -0.25rem 0 0;
   font-size: 0.75rem;
   line-height: 1.45;
   color: var(--ink-faint);
+}
+
+.fo-gm-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.fo-gm-poll-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.45rem;
+}
+
+.fo-gm-memory-body {
+  margin: 0.25rem 0 0;
+  white-space: pre-wrap;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.fo-gm-file-label {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  width: 100%;
+}
+
+.fo-gm-file-label__text {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.fo-gm-footer-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.25rem;
+  padding-top: 0.15rem;
+}
+
+.fo-gm-footer-bar .fo-gm-footer {
+  margin: 0;
 }
 
 /* Compact action / form panels (list pages) */
@@ -238,6 +363,18 @@
   display: flex;
   flex-direction: column;
   gap: 0.55rem;
+}
+
+.fo-gm-form--spacious {
+  gap: 0.85rem;
+}
+
+.fo-gm-row__title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.15rem;
 }
 
 .fo-gm-form--row {
@@ -324,6 +461,9 @@ a.fo-gm-row:focus-visible {
 }
 
 .fo-gm-row__action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
   flex-shrink: 0;
   font-size: 0.75rem;
   font-weight: 600;
@@ -398,6 +538,9 @@ a.fo-gm-row:focus-visible {
 
 .fo-gm-callout__title {
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
   font-family: var(--font-hero);
   font-size: 0.8125rem;
   font-weight: 700;
@@ -424,6 +567,17 @@ a.fo-gm-row:focus-visible {
   flex-direction: column;
   gap: 0.35rem;
   padding: 1.1rem 0.25rem 0.85rem;
+}
+
+.fo-gm-empty--icon {
+  padding-top: 0.85rem;
+}
+
+.fo-gm-empty__icon {
+  width: 1.1rem;
+  height: 1.1rem;
+  color: color-mix(in oklab, var(--cyan) 55%, var(--ink-faint));
+  margin-bottom: 0.1rem;
 }
 
 .fo-gm-empty__title {
@@ -453,11 +607,36 @@ a.fo-gm-row:focus-visible {
   background: color-mix(in oklab, var(--white) 94%, var(--horizon-cool));
 }
 
+.fo-gm-status__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem 0.85rem;
+}
+
 .fo-gm-link {
   font-size: 0.8125rem;
   color: var(--sky);
   text-decoration: underline;
   text-underline-offset: 2px;
+}
+
+.fo-gm-link--action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.fo-gm-link--action:hover {
+  text-decoration: underline;
+}
+
+.fo-gm-link--inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
 }
 
 .fo-gm-link:focus-visible {
@@ -515,4 +694,416 @@ a.fo-gm-row:focus-visible {
 .fo-gm-select--narrow {
   min-width: 12rem;
   width: auto;
+}
+
+/* ── Tabs (MICE / Groups list desks) ───────────────────────── */
+
+.fo-gm-tabs {
+  display: flex;
+  gap: 0.15rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.fo-gm-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: -1px;
+  padding: 0.65rem 0.85rem;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--ink-soft);
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.fo-gm-tab:hover {
+  color: var(--navy);
+}
+
+.fo-gm-tab:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--electric) 45%, transparent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.fo-gm-tab--active {
+  border-bottom-color: var(--electric);
+  color: var(--navy);
+  font-weight: 600;
+}
+
+.fo-gm-tab__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  padding: 0.05rem 0.35rem;
+  border-radius: 0.35rem;
+  background: color-mix(in oklab, var(--horizon-cool) 70%, white);
+  color: var(--ink-faint);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.fo-gm-tab--active .fo-gm-tab__count {
+  background: color-mix(in oklab, var(--electric) 12%, white);
+  color: var(--navy);
+}
+
+/* ── Status / type chips ───────────────────────────────────── */
+
+.fo-gm-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: 0.35rem;
+  border: 1px solid var(--line);
+  background: color-mix(in oklab, var(--white) 88%, var(--horizon-cool));
+  color: var(--ink-soft);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.fo-gm-chip--ok {
+  border-color: color-mix(in oklab, var(--cyan) 28%, var(--line));
+  background: color-mix(in oklab, var(--horizon-cool) 55%, white);
+  color: color-mix(in oklab, var(--navy) 70%, var(--cyan));
+}
+
+.fo-gm-chip--warn {
+  border-color: color-mix(in oklab, var(--electric) 22%, var(--line));
+  background: color-mix(in oklab, var(--electric) 8%, white);
+  color: var(--navy);
+}
+
+.fo-gm-chip--muted {
+  color: var(--ink-faint);
+}
+
+.fo-gm-chip--danger {
+  border-color: color-mix(in oklab, var(--danger) 35%, var(--line));
+  background: color-mix(in oklab, var(--danger) 7%, white);
+  color: var(--danger);
+}
+
+/* ── Requirement toggles ───────────────────────────────────── */
+
+.fo-gm-reqs {
+  display: grid;
+  gap: 0.45rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 480px) {
+  .fo-gm-reqs {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (min-width: 640px) {
+  .fo-gm-reqs {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+.fo-gm-req {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 0.65rem;
+  background: var(--white);
+  color: var(--ink-soft);
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.fo-gm-req:hover {
+  border-color: color-mix(in oklab, var(--electric) 28%, var(--line));
+}
+
+.fo-gm-req:has(input:checked) {
+  border-color: color-mix(in oklab, var(--electric) 40%, var(--line));
+  background: color-mix(in oklab, var(--electric) 6%, white);
+  color: var(--navy);
+}
+
+.fo-gm-req:has(input:focus-visible) {
+  outline: 2px solid color-mix(in oklab, var(--electric) 45%, transparent);
+  outline-offset: 1px;
+}
+
+.fo-gm-req input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+
+.fo-gm-req__icon {
+  display: flex;
+  flex-shrink: 0;
+  color: var(--ink-faint);
+}
+
+.fo-gm-req:has(input:checked) .fo-gm-req__icon {
+  color: var(--electric);
+}
+
+.fo-gm-success {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.9rem 1rem;
+  border-radius: 0.85rem;
+  border: 1px solid color-mix(in oklab, var(--cyan) 30%, var(--line));
+  background: color-mix(in oklab, var(--horizon-cool) 50%, white);
+}
+
+.fo-gm-success__title {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--navy);
+  line-height: 1.4;
+}
+
+.fo-gm-success__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.fo-gm-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 0.75rem 0.85rem 0.9rem;
+  border-top: 1px solid var(--line);
+  background: color-mix(in oklab, var(--horizon-cool) 35%, white);
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+
+.fo-gm-detail p {
+  margin: 0;
+}
+
+.fo-gm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding-top: 0.35rem;
+}
+
+.fo-gm-guest-points {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.fo-gm-guest-points li {
+  display: flex;
+  gap: 0.65rem;
+  align-items: flex-start;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+
+.fo-gm-guest-points__icon {
+  display: flex;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+  color: var(--electric);
+}
+
+.fo-gm-guest-points strong {
+  display: block;
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 0.1rem;
+}
+
+/* ── Groups list desk additions ────────────────────────────── */
+
+.fo-gm-tab__icon {
+  width: 0.9rem;
+  height: 0.9rem;
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
+.fo-gm-checks {
+  display: grid;
+  gap: 0.45rem;
+  margin-top: 0.4rem;
+}
+
+@media (min-width: 640px) {
+  .fo-gm-checks {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.fo-gm-check {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: 0.65rem;
+  background: color-mix(in oklab, var(--white) 92%, var(--horizon-cool));
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.fo-gm-check:has(input:focus-visible) {
+  outline: 2px solid color-mix(in oklab, var(--sky) 45%, transparent);
+  outline-offset: 1px;
+}
+
+.fo-gm-check input {
+  accent-color: var(--sky);
+  width: 0.9rem;
+  height: 0.9rem;
+  flex-shrink: 0;
+}
+
+.fo-gm-check--wide {
+  grid-column: 1 / -1;
+}
+
+.fo-gm-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: 0.3rem;
+  border: 1px solid color-mix(in oklab, var(--cyan) 22%, var(--line));
+  background: color-mix(in oklab, var(--horizon-cool) 70%, white);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--navy) 78%, var(--sky));
+  white-space: nowrap;
+}
+
+.fo-gm-success__title {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+}
+
+.fo-gm-success__body {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+
+.fo-gm-actions--padded {
+  padding-top: 0.15rem;
+}
+
+.fo-gm-detail__note {
+  margin: 0;
+  line-height: 1.45;
+  color: var(--ink);
+}
+
+.fo-gm-dl {
+  display: grid;
+  gap: 0.35rem 1rem;
+  margin: 0;
+}
+
+@media (min-width: 640px) {
+  .fo-gm-dl {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.fo-gm-dl dt {
+  margin: 0;
+  font-size: 0.6875rem;
+  color: var(--ink-faint);
+}
+
+.fo-gm-dl dd {
+  margin: 0.1rem 0 0;
+  color: var(--ink);
+}
+
+.fo-gm-field-grid {
+  display: grid;
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .fo-gm-field-grid--2 {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .fo-gm-field-grid--3 {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  .fo-gm-field-grid--4 {
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+  }
+}
+
+.fo-gm-icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+.fo-gm-icon--lg {
+  width: 1.15rem;
+  height: 1.15rem;
+  margin-top: 0.1rem;
+  color: var(--sky);
+}
+
+button.fo-gm-row {
+  appearance: none;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+button.fo-gm-row:hover {
+  background: color-mix(in oklab, var(--horizon-cool) 70%, transparent);
+}
+
+button.fo-gm-row:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--sky) 45%, transparent);
+  outline-offset: 1px;
 }

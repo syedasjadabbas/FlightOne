@@ -29,16 +29,16 @@ export type FlightOneTestimonial = {
 export const FLIGHTONE_BRAND = {
   name: "FlightOne Travel",
   shortName: "FlightOne",
-  tagline: "Custom tour packages from Pakistan, designed around you",
+  tagline: "Custom tour packages global, designed around you",
   promise: "Your itinerary in 24 hours. Free to request. No obligation to book.",
   metaDescription:
-    "FlightOne designs custom tour packages from Pakistan for the Maldives, Turkey, Dubai and more. Get a full itinerary with honest pricing within 24 hours.",
+    "FlightOne designs custom tour packages globally for the Maldives, Turkey, Dubai and more. Get a full itinerary with honest pricing within 24 hours.",
   address: "71 C3, Facing Qarshi Park, Gulberg III, Lahore",
   phoneDisplay: "+92 327 777 0170",
   phoneE164: "+923277770170",
   whatsappUrl: "https://wa.me/923277770170",
   whatsappPrefill:
-    "Hi FlightOne, I would like a custom tour package from Pakistan. Please share details about my trip.",
+    "Hi FlightOne, I would like a custom tour package. Please share details about my trip.",
   email: "info@flightone.co",
   hours: "Mon – Sat: 10 am – 7 pm (PKT). Sunday closed.",
   instagram: "https://www.instagram.com/flightone",

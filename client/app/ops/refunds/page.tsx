@@ -1,6 +1,8 @@
 import { SiteNav } from "@/components/SiteNav";
 import { DeskShell } from "@/components/DeskShell";
 import { OpsRefundsClient } from "./OpsRefundsClient";
+import "../ops-hub.css";
+import "./ops-refunds.css";
 
 export const metadata = { title: "Refunds ops — FlightOne" };
 

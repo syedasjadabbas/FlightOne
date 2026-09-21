@@ -3,7 +3,7 @@ import { TravellerShell } from "@/app/components/traveller";
 import { EscalationDetailClient } from "./EscalationDetailClient";
 
 export const metadata = {
-  title: "Escalation — FlightOne",
+  title: "Support case — FlightOne",
 };
 
 export default async function EscalationDetailPage({
@@ -15,7 +15,7 @@ export default async function EscalationDetailPage({
   return (
     <main className="fo-stage relative flex min-h-[100dvh] flex-col">
       <SiteNav />
-      <TravellerShell>
+      <TravellerShell width="narrow">
         <EscalationDetailClient id={id} />
       </TravellerShell>
     </main>

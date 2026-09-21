@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button, Spinner } from "@/components/ui";
-import { TravellerSection, TravellerState } from "@/app/components/traveller";
+import { TravellerChip, TravellerSection, TravellerState } from "@/app/components/traveller";
 import {
   useListSessionsQuery,
   useRevokeOtherSessionsMutation,
@@ -105,13 +105,9 @@ export function SessionsSection() {
               <li key={s.id} className="fo-traveller__row">
                 <div className="fo-traveller__row-top">
                   <div className="min-w-0">
-                    <p className="fo-traveller__row-title">
+                    <p className="fo-traveller__row-title inline-flex flex-wrap items-center gap-2">
                       {s.deviceLabel}
-                      {s.current ? (
-                        <span className="ml-2 text-[11px] font-semibold uppercase tracking-wide text-[var(--sky)]">
-                          This device
-                        </span>
-                      ) : null}
+                      {s.current ? <TravellerChip>This device</TravellerChip> : null}
                     </p>
                     <p className="fo-traveller__row-meta">
                       Last used {formatSessionWhen(s.lastUsedAt)}

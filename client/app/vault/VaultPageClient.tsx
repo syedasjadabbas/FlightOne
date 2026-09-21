@@ -1,7 +1,13 @@
 ﻿"use client";
 
 import { useMemo, useState } from "react";
-import { Button, Input, SearchableSelect, Spinner } from "@/components/ui";
+import { FilePlus2, Lock, Search } from "lucide-react";
+import { Button, Input, Spinner } from "@/components/ui";
+import {
+  TravellerPageHeader,
+  TravellerSection,
+  TravellerState,
+} from "@/app/components/traveller";
 import { useAuthStore } from "@/store/auth.store";
 import {
   useCreateDocumentMutation,
@@ -20,61 +26,19 @@ import {
   type VaultDocument,
 } from "@/lib/api/vault.api";
 import { isIdentityVaultType } from "@/lib/profile/ocrReview";
-import { DocumentOcrPanel } from "@/app/profile/_components/DocumentOcrPanel";
-import { VAULT_TYPE_LABELS, VAULT_TYPE_ORDER, visaStatusLabel } from "@/lib/vault/visaStatus";
+import { VAULT_TYPE_LABELS, VAULT_TYPE_ORDER } from "@/lib/vault/visaStatus";
 import { DeleteDocumentConfirm } from "./_components/DeleteDocumentConfirm";
+import { VaultCategoryTabs, type VaultCategory } from "./_components/VaultCategoryTabs";
+import { VaultDocRow } from "./_components/VaultDocRow";
 import { VaultDocumentDetails } from "./_components/VaultDocumentDetails";
+import { VaultSummaryStrip } from "./_components/VaultSummaryStrip";
+import { VaultUploadModal } from "./_components/VaultUploadModal";
+import { getDaysUntil } from "./_components/vaultFormat";
 import {
-  VisaMetaFields,
   emptyVisaMetaForm,
   visaMetaFormToInput,
   type VisaMetaFormValue,
 } from "./_components/VisaMetaFields";
-
-type VaultCategory = "ALL" | "IDENTITIES" | "VISAS" | "LOYALTY" | "VOUCHERS" | "EXPIRING";
-
-const CATEGORY_TABS: Array<{ id: VaultCategory; label: string }> = [
-  { id: "ALL", label: "All Documents" },
-  { id: "IDENTITIES", label: "Passports & IDs" },
-  { id: "VISAS", label: "Visas & Permits" },
-  { id: "LOYALTY", label: "Loyalty & Memberships" },
-  { id: "VOUCHERS", label: "Tickets & Vouchers" },
-  { id: "EXPIRING", label: "Expiring Soon (≤90d)" },
-];
-
-const UPLOAD_TYPES: Array<{ value: VaultDocType; label: string; category: string }> = [
-  { value: "PASSPORT", label: "Passport", category: "Identification" },
-  { value: "NATIONAL_ID", label: "National ID / CNIC", category: "Identification" },
-  { value: "RESIDENCE_PERMIT", label: "Residence Permit", category: "Identification" },
-  { value: "VISA", label: "Visa", category: "Travel Entry" },
-  { value: "TICKET", label: "Ticket", category: "Travel" },
-  { value: "HOTEL_VOUCHER", label: "Hotel Voucher", category: "Travel" },
-  { value: "INSURANCE", label: "Travel Insurance", category: "Coverage" },
-  { value: "TRAVEL_CERT", label: "Travel Certificate", category: "Travel Entry" },
-  { value: "FF_CARD", label: "Frequent Flyer Card", category: "Loyalty" },
-  { value: "LOYALTY_CARD", label: "Hotel / Travel Loyalty Card", category: "Loyalty" },
-  { value: "OTHER", label: "Other Document", category: "General" },
-];
-
-function formatDate(value: string | null | undefined) {
-  if (!value) return "No expiry";
-  try {
-    return new Date(value).toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  } catch {
-    return "—";
-  }
-}
-
-function getDaysUntil(dateIso: string | null | undefined): number | null {
-  if (!dateIso) return null;
-  const now = new Date().getTime();
-  const target = new Date(dateIso).getTime();
-  return Math.ceil((target - now) / (1000 * 60 * 60 * 24));
-}
 
 function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -95,7 +59,6 @@ export function VaultPageClient() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showUploadModal, setShowUploadModal] = useState(false);
 
-  // Upload Form State
   const [uploadTitle, setUploadTitle] = useState("");
   const [uploadType, setUploadType] = useState<VaultDocType>("PASSPORT");
   const [uploadIssue, setUploadIssue] = useState("");
@@ -146,7 +109,6 @@ export function VaultPageClient() {
 
   const rawItems = list?.items ?? [];
 
-  // Metrics computation
   const stats = useMemo(() => {
     let validCount = 0;
     let expiringCount = 0;
@@ -172,10 +134,8 @@ export function VaultPageClient() {
     };
   }, [rawItems]);
 
-  // Filter items
   const filteredItems = useMemo(() => {
     return rawItems.filter((doc) => {
-      // Search text filter
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
         const matchesTitle = doc.title.toLowerCase().includes(q);
@@ -188,9 +148,12 @@ export function VaultPageClient() {
         }
       }
 
-      // Category tab filter
       if (selectedCategory === "IDENTITIES") {
-        return doc.type === "PASSPORT" || doc.type === "NATIONAL_ID" || doc.type === "RESIDENCE_PERMIT";
+        return (
+          doc.type === "PASSPORT" ||
+          doc.type === "NATIONAL_ID" ||
+          doc.type === "RESIDENCE_PERMIT"
+        );
       }
       if (selectedCategory === "VISAS") {
         return doc.type === "VISA" || doc.type === "TRAVEL_CERT";
@@ -405,444 +368,199 @@ export function VaultPageClient() {
 
   if (isError) {
     return (
-      <div className="rounded-2xl border border-rose-200 bg-rose-50/50 p-8 text-center">
-        <p className="text-base font-semibold text-rose-900">Traveller Vault Unavailable</p>
-        <p className="mt-1 text-sm text-rose-700">Could not retrieve your stored documents.</p>
-        <Button size="sm" variant="secondary" onClick={() => refetch()} className="mt-4">
-          Retry
-        </Button>
+      <div className="fo-vault">
+        <TravellerPageHeader
+          title="Traveller Vault"
+          lede="Store and manage passports, visas, and travel documents in one place."
+        />
+        <TravellerState
+          variant="error"
+          title="Vault unavailable"
+          action={
+            <Button size="sm" variant="secondary" onClick={() => refetch()}>
+              Retry
+            </Button>
+          }
+        >
+          Could not retrieve your stored documents.
+        </TravellerState>
       </div>
     );
   }
 
-  return (
-    <div className="w-full space-y-8">
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200/80 pb-6">
-        <div>
-          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-cyan-700">
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
-            Encrypted Travel Credentials
-          </div>
-          <h1 className="mt-1 text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 font-[var(--font-sora)]">
-            Traveller Vault
-          </h1>
-          <p className="mt-1.5 text-sm sm:text-base text-slate-600 max-w-2xl">
-            Store, verify, and manage your passports, visas, loyalty cards, and travel documents in one secure place.
-          </p>
-        </div>
+  const providerLabel = capability?.configured ? capability.provider : "Standard safe";
+  const maxMbNote = capability?.maxBytes
+    ? `Max ${(capability.maxBytes / (1024 * 1024)).toFixed(0)} MB / doc`
+    : null;
 
-        <div className="flex items-center gap-3">
+  return (
+    <div className="fo-vault">
+      <TravellerPageHeader
+        title="Traveller Vault"
+        lede="Passports, visas, loyalty cards, and vouchers — stored encrypted, ready when you travel."
+        actions={
           <Button
             size="md"
             onClick={() => {
               setActionError(null);
               setShowUploadModal(true);
             }}
-            className="flex items-center gap-2 shadow-sm"
+            icon={<FilePlus2 size={15} strokeWidth={2} aria-hidden />}
           >
-            <span>+ Add Document</span>
+            Add document
           </Button>
-        </div>
-      </div>
-
-      {/* Vault KPI Summary Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-4.5 shadow-xs">
-          <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Total Items</span>
-          <div className="mt-1 text-2xl font-bold text-slate-900 font-[var(--font-sora)]">{stats.total}</div>
-          <span className="text-xs text-slate-400">In secure storage</span>
-        </div>
-
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-4.5 shadow-xs">
-          <span className="text-xs font-semibold uppercase tracking-wider text-emerald-600">Active & Valid</span>
-          <div className="mt-1 text-2xl font-bold text-emerald-700 font-[var(--font-sora)]">{stats.valid}</div>
-          <span className="text-xs text-slate-400">Ready for travel</span>
-        </div>
-
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-4.5 shadow-xs">
-          <span className="text-xs font-semibold uppercase tracking-wider text-amber-600">Expiring ≤ 90d</span>
-          <div className="mt-1 text-2xl font-bold text-amber-700 font-[var(--font-sora)]">{stats.expiring}</div>
-          <span className="text-xs text-slate-400">Needs renewal soon</span>
-        </div>
-
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-4.5 shadow-xs">
-          <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Storage Provider</span>
-          <div className="mt-1 text-sm font-bold text-slate-900 truncate">
-            {capability?.configured ? capability.provider : "Standard Safe"}
-          </div>
-          <span className="text-xs text-slate-400">
-            {capability?.maxBytes ? `Max ${(capability.maxBytes / (1024 * 1024)).toFixed(0)}MB / doc` : "Encrypted"}
+        }
+        meta={
+          <span className="inline-flex items-center gap-1.5">
+            <Lock size={12} strokeWidth={2} aria-hidden />
+            Encrypted travel credentials
           </span>
-        </div>
-      </div>
+        }
+      />
 
-      {/* Global Alerts / Toasts */}
-      {actionSuccess && (
-        <div className="flex items-center justify-between rounded-xl bg-emerald-50 border border-emerald-200 px-4 py-3 text-sm font-medium text-emerald-900">
-          <span>✓ {actionSuccess}</span>
-          <button type="button" onClick={() => setActionSuccess(null)} className="text-xs opacity-70 hover:opacity-100">✕</button>
-        </div>
-      )}
-      {actionError && (
-        <div className="flex items-center justify-between rounded-xl bg-rose-50 border border-rose-200 px-4 py-3 text-sm font-medium text-rose-900">
-          <span>✕ {actionError}</span>
-          <button type="button" onClick={() => setActionError(null)} className="text-xs opacity-70 hover:opacity-100">✕</button>
-        </div>
-      )}
+      <VaultSummaryStrip
+        total={stats.total}
+        valid={stats.valid}
+        expiring={stats.expiring}
+        expired={stats.expired}
+        providerLabel={providerLabel}
+        maxMbNote={maxMbNote}
+      />
 
-      {/* Category Tabs & Search Bar */}
-      <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          {/* Tabs */}
-          <div className="flex flex-wrap items-center gap-1.5 rounded-xl bg-slate-100/80 p-1">
-            {CATEGORY_TABS.map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setSelectedCategory(tab.id)}
-                className={`rounded-lg px-3 py-1.5 text-xs sm:text-sm font-medium transition-all ${
-                  selectedCategory === tab.id
-                    ? "bg-white text-slate-900 shadow-xs font-semibold"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
+      {actionSuccess ? (
+        <div className="fo-vault__flash fo-vault__flash--ok" role="status">
+          <span>{actionSuccess}</span>
+          <button
+            type="button"
+            className="fo-vault__flash-dismiss"
+            onClick={() => setActionSuccess(null)}
+          >
+            Dismiss
+          </button>
+        </div>
+      ) : null}
+      {actionError && !showUploadModal ? (
+        <div className="fo-vault__flash fo-vault__flash--err" role="alert">
+          <span>{actionError}</span>
+          <button
+            type="button"
+            className="fo-vault__flash-dismiss"
+            onClick={() => setActionError(null)}
+          >
+            Dismiss
+          </button>
+        </div>
+      ) : null}
 
-          {/* Quick Search */}
-          <div className="w-full sm:w-64">
+      <div className="fo-vault__toolbar">
+        <VaultCategoryTabs selected={selectedCategory} onChange={setSelectedCategory} />
+        <div className="fo-vault__search">
+          <div className="fo-vault__search-wrap">
+            <Search
+              size={14}
+              strokeWidth={2}
+              className="fo-vault__search-icon"
+              aria-hidden
+            />
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search documents…"
-              className="py-1.5 text-xs sm:text-sm"
+              aria-label="Search documents"
+              className="py-1.5 text-sm"
             />
           </div>
         </div>
       </div>
 
-      {/* Document Cards Grid */}
       {filteredItems.length === 0 ? (
-        <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50/60 p-12 text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-xs">
-            <svg className="h-6 w-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-          </div>
-          <h3 className="text-base font-bold text-slate-900">No documents found</h3>
-          <p className="mt-1 text-sm text-slate-500">
-            {searchQuery
-              ? "No documents matched your search filter."
-              : "Upload your passport, national ID, visas, or vouchers to get started."}
-          </p>
-          <Button
-            size="sm"
-            onClick={() => {
-              setSearchQuery("");
-              setShowUploadModal(true);
-            }}
-            className="mt-4"
-          >
-            + Upload Document
-          </Button>
-        </div>
+        <TravellerState
+          title="No documents found"
+          action={
+            <Button
+              size="sm"
+              onClick={() => {
+                setSearchQuery("");
+                setShowUploadModal(true);
+              }}
+              icon={<FilePlus2 size={13} strokeWidth={2} aria-hidden />}
+            >
+              Upload document
+            </Button>
+          }
+        >
+          {searchQuery
+            ? "No documents matched your search."
+            : "Upload a passport, national ID, visa, or voucher to get started."}
+        </TravellerState>
       ) : (
-        <div className="space-y-8">
+        <div className="fo-vault__groups">
           {groupedItems.map((group) => (
-            <section key={group.type} className="space-y-3">
-              <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-500">
-                {VAULT_TYPE_LABELS[group.type] || group.type}
-                <span className="ml-2 text-slate-400 font-medium">{group.items.length}</span>
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <TravellerSection
+              key={group.type}
+              title={`${VAULT_TYPE_LABELS[group.type] || group.type} · ${group.items.length}`}
+            >
+              <ul className="fo-vault__list">
                 {group.items.map((doc) => {
-            const verification = verificationByVaultId.get(doc.id);
-            const identityDoc = ocrByVaultId[doc.id] || identityDocByVaultId.get(doc.id) || null;
-            const showOcr = ocrOpenVaultId === doc.id && identityDoc;
-            const daysUntil = getDaysUntil(doc.expiresAt);
-            const isBusy = busyId === doc.id;
+                  const identityDoc =
+                    ocrByVaultId[doc.id] || identityDocByVaultId.get(doc.id) || null;
+                  const showOcr = ocrOpenVaultId === doc.id && Boolean(identityDoc);
 
-            // Status tag logic
-            let expiryTone = "bg-emerald-50 text-emerald-700 border-emerald-200";
-            let expiryLabel = `Valid Â· Exp ${formatDate(doc.expiresAt)}`;
-
-            if (daysUntil !== null) {
-              if (daysUntil < 0) {
-                expiryTone = "bg-rose-50 text-rose-700 border-rose-200";
-                expiryLabel = `Expired (${formatDate(doc.expiresAt)})`;
-              } else if (daysUntil <= 90) {
-                expiryTone = "bg-amber-50 text-amber-800 border-amber-200";
-                expiryLabel = `Expiring in ${daysUntil}d (${formatDate(doc.expiresAt)})`;
-              }
-            } else if (!doc.expiresAt) {
-              expiryTone = "bg-slate-50 text-slate-700 border-slate-200";
-              expiryLabel = "No expiration date";
-            }
-
-            return (
-              <div
-                key={doc.id}
-                className="flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs hover:shadow-md transition-shadow"
-              >
-                <div>
-                  {/* Card Header: Type Badge & Status */}
-                  <div className="flex items-start justify-between gap-2">
-                    <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-slate-700">
-                      {doc.type.replaceAll("_", " ")}
-                    </span>
-                    {doc.isPlatformIssued && (
-                      <span className="rounded-full bg-cyan-50 border border-cyan-200 px-2.5 py-0.5 text-[11px] font-semibold text-cyan-800">
-                        Platform Issued
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Title */}
-                  <h3 className="mt-3 text-base font-bold text-slate-900 tracking-tight line-clamp-1 font-[var(--font-sora)]">
-                    {doc.title}
-                  </h3>
-
-                  {/* Expiry Badge */}
-                  <div className="mt-2 flex flex-wrap items-center gap-2">
-                    <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${expiryTone}`}>
-                      <span className="h-1.5 w-1.5 rounded-full bg-current" />
-                      {expiryLabel}
-                    </span>
-                    {doc.type === "VISA" && doc.visaMeta ? (
-                      <span className="inline-flex items-center rounded-full border border-cyan-200 bg-cyan-50 px-2.5 py-0.5 text-xs font-semibold text-cyan-800">
-                        {visaStatusLabel(doc.visaMeta.visaStatus)}
-                        {doc.visaMeta.destinationCode ? ` Â· ${doc.visaMeta.destinationCode}` : ""}
-                      </span>
-                    ) : null}
-                  </div>
-
-                  {/* Metadata Row */}
-                  <div className="mt-3 space-y-1 text-xs text-slate-500">
-                    <div>
-                      File:{" "}
-                      <span className="font-medium text-slate-700">
-                        {doc.originalFilename || "Metadata only"}
-                      </span>
-                      {doc.byteSize ? ` Â· ${(doc.byteSize / (1024 * 1024)).toFixed(2)} MB` : ""}
-                    </div>
-
-                    {verification && (
-                      <div className="flex items-center gap-1 text-cyan-800 font-medium">
-                        <span>✓ Verified on Profile ({verification})</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Card Actions Footer */}
-                <div className="mt-5 border-t border-slate-100 pt-4 flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex items-center gap-1.5">
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      disabled={isBusy}
-                      onClick={() => {
+                  return (
+                    <VaultDocRow
+                      key={doc.id}
+                      doc={doc}
+                      verification={verificationByVaultId.get(doc.id)}
+                      identityDoc={identityDoc}
+                      showOcr={showOcr}
+                      busy={busyId === doc.id}
+                      onDetails={() => {
                         setSelectedFallback(doc);
                         setSelectedDocId(doc.id);
                       }}
-                      className="text-xs px-2.5"
-                    >
-                      Details
-                    </Button>
-                    {doc.hasBinary && doc.isActive && (
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        disabled={isBusy}
-                        onClick={() => void onDownload(doc)}
-                        className="text-xs px-2.5"
-                      >
-                        Download
-                      </Button>
-                    )}
-
-                    {doc.isActive && (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        disabled={isBusy}
-                        onClick={() => void onShare(doc)}
-                        className="text-xs px-2"
-                        title="Copy temporary 24h share token"
-                      >
-                        Share
-                      </Button>
-                    )}
-
-                    {isIdentityVaultType(doc.type) && doc.isActive && doc.hasBinary && (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        disabled={isBusy}
-                        onClick={async () => {
-                          if (ocrOpenVaultId === doc.id) {
-                            setOcrOpenVaultId(null);
-                            return;
-                          }
-                          setBusyId(doc.id);
-                          const linked = await ensureIdentityDocForVault(doc);
-                          setBusyId(null);
-                          if (linked) setOcrOpenVaultId(doc.id);
-                        }}
-                        className="text-xs px-2 text-cyan-700"
-                      >
-                        {ocrOpenVaultId === doc.id ? "Hide OCR" : "OCR"}
-                      </Button>
-                    )}
-                  </div>
-
-                  {!doc.isPlatformIssued && doc.isActive && (
-                    <div className="flex items-center gap-1">
-                      <button
-                        type="button"
-                        onClick={() => void onReplace(doc)}
-                        className="rounded p-1 text-slate-400 hover:text-slate-700 text-xs"
-                        title="Replace file"
-                      >
-                        Replace
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => void onDelete(doc)}
-                        className="rounded p-1 text-slate-400 hover:text-rose-600 text-xs"
-                        title="Delete document"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                {/* Inline OCR Review Panel */}
-                {showOcr && identityDoc && (
-                  <div className="mt-4 border-t border-slate-200/80 pt-3">
-                    <DocumentOcrPanel document={identityDoc} compact />
-                  </div>
-                )}
-              </div>
-            );
+                      onDownload={() => void onDownload(doc)}
+                      onShare={() => void onShare(doc)}
+                      onReplace={() => void onReplace(doc)}
+                      onDelete={() => void onDelete(doc)}
+                      onToggleOcr={async () => {
+                        if (ocrOpenVaultId === doc.id) {
+                          setOcrOpenVaultId(null);
+                          return;
+                        }
+                        setBusyId(doc.id);
+                        const linked = await ensureIdentityDocForVault(doc);
+                        setBusyId(null);
+                        if (linked) setOcrOpenVaultId(doc.id);
+                      }}
+                    />
+                  );
                 })}
-              </div>
-            </section>
+              </ul>
+            </TravellerSection>
           ))}
         </div>
       )}
 
-      {/* Upload Document Modal Dialog */}
-      {showUploadModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs anim-fade">
-          <div className="relative w-full max-w-lg rounded-3xl bg-white p-6 sm:p-8 shadow-2xl border border-slate-200">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-              <div>
-                <h3 className="text-lg font-bold text-slate-900 font-[var(--font-sora)]">
-                  Add Document to Vault
-                </h3>
-                <p className="text-xs text-slate-500">Secure AES-256 cloud encryption</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowUploadModal(false)}
-                className="rounded-lg p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100"
-              >
-                ✕
-              </button>
-            </div>
-
-            <form onSubmit={onUpload} className="mt-5 space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Document Type
-                </label>
-                <SearchableSelect
-                  options={UPLOAD_TYPES}
-                  value={uploadType}
-                  onChange={(v) => setUploadType(v as VaultDocType)}
-                  searchable
-                />
-              </div>
-
-              <Input
-                label="Document Title"
-                value={uploadTitle}
-                onChange={(e) => setUploadTitle(e.target.value)}
-                placeholder="e.g. US B1/B2 Visa, Pakistan Passport"
-                required
-              />
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <Input
-                  label="Issue date (optional)"
-                  type="date"
-                  value={uploadIssue}
-                  onChange={(e) => setUploadIssue(e.target.value)}
-                />
-                <Input
-                  label="Expiration Date (optional)"
-                  type="date"
-                  value={uploadExpiry}
-                  onChange={(e) => setUploadExpiry(e.target.value)}
-                  hint="Used for automatic renewal reminders"
-                />
-              </div>
-
-              {uploadType === "VISA" ? (
-                <VisaMetaFields value={uploadVisa} onChange={setUploadVisa} disabled={uploading} />
-              ) : null}
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  File Document (PDF, JPEG, PNG, WebP)
-                </label>
-                <div className="relative rounded-xl border-2 border-dashed border-slate-300 bg-slate-50/70 p-5 text-center hover:bg-slate-50">
-                  <input
-                    type="file"
-                    accept="application/pdf,image/jpeg,image/png,image/webp"
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                    onChange={(e) => setUploadFile(e.target.files?.[0] ?? null)}
-                  />
-                  {uploadFile ? (
-                    <div className="text-xs font-semibold text-emerald-800">
-                      ✓ Selected: {uploadFile.name} ({(uploadFile.size / (1024 * 1024)).toFixed(2)} MB)
-                    </div>
-                  ) : (
-                    <div className="text-xs text-slate-500">
-                      <span className="font-semibold text-cyan-700">Click to upload</span> or drag and drop
-                      <div className="text-[11px] text-slate-400 mt-1">PDF or image files</div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {actionError && (
-                <p className="text-xs font-semibold text-rose-600">{actionError}</p>
-              )}
-
-              <div className="mt-6 flex justify-end gap-3 border-t border-slate-100 pt-4">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={() => setShowUploadModal(false)}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={uploading}>
-                  {uploading ? "Encrypting & Uploading…" : "Upload Document"}
-                </Button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      {showUploadModal ? (
+        <VaultUploadModal
+          uploadTitle={uploadTitle}
+          uploadType={uploadType}
+          uploadIssue={uploadIssue}
+          uploadExpiry={uploadExpiry}
+          uploadFile={uploadFile}
+          uploadVisa={uploadVisa}
+          uploading={uploading}
+          actionError={actionError}
+          onTitleChange={setUploadTitle}
+          onTypeChange={setUploadType}
+          onIssueChange={setUploadIssue}
+          onExpiryChange={setUploadExpiry}
+          onFileChange={setUploadFile}
+          onVisaChange={setUploadVisa}
+          onClose={() => setShowUploadModal(false)}
+          onSubmit={(e) => void onUpload(e)}
+        />
+      ) : null}
 
       {selectedDocId && (selectedFallback || rawItems.find((d) => d.id === selectedDocId)) ? (
         <VaultDocumentDetails

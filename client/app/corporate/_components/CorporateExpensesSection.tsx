@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { CheckCircle2, FileDown, Receipt } from "lucide-react";
 import { Button, Input } from "@/components/ui";
 import {
   useAttachExpenseReceiptMutation,
@@ -13,9 +14,19 @@ import {
   useSubmitExpenseMutation,
   useUpsertPerDiemPolicyMutation,
 } from "@/lib/api/corporate.api";
+import { DeskSectionHead, DeskStatus } from "./DeskSectionHead";
 
 function money(minor: number, currency?: string | null) {
   return `${currency || ""} ${(minor / 100).toFixed(2)}`.trim();
+}
+
+const selectClass =
+  "mt-1 w-full rounded-[var(--fo-desk-radius)] border border-[var(--fo-desk-line)] bg-[var(--white)] px-2.5 py-1.5 text-sm text-[var(--navy)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color-mix(in_oklab,var(--cyan)_55%,transparent)]";
+
+function expenseTone(status: string): "neutral" | "ok" | "warn" {
+  if (/APPROVED|REIMBURSED|PAID/i.test(status)) return "ok";
+  if (/REJECT|FAIL|VOID/i.test(status)) return "warn";
+  return "neutral";
 }
 
 export function CorporateExpensesSection({
@@ -47,26 +58,35 @@ export function CorporateExpensesSection({
 
   return (
     <section className="fo-desk__panel fo-desk__stack">
-      <h2 className="fo-desk__section-label">Expenses</h2>
-      <p className="text-xs text-slate-600">
+      <DeskSectionHead icon={Receipt} title="Expenses" />
+
+      <p className="text-xs text-[var(--ink-soft)]">
         {data?.ocr?.configured
           ? "Receipt OCR is configured."
           : data?.ocr?.reason || "Receipt OCR is not configured — amounts are never invented."}
       </p>
-      <p className="text-xs text-slate-600">
+      <p className="text-xs text-[var(--ink-soft)]">
         {perDiem?.configured
           ? `Per-diem policy active (${perDiem.items[0]?.currency} ${((perDiem.items[0]?.dailyAmountMinor || 0) / 100).toFixed(2)} / day).`
           : perDiem?.emptyReason || "No corporate per-diem policy is configured."}
       </p>
 
       <div className="grid gap-2 sm:grid-cols-2">
-        <Input label="Amount (minor units)" value={amount} onChange={(e) => setAmount(e.target.value)} />
-        <Input label="Merchant" value={merchant} onChange={(e) => setMerchant(e.target.value)} />
+        <Input
+          label="Amount (minor units)"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+        />
+        <Input
+          label="Merchant"
+          value={merchant}
+          onChange={(e) => setMerchant(e.target.value)}
+        />
       </div>
-      <label className="text-xs text-slate-600">
+      <label className="block text-xs font-medium text-[var(--ink-soft)]">
         Category
         <select
-          className="mt-1 w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm"
+          className={selectClass}
           value={category}
           onChange={(e) => setCategory(e.target.value)}
         >
@@ -77,10 +97,10 @@ export function CorporateExpensesSection({
           ))}
         </select>
       </label>
-      <label className="text-xs text-slate-600">
+      <label className="block text-xs font-medium text-[var(--ink-soft)]">
         Link trip (optional)
         <select
-          className="mt-1 w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm"
+          className={selectClass}
           value={bookingId}
           onChange={(e) => setBookingId(e.target.value)}
         >
@@ -124,9 +144,11 @@ export function CorporateExpensesSection({
       </Button>
 
       {!data?.items?.length ? (
-        <p className="fo-desk__empty">No expenses yet.</p>
+        <p className="fo-desk__empty" style={{ padding: 0 }}>
+          No expenses yet.
+        </p>
       ) : (
-        <div className="fo-desk__table-wrap">
+        <div className="fo-desk__table-wrap -mx-1">
           <table className="fo-desk__table">
             <thead>
               <tr>
@@ -134,67 +156,87 @@ export function CorporateExpensesSection({
                 <th>Amount</th>
                 <th>Status</th>
                 <th>OCR</th>
-                <th></th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {data.items.map((e) => (
                 <tr key={e.id}>
                   <td>
-                    {e.merchant || e.category}
-                    {e.bookingId ? <span className="block text-[11px] text-slate-400">Trip linked</span> : null}
+                    <span className="font-medium text-[var(--navy)]">
+                      {e.merchant || e.category}
+                    </span>
+                    {e.bookingId ? (
+                      <span className="mt-0.5 block text-[11px] text-[var(--ink-faint)]">
+                        Trip linked
+                      </span>
+                    ) : null}
                   </td>
                   <td>{money(e.amountMinor, e.currency)}</td>
-                  <td>{e.status}</td>
-                  <td>{e.ocrStatus}</td>
                   <td>
-                    <div className="flex flex-wrap gap-1">
+                    <DeskStatus tone={expenseTone(e.status)}>{e.status}</DeskStatus>
+                  </td>
+                  <td className="text-[var(--ink-soft)]">{e.ocrStatus}</td>
+                  <td>
+                    <div className="fo-desk__toolbar">
                       {e.status === "DRAFT" || e.status === "REJECTED" ? (
-                        <button
+                        <Button
+                          size="sm"
+                          variant="secondary"
                           type="button"
-                          className="text-[11px] text-cyan-700"
                           onClick={() => void submitExpense({ companyId, expenseId: e.id })}
                         >
                           Submit
-                        </button>
+                        </Button>
                       ) : null}
                       {isApprover && e.status === "PENDING_APPROVAL" ? (
                         <>
-                          <button
+                          <Button
+                            size="sm"
                             type="button"
-                            className="text-[11px] text-cyan-700"
                             onClick={() =>
-                              void decideExpense({ companyId, expenseId: e.id, decision: "APPROVE" })
+                              void decideExpense({
+                                companyId,
+                                expenseId: e.id,
+                                decision: "APPROVE",
+                              })
                             }
                           >
                             Approve
-                          </button>
-                          <button
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="secondary"
                             type="button"
-                            className="text-[11px] text-slate-600"
                             onClick={() =>
-                              void decideExpense({ companyId, expenseId: e.id, decision: "REJECT" })
+                              void decideExpense({
+                                companyId,
+                                expenseId: e.id,
+                                decision: "REJECT",
+                              })
                             }
                           >
                             Reject
-                          </button>
+                          </Button>
                         </>
                       ) : null}
-                      {isAdmin && (e.status === "REIMBURSEMENT_PENDING" || e.status === "APPROVED") ? (
-                        <button
+                      {isAdmin &&
+                      (e.status === "REIMBURSEMENT_PENDING" || e.status === "APPROVED") ? (
+                        <Button
+                          size="sm"
                           type="button"
-                          className="text-[11px] text-cyan-700"
                           onClick={() => void reimburse({ companyId, expenseId: e.id })}
                         >
                           Mark reimbursed
-                        </button>
+                        </Button>
                       ) : null}
-                      <label className="text-[11px] text-slate-500 cursor-pointer">
+                      <label className="inline-flex cursor-pointer items-center gap-1 text-[11px] font-medium text-[var(--cyan)] underline-offset-2 hover:underline">
+                        <FileDown className="h-3 w-3" aria-hidden />
                         Receipt
                         <input
                           type="file"
                           accept="image/jpeg,image/png,image/webp,application/pdf"
-                          className="hidden"
+                          className="sr-only"
                           onChange={async (ev) => {
                             const file = ev.target.files?.[0];
                             ev.target.value = "";
@@ -205,7 +247,9 @@ export function CorporateExpensesSection({
                               reader.onerror = reject;
                               reader.readAsDataURL(file);
                             });
-                            const b64 = dataUrl.includes(",") ? dataUrl.slice(dataUrl.indexOf(",") + 1) : dataUrl;
+                            const b64 = dataUrl.includes(",")
+                              ? dataUrl.slice(dataUrl.indexOf(",") + 1)
+                              : dataUrl;
                             try {
                               await attachReceipt({
                                 companyId,
@@ -232,54 +276,70 @@ export function CorporateExpensesSection({
 
       {isAdmin ? (
         <>
-          <Input label="Per-diem daily amount (minor units)" value={daily} onChange={(e) => setDaily(e.target.value)} />
-          <Button
-            size="sm"
-            type="button"
-            disabled={!daily.trim()}
-            onClick={async () => {
-              const n = Number(daily);
-              if (!Number.isInteger(n) || n < 0) return;
-              try {
-                await upsertPerDiem({ companyId, dailyAmountMinor: n, name: "Standard per diem" }).unwrap();
-                setMsg("Per-diem policy saved");
-              } catch {
-                setMsg("Could not save per-diem policy.");
-              }
-            }}
-          >
-            Save per-diem policy
-          </Button>
-          <Button
-            size="sm"
-            variant="secondary"
-            type="button"
-            onClick={async () => {
-              try {
-                const out = await exportExpenses({ companyId }).unwrap();
-                const csv = atob(out.contentBase64);
-                const blob = new Blob([csv], { type: "text/csv" });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = out.filename;
-                a.click();
-                URL.revokeObjectURL(url);
-                setMsg(
-                  out.submittedExternally
-                    ? "Export downloaded"
-                    : out.integration.reason || "Local CSV downloaded — not sent to payroll.",
-                );
-              } catch {
-                setMsg("Export failed.");
-              }
-            }}
-          >
-            Download reimbursement export
-          </Button>
+          <Input
+            label="Per-diem daily amount (minor units)"
+            value={daily}
+            onChange={(e) => setDaily(e.target.value)}
+          />
+          <div className="fo-desk__toolbar">
+            <Button
+              size="sm"
+              type="button"
+              disabled={!daily.trim()}
+              onClick={async () => {
+                const n = Number(daily);
+                if (!Number.isInteger(n) || n < 0) return;
+                try {
+                  await upsertPerDiem({
+                    companyId,
+                    dailyAmountMinor: n,
+                    name: "Standard per diem",
+                  }).unwrap();
+                  setMsg("Per-diem policy saved");
+                } catch {
+                  setMsg("Could not save per-diem policy.");
+                }
+              }}
+            >
+              Save per-diem policy
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
+              type="button"
+              onClick={async () => {
+                try {
+                  const out = await exportExpenses({ companyId }).unwrap();
+                  const csv = atob(out.contentBase64);
+                  const blob = new Blob([csv], { type: "text/csv" });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = url;
+                  a.download = out.filename;
+                  a.click();
+                  URL.revokeObjectURL(url);
+                  setMsg(
+                    out.submittedExternally
+                      ? "Export downloaded"
+                      : out.integration.reason ||
+                          "Local CSV downloaded — not sent to payroll.",
+                  );
+                } catch {
+                  setMsg("Export failed.");
+                }
+              }}
+            >
+              Download reimbursement export
+            </Button>
+          </div>
         </>
       ) : null}
-      {msg ? <p className="text-[13px] text-slate-600">{msg}</p> : null}
+      {msg ? (
+        <p className="inline-flex items-center gap-1.5 text-[13px] text-[var(--ink-soft)]">
+          <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-[var(--cyan)]" aria-hidden />
+          {msg}
+        </p>
+      ) : null}
     </section>
   );
 }

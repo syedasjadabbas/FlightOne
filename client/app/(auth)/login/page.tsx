@@ -2,9 +2,11 @@ import { Suspense } from "react";
 import { AuthShell } from "../components/AuthShell";
 import { LoginForm } from "./components/LoginForm";
 import { LoginFormSkeleton } from "./components/LoginFormSkeleton";
+import "../auth-form.css";
 
 export const metadata = {
   title: "Log in — FlightOne",
+  description: "Sign in to FlightOne to access your trips and bookings.",
 };
 
 export default function LoginPage() {
@@ -14,7 +16,7 @@ export default function LoginPage() {
         fallback={
           <>
             <p role="status" className="sr-only">
-              Loading login form
+              Loading sign-in form
             </p>
             <LoginFormSkeleton />
           </>

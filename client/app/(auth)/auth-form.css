@@ -1,0 +1,129 @@
+/* Shared auth form surface — used by login + signup. FlightOne / Joby tokens only. */
+
+.fo-auth-form {
+  --fo-auth-surface: var(--joby-surface);
+  --fo-auth-navy: var(--joby-navy);
+  --fo-auth-blue: var(--joby-blue);
+  --fo-auth-cyan: var(--cyan);
+}
+
+.fo-auth-form .fo-auth__panel {
+  background:
+    linear-gradient(
+      165deg,
+      color-mix(in oklab, var(--fo-auth-surface) 55%, white) 0%,
+      white 48%,
+      white 100%
+    );
+  border-color: color-mix(in oklab, var(--fo-auth-navy) 14%, transparent);
+  box-shadow:
+    0 18px 40px -14px color-mix(in oklab, var(--fo-auth-navy) 18%, transparent),
+    0 2px 8px -2px color-mix(in oklab, var(--fo-auth-navy) 6%, transparent);
+}
+
+.fo-auth-form .fo-auth__panel::before {
+  background: linear-gradient(
+    180deg,
+    var(--fo-auth-blue) 0%,
+    var(--fo-auth-cyan) 55%,
+    color-mix(in oklab, var(--fo-auth-navy) 70%, var(--fo-auth-cyan)) 100%
+  );
+}
+
+.fo-auth-form .fo-auth__title {
+  color: var(--fo-auth-navy);
+}
+
+.fo-auth-form .fo-auth__lead {
+  color: var(--joby-gray-text, #55606e);
+  max-width: 32ch;
+}
+
+.fo-auth-form .fo-auth__body {
+  margin-top: 0.75rem;
+}
+
+.fo-auth-form .fo-auth__form {
+  gap: 0.7rem;
+}
+
+.fo-auth-form .fo-auth__submit {
+  background: var(--fo-auth-blue) !important;
+  gap: 0.45rem;
+  margin-top: 0.35rem;
+  height: 2.65rem;
+}
+
+.fo-auth-form .fo-auth__submit:hover:not(:disabled) {
+  background: color-mix(in oklab, var(--fo-auth-blue) 86%, var(--fo-auth-navy)) !important;
+}
+
+.fo-auth-form .fo-auth__submit:focus-visible {
+  box-shadow:
+    0 0 0 2px var(--white),
+    0 0 0 4px color-mix(in oklab, var(--fo-auth-blue) 45%, transparent);
+}
+
+.fo-auth-form .fo-auth__submit:disabled {
+  opacity: 0.72;
+}
+
+.fo-auth-form .fo-auth__link {
+  color: color-mix(in oklab, var(--fo-auth-navy) 55%, var(--fo-auth-blue));
+}
+
+.fo-auth-form .fo-auth__link:hover {
+  color: var(--fo-auth-blue);
+}
+
+.fo-auth-form__fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.fo-auth-form__alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+}
+
+.fo-auth-form__alert svg {
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.fo-auth-form__footer-btn {
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  border-radius: 0.25rem;
+  color: color-mix(in oklab, var(--fo-auth-navy) 55%, var(--fo-auth-blue));
+}
+
+.fo-auth-form__footer-btn:hover:not(:disabled) {
+  color: var(--fo-auth-blue);
+}
+
+.fo-auth-form__footer-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.fo-auth-form__footer-btn:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--fo-auth-blue) 45%, transparent);
+  outline-offset: 2px;
+}
+
+.fo-auth-form__code input {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 1.35rem !important;
+  font-weight: 700;
+  letter-spacing: 0.35em;
+  text-align: center;
+  padding-inline: 0.75rem !important;
+}

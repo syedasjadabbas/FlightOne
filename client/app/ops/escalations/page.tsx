@@ -1,6 +1,7 @@
 import { SiteNav } from "@/components/SiteNav";
 import { DeskShell } from "@/components/DeskShell";
 import { OpsEscalationsClient } from "./OpsEscalationsClient";
+import "./ops-escalations.css";
 
 export const metadata = {
   title: "Consultant queue — FlightOne",

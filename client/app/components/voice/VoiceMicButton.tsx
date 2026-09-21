@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Loader2, Mic, MicOff } from "lucide-react";
 import { useAuthStore } from "@/store/auth.store";
 import {
   useCreateVoiceSessionMutation,
@@ -50,15 +51,23 @@ export function VoiceMicButton({
 
   const [uiState, setUiState] = useState<VoiceUiState>("idle");
   const [status, setStatus] = useState<string | null>(null);
+  // Defer browser API checks until after mount so SSR HTML matches the first client paint.
+  const [browserReady, setBrowserReady] = useState(false);
   const sessionIdRef = useRef<string | null>(null);
   const recRef = useRef<SpeechRec | null>(null);
 
-  const Ctor = getSpeechRecognitionCtor();
-  const unsupported = !isBrowserVoiceSupported(
-    Ctor,
-    typeof navigator !== "undefined" ? navigator.mediaDevices : null,
-  );
-  const unauthenticated = hasHydrated && !accessToken;
+  useEffect(() => {
+    setBrowserReady(true);
+  }, []);
+
+  const Ctor = browserReady ? getSpeechRecognitionCtor() : null;
+  const unsupported =
+    browserReady &&
+    !isBrowserVoiceSupported(
+      Ctor,
+      typeof navigator !== "undefined" ? navigator.mediaDevices : null,
+    );
+  const unauthenticated = browserReady && hasHydrated && !accessToken;
 
   const speak = useCallback((text: string) => {
     if (typeof window === "undefined" || !window.speechSynthesis) return;
@@ -176,6 +185,7 @@ export function VoiceMicButton({
   useEffect(() => () => stopListening(), [stopListening]);
 
   const listening = uiState === "listening";
+  const processing = uiState === "processing";
   const label = status || voiceStatusLabel(uiState, { unsupported, unauthenticated });
 
   return (
@@ -183,25 +193,27 @@ export function VoiceMicButton({
       <button
         type="button"
         onClick={() => (listening ? stopListening() : void startListening())}
-        className={`flex h-8 w-8 items-center justify-center rounded-xl border transition-all ${
+        className={`flex h-9 w-9 items-center justify-center rounded-xl border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--electric)]/35 ${
           listening
-            ? "border-rose-300 bg-rose-50 text-rose-700"
-            : "border-slate-200 bg-white text-slate-600 hover:border-cyan-300 hover:text-cyan-700"
+            ? "border-[color-mix(in_oklab,var(--danger)_35%,var(--line))] bg-[color-mix(in_oklab,var(--danger)_8%,white)] text-[var(--danger)]"
+            : "border-[var(--line)] bg-white text-[var(--ink-soft)] hover:border-[color-mix(in_oklab,var(--electric)_40%,var(--line))] hover:text-[var(--electric)]"
         }`}
         aria-label={listening ? "Stop listening" : "Talk with Ava"}
         title={label}
       >
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
-          />
-        </svg>
+        {processing ? (
+          <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} aria-hidden />
+        ) : listening ? (
+          <MicOff className="h-4 w-4" strokeWidth={1.9} aria-hidden />
+        ) : (
+          <Mic className="h-4 w-4" strokeWidth={1.9} aria-hidden />
+        )}
       </button>
       {uiState !== "idle" ? (
-        <p className="mt-1 max-w-[11rem] text-[10px] leading-snug text-slate-500" aria-live="polite">
+        <p
+          className="absolute bottom-full right-0 mb-1 max-w-[12rem] rounded-md border border-[var(--line)] bg-white px-2 py-1 text-[10px] leading-snug text-[var(--ink-soft)] shadow-[var(--shadow-soft)]"
+          aria-live="polite"
+        >
           {label}
         </p>
       ) : null}

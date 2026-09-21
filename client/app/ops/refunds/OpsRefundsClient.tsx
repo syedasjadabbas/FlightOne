@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
-import { Button, Pagination, Spinner, pageCountFor, paginateItems } from "@/components/ui";
+import { useMemo, useState } from "react";
+import { Pagination, Spinner, pageCountFor, paginateItems } from "@/components/ui";
 import { PermissionGate } from "@/components/PermissionGate";
 import {
   useListRefundCasesQuery,
@@ -10,7 +10,18 @@ import {
 } from "@/lib/api/refunds.api";
 import { usePermissions } from "@/lib/permissions/usePermissions";
 import { useAuthStore } from "@/store/auth.store";
-import { useState } from "react";
+import {
+  OpsRefundCaseRow,
+  OpsRefundsEmpty,
+  OpsRefundsHeader,
+  OpsRefundsPermissionGate,
+  OpsRefundsSignInGate,
+  OpsRefundsSummary,
+  STATUS_FILTERS,
+  filterCases,
+  statusFilterLabel,
+  summarizeCases,
+} from "./_components";
 
 const PAGE_SIZE_DEFAULT = 15;
 
@@ -27,57 +38,98 @@ export function OpsRefundsClient() {
   const [processCase] = useProcessRefundCaseMutation();
   const [rejectCase] = useRejectRefundCaseMutation();
   const [msg, setMsg] = useState<string | null>(null);
+  const [msgWarn, setMsgWarn] = useState(false);
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [filter, setFilter] = useState<(typeof STATUS_FILTERS)[number]>("ACTIONABLE");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(PAGE_SIZE_DEFAULT);
 
+  const items = data?.items ?? [];
+  const summary = useMemo(() => summarizeCases(items), [items]);
+  const filtered = useMemo(() => filterCases(items, filter), [items, filter]);
+
+  async function handleProcess(id: string) {
+    setMsg(null);
+    setMsgWarn(false);
+    setBusyId(id);
+    try {
+      const r = await processCase(id).unwrap();
+      setMsg(`Processed → ${r.status}`);
+      setMsgWarn(r.status === "FAILED" || r.status === "REQUIRES_HUMAN");
+      refetch();
+    } catch {
+      setMsg("Process failed.");
+      setMsgWarn(true);
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function handleReject(id: string) {
+    setMsg(null);
+    setMsgWarn(false);
+    setBusyId(id);
+    try {
+      await rejectCase({ id, reason: "Rejected by ops" }).unwrap();
+      setMsg("Rejected.");
+      refetch();
+    } catch {
+      setMsg("Reject failed.");
+      setMsgWarn(true);
+    } finally {
+      setBusyId(null);
+    }
+  }
+
   if (!hasHydrated || permsLoading) {
     return (
-      <div className="flex justify-center py-16">
+      <div className="flex justify-center py-16" role="status" aria-live="polite">
         <Spinner />
       </div>
     );
   }
+
   if (!accessToken) {
-    return (
-      <div className="fo-desk__panel">
-        <p className="fo-desk__empty">Sign in required.</p>
-      </div>
-    );
+    return <OpsRefundsSignInGate />;
   }
 
   return (
-    <PermissionGate
-      anyOf={["refunds:read"]}
-      mode="fallback"
-      fallback={
-        <header className="fo-desk__header">
-          <h1 className="fo-desk__title">Refunds ops</h1>
-          <p className="fo-desk__lede">Missing `refunds:read` permission.</p>
-          <div className="fo-desk__links">
-            <Link href="/refunds">Customer refunds</Link>
-          </div>
-        </header>
-      }
-    >
-      <div className="fo-desk__stack" style={{ gap: "1.25rem" }}>
-        <header className="fo-desk__header">
-          <h1 className="fo-desk__title">Refunds queue</h1>
-          <p className="fo-desk__lede">
-            Process only confirms completion when payment/supplier paths succeed — otherwise
-            REQUIRES_HUMAN / FAILED. Exchange and reissue stay REQUIRES_HUMAN until an agent
-            completes the ticket change outside live GDS mutation.
+    <PermissionGate anyOf={["refunds:read"]} mode="fallback" fallback={<OpsRefundsPermissionGate />}>
+      <div className="fo-ops fo-ops-refunds">
+        <OpsRefundsHeader />
+
+        {!isLoading && items.length > 0 ? <OpsRefundsSummary summary={summary} /> : null}
+
+        {msg ? (
+          <p className={`fo-ops__msg${msgWarn ? " fo-ops__msg--warn" : ""}`} role="status">
+            {msg}
           </p>
-          <div className="fo-desk__links">
-            <Link href="/ops">← Operations</Link>
-          </div>
-        </header>
-        {msg ? <p className="text-[13px] text-ink-soft">{msg}</p> : null}
+        ) : null}
+
+        <div className="fo-desk__toolbar" role="group" aria-label="Status filter">
+          {STATUS_FILTERS.map((f) => (
+            <button
+              key={f}
+              type="button"
+              onClick={() => {
+                setFilter(f);
+                setPage(1);
+              }}
+              className={`fo-desk__chip${filter === f ? " fo-desk__chip--active" : ""}`}
+            >
+              {statusFilterLabel(f)}
+            </button>
+          ))}
+        </div>
+
         {isLoading ? (
-          <Spinner />
-        ) : !data?.items?.length ? (
-          <div className="fo-desk__panel">
-            <p className="fo-desk__empty">No cases.</p>
+          <div className="flex justify-center py-12" role="status" aria-live="polite">
+            <Spinner />
           </div>
+        ) : !items.length ? (
+          <OpsRefundsEmpty filtered={false} />
+        ) : !filtered.length ? (
+          <OpsRefundsEmpty filtered />
         ) : (
           <section className="fo-desk__panel fo-desk__panel--flush">
             <div className="fo-desk__table-wrap">
@@ -92,79 +144,29 @@ export function OpsRefundsClient() {
                   </tr>
                 </thead>
                 <tbody>
-                  {paginateItems(data.items, page, pageSize).map((c) => (
-                    <tr key={c.id}>
-                      <td>
-                        <Link href={`/refunds/${c.id}`}>
-                          {(c.kind || "REFUND").replaceAll("_", " ")}
-                        </Link>
-                      </td>
-                      <td>
-                        <span
-                          className={
-                            ["REQUIRES_HUMAN", "FAILED"].includes(c.status)
-                              ? "fo-desk__status fo-desk__status--warn"
-                              : "fo-desk__status"
-                          }
-                        >
-                          {c.status}
-                        </span>
-                      </td>
-                      <td className="fo-desk__mono">{c.bookingId}</td>
-                      <td className="fo-desk__mono">{c.id.slice(0, 10)}…</td>
-                      {canWrite ? (
-                        <td>
-                          {["SUBMITTED", "PROCESSING", "REQUIRES_HUMAN"].includes(c.status) ? (
-                            <div className="fo-desk__toolbar">
-                              <Button
-                                size="sm"
-                                onClick={async () => {
-                                  setMsg(null);
-                                  try {
-                                    const r = await processCase(c.id).unwrap();
-                                    setMsg(`Processed → ${r.status}`);
-                                    refetch();
-                                  } catch {
-                                    setMsg("Process failed.");
-                                  }
-                                }}
-                              >
-                                Process
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="secondary"
-                                onClick={async () => {
-                                  setMsg(null);
-                                  try {
-                                    await rejectCase({ id: c.id, reason: "Rejected by ops" }).unwrap();
-                                    setMsg("Rejected.");
-                                    refetch();
-                                  } catch {
-                                    setMsg("Reject failed.");
-                                  }
-                                }}
-                              >
-                                Reject
-                              </Button>
-                            </div>
-                          ) : (
-                            "—"
-                          )}
-                        </td>
-                      ) : null}
-                    </tr>
+                  {paginateItems(filtered, page, pageSize).map((c) => (
+                    <OpsRefundCaseRow
+                      key={c.id}
+                      caseItem={c}
+                      canWrite={canWrite}
+                      busy={busyId === c.id}
+                      onProcess={handleProcess}
+                      onReject={handleReject}
+                    />
                   ))}
                 </tbody>
               </table>
             </div>
             <Pagination
               page={page}
-              pageCount={pageCountFor(data.items.length, pageSize)}
+              pageCount={pageCountFor(filtered.length, pageSize)}
               onPageChange={setPage}
               pageSize={pageSize}
-              onPageSizeChange={setPageSize}
-              totalItems={data.items.length}
+              onPageSizeChange={(size) => {
+                setPageSize(size);
+                setPage(1);
+              }}
+              totalItems={filtered.length}
               label="Refund cases"
             />
           </section>

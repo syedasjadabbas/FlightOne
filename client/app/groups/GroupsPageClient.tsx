@@ -2,6 +2,16 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import {
+  ArrowRight,
+  CheckCircle2,
+  ClipboardList,
+  LogIn,
+  Mail,
+  Plane,
+  UserPlus,
+  Users,
+} from "lucide-react";
 import { Button, Input, SearchableSelect, Spinner } from "@/components/ui";
 import {
   useAcceptInviteMutation,
@@ -16,7 +26,11 @@ import {
   type GroupDateFlexibility,
   type GroupType,
 } from "@/lib/api/groups.api";
-import { formatGroupRequestSubmitError, isValidGroupPassengerCount, MIN_GROUP_PASSENGERS } from "@/lib/groups/groupRequest";
+import {
+  formatGroupRequestSubmitError,
+  isValidGroupPassengerCount,
+  MIN_GROUP_PASSENGERS,
+} from "@/lib/groups/groupRequest";
 import { useAuthStore } from "@/store/auth.store";
 
 const TYPES: GroupType[] = [
@@ -113,7 +127,7 @@ export function GroupsPageClient() {
 
   if (!hasHydrated) {
     return (
-      <div className="flex justify-center py-16">
+      <div className="flex justify-center py-16" role="status" aria-label="Loading">
         <Spinner />
       </div>
     );
@@ -121,66 +135,39 @@ export function GroupsPageClient() {
 
   if (!accessToken) {
     return (
-      <div className="space-y-8">
-        <header className="border-b border-slate-200/80 pb-6">
-          <p className="text-xs font-semibold uppercase tracking-wider text-cyan-600">
-            Group Travel
-          </p>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl font-[var(--font-sora)]">
-            FlightOne Group Bookings
-          </h1>
-          <p className="mt-2 text-sm text-slate-600 max-w-2xl leading-relaxed">
-            Submit a group travel request for {MIN_GROUP_PASSENGERS} or more travellers. The group
-            desk reviews enquiries manually — FlightOne does not auto-ticket group inventory or
-            invent fares.
-          </p>
-          <div className="mt-4 flex gap-3">
-            <Link href="/login?redirect=%2Fgroups">
-              <Button size="sm">Sign in to request group travel</Button>
-            </Link>
-            <Link href="/chat">
-              <Button size="sm" variant="secondary">Plan with Ava</Button>
-            </Link>
+      <div className="fo-gm-page">
+        <header className="fo-gm-masthead">
+          <div className="fo-gm-masthead__inner">
+            <p className="fo-gm-kicker">Group desk</p>
+            <h1 className="fo-gm-title">Group bookings</h1>
+            <p className="fo-gm-lede">
+              Requests for {MIN_GROUP_PASSENGERS}+ travellers go to the group desk for manual
+              review. No auto-ticketing, no invented fares.
+            </p>
           </div>
         </header>
 
-        <div className="grid gap-4 sm:grid-cols-3">
-          <div className="rounded-xl border border-slate-200/80 bg-white/80 p-4 shadow-2xs">
-            <p className="text-sm font-semibold text-slate-900">Structured enquiry</p>
-            <p className="mt-1 text-xs text-slate-600 leading-relaxed">
-              Origin, destination, dates, group size, cabin and contact details — stored as your
-              request, not as a live airline booking.
-            </p>
-          </div>
-          <div className="rounded-xl border border-slate-200/80 bg-white/80 p-4 shadow-2xs">
-            <p className="text-sm font-semibold text-slate-900">Manual group desk</p>
-            <p className="mt-1 text-xs text-slate-600 leading-relaxed">
-              A specialist reviews the request. Availability, fares, and tickets are confirmed only
-              when a supplier actually confirms them.
-            </p>
-          </div>
-          <div className="rounded-xl border border-slate-200/80 bg-white/80 p-4 shadow-2xs">
-            <p className="text-sm font-semibold text-slate-900">Shared workspace</p>
-            <p className="mt-1 text-xs text-slate-600 leading-relaxed">
-              After you submit, you can invite members, share documents, and coordinate in a group
-              workspace while the desk works the request.
-            </p>
-          </div>
-        </div>
-
-        <div className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-xs">
-          <h2 className="text-base font-semibold text-slate-900">
-            Start a group request ({MIN_GROUP_PASSENGERS}+ passengers)
-          </h2>
-          <p className="mt-1 text-xs text-slate-600">
-            Sign in to submit a request, track status, and open the collaboration workspace.
+        <div className="fo-gm-status">
+          <p className="fo-gm-section__title">Sign in to continue</p>
+          <p className="fo-gm-section__hint">
+            Submit a route enquiry, track desk status, and open a collaboration workspace once a
+            request exists.
           </p>
-          <div className="mt-4 flex gap-3">
+          <div className="fo-gm-actions">
             <Link href="/login?redirect=%2Fgroups">
-              <Button size="sm">Log in</Button>
+              <Button size="sm" icon={<LogIn className="fo-gm-icon" aria-hidden />}>
+                Sign in
+              </Button>
             </Link>
             <Link href="/signup">
-              <Button size="sm" variant="ghost">Create account</Button>
+              <Button size="sm" variant="ghost">
+                Create account
+              </Button>
+            </Link>
+            <Link href="/chat">
+              <Button size="sm" variant="secondary">
+                Ask Ava
+              </Button>
             </Link>
           </div>
         </div>
@@ -276,11 +263,11 @@ export function GroupsPageClient() {
   }
 
   return (
-    <div className="fo-gm-page space-y-6">
+    <div className="fo-gm-page">
       <header className="fo-gm-masthead">
         <div className="fo-gm-masthead__inner">
-          <p className="fo-gm-kicker">Group Travel</p>
-          <h1 className="fo-gm-title">Group Bookings</h1>
+          <p className="fo-gm-kicker">Group desk</p>
+          <h1 className="fo-gm-title">Group bookings</h1>
           <p className="fo-gm-lede">
             Enquiries for {MIN_GROUP_PASSENGERS}+ travellers are reviewed by the group desk. This
             is not automated group ticketing.
@@ -288,41 +275,44 @@ export function GroupsPageClient() {
         </div>
       </header>
 
-      <div className="flex border-b border-slate-200 gap-2">
+      <div className="fo-gm-tabs" role="tablist" aria-label="Group desk sections">
         <button
           type="button"
+          role="tab"
+          aria-selected={activeTab === "enquiry"}
+          id="fo-gm-tab-enquiry"
+          className={`fo-gm-tab${activeTab === "enquiry" ? " fo-gm-tab--active" : ""}`}
           onClick={() => setActiveTab("enquiry")}
-          className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
-            activeTab === "enquiry"
-              ? "border-sky-600 text-sky-600 font-semibold"
-              : "border-transparent text-slate-600 hover:text-slate-900"
-          }`}
         >
+          <ClipboardList className="fo-gm-tab__icon" aria-hidden />
           Group request ({MIN_GROUP_PASSENGERS}+)
         </button>
         <button
           type="button"
+          role="tab"
+          aria-selected={activeTab === "groups"}
+          id="fo-gm-tab-groups"
+          className={`fo-gm-tab${activeTab === "groups" ? " fo-gm-tab--active" : ""}`}
           onClick={() => setActiveTab("groups")}
-          className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
-            activeTab === "groups"
-              ? "border-sky-600 text-sky-600 font-semibold"
-              : "border-transparent text-slate-600 hover:text-slate-900"
-          }`}
         >
+          <Users className="fo-gm-tab__icon" aria-hidden />
           My groups ({active.length})
         </button>
       </div>
 
       {pending.length > 0 ? (
         <div className="fo-gm-callout" role="region" aria-label="Pending invitations">
-          <p className="fo-gm-callout__title">Pending group invitations</p>
+          <p className="fo-gm-callout__title">
+            <Mail className="fo-gm-icon" aria-hidden />
+            Pending invitations
+          </p>
           {pending.map((g) => (
             <div key={g.id} className="fo-gm-invite">
               <div>
                 <p className="fo-gm-row__title">{g.name}</p>
                 <p className="fo-gm-row__meta">{g.type.replace(/_/g, " ")}</p>
               </div>
-              <div className="flex gap-2">
+              <div className="fo-gm-actions">
                 <Button
                   type="button"
                   size="sm"
@@ -351,356 +341,373 @@ export function GroupsPageClient() {
       ) : null}
 
       {activeTab === "enquiry" ? (
-        <div className="space-y-6">
-          <div className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-xs">
-            <div className="border-b border-slate-100 pb-4 mb-4">
-              <h2 className="text-base font-semibold text-slate-900">Group travel request</h2>
-              <p className="text-xs text-slate-500 mt-1">
-                Minimum {MIN_GROUP_PASSENGERS} passengers. Submitting creates a request for the
-                group desk and, when possible, a collaboration workspace. No airline inventory is
-                held until a supplier confirms it.
+        <div className="space-y-5">
+          <section className="fo-gm-ledger" aria-labelledby="fo-gm-request-heading">
+            <div className="fo-gm-section">
+              <h2 id="fo-gm-request-heading" className="fo-gm-section__title">
+                Group travel request
+              </h2>
+              <p className="fo-gm-section__hint">
+                Minimum {MIN_GROUP_PASSENGERS} passengers. Submitting creates a desk request and,
+                when possible, a collaboration workspace. Inventory is not held until a supplier
+                confirms it.
               </p>
-            </div>
 
-            {formSuccess ? (
-              <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-4 space-y-3">
-                <p className="text-sm font-semibold text-emerald-900">{formSuccess}</p>
-                <p className="text-xs text-emerald-700 leading-relaxed">
-                  You can track this request below. Fulfilment is manual — we will not invent a PNR
-                  or fare here.
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {createdGroupId ? (
-                    <Link href={`/groups/${createdGroupId}`}>
-                      <Button size="sm">Open workspace</Button>
-                    </Link>
-                  ) : null}
-                  {createdRequestId ? (
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={() => setSelectedRequestId(createdRequestId)}
-                    >
-                      View request
+              {formSuccess ? (
+                <div className="fo-gm-success" role="status">
+                  <p className="fo-gm-success__title">
+                    <CheckCircle2 className="fo-gm-icon--lg" aria-hidden />
+                    <span>{formSuccess}</span>
+                  </p>
+                  <p className="fo-gm-success__body">
+                    Track this request below. Fulfilment is manual — we will not invent a PNR or
+                    fare here.
+                  </p>
+                  <div className="fo-gm-actions">
+                    {createdGroupId ? (
+                      <Link href={`/groups/${createdGroupId}`}>
+                        <Button size="sm" icon={<ArrowRight className="fo-gm-icon" aria-hidden />}>
+                          Open workspace
+                        </Button>
+                      </Link>
+                    ) : null}
+                    {createdRequestId ? (
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => setSelectedRequestId(createdRequestId)}
+                      >
+                        View request
+                      </Button>
+                    ) : null}
+                    <Button size="sm" variant="ghost" onClick={() => setFormSuccess(null)}>
+                      Submit another
                     </Button>
-                  ) : null}
-                  <Button size="sm" variant="ghost" onClick={() => setFormSuccess(null)}>
-                    Submit another request
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <form onSubmit={handleEnquirySubmit} className="space-y-4">
-                <div className="grid gap-4 sm:grid-cols-3">
-                  <Input
-                    label="Group / trip name *"
-                    value={groupName}
-                    onChange={(e) => setGroupName(e.target.value)}
-                    placeholder="e.g. Team offsite"
-                    required
-                  />
-                  <SearchableSelect
-                    label="Group type"
-                    options={TYPE_OPTIONS}
-                    value={groupType}
-                    onChange={(v) => setGroupType(v as GroupType)}
-                    searchable={false}
-                  />
-                  <Input
-                    label={`Passenger count (min. ${MIN_GROUP_PASSENGERS}) *`}
-                    type="number"
-                    min={MIN_GROUP_PASSENGERS}
-                    value={passengerCount}
-                    onChange={(e) => setPassengerCount(e.target.value)}
-                    required
-                  />
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-4">
-                  <Input
-                    label="Origin *"
-                    value={origin}
-                    onChange={(e) => setOrigin(e.target.value.toUpperCase())}
-                    placeholder="IATA or city code"
-                    required
-                  />
-                  <Input
-                    label="Destination *"
-                    value={destination}
-                    onChange={(e) => setDestination(e.target.value.toUpperCase())}
-                    placeholder="IATA or city code"
-                    required
-                  />
-                  <Input
-                    label="Departure date"
-                    type="date"
-                    value={departureDate}
-                    onChange={(e) => setDepartureDate(e.target.value)}
-                  />
-                  <Input
-                    label="Return date"
-                    type="date"
-                    value={returnDate}
-                    onChange={(e) => setReturnDate(e.target.value)}
-                  />
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-3">
-                  <SearchableSelect
-                    label="Date flexibility"
-                    options={FLEXIBILITY_OPTIONS}
-                    value={flexibility}
-                    onChange={(v) => setFlexibility(v as GroupDateFlexibility)}
-                    searchable={false}
-                  />
-                  <SearchableSelect
-                    label="Cabin preference"
-                    options={CABIN_OPTIONS}
-                    value={cabinPreference}
-                    onChange={(v) => setCabinPreference((v as GroupCabinPreference) || "")}
-                    searchable={false}
-                  />
-                  <Input
-                    label="Travel purpose"
-                    value={purpose}
-                    onChange={(e) => setPurpose(e.target.value)}
-                    placeholder="e.g. conference, sports tour"
-                  />
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <Input
-                    label="Organization / company (optional)"
-                    value={organization}
-                    onChange={(e) => setOrganization(e.target.value)}
-                  />
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-3">
-                  <Input
-                    label="Primary contact name *"
-                    value={contactName}
-                    onChange={(e) => setContactName(e.target.value)}
-                    placeholder={user?.name || "Organizer name"}
-                  />
-                  <Input
-                    label="Contact email *"
-                    type="email"
-                    value={contactEmail}
-                    onChange={(e) => setContactEmail(e.target.value)}
-                    placeholder={user?.email || "organizer@example.com"}
-                  />
-                  <Input
-                    label="Contact phone / WhatsApp"
-                    value={contactPhone}
-                    onChange={(e) => setContactPhone(e.target.value)}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-2">
-                    Requirements (optional)
-                  </label>
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer rounded-lg border border-slate-200 p-2.5 bg-slate-50/50">
-                      <input
-                        type="checkbox"
-                        checked={reqSeating}
-                        onChange={(e) => setReqSeating(e.target.checked)}
-                        className="rounded text-sky-600 focus:ring-sky-500"
-                      />
-                      <span>Request seats together</span>
-                    </label>
-                    <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer rounded-lg border border-slate-200 p-2.5 bg-slate-50/50">
-                      <input
-                        type="checkbox"
-                        checked={reqBaggage}
-                        onChange={(e) => setReqBaggage(e.target.checked)}
-                        className="rounded text-sky-600 focus:ring-sky-500"
-                      />
-                      <span>Extra baggage needs</span>
-                    </label>
-                    <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer rounded-lg border border-slate-200 p-2.5 bg-slate-50/50">
-                      <input
-                        type="checkbox"
-                        checked={reqTransfers}
-                        onChange={(e) => setReqTransfers(e.target.checked)}
-                        className="rounded text-sky-600 focus:ring-sky-500"
-                      />
-                      <span>Airport transfers</span>
-                    </label>
-                    <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer rounded-lg border border-slate-200 p-2.5 bg-slate-50/50">
-                      <input
-                        type="checkbox"
-                        checked={reqSplitBilling}
-                        onChange={(e) => setReqSplitBilling(e.target.checked)}
-                        className="rounded text-sky-600 focus:ring-sky-500"
-                      />
-                      <span>Split billing request</span>
-                    </label>
-                    <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer rounded-lg border border-slate-200 p-2.5 bg-slate-50/50 sm:col-span-2">
-                      <input
-                        type="checkbox"
-                        checked={reqAccommodation}
-                        onChange={(e) => setReqAccommodation(e.target.checked)}
-                        className="rounded text-sky-600 focus:ring-sky-500"
-                      />
-                      <span>Accommodation required</span>
-                    </label>
                   </div>
                 </div>
+              ) : (
+                <form onSubmit={handleEnquirySubmit} className="fo-gm-form fo-gm-form--spacious">
+                  <div className="fo-gm-field-grid fo-gm-field-grid--3">
+                    <Input
+                      label="Group / trip name *"
+                      value={groupName}
+                      onChange={(e) => setGroupName(e.target.value)}
+                      placeholder="e.g. Team offsite"
+                      required
+                    />
+                    <SearchableSelect
+                      label="Group type"
+                      options={TYPE_OPTIONS}
+                      value={groupType}
+                      onChange={(v) => setGroupType(v as GroupType)}
+                      searchable={false}
+                    />
+                    <Input
+                      label={`Passenger count (min. ${MIN_GROUP_PASSENGERS}) *`}
+                      type="number"
+                      min={MIN_GROUP_PASSENGERS}
+                      value={passengerCount}
+                      onChange={(e) => setPassengerCount(e.target.value)}
+                      required
+                    />
+                  </div>
 
-                {reqAccommodation ? (
+                  <div className="fo-gm-field-grid fo-gm-field-grid--4">
+                    <Input
+                      label="Origin *"
+                      value={origin}
+                      onChange={(e) => setOrigin(e.target.value.toUpperCase())}
+                      placeholder="IATA or city"
+                      required
+                    />
+                    <Input
+                      label="Destination *"
+                      value={destination}
+                      onChange={(e) => setDestination(e.target.value.toUpperCase())}
+                      placeholder="IATA or city"
+                      required
+                    />
+                    <Input
+                      label="Departure date"
+                      type="date"
+                      value={departureDate}
+                      onChange={(e) => setDepartureDate(e.target.value)}
+                    />
+                    <Input
+                      label="Return date"
+                      type="date"
+                      value={returnDate}
+                      onChange={(e) => setReturnDate(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="fo-gm-field-grid fo-gm-field-grid--3">
+                    <SearchableSelect
+                      label="Date flexibility"
+                      options={FLEXIBILITY_OPTIONS}
+                      value={flexibility}
+                      onChange={(v) => setFlexibility(v as GroupDateFlexibility)}
+                      searchable={false}
+                    />
+                    <SearchableSelect
+                      label="Cabin preference"
+                      options={CABIN_OPTIONS}
+                      value={cabinPreference}
+                      onChange={(v) => setCabinPreference((v as GroupCabinPreference) || "")}
+                      searchable={false}
+                    />
+                    <Input
+                      label="Travel purpose"
+                      value={purpose}
+                      onChange={(e) => setPurpose(e.target.value)}
+                      placeholder="e.g. conference, sports tour"
+                    />
+                  </div>
+
+                  <div className="fo-gm-field-grid fo-gm-field-grid--2">
+                    <Input
+                      label="Organization / company (optional)"
+                      value={organization}
+                      onChange={(e) => setOrganization(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="fo-gm-field-grid fo-gm-field-grid--3">
+                    <Input
+                      label="Primary contact name *"
+                      value={contactName}
+                      onChange={(e) => setContactName(e.target.value)}
+                      placeholder={user?.name || "Organizer name"}
+                    />
+                    <Input
+                      label="Contact email *"
+                      type="email"
+                      value={contactEmail}
+                      onChange={(e) => setContactEmail(e.target.value)}
+                      placeholder={user?.email || "organizer@example.com"}
+                    />
+                    <Input
+                      label="Contact phone / WhatsApp"
+                      value={contactPhone}
+                      onChange={(e) => setContactPhone(e.target.value)}
+                    />
+                  </div>
+
+                  <div>
+                    <span className="fo-gm-field-label">Requirements (optional)</span>
+                    <div className="fo-gm-checks">
+                      <label className="fo-gm-check">
+                        <input
+                          type="checkbox"
+                          checked={reqSeating}
+                          onChange={(e) => setReqSeating(e.target.checked)}
+                        />
+                        <span>Seats together</span>
+                      </label>
+                      <label className="fo-gm-check">
+                        <input
+                          type="checkbox"
+                          checked={reqBaggage}
+                          onChange={(e) => setReqBaggage(e.target.checked)}
+                        />
+                        <span>Extra baggage</span>
+                      </label>
+                      <label className="fo-gm-check">
+                        <input
+                          type="checkbox"
+                          checked={reqTransfers}
+                          onChange={(e) => setReqTransfers(e.target.checked)}
+                        />
+                        <span>Airport transfers</span>
+                      </label>
+                      <label className="fo-gm-check">
+                        <input
+                          type="checkbox"
+                          checked={reqSplitBilling}
+                          onChange={(e) => setReqSplitBilling(e.target.checked)}
+                        />
+                        <span>Split billing</span>
+                      </label>
+                      <label className="fo-gm-check fo-gm-check--wide">
+                        <input
+                          type="checkbox"
+                          checked={reqAccommodation}
+                          onChange={(e) => setReqAccommodation(e.target.checked)}
+                        />
+                        <span>Accommodation required</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {reqAccommodation ? (
+                    <Input
+                      label="Accommodation notes"
+                      value={accommodationNotes}
+                      onChange={(e) => setAccommodationNotes(e.target.value)}
+                      placeholder="Rooming, location, or board — not a hotel booking"
+                    />
+                  ) : null}
+                  {reqTransfers ? (
+                    <Input
+                      label="Transport notes"
+                      value={transportNotes}
+                      onChange={(e) => setTransportNotes(e.target.value)}
+                      placeholder="Coach, meet-and-greet, or transfer notes"
+                    />
+                  ) : null}
+
                   <Input
-                    label="Accommodation notes"
-                    value={accommodationNotes}
-                    onChange={(e) => setAccommodationNotes(e.target.value)}
-                    placeholder="Rooming, location, or board preference — not a hotel booking"
+                    label="Additional notes"
+                    value={specialNotes}
+                    onChange={(e) => setSpecialNotes(e.target.value)}
+                    placeholder="Anything else the group desk should know"
                   />
-                ) : null}
-                {reqTransfers ? (
-                  <Input
-                    label="Transport notes"
-                    value={transportNotes}
-                    onChange={(e) => setTransportNotes(e.target.value)}
-                    placeholder="Coach, meet-and-greet, or other transfer notes"
-                  />
-                ) : null}
 
-                <Input
-                  label="Additional notes"
-                  value={specialNotes}
-                  onChange={(e) => setSpecialNotes(e.target.value)}
-                  placeholder="Anything else the group desk should know"
-                />
+                  {formMsg ? <p className="fo-gm-msg fo-gm-msg--danger">{formMsg}</p> : null}
 
-                {formMsg ? <p className="text-xs text-red-600">{formMsg}</p> : null}
-
-                <div className="flex items-center gap-3 pt-2">
-                  <Button type="submit" disabled={requestState.isLoading}>
-                    {requestState.isLoading ? "Submitting…" : "Submit group request"}
-                  </Button>
-                  <Link href="/chat">
-                    <Button type="button" variant="ghost">
-                      Ask Ava
-                    </Button>
-                  </Link>
-                </div>
-              </form>
-            )}
-          </div>
-
-          <section className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-xs">
-            <h2 className="text-base font-semibold text-slate-900">Your group requests</h2>
-            <p className="text-xs text-slate-500 mt-1">
-              Only you can see these. Status is the enquiry lifecycle, not a ticket.
-            </p>
-            {requestsLoading ? (
-              <div className="flex justify-center py-8">
-                <Spinner />
-              </div>
-            ) : requestsError ? (
-              <div className="fo-gm-status mt-3">
-                <p className="fo-gm-msg fo-gm-msg--danger">Could not load your requests.</p>
-                <Button type="button" size="sm" onClick={() => void refetchRequests()}>
-                  Retry
-                </Button>
-              </div>
-            ) : requests.length === 0 ? (
-              <p className="mt-3 text-sm text-slate-600">No group requests yet.</p>
-            ) : (
-              <ul className="fo-gm-list fo-gm-list--flush mt-3">
-                {requests.map((r) => (
-                  <li key={r.id}>
-                    <button
-                      type="button"
-                      className="fo-gm-row w-full text-left"
-                      onClick={() =>
-                        setSelectedRequestId((current) => (current === r.id ? null : r.id))
-                      }
+                  <div className="fo-gm-actions fo-gm-actions--padded">
+                    <Button
+                      type="submit"
+                      disabled={requestState.isLoading}
+                      icon={<Plane className="fo-gm-icon" aria-hidden />}
                     >
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <p className="fo-gm-row__title">{r.name}</p>
-                          <span className="text-[10px] uppercase font-semibold tracking-wider bg-sky-100 text-sky-800 rounded px-1.5 py-0.5">
-                            {r.status} · {r.passengerCount} pax
-                          </span>
+                      {requestState.isLoading ? "Submitting…" : "Submit group request"}
+                    </Button>
+                    <Link href="/chat">
+                      <Button type="button" variant="ghost">
+                        Ask Ava
+                      </Button>
+                    </Link>
+                  </div>
+                </form>
+              )}
+            </div>
+          </section>
+
+          <section className="fo-gm-ledger" aria-labelledby="fo-gm-requests-heading">
+            <div className="fo-gm-section">
+              <h2 id="fo-gm-requests-heading" className="fo-gm-section__title">
+                Your group requests
+              </h2>
+              <p className="fo-gm-section__hint">
+                Visible only to you. Status is the enquiry lifecycle, not a ticket.
+              </p>
+              {requestsLoading ? (
+                <div className="flex justify-center py-8" role="status" aria-label="Loading requests">
+                  <Spinner />
+                </div>
+              ) : requestsError ? (
+                <div className="fo-gm-status">
+                  <p className="fo-gm-msg fo-gm-msg--danger">Could not load your requests.</p>
+                  <Button type="button" size="sm" onClick={() => void refetchRequests()}>
+                    Retry
+                  </Button>
+                </div>
+              ) : requests.length === 0 ? (
+                <div className="fo-gm-empty">
+                  <p className="fo-gm-empty__title">No requests yet</p>
+                  <p className="fo-gm-empty__body">
+                    Submit a group travel request above to start the desk review.
+                  </p>
+                </div>
+              ) : (
+                <ul className="fo-gm-list fo-gm-list--flush">
+                  {requests.map((r) => (
+                    <li key={r.id}>
+                      <button
+                        type="button"
+                        className="fo-gm-row"
+                        onClick={() =>
+                          setSelectedRequestId((current) => (current === r.id ? null : r.id))
+                        }
+                      >
+                        <div>
+                          <div className="fo-gm-row__title-row">
+                            <p className="fo-gm-row__title">{r.name}</p>
+                            <span className="fo-gm-badge">
+                              {r.status} · {r.passengerCount} pax
+                            </span>
+                          </div>
+                          <p className="fo-gm-row__meta">
+                            {r.origin} → {r.destination}
+                            {r.departureDate ? ` · ${formatDate(r.departureDate)}` : ""}
+                          </p>
                         </div>
-                        <p className="fo-gm-row__meta">
-                          {r.origin} → {r.destination}
-                          {r.departureDate ? ` · ${formatDate(r.departureDate)}` : ""}
-                        </p>
-                      </div>
-                      <span className="fo-gm-row__action">
-                        {selectedRequestId === r.id ? "Hide" : "Details"}
-                      </span>
-                    </button>
-                    {selected?.id === r.id ? (
-                      <div className="border-t border-slate-100 px-4 py-3 text-xs text-slate-700 space-y-2 bg-slate-50/70">
-                        <p>{r.fulfilmentNote}</p>
-                        <dl className="grid gap-1 sm:grid-cols-2">
-                          <div>
-                            <dt className="text-slate-500">Status</dt>
-                            <dd>{r.status}</dd>
-                          </div>
-                          <div>
-                            <dt className="text-slate-500">Cabin</dt>
-                            <dd>{r.cabinPreference || "—"}</dd>
-                          </div>
-                          <div>
-                            <dt className="text-slate-500">Return</dt>
-                            <dd>{formatDate(r.returnDate)}</dd>
-                          </div>
-                          <div>
-                            <dt className="text-slate-500">Purpose</dt>
-                            <dd>{r.purpose || "—"}</dd>
-                          </div>
-                          <div>
-                            <dt className="text-slate-500">Contact</dt>
-                            <dd>
-                              {r.contactName} · {r.contactEmail}
-                            </dd>
-                          </div>
-                          <div>
-                            <dt className="text-slate-500">Submitted</dt>
-                            <dd>{formatDate(r.createdAt)}</dd>
-                          </div>
-                        </dl>
-                        {r.notes ? <p>Notes: {r.notes}</p> : null}
-                        <div className="flex flex-wrap gap-2 pt-1">
-                          {r.groupId ? (
-                            <Link href={`/groups/${r.groupId}`}>
-                              <Button size="sm" variant="secondary">
-                                Open workspace
+                        <span className="fo-gm-row__action">
+                          {selectedRequestId === r.id ? "Hide" : "Details"}
+                        </span>
+                      </button>
+                      {selected?.id === r.id ? (
+                        <div className="fo-gm-detail">
+                          <p className="fo-gm-detail__note">{r.fulfilmentNote}</p>
+                          <dl className="fo-gm-dl">
+                            <div>
+                              <dt>Status</dt>
+                              <dd>{r.status}</dd>
+                            </div>
+                            <div>
+                              <dt>Cabin</dt>
+                              <dd>{r.cabinPreference || "—"}</dd>
+                            </div>
+                            <div>
+                              <dt>Return</dt>
+                              <dd>{formatDate(r.returnDate)}</dd>
+                            </div>
+                            <div>
+                              <dt>Purpose</dt>
+                              <dd>{r.purpose || "—"}</dd>
+                            </div>
+                            <div>
+                              <dt>Contact</dt>
+                              <dd>
+                                {r.contactName} · {r.contactEmail}
+                              </dd>
+                            </div>
+                            <div>
+                              <dt>Submitted</dt>
+                              <dd>{formatDate(r.createdAt)}</dd>
+                            </div>
+                          </dl>
+                          {r.notes ? <p>Notes: {r.notes}</p> : null}
+                          <div className="fo-gm-actions">
+                            {r.groupId ? (
+                              <Link href={`/groups/${r.groupId}`}>
+                                <Button
+                                  size="sm"
+                                  variant="secondary"
+                                  icon={<ArrowRight className="fo-gm-icon" aria-hidden />}
+                                >
+                                  Open workspace
+                                </Button>
+                              </Link>
+                            ) : null}
+                            {r.status === "SUBMITTED" || r.status === "IN_REVIEW" ? (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                disabled={cancelState.isLoading}
+                                onClick={async () => {
+                                  await cancelRequest({ requestId: r.id });
+                                  void refetchRequests();
+                                }}
+                              >
+                                {cancelState.isLoading ? "Cancelling…" : "Cancel request"}
                               </Button>
-                            </Link>
-                          ) : null}
-                          {r.status === "SUBMITTED" || r.status === "IN_REVIEW" ? (
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              disabled={cancelState.isLoading}
-                              onClick={async () => {
-                                await cancelRequest({ requestId: r.id });
-                                void refetchRequests();
-                              }}
-                            >
-                              {cancelState.isLoading ? "Cancelling…" : "Cancel request"}
-                            </Button>
-                          ) : null}
+                            ) : null}
+                          </div>
                         </div>
-                      </div>
-                    ) : null}
-                  </li>
-                ))}
-              </ul>
-            )}
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </section>
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-5">
           {isLoading ? (
-            <div className="flex justify-center py-16">
+            <div className="flex justify-center py-16" role="status" aria-label="Loading groups">
               <Spinner />
             </div>
           ) : isError ? (
@@ -737,7 +744,10 @@ export function GroupsPageClient() {
                                 {g.inviteCode ? ` · Invite: ${g.inviteCode}` : ""}
                               </p>
                             </div>
-                            <span className="fo-gm-row__action">Open workspace →</span>
+                            <span className="fo-gm-row__action">
+                              Open
+                              <ArrowRight className="fo-gm-icon" aria-hidden />
+                            </span>
                           </Link>
                         </li>
                       ))}
@@ -752,7 +762,11 @@ export function GroupsPageClient() {
                     Quick setup group
                   </h2>
                   <div className="fo-gm-form">
-                    <Input label="Group name" value={quickName} onChange={(e) => setQuickName(e.target.value)} />
+                    <Input
+                      label="Group name"
+                      value={quickName}
+                      onChange={(e) => setQuickName(e.target.value)}
+                    />
                     <SearchableSelect
                       label="Type"
                       options={TYPE_OPTIONS}
@@ -763,10 +777,14 @@ export function GroupsPageClient() {
                     <Button
                       type="button"
                       disabled={createState.isLoading || !quickName.trim()}
+                      icon={<Users className="fo-gm-icon" aria-hidden />}
                       onClick={async () => {
                         setQuickMsg(null);
                         try {
-                          const g = await createGroup({ name: quickName.trim(), type: quickType }).unwrap();
+                          const g = await createGroup({
+                            name: quickName.trim(),
+                            type: quickType,
+                          }).unwrap();
                           setQuickName("");
                           window.location.href = `/groups/${g.id}`;
                         } catch {
@@ -793,6 +811,7 @@ export function GroupsPageClient() {
                       type="button"
                       variant="secondary"
                       disabled={joinState.isLoading || !inviteCode.trim()}
+                      icon={<UserPlus className="fo-gm-icon" aria-hidden />}
                       onClick={async () => {
                         setQuickMsg(null);
                         try {

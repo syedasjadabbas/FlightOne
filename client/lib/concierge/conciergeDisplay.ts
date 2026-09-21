@@ -36,3 +36,19 @@ export function conciergeStatusLabel(status: string | null | undefined): string 
       return status || "—";
   }
 }
+
+export function conciergeStatusTone(
+  status: string | null | undefined,
+): "default" | "warn" | "muted" {
+  switch (status) {
+    case "EXECUTED":
+    case "PENDING_CONFIRMATION":
+      return "default";
+    case "BLOCKED":
+    case "ESCALATED":
+    case "FAILED":
+      return "warn";
+    default:
+      return "muted";
+  }
+}

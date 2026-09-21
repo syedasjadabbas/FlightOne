@@ -1,6 +1,7 @@
 import { SiteNav } from "@/components/SiteNav";
 import { TravellerShell } from "@/app/components/traveller";
 import { RefundsPageClient } from "./RefundsPageClient";
+import "./refunds.css";
 
 export const metadata = { title: "Refunds & servicing — FlightOne" };
 

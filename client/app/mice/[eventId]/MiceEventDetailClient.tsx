@@ -1,7 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import Link from "next/link";
+import {
+  ArrowLeft,
+  BadgeCheck,
+  Building2,
+  Calendar,
+  Car,
+  ClipboardList,
+  Handshake,
+  MapPin,
+  MessageCircle,
+  Plane,
+  QrCode,
+  RefreshCw,
+  UserPlus,
+  Users,
+  Wallet,
+  type LucideIcon,
+} from "lucide-react";
 import { Button, Input, SearchableSelect, Spinner } from "@/components/ui";
 import {
   useBookMiceTransferMutation,
@@ -25,7 +43,7 @@ import {
   useSaveMiceBudgetLineMutation,
   useSelfRegisterMiceMutation,
 } from "@/lib/api/mice.api";
-import type { MiceTransferDirection } from "@/lib/api/mice.api";
+import type { MiceTransferDirection, MiceTransferStatus } from "@/lib/api/mice.api";
 import { useAuthStore } from "@/store/auth.store";
 
 const TRANSFER_DIRECTION_OPTIONS = [
@@ -33,21 +51,147 @@ const TRANSFER_DIRECTION_OPTIONS = [
   { value: "AIRPORT_DROPOFF", label: "Airport drop-off" },
 ];
 
+const EVENT_TYPE_LABEL: Record<string, string> = {
+  MEETING: "Meeting",
+  INCENTIVE: "Incentive",
+  CONFERENCE: "Conference",
+  EXHIBITION: "Exhibition",
+};
+
+function formatWhen(value: string | null | undefined) {
+  if (!value) return "—";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "—";
+  return d.toLocaleString(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+}
+
+function formatMinor(minor: unknown, currency?: unknown) {
+  const n = typeof minor === "number" ? minor : Number(minor);
+  if (!Number.isFinite(n)) return "—";
+  const cur = typeof currency === "string" && currency ? currency : "";
+  return `${(n / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}${cur ? ` ${cur}` : ""}`;
+}
+
+function labelize(key: string) {
+  return key
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function transferChipTone(status: MiceTransferStatus | string): "ok" | "warn" | "danger" {
+  if (status === "CONFIRMED") return "ok";
+  if (status === "FAILED" || status === "DATA_UNAVAILABLE") return "danger";
+  return "warn";
+}
+
 function DeskSection({
   title,
+  icon: Icon,
   hint,
   children,
 }: {
   title: string;
-  hint?: React.ReactNode;
-  children: React.ReactNode;
+  icon: LucideIcon;
+  hint?: ReactNode;
+  children: ReactNode;
 }) {
   return (
     <section className="fo-gm-section">
-      <h2 className="fo-gm-section__title">{title}</h2>
+      <div className="fo-mice-event__section-head">
+        <Icon size={15} strokeWidth={2} aria-hidden />
+        <h2 className="fo-gm-section__title">{title}</h2>
+      </div>
       {hint ? <p className="fo-gm-section__hint">{hint}</p> : null}
       {children}
     </section>
+  );
+}
+
+function EmptyBlock({
+  icon: Icon,
+  title,
+  body,
+}: {
+  icon: LucideIcon;
+  title: string;
+  body: string;
+}) {
+  return (
+    <div className="fo-gm-empty">
+      <span className="fo-mice-event__empty-icon" aria-hidden>
+        <Icon size={16} strokeWidth={2} />
+      </span>
+      <p className="fo-gm-empty__title">{title}</p>
+      <p className="fo-gm-empty__body">{body}</p>
+    </div>
+  );
+}
+
+function FactsBlock({
+  entries,
+}: {
+  entries: Array<{ label: string; value: ReactNode }>;
+}) {
+  if (entries.length === 0) return null;
+  return (
+    <dl className="fo-mice-event__facts">
+      {entries.map((e) => (
+        <div key={e.label} className="fo-mice-event__fact">
+          <dt>{e.label}</dt>
+          <dd>{e.value}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+function RecordFacts({ data, prefer }: { data: Record<string, unknown>; prefer?: string[] }) {
+  const keys = prefer?.length
+    ? [...prefer.filter((k) => k in data), ...Object.keys(data).filter((k) => !prefer.includes(k))]
+    : Object.keys(data);
+
+  const entries = keys
+    .filter((k) => data[k] != null && typeof data[k] !== "object")
+    .map((k) => ({
+      label: labelize(k),
+      value: String(data[k]),
+    }));
+
+  const nested = keys.filter((k) => data[k] != null && typeof data[k] === "object");
+
+  return (
+    <>
+      <FactsBlock entries={entries} />
+      {nested.map((k) => {
+        const val = data[k];
+        if (Array.isArray(val)) {
+          return (
+            <div key={k} className="mt-2">
+              <p className="fo-gm-subhead">{labelize(k)}</p>
+              <p className="fo-gm-row__meta">{val.length ? val.map(String).join(" · ") : "—"}</p>
+            </div>
+          );
+        }
+        if (val && typeof val === "object") {
+          const obj = val as Record<string, unknown>;
+          return (
+            <div key={k} className="mt-2">
+              <p className="fo-gm-subhead">{labelize(k)}</p>
+              <FactsBlock
+                entries={Object.entries(obj)
+                  .filter(([, v]) => v != null && typeof v !== "object")
+                  .map(([nk, nv]) => ({ label: labelize(nk), value: String(nv) }))}
+              />
+            </div>
+          );
+        }
+        return null;
+      })}
+    </>
   );
 }
 
@@ -103,29 +247,34 @@ export function MiceEventDetailClient({ eventId }: { eventId: string }) {
   const [budgetAmt, setBudgetAmt] = useState("");
   const [sponsorName, setSponsorName] = useState("");
   const [msg, setMsg] = useState<string | null>(null);
+  const [busy, setBusy] = useState<string | null>(null);
 
   const isManager = event?.myRole === "MANAGER";
 
   if (!hasHydrated) {
     return (
-      <div className="flex justify-center py-16">
+      <div className="flex justify-center py-16" role="status" aria-live="polite">
         <Spinner />
+        <span className="sr-only">Loading event desk</span>
       </div>
     );
   }
   if (!accessToken) {
     return (
       <div className="fo-gm-status">
-        <Link href="/login" className="fo-gm-link">
-          Log in
+        <p className="fo-gm-empty__title">Sign in required</p>
+        <p className="fo-gm-empty__body">Open this event desk after you sign in.</p>
+        <Link href={`/login?redirect=${encodeURIComponent(`/mice/${eventId}`)}`} className="fo-gm-link">
+          Sign in
         </Link>
       </div>
     );
   }
   if (isLoading) {
     return (
-      <div className="flex justify-center py-16">
+      <div className="flex justify-center py-16" role="status" aria-live="polite">
         <Spinner />
+        <span className="sr-only">Loading event</span>
       </div>
     );
   }
@@ -139,71 +288,128 @@ export function MiceEventDetailClient({ eventId }: { eventId: string }) {
         <p className="fo-gm-msg fo-gm-msg--danger">
           {status === 403 ? "You don’t have access to this event." : "Could not load event."}
         </p>
-        <Button type="button" size="sm" onClick={() => void refetch()}>
-          Retry
-        </Button>
-        <Link href="/mice" className="fo-gm-link">
-          Back to MICE
-        </Link>
+        <div className="flex flex-wrap items-center gap-3">
+          <Button
+            type="button"
+            size="sm"
+            icon={<RefreshCw size={14} strokeWidth={2} aria-hidden />}
+            onClick={() => void refetch()}
+          >
+            Retry
+          </Button>
+          <Link href="/mice" className="fo-gm-link">
+            Back to MICE
+          </Link>
+        </div>
       </div>
     );
   }
 
+  const byStatus =
+    attendance?.byRegistrationStatus &&
+    typeof attendance.byRegistrationStatus === "object" &&
+    !Array.isArray(attendance.byRegistrationStatus)
+      ? (attendance.byRegistrationStatus as Record<string, unknown>)
+      : null;
+
+  const providerName =
+    transferCapability?.provider ||
+    (transfersPayload?.capability as { provider?: string } | undefined)?.provider ||
+    null;
+  const providerConfigured = Boolean(
+    transferCapability?.configured ||
+      (transfersPayload?.capability as { configured?: boolean } | undefined)?.configured,
+  );
+  const canBookLive = Boolean(
+    transferCapability?.canBookLive ||
+      (transfersPayload?.capability as { canBookLive?: boolean } | undefined)?.canBookLive,
+  );
+
+  const currency = event.currency || (budget?.currency as string | undefined) || null;
+
   return (
-    <div className="fo-gm-page">
+    <div className="fo-gm-page fo-mice-event">
       <header className="fo-gm-masthead">
         <div className="fo-gm-masthead__inner">
           <Link href="/mice" className="fo-gm-back">
-            ← MICE
+            <ArrowLeft size={14} strokeWidth={2} aria-hidden />
+            MICE
           </Link>
-          <p className="fo-gm-kicker">Event desk</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="fo-gm-kicker">Event desk</p>
+            <span className="fo-mice-event__chip">{EVENT_TYPE_LABEL[event.type] || event.type}</span>
+            {isManager ? (
+              <span className="fo-mice-event__chip fo-mice-event__chip--role">Manager</span>
+            ) : null}
+          </div>
           <h1 className="fo-gm-title">{event.name}</h1>
           <p className="fo-gm-meta">
-            <span>{event.type}</span>
-            <span>{event.venue || "Venue TBA"}</span>
-            <span>{new Date(event.startsAt).toLocaleString()}</span>
+            <span className="fo-mice-event__meta-item">
+              <MapPin size={13} strokeWidth={2} aria-hidden />
+              {event.venue || "Venue TBA"}
+            </span>
+            <span className="fo-mice-event__meta-item">
+              <Calendar size={13} strokeWidth={2} aria-hidden />
+              {formatWhen(event.startsAt)}
+              {event.endsAt ? ` – ${formatWhen(event.endsAt)}` : ""}
+            </span>
           </p>
-          {msg ? <p className="fo-gm-msg">{msg}</p> : null}
+          {msg ? (
+            <p className="fo-gm-msg" role="status">
+              {msg}
+            </p>
+          ) : null}
         </div>
       </header>
 
       {!isManager ? (
-        <Button
-          type="button"
-          size="sm"
-          onClick={async () => {
-            try {
-              await selfReg(eventId).unwrap();
-              setMsg("You are registered.");
-            } catch {
-              setMsg("Registration failed or already registered.");
-            }
-          }}
-        >
-          Register myself
-        </Button>
+        <div className="fo-mice-event__register">
+          <p className="fo-mice-event__register-copy">
+            Register yourself as a delegate for this event. Your badge unlocks once registration is
+            confirmed.
+          </p>
+          <Button
+            type="button"
+            size="sm"
+            disabled={busy === "selfReg"}
+            icon={<UserPlus size={14} strokeWidth={2} aria-hidden />}
+            onClick={async () => {
+              setBusy("selfReg");
+              try {
+                await selfReg(eventId).unwrap();
+                setMsg("You are registered.");
+              } catch {
+                setMsg("Registration failed or already registered.");
+              } finally {
+                setBusy(null);
+              }
+            }}
+          >
+            Register myself
+          </Button>
+        </div>
       ) : null}
 
       <div className="fo-gm-ledger">
-        <DeskSection title="Delegates">
+        <DeskSection title="Delegates" icon={Users}>
           {(delegates || []).length === 0 ? (
-            <div className="fo-gm-empty">
-              <p className="fo-gm-empty__title">No delegates yet</p>
-              <p className="fo-gm-empty__body">
-                Managers add people here; attendees can register themselves when invited.
-              </p>
-            </div>
+            <EmptyBlock
+              icon={Users}
+              title="No delegates yet"
+              body="Managers add people here; attendees can register themselves when invited."
+            />
           ) : (
             <ul className="fo-gm-list">
               {(delegates || []).map((d) => (
                 <li key={String(d.id)} className="fo-gm-inline">
                   <span>
-                    {String(d.fullName)} · {String(d.registrationStatus)}
+                    {String(d.fullName)}
+                    <span className="fo-gm-inline__muted"> · {String(d.registrationStatus)}</span>
                   </span>
                   {d.badgeCode ? (
                     <button
                       type="button"
-                      className="fo-gm-link"
+                      className="fo-gm-link inline-flex items-center gap-1"
                       onClick={async () => {
                         try {
                           const badge = await fetchBadge({
@@ -221,6 +427,7 @@ export function MiceEventDetailClient({ eventId }: { eventId: string }) {
                         }
                       }}
                     >
+                      <BadgeCheck size={13} strokeWidth={2} aria-hidden />
                       Badge
                     </button>
                   ) : null}
@@ -235,10 +442,19 @@ export function MiceEventDetailClient({ eventId }: { eventId: string }) {
               <Button
                 type="button"
                 size="sm"
+                disabled={busy === "register" || !fullName.trim() || !email.trim()}
                 onClick={async () => {
-                  await register({ eventId, fullName, email }).unwrap();
-                  setFullName("");
-                  setEmail("");
+                  setBusy("register");
+                  try {
+                    await register({ eventId, fullName, email }).unwrap();
+                    setFullName("");
+                    setEmail("");
+                    setMsg("Delegate added.");
+                  } catch {
+                    setMsg("Could not add delegate.");
+                  } finally {
+                    setBusy(null);
+                  }
                 }}
               >
                 Add delegate
@@ -247,12 +463,13 @@ export function MiceEventDetailClient({ eventId }: { eventId: string }) {
           ) : null}
         </DeskSection>
 
-        <DeskSection title="Agenda">
+        <DeskSection title="Agenda" icon={ClipboardList}>
           {(sessions || []).length === 0 ? (
-            <div className="fo-gm-empty">
-              <p className="fo-gm-empty__title">No sessions yet</p>
-              <p className="fo-gm-empty__body">Add agenda blocks with start and end times.</p>
-            </div>
+            <EmptyBlock
+              icon={ClipboardList}
+              title="No sessions yet"
+              body="Add agenda blocks with start and end times."
+            />
           ) : (
             <ul className="fo-gm-list">
               {(sessions || []).map((s) => (
@@ -260,7 +477,8 @@ export function MiceEventDetailClient({ eventId }: { eventId: string }) {
                   <p className="fo-gm-row__title">{String(s.title)}</p>
                   <p className="fo-gm-row__meta">
                     {s.speakers ? `${String(s.speakers)} · ` : ""}
-                    {new Date(String(s.startsAt)).toLocaleString()}
+                    {formatWhen(String(s.startsAt))}
+                    {s.endsAt ? ` – ${formatWhen(String(s.endsAt))}` : ""}
                   </p>
                 </li>
               ))}
@@ -273,23 +491,42 @@ export function MiceEventDetailClient({ eventId }: { eventId: string }) {
                 value={sessionTitle}
                 onChange={(e) => setSessionTitle(e.target.value)}
               />
-              <Input
-                label="Starts"
-                value={sessionStart}
-                onChange={(e) => setSessionStart(e.target.value)}
-              />
-              <Input label="Ends" value={sessionEnd} onChange={(e) => setSessionEnd(e.target.value)} />
+              <div className="fo-gm-form fo-gm-form--row">
+                <Input
+                  label="Starts"
+                  type="datetime-local"
+                  value={sessionStart}
+                  onChange={(e) => setSessionStart(e.target.value)}
+                />
+                <Input
+                  label="Ends"
+                  type="datetime-local"
+                  value={sessionEnd}
+                  onChange={(e) => setSessionEnd(e.target.value)}
+                />
+              </div>
               <Button
                 type="button"
                 size="sm"
+                disabled={busy === "session" || !sessionTitle.trim() || !sessionStart || !sessionEnd}
                 onClick={async () => {
-                  await createSession({
-                    eventId,
-                    title: sessionTitle,
-                    startsAt: new Date(sessionStart).toISOString(),
-                    endsAt: new Date(sessionEnd).toISOString(),
-                  }).unwrap();
-                  setSessionTitle("");
+                  setBusy("session");
+                  try {
+                    await createSession({
+                      eventId,
+                      title: sessionTitle,
+                      startsAt: new Date(sessionStart).toISOString(),
+                      endsAt: new Date(sessionEnd).toISOString(),
+                    }).unwrap();
+                    setSessionTitle("");
+                    setSessionStart("");
+                    setSessionEnd("");
+                    setMsg("Session added.");
+                  } catch {
+                    setMsg("Could not add session.");
+                  } finally {
+                    setBusy(null);
+                  }
                 }}
               >
                 Add session
@@ -299,7 +536,7 @@ export function MiceEventDetailClient({ eventId }: { eventId: string }) {
         </DeskSection>
 
         {isManager ? (
-          <DeskSection title="QR check-in">
+          <DeskSection title="QR check-in" icon={QrCode} hint="Scan or type the badge code at the door.">
             <div className="fo-gm-form fo-gm-form--row">
               <Input
                 label="Badge code"
@@ -309,13 +546,17 @@ export function MiceEventDetailClient({ eventId }: { eventId: string }) {
               <Button
                 type="button"
                 size="sm"
+                disabled={busy === "checkin" || !badgeCode.trim()}
                 onClick={async () => {
+                  setBusy("checkin");
                   try {
                     await checkIn({ eventId, badgeCode }).unwrap();
                     setMsg("Check-in recorded.");
                     setBadgeCode("");
                   } catch {
                     setMsg("Invalid badge or unauthorized.");
+                  } finally {
+                    setBusy(null);
                   }
                 }}
               >
@@ -325,36 +566,62 @@ export function MiceEventDetailClient({ eventId }: { eventId: string }) {
           </DeskSection>
         ) : null}
 
-        <DeskSection title="Attendance">
-          <p className="fo-gm-lede fo-gm-lede--flush">
-            Delegates: {String(attendance?.totalDelegates ?? "—")} · Scope:{" "}
-            {String(attendance?.scope ?? "—")}
-          </p>
-          <pre className="fo-gm-pre">
-            {JSON.stringify(attendance?.byRegistrationStatus || {}, null, 2)}
-          </pre>
+        <DeskSection title="Attendance" icon={BadgeCheck}>
+          <FactsBlock
+            entries={[
+              {
+                label: "Delegates",
+                value: String(attendance?.totalDelegates ?? "—"),
+              },
+              {
+                label: "Scope",
+                value: String(attendance?.scope ?? "—"),
+              },
+            ]}
+          />
+          {byStatus && Object.keys(byStatus).length > 0 ? (
+            <ul className="fo-mice-event__status-list" aria-label="By registration status">
+              {Object.entries(byStatus).map(([status, count]) => (
+                <li key={status}>
+                  <span>{labelize(status)}</span>
+                  <span>{String(count)}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="fo-gm-row__meta mt-1">No registration breakdown yet.</p>
+          )}
         </DeskSection>
 
         <DeskSection
           title="Flights & hotels"
-          hint="Links real Module 03 bookings only — never invents inventory."
+          icon={Plane}
+          hint="Links real bookings only — never invents inventory."
         >
           {(travel?.items || []).length === 0 ? (
-            <div className="fo-gm-empty">
-              <p className="fo-gm-empty__title">No linked bookings</p>
-              <p className="fo-gm-empty__body">
-                Managers can link an existing booking ID to this event.
-              </p>
-            </div>
+            <EmptyBlock
+              icon={Plane}
+              title="No linked bookings"
+              body="Managers can link an existing booking ID to this event."
+            />
           ) : (
             <ul className="fo-gm-list">
-              {(travel?.items || []).map((t) => (
-                <li key={String(t.shareId)} className="fo-gm-item">
-                  {String(t.kind)} · {String((t.booking as { status?: string })?.status)} ·{" "}
-                  {String((t.booking as { amountMinor?: number })?.amountMinor)}{" "}
-                  {String((t.booking as { currency?: string })?.currency)}
-                </li>
-              ))}
+              {(travel?.items || []).map((t) => {
+                const booking = t.booking as
+                  | { status?: string; amountMinor?: number; currency?: string }
+                  | undefined;
+                return (
+                  <li key={String(t.shareId)} className="fo-gm-item">
+                    <p className="fo-gm-row__title">{String(t.kind)}</p>
+                    <p className="fo-gm-row__meta">
+                      {String(booking?.status ?? "—")}
+                      {booking?.amountMinor != null
+                        ? ` · ${formatMinor(booking.amountMinor, booking.currency)}`
+                        : ""}
+                    </p>
+                  </li>
+                );
+              })}
             </ul>
           )}
           {isManager ? (
@@ -367,12 +634,17 @@ export function MiceEventDetailClient({ eventId }: { eventId: string }) {
               <Button
                 type="button"
                 size="sm"
+                disabled={busy === "link" || !bookingId.trim()}
                 onClick={async () => {
+                  setBusy("link");
                   try {
                     await linkBooking({ eventId, bookingId }).unwrap();
                     setBookingId("");
+                    setMsg("Booking linked.");
                   } catch {
                     setMsg("Could not link booking.");
+                  } finally {
+                    setBusy(null);
                   }
                 }}
               >
@@ -384,53 +656,43 @@ export function MiceEventDetailClient({ eventId }: { eventId: string }) {
 
         <DeskSection
           title="Transfers"
-          hint={
-            <>
-              Requirements are stored on the event. Live booking only when{" "}
-              <code className="fo-gm-code">MICE_TRANSFER_BOOK_PROVIDER</code> is configured —
-              never invented.
-            </>
-          }
+          icon={Car}
+          hint="Requirements are stored on the event. Live booking only when a transfer provider is configured."
         >
-          <p className="fo-gm-section__hint">
-            Provider:{" "}
-            {String(
-              transferCapability?.provider ||
-                (transfersPayload?.capability as { provider?: string } | undefined)?.provider ||
-                "—",
-            )}{" "}
-            ·{" "}
-            {transferCapability?.configured ||
-            (transfersPayload?.capability as { configured?: boolean } | undefined)?.configured
-              ? "configured"
-              : "UNCONFIGURED"}
-            {!(
-              transferCapability?.canBookLive ||
-              (transfersPayload?.capability as { canBookLive?: boolean } | undefined)?.canBookLive
-            )
-              ? " · live book unavailable"
-              : " · live book available"}
+          <p className="fo-mice-event__provider">
+            <span
+              className={`fo-mice-event__chip fo-mice-event__chip--${providerConfigured ? "ok" : "warn"}`}
+            >
+              {providerConfigured ? "Provider ready" : "Provider unset"}
+            </span>
+            <span>{providerName || "No provider"}</span>
+            <span>{canBookLive ? "Live book available" : "Live book unavailable"}</span>
           </p>
           {transfers.length === 0 ? (
-            <div className="fo-gm-empty">
-              <p className="fo-gm-empty__title">No transfer requirements yet</p>
-              <p className="fo-gm-empty__body">
-                Capture airport pickup or drop-off needs for delegates here.
-              </p>
-            </div>
+            <EmptyBlock
+              icon={Car}
+              title="No transfer requirements yet"
+              body="Capture airport pickup or drop-off needs for delegates here."
+            />
           ) : (
             <ul className="fo-gm-list">
               {transfers.map((t) => (
                 <li key={t.id} className="fo-gm-item">
-                  <p className="fo-gm-row__title">
-                    {t.label} · {t.direction} · {t.status}
-                  </p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="fo-gm-row__title mb-0">{t.label}</p>
+                    <span
+                      className={`fo-mice-event__chip fo-mice-event__chip--${transferChipTone(t.status)}`}
+                    >
+                      {t.status.replaceAll("_", " ")}
+                    </span>
+                  </div>
                   <p className="fo-gm-row__meta">
-                    {t.airportCode ? `${t.airportCode} · ` : ""}
-                    {t.passengerCount} pax
+                    {t.direction.replaceAll("_", " ").toLowerCase()}
+                    {t.airportCode ? ` · ${t.airportCode}` : ""}
+                    {` · ${t.passengerCount} pax`}
                     {t.pickupLocation ? ` · from ${t.pickupLocation}` : ""}
                     {t.dropoffLocation ? ` · to ${t.dropoffLocation}` : ""}
-                    {t.pickupAt ? ` · ${new Date(String(t.pickupAt)).toLocaleString()}` : ""}
+                    {t.pickupAt ? ` · ${formatWhen(String(t.pickupAt))}` : ""}
                   </p>
                   {t.flightRef || t.flightLinkage ? (
                     <p className="fo-gm-row__meta">
@@ -448,7 +710,7 @@ export function MiceEventDetailClient({ eventId }: { eventId: string }) {
                   ) : null}
                   {t.liveTransferStatus ? (
                     <p className="fo-gm-row__meta">
-                      Live transfer status: {String(t.liveTransferStatus.dataStatus)}
+                      Live: {String(t.liveTransferStatus.dataStatus)}
                       {t.liveTransferStatus.reason
                         ? ` — ${String(t.liveTransferStatus.reason)}`
                         : ""}
@@ -460,7 +722,9 @@ export function MiceEventDetailClient({ eventId }: { eventId: string }) {
                       size="sm"
                       variant="secondary"
                       className="mt-1"
+                      disabled={busy === `book-${t.id}`}
                       onClick={async () => {
+                        setBusy(`book-${t.id}`);
                         try {
                           const r = await bookTransfer({ eventId, transferId: t.id }).unwrap();
                           setMsg(
@@ -468,6 +732,8 @@ export function MiceEventDetailClient({ eventId }: { eventId: string }) {
                           );
                         } catch {
                           setMsg("Transfer booking attempt failed.");
+                        } finally {
+                          setBusy(null);
                         }
                       }}
                     >
@@ -528,7 +794,7 @@ export function MiceEventDetailClient({ eventId }: { eventId: string }) {
               </div>
               <div className="fo-gm-form fo-gm-form--row">
                 <SearchableSelect
-                  className="min-w-[12rem]"
+                  className="min-w-48"
                   label="Delegate"
                   options={[
                     { value: "", label: "— none —" },
@@ -549,11 +815,13 @@ export function MiceEventDetailClient({ eventId }: { eventId: string }) {
                 <Button
                   type="button"
                   size="sm"
+                  disabled={busy === "transfer" || !transferLabel.trim()}
                   onClick={async () => {
                     if (!transferLabel.trim()) {
                       setMsg("Transfer label required.");
                       return;
                     }
+                    setBusy("transfer");
                     try {
                       const r = await createTransfer({
                         eventId,
@@ -576,6 +844,8 @@ export function MiceEventDetailClient({ eventId }: { eventId: string }) {
                       setTransferFlightBookingId("");
                     } catch {
                       setMsg("Could not create transfer (check flight link / permissions).");
+                    } finally {
+                      setBusy(null);
                     }
                   }}
                 >
@@ -586,12 +856,23 @@ export function MiceEventDetailClient({ eventId }: { eventId: string }) {
           ) : null}
         </DeskSection>
 
-        <DeskSection title="Budget">
-          <p className="fo-gm-lede fo-gm-lede--flush">
-            Ceiling: {String(budget?.budgetCeilingMinor ?? "—")} · Travel actual:{" "}
-            {String(budget?.travelActualMinor ?? "—")} · Actual total:{" "}
-            {String(budget?.actualTotalMinor ?? "—")}
-          </p>
+        <DeskSection title="Budget" icon={Wallet}>
+          <FactsBlock
+            entries={[
+              {
+                label: "Ceiling",
+                value: formatMinor(budget?.budgetCeilingMinor, currency),
+              },
+              {
+                label: "Travel actual",
+                value: formatMinor(budget?.travelActualMinor, currency),
+              },
+              {
+                label: "Actual total",
+                value: formatMinor(budget?.actualTotalMinor, currency),
+              },
+            ]}
+          />
           {isManager ? (
             <div className="fo-gm-form fo-gm-form--row">
               <Input
@@ -607,14 +888,24 @@ export function MiceEventDetailClient({ eventId }: { eventId: string }) {
               <Button
                 type="button"
                 size="sm"
+                disabled={busy === "budget" || !budgetLabel.trim()}
                 onClick={async () => {
-                  await saveBudget({
-                    eventId,
-                    category: "OTHER",
-                    label: budgetLabel,
-                    plannedMinor: Number(budgetAmt) || 0,
-                  }).unwrap();
-                  setBudgetLabel("");
+                  setBusy("budget");
+                  try {
+                    await saveBudget({
+                      eventId,
+                      category: "OTHER",
+                      label: budgetLabel,
+                      plannedMinor: Number(budgetAmt) || 0,
+                    }).unwrap();
+                    setBudgetLabel("");
+                    setBudgetAmt("");
+                    setMsg("Budget line saved.");
+                  } catch {
+                    setMsg("Could not save budget line.");
+                  } finally {
+                    setBusy(null);
+                  }
                 }}
               >
                 Add line
@@ -623,18 +914,19 @@ export function MiceEventDetailClient({ eventId }: { eventId: string }) {
           ) : null}
         </DeskSection>
 
-        <DeskSection title="Sponsors">
+        <DeskSection title="Sponsors" icon={Handshake}>
           {(sponsors || []).length === 0 ? (
-            <div className="fo-gm-empty">
-              <p className="fo-gm-empty__title">No sponsors listed</p>
-              <p className="fo-gm-empty__body">Add partner names when the event has sponsorships.</p>
-            </div>
+            <EmptyBlock
+              icon={Handshake}
+              title="No sponsors listed"
+              body="Add partner names when the event has sponsorships."
+            />
           ) : (
             <ul className="fo-gm-list">
               {(sponsors || []).map((s) => (
                 <li key={String(s.id)} className="fo-gm-item">
-                  {String(s.name)}
-                  {s.tier ? ` · ${String(s.tier)}` : ""}
+                  <p className="fo-gm-row__title">{String(s.name)}</p>
+                  {s.tier ? <p className="fo-gm-row__meta">{String(s.tier)}</p> : null}
                 </li>
               ))}
             </ul>
@@ -649,9 +941,18 @@ export function MiceEventDetailClient({ eventId }: { eventId: string }) {
               <Button
                 type="button"
                 size="sm"
+                disabled={busy === "sponsor" || !sponsorName.trim()}
                 onClick={async () => {
-                  await createSponsor({ eventId, name: sponsorName }).unwrap();
-                  setSponsorName("");
+                  setBusy("sponsor");
+                  try {
+                    await createSponsor({ eventId, name: sponsorName }).unwrap();
+                    setSponsorName("");
+                    setMsg("Sponsor added.");
+                  } catch {
+                    setMsg("Could not add sponsor.");
+                  } finally {
+                    setBusy(null);
+                  }
                 }}
               >
                 Add sponsor
@@ -661,18 +962,24 @@ export function MiceEventDetailClient({ eventId }: { eventId: string }) {
         </DeskSection>
 
         {isManager && report ? (
-          <DeskSection title="Event report">
-            <pre className="fo-gm-pre">{JSON.stringify(report, null, 2)}</pre>
+          <DeskSection title="Event report" icon={Building2}>
+            <RecordFacts
+              data={report}
+              prefer={["eventId", "name", "type", "delegateCount", "sessionCount", "status"]}
+            />
           </DeskSection>
         ) : null}
       </div>
 
-      <p className="fo-gm-footer">
-        Ask Ava about this event in{" "}
-        <Link href="/chat" className="fo-gm-link">
-          chat
-        </Link>
-        .
+      <p className="fo-gm-footer fo-mice-event__footer">
+        <MessageCircle size={13} strokeWidth={2} aria-hidden />
+        <span>
+          Ask Ava about this event in{" "}
+          <Link href="/chat" className="fo-gm-link">
+            chat
+          </Link>
+          .
+        </span>
       </p>
     </div>
   );

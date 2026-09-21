@@ -144,13 +144,11 @@ export function DocumentsSection() {
       title="Identity documents"
       note={
         <>
-          Document numbers are encrypted at rest and never shown in this list. Upload a
-          passport/CNIC scan to the{" "}
+          Numbers are encrypted and hidden here. Upload a scan via{" "}
           <Link href="/vault" className="text-[var(--sky)] underline-offset-2 hover:underline">
             Vault
           </Link>
-          , run OCR, review extracted fields, then confirm before saving. Assign docs to
-          family or companions when needed.
+          , review OCR fields, then confirm. Assign to family or companions when needed.
         </>
       }
       panel

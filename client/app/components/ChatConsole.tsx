@@ -19,6 +19,7 @@ import {
   useDeleteConversationMutation,
 } from "@/lib/api/conversations.api";
 import { ChatSidebar } from "./chat/ChatSidebar";
+import { GuestBanner } from "./GuestBanner";
 import { VoiceMicButton } from "./voice/VoiceMicButton";
 import { PredictiveSuggestions } from "./ask-ai/PredictiveSuggestions";
 
@@ -326,6 +327,7 @@ export function ChatConsole() {
               busy={chat.busy}
               searchPhase={chat.searchPhase}
               onSend={chat.send}
+              banner={<GuestBanner />}
               location={location}
               locationReady={locationReady}
               followUpSuggestions={chat.followUpSuggestions}

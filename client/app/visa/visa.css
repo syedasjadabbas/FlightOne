@@ -1,0 +1,358 @@
+/**
+ * Visa advisory — nationality × destination corridor + attributed facts.
+ * Navy / electric blue / bone / cyan. No glow, no badge soup.
+ */
+
+.fo-visa {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.35rem, 2.6vw, 1.9rem);
+}
+
+/* ── Official notice ─────────────────────────────────────────── */
+
+.fo-visa__notice {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 0.9rem 0;
+  border-top: 1px solid color-mix(in oklab, var(--cyan) 16%, var(--line));
+  border-bottom: 1px solid color-mix(in oklab, var(--cyan) 16%, var(--line));
+}
+
+.fo-visa__notice-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.35rem;
+  background: color-mix(in oklab, var(--bone) 70%, white);
+  color: var(--navy);
+}
+
+.fo-visa__notice-title {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.fo-visa__notice-copy {
+  margin: 0.2rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+/* ── ISO quick picks ─────────────────────────────────────────── */
+
+.fo-visa__picks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+}
+
+.fo-visa__picks-label {
+  margin-right: 0.2rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.fo-visa__pick {
+  min-width: 2.25rem;
+  padding: 0.28rem 0.45rem;
+  border: 1px solid color-mix(in oklab, var(--line) 80%, var(--navy));
+  border-radius: 0.3rem;
+  background: transparent;
+  font-family: var(--font-hero);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--navy);
+  cursor: pointer;
+  transition:
+    border-color 0.15s var(--ease-standard),
+    background 0.15s var(--ease-standard),
+    color 0.15s var(--ease-standard);
+}
+
+.fo-visa__pick:hover {
+  border-color: color-mix(in oklab, var(--cyan) 42%, var(--line));
+  background: color-mix(in oklab, var(--cyan) 5%, white);
+}
+
+.fo-visa__pick:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--electric) 45%, transparent);
+  outline-offset: 2px;
+}
+
+.fo-visa__pick--on {
+  border-color: var(--navy);
+  background: var(--navy);
+  color: var(--bone);
+}
+
+.fo-visa__pick--on:hover {
+  border-color: var(--navy);
+  background: color-mix(in oklab, var(--navy) 88%, black);
+  color: var(--bone);
+}
+
+.fo-visa__form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding-top: 0.25rem;
+}
+
+.fo-visa__error {
+  margin: 0.5rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--danger);
+}
+
+/* ── Corridor result ─────────────────────────────────────────── */
+
+.fo-visa__corridor {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem 0 0.25rem;
+  border-top: 1px solid color-mix(in oklab, var(--cyan) 14%, var(--line));
+}
+
+.fo-visa__corridor-route {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.fo-visa__endpoint {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.fo-visa__endpoint--arrive {
+  text-align: right;
+  margin-left: auto;
+}
+
+.fo-visa__iso {
+  margin: 0;
+  font-family: var(--font-hero);
+  font-size: clamp(1.65rem, 4vw, 2.1rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--navy);
+}
+
+.fo-visa__iso-label {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.fo-visa__corridor-mid {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 2.5rem;
+  color: var(--cyan);
+}
+
+.fo-visa__corridor-line {
+  flex: 1;
+  height: 1px;
+  background: color-mix(in oklab, var(--cyan) 35%, var(--line));
+}
+
+.fo-visa__summary {
+  margin: 0;
+  max-width: 40rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.55;
+  color: var(--navy);
+}
+
+.fo-visa__status-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.65rem;
+}
+
+.fo-visa__status-note {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--ink-faint);
+}
+
+.fo-visa__guidance {
+  margin: 0;
+  padding: 0.65rem 0;
+  border-top: 1px dashed color-mix(in oklab, var(--line) 90%, var(--navy));
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+
+/* ── Checklist / docs ────────────────────────────────────────── */
+
+.fo-visa__check-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.fo-visa__check-item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.55rem 0.75rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.fo-visa__check-item:first-child {
+  border-top: 1px solid var(--line);
+}
+
+.fo-visa__check-mark {
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-top: 0.1rem;
+  border-radius: 0.3rem;
+  background: color-mix(in oklab, var(--horizon-cool) 70%, white);
+  color: var(--cyan);
+}
+
+.fo-visa__check-mark--missing {
+  background: color-mix(in oklab, var(--bone) 55%, white);
+  color: var(--ink-faint);
+}
+
+.fo-visa__check-title {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.fo-visa__check-meta {
+  margin: 0.2rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--ink-faint);
+}
+
+.fo-visa__doc-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.fo-visa__doc-list li {
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+
+.fo-visa__doc-list li::before {
+  content: "";
+  display: inline-block;
+  width: 0.35rem;
+  height: 0.35rem;
+  margin-right: 0.55rem;
+  margin-bottom: 0.1rem;
+  border-radius: 1px;
+  background: color-mix(in oklab, var(--cyan) 55%, var(--navy));
+  vertical-align: middle;
+}
+
+/* ── Applications ────────────────────────────────────────────── */
+
+.fo-visa__appt-edit {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 0.65rem;
+  padding: 0.85rem 0 0.25rem;
+  border-top: 1px dashed color-mix(in oklab, var(--line) 85%, var(--navy));
+}
+
+.fo-visa__flash {
+  margin: 0.5rem 0 0;
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+}
+
+.fo-visa__flash--ok {
+  color: var(--cyan);
+}
+
+/* ── Specialist desk ─────────────────────────────────────────── */
+
+.fo-visa__desk-copy {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+.fo-visa__desk-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.85rem;
+}
+
+.fo-visa__confirm {
+  display: flex;
+  gap: 0.55rem;
+  align-items: flex-start;
+  margin-top: 0.75rem;
+  padding: 0.75rem 0;
+  border-top: 1px solid color-mix(in oklab, var(--cyan) 18%, var(--line));
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--navy);
+}
+
+.fo-visa__confirm-icon {
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+  color: var(--cyan);
+}
+
+@media (max-width: 520px) {
+  .fo-visa__corridor-route {
+    flex-wrap: wrap;
+  }
+
+  .fo-visa__endpoint--arrive {
+    text-align: left;
+    margin-left: 0;
+  }
+
+  .fo-visa__corridor-mid {
+    width: 100%;
+    order: 1;
+  }
+}

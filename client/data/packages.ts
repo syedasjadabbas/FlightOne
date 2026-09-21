@@ -15,7 +15,7 @@ export const TRAVEL_STYLES: TravelStyle[] = [
     badge: 'Romantic',
     title: 'Honeymoon Packages',
     description: 'Overwater villas in the Maldives, cave suites in Cappadocia, and private dinners arranged around your dates, not a group schedule.',
-    ctaText: 'See honeymoon packages from Pakistan',
+    ctaText: 'See honeymoon packages globally',
     link: '/honeymoon-packages'
   },
   {

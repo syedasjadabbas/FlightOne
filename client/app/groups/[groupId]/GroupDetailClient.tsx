@@ -2,7 +2,21 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Button, Input, Spinner } from "@/components/ui";
+import {
+  ArrowLeft,
+  BookMarked,
+  FileText,
+  Images,
+  LogOut,
+  MapPinned,
+  Megaphone,
+  MessageCircle,
+  Plane,
+  Radio,
+  Users,
+  Vote,
+} from "lucide-react";
+import { Button, Input } from "@/components/ui";
 import {
   useCreateAnnouncementMutation,
   useCreateEmergencyMutation,
@@ -29,23 +43,27 @@ import {
   useVotePollMutation,
 } from "@/lib/api/groups.api";
 import { useAuthStore } from "@/store/auth.store";
+import { GroupEmpty } from "./_components/GroupEmpty";
+import { GroupInviteCode } from "./_components/GroupInviteCode";
+import { GroupSection } from "./_components/GroupSection";
+import {
+  GroupChip,
+  GroupLoadError,
+  GroupLoading,
+  GroupSignInPrompt,
+} from "./_components/GroupStatusShell";
 
-function DeskSection({
-  title,
-  hint,
-  children,
-}: {
-  title: string;
-  hint?: React.ReactNode;
-  children: React.ReactNode;
-}) {
-  return (
-    <section className="fo-gm-section">
-      <h2 className="fo-gm-section__title">{title}</h2>
-      {hint ? <p className="fo-gm-section__hint">{hint}</p> : null}
-      {children}
-    </section>
-  );
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = String(reader.result || "");
+      const comma = result.indexOf(",");
+      resolve(comma >= 0 ? result.slice(comma + 1) : result);
+    };
+    reader.onerror = () => reject(reader.error ?? new Error("read failed"));
+    reader.readAsDataURL(file);
+  });
 }
 
 export function GroupDetailClient({ groupId }: { groupId: string }) {
@@ -74,6 +92,7 @@ export function GroupDetailClient({ groupId }: { groupId: string }) {
   const [vaultDocId, setVaultDocId] = useState("");
   const [waypointLabel, setWaypointLabel] = useState("");
   const [localMsg, setLocalMsg] = useState<string | null>(null);
+  const [photoBusy, setPhotoBusy] = useState(false);
 
   const [invite] = useInviteMemberMutation();
   const [announce] = useCreateAnnouncementMutation();
@@ -93,79 +112,58 @@ export function GroupDetailClient({ groupId }: { groupId: string }) {
     return role === "ORGANIZER" || role === "ADMIN";
   }, [group]);
 
-  if (!hasHydrated) {
-    return (
-      <div className="flex justify-center py-16">
-        <Spinner />
-      </div>
-    );
-  }
-  if (!accessToken) {
-    return (
-      <div className="fo-gm-status">
-        <Link href="/login?redirect=%2Fgroups" className="fo-gm-link">
-          Log in
-        </Link>
-      </div>
-    );
-  }
-  if (isLoading) {
-    return (
-      <div className="flex justify-center py-16">
-        <Spinner />
-      </div>
-    );
-  }
+  if (!hasHydrated) return <GroupLoading />;
+  if (!accessToken) return <GroupSignInPrompt />;
+  if (isLoading) return <GroupLoading />;
   if (isError || !group) {
     const status =
       error && typeof error === "object" && "status" in error
         ? (error as { status?: number }).status
         : null;
     return (
-      <div className="fo-gm-status">
-        <p className="fo-gm-msg fo-gm-msg--danger">
-          {status === 403
-            ? "You don’t have access to this group."
-            : "Could not load this group."}
-        </p>
-        <Button type="button" size="sm" onClick={() => void refetch()}>
-          Retry
-        </Button>
-        <Link href="/groups" className="fo-gm-link">
-          Back to groups
-        </Link>
-      </div>
+      <GroupLoadError forbidden={status === 403} onRetry={() => void refetch()} />
     );
   }
+
+  const memberCount = (members || []).length;
+  const typeLabel = group.type.replace(/_/g, " ");
 
   return (
     <div className="fo-gm-page">
       <header className="fo-gm-masthead">
         <div className="fo-gm-masthead__inner">
-          <Link href="/groups" className="fo-gm-back">
-            ← Groups
+          <Link href="/groups" className="fo-gm-back fo-gm-back--icon">
+            <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
+            Groups
           </Link>
           <p className="fo-gm-kicker">Trip group</p>
           <h1 className="fo-gm-title">{group.name}</h1>
-          <p className="fo-gm-meta">
-            <span>{group.type.replace(/_/g, " ")}</span>
-            {isOrganizer ? <span>Organizer tools enabled</span> : null}
-          </p>
-          <p className="fo-gm-meta">
-            <span>Invite code</span>
-            <span className="fo-gm-meta__code">{group.inviteCode}</span>
-          </p>
-          {localMsg ? <p className="fo-gm-msg">{localMsg}</p> : null}
+          <div className="fo-gm-meta fo-gm-meta--chips">
+            <GroupChip>{typeLabel}</GroupChip>
+            {memberCount > 0 ? (
+              <GroupChip>
+                {memberCount} {memberCount === 1 ? "member" : "members"}
+              </GroupChip>
+            ) : null}
+            {isOrganizer ? <GroupChip tone="accent">Organizer</GroupChip> : null}
+          </div>
+          <GroupInviteCode code={group.inviteCode} />
+          {localMsg ? (
+            <p className="fo-gm-msg" role="status">
+              {localMsg}
+            </p>
+          ) : null}
         </div>
       </header>
 
       <div className="fo-gm-ledger">
-        <DeskSection title="Members">
+        <GroupSection icon={Users} title="Members">
           {(members || []).length === 0 ? (
-            <div className="fo-gm-empty">
-              <p className="fo-gm-empty__title">No members listed</p>
-              <p className="fo-gm-empty__body">Invite travelers by email when you’re ready.</p>
-            </div>
+            <GroupEmpty
+              icon={Users}
+              title="No members listed"
+              body="Invite travelers by email when you’re ready."
+            />
           ) : (
             <ul className="fo-gm-list">
               {(members || []).map((m) => (
@@ -202,19 +200,19 @@ export function GroupDetailClient({ groupId }: { groupId: string }) {
               </Button>
             </div>
           ) : null}
-        </DeskSection>
+        </GroupSection>
 
-        <DeskSection
+        <GroupSection
+          icon={Plane}
           title="Shared itinerary"
-          hint="Share one of your ticketed bookings so the group can see the same flight plan."
+          hint="Share a ticketed booking you own so the group sees the same flight plan."
         >
           {(itinerary?.items || []).length === 0 ? (
-            <div className="fo-gm-empty">
-              <p className="fo-gm-empty__title">No shared bookings yet</p>
-              <p className="fo-gm-empty__body">
-                Paste a booking ID you own to add it to the group itinerary.
-              </p>
-            </div>
+            <GroupEmpty
+              icon={Plane}
+              title="No shared bookings yet"
+              body="Paste a booking ID you own to add it to the group itinerary."
+            />
           ) : (
             <ul className="fo-gm-list">
               {itinerary!.items.map((it) => {
@@ -229,7 +227,7 @@ export function GroupDetailClient({ groupId }: { groupId: string }) {
                     <p className="fo-gm-row__meta">
                       {[slice?.flightNumber, slice?.origin, slice?.destination]
                         .filter(Boolean)
-                        .join(" · ") || "Booking linked (see booking record for details)"}
+                        .join(" · ") || "Booking linked"}
                     </p>
                   </li>
                 );
@@ -258,9 +256,9 @@ export function GroupDetailClient({ groupId }: { groupId: string }) {
               Share
             </Button>
           </div>
-        </DeskSection>
+        </GroupSection>
 
-        <DeskSection title="Flight status">
+        <GroupSection icon={Radio} title="Flight status">
           {!flightStatus?.capability?.canPollLive ? (
             <p className="fo-gm-section__hint">
               Live status unavailable:{" "}
@@ -268,42 +266,55 @@ export function GroupDetailClient({ groupId }: { groupId: string }) {
               invented.
             </p>
           ) : null}
-          <ul className="fo-gm-list">
-            {(flightStatus?.updates || []).map((u, i) => (
-              <li key={i} className="fo-gm-item">
-                <p className="fo-gm-row__title">{String(u.dataStatus || u.status)}</p>
-                {u.reason ? <p className="fo-gm-row__meta">{String(u.reason)}</p> : null}
-              </li>
-            ))}
-          </ul>
-          {(liveUpdates?.items || []).length > 0 ? (
-            <div>
-              <p className="fo-gm-subhead">Verified booking changes</p>
+          {(flightStatus?.updates || []).length === 0 &&
+          (liveUpdates?.items || []).length === 0 ? (
+            <GroupEmpty
+              icon={Radio}
+              title="No status updates"
+              body="Verified changes from linked bookings will appear here."
+            />
+          ) : (
+            <>
               <ul className="fo-gm-list">
-                {liveUpdates!.items.slice(0, 8).map((t) => (
-                  <li key={String(t.id)} className="fo-gm-item">
-                    <p className="fo-gm-row__meta">
-                      {String(t.fromStatus || "—")} → {String(t.toStatus)} ·{" "}
-                      {t.createdAt ? new Date(String(t.createdAt)).toLocaleString() : ""}
-                    </p>
+                {(flightStatus?.updates || []).map((u, i) => (
+                  <li key={i} className="fo-gm-item">
+                    <p className="fo-gm-row__title">{String(u.dataStatus || u.status)}</p>
+                    {u.reason ? <p className="fo-gm-row__meta">{String(u.reason)}</p> : null}
                   </li>
                 ))}
               </ul>
-            </div>
-          ) : null}
-        </DeskSection>
+              {(liveUpdates?.items || []).length > 0 ? (
+                <div className="fo-gm-stack">
+                  <p className="fo-gm-subhead">Verified booking changes</p>
+                  <ul className="fo-gm-list">
+                    {liveUpdates!.items.slice(0, 8).map((t) => (
+                      <li key={String(t.id)} className="fo-gm-item">
+                        <p className="fo-gm-row__meta">
+                          {String(t.fromStatus || "—")} → {String(t.toStatus)}
+                          {t.createdAt
+                            ? ` · ${new Date(String(t.createdAt)).toLocaleString()}`
+                            : ""}
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+            </>
+          )}
+        </GroupSection>
 
-        <DeskSection
+        <GroupSection
+          icon={FileText}
           title="Shared documents"
-          hint="Private vault files stay private until you share them with this group."
+          hint="Vault files stay private until you share them with this group."
         >
           {(documents?.items || []).length === 0 ? (
-            <div className="fo-gm-empty">
-              <p className="fo-gm-empty__title">No documents shared</p>
-              <p className="fo-gm-empty__body">
-                Share a vault document ID, or open Vault to manage files first.
-              </p>
-            </div>
+            <GroupEmpty
+              icon={FileText}
+              title="No documents shared"
+              body="Share a vault document ID, or open Vault to manage files first."
+            />
           ) : (
             <ul className="fo-gm-list">
               {documents!.items.map((d) => (
@@ -335,19 +346,19 @@ export function GroupDetailClient({ groupId }: { groupId: string }) {
               Share from Vault
             </Button>
           </div>
-          <Link href="/vault" className="fo-gm-link">
+          <Link href="/vault" className="fo-gm-link fo-gm-link--action">
+            <FileText className="h-3.5 w-3.5" aria-hidden />
             Open Vault
           </Link>
-        </DeskSection>
+        </GroupSection>
 
-        <DeskSection title="Announcements">
+        <GroupSection icon={Megaphone} title="Announcements">
           {(announcements || []).length === 0 ? (
-            <div className="fo-gm-empty">
-              <p className="fo-gm-empty__title">No announcements yet</p>
-              <p className="fo-gm-empty__body">
-                Organizers can post updates and emergency broadcasts here.
-              </p>
-            </div>
+            <GroupEmpty
+              icon={Megaphone}
+              title="No announcements yet"
+              body="Organizers can post updates and emergency broadcasts here."
+            />
           ) : (
             <ul className="fo-gm-list">
               {(announcements || []).map((a) => (
@@ -368,7 +379,11 @@ export function GroupDetailClient({ groupId }: { groupId: string }) {
           )}
           {isOrganizer ? (
             <div className="fo-gm-form">
-              <Input label="Announcement" value={annBody} onChange={(e) => setAnnBody(e.target.value)} />
+              <Input
+                label="Announcement"
+                value={annBody}
+                onChange={(e) => setAnnBody(e.target.value)}
+              />
               <Button
                 type="button"
                 size="sm"
@@ -405,21 +420,20 @@ export function GroupDetailClient({ groupId }: { groupId: string }) {
               </Button>
             </div>
           ) : null}
-        </DeskSection>
+        </GroupSection>
 
-        <DeskSection title="Polls">
+        <GroupSection icon={Vote} title="Polls">
           {(polls || []).length === 0 ? (
-            <div className="fo-gm-empty">
-              <p className="fo-gm-empty__title">No polls yet</p>
-              <p className="fo-gm-empty__body">
-                Use a poll when the group needs a quick decision.
-              </p>
-            </div>
+            <GroupEmpty
+              icon={Vote}
+              title="No polls yet"
+              body="Use a poll when the group needs a quick decision."
+            />
           ) : (
             (polls || []).map((p) => (
               <div key={p.id} className="fo-gm-item">
                 <p className="fo-gm-row__title">{p.question}</p>
-                <div className="mt-2 flex flex-wrap gap-2">
+                <div className="fo-gm-poll-options">
                   {(p.options || []).map((opt, idx) => (
                     <Button
                       key={idx}
@@ -459,16 +473,15 @@ export function GroupDetailClient({ groupId }: { groupId: string }) {
               </Button>
             </div>
           ) : null}
-        </DeskSection>
+        </GroupSection>
 
-        <DeskSection title="Attendance">
+        <GroupSection icon={MapPinned} title="Attendance">
           {(attendance?.waypoints || []).length === 0 ? (
-            <div className="fo-gm-empty">
-              <p className="fo-gm-empty__title">No waypoints yet</p>
-              <p className="fo-gm-empty__body">
-                Organizers add meeting points so travelers can check in on site.
-              </p>
-            </div>
+            <GroupEmpty
+              icon={MapPinned}
+              title="No waypoints yet"
+              body="Organizers add meeting points so travelers can check in on site."
+            />
           ) : (
             <ul className="fo-gm-list">
               {attendance!.waypoints.map((w) => (
@@ -505,19 +518,20 @@ export function GroupDetailClient({ groupId }: { groupId: string }) {
             </div>
           ) : null}
           <p className="fo-gm-section__hint">Scope: {attendance?.scope || "—"}</p>
-        </DeskSection>
+        </GroupSection>
 
-        <DeskSection title="Photo gallery">
+        <GroupSection icon={Images} title="Photo gallery">
           {!photos?.storage?.canUpload ? (
             <p className="fo-gm-section__hint">
               Photo storage is not configured on the server (Vault local storage required).
             </p>
           ) : null}
           {(photos?.items || []).length === 0 ? (
-            <div className="fo-gm-empty">
-              <p className="fo-gm-empty__title">No photos yet</p>
-              <p className="fo-gm-empty__body">Upload a JPEG, PNG, or WebP when storage is ready.</p>
-            </div>
+            <GroupEmpty
+              icon={Images}
+              title="No photos yet"
+              body="Upload a JPEG, PNG, or WebP when storage is ready."
+            />
           ) : (
             <ul className="fo-gm-list">
               {(photos?.items || []).map((p) => (
@@ -528,34 +542,40 @@ export function GroupDetailClient({ groupId }: { groupId: string }) {
               ))}
             </ul>
           )}
-          <input
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            className="fo-gm-file"
-            onChange={async (e) => {
-              const file = e.target.files?.[0];
-              if (!file) return;
-              const buf = await file.arrayBuffer();
-              const bytes = new Uint8Array(buf);
-              let binary = "";
-              for (let i = 0; i < bytes.length; i += 1) binary += String.fromCharCode(bytes[i]!);
-              const contentBase64 = btoa(binary);
-              try {
-                await uploadPhoto({
-                  groupId,
-                  contentBase64,
-                  contentType: file.type,
-                  caption: file.name,
-                }).unwrap();
-                setLocalMsg("Photo uploaded.");
-              } catch {
-                setLocalMsg("Photo upload failed.");
-              }
-            }}
-          />
-        </DeskSection>
+          <label className="fo-gm-file-label">
+            <span className="fo-gm-file-label__text">
+              {photoBusy ? "Uploading…" : "Choose photo"}
+            </span>
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="fo-gm-file"
+              disabled={photoBusy}
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                e.target.value = "";
+                if (!file) return;
+                setPhotoBusy(true);
+                try {
+                  const contentBase64 = await fileToBase64(file);
+                  await uploadPhoto({
+                    groupId,
+                    contentBase64,
+                    contentType: file.type,
+                    caption: file.name,
+                  }).unwrap();
+                  setLocalMsg("Photo uploaded.");
+                } catch {
+                  setLocalMsg("Photo upload failed.");
+                } finally {
+                  setPhotoBusy(false);
+                }
+              }}
+            />
+          </label>
+        </GroupSection>
 
-        <DeskSection title="Trip memories">
+        <GroupSection icon={BookMarked} title="Trip memories">
           <Button
             type="button"
             size="sm"
@@ -574,38 +594,51 @@ export function GroupDetailClient({ groupId }: { groupId: string }) {
           >
             Generate trip memory
           </Button>
-          <ul className="fo-gm-list">
-            {(memories || []).map((m) => (
-              <li key={m.id} className="fo-gm-item fo-gm-item--boxed">
-                <p className="fo-gm-row__title">{m.title}</p>
-                <p className="whitespace-pre-wrap text-[13px] text-ink-soft">{m.body}</p>
-                <p className="fo-gm-row__meta">{m.status}</p>
-              </li>
-            ))}
-          </ul>
-        </DeskSection>
+          {(memories || []).length === 0 ? (
+            <GroupEmpty
+              icon={BookMarked}
+              title="No memories yet"
+              body="Generate a summary when the group has enough attributed activity."
+            />
+          ) : (
+            <ul className="fo-gm-list">
+              {(memories || []).map((m) => (
+                <li key={m.id} className="fo-gm-item fo-gm-item--boxed">
+                  <p className="fo-gm-row__title">{m.title}</p>
+                  <p className="fo-gm-memory-body">{m.body}</p>
+                  <p className="fo-gm-row__meta">{m.status}</p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </GroupSection>
       </div>
 
-      <Button
-        type="button"
-        variant="secondary"
-        size="sm"
-        onClick={async () => {
-          if (!window.confirm("Leave this group? Shared content access ends going forward.")) return;
-          await leave(groupId);
-          window.location.href = "/groups";
-        }}
-      >
-        Leave group
-      </Button>
-
-      <p className="fo-gm-footer">
-        Ask Ava about this group in{" "}
-        <Link href="/chat" className="fo-gm-link">
-          chat
-        </Link>
-        .
-      </p>
+      <div className="fo-gm-footer-bar">
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          icon={<LogOut className="h-3.5 w-3.5" aria-hidden />}
+          onClick={async () => {
+            if (!window.confirm("Leave this group? Shared content access ends going forward.")) {
+              return;
+            }
+            await leave(groupId);
+            window.location.href = "/groups";
+          }}
+        >
+          Leave group
+        </Button>
+        <p className="fo-gm-footer">
+          Ask Ava about this group in{" "}
+          <Link href="/chat" className="fo-gm-link fo-gm-link--inline">
+            <MessageCircle className="h-3 w-3" aria-hidden />
+            chat
+          </Link>
+          .
+        </p>
+      </div>
     </div>
   );
 }

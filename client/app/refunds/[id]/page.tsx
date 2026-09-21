@@ -13,7 +13,7 @@ export default async function RefundCasePage({
   return (
     <main className="fo-stage relative flex min-h-[100dvh] flex-col">
       <SiteNav />
-      <TravellerShell>
+      <TravellerShell width="narrow">
         <RefundCaseDetailClient id={id} />
       </TravellerShell>
     </main>

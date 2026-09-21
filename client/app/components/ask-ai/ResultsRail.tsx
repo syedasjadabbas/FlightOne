@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, type RefObject } from "react";
+import { X } from "lucide-react";
 import type { ItinerarySummary, OfferCard } from "@/lib/consultant/types";
 import { filterByTab, type ResultsTab } from "@/lib/ask-ai/applyFilters";
 import type {
@@ -755,17 +756,10 @@ export function ResultsRail({
               <button
                 type="button"
                 onClick={onClose}
-                className="ml-1 inline-flex h-8 w-8 items-center justify-center rounded-full border border-[var(--line)] bg-white text-[var(--ink-soft)] transition-colors hover:border-[var(--sky)] hover:text-[var(--sky)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sky)]/35"
+                className="ml-1 inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--line)] bg-white text-[var(--ink-soft)] transition-colors hover:border-[var(--electric)] hover:text-[var(--electric)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--electric)]/35"
                 aria-label="Back to chat"
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>
-                  <path
-                    d="M6 6l12 12M18 6 6 18"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  />
-                </svg>
+                <X className="h-3.5 w-3.5" aria-hidden />
               </button>
             ) : null}
           </div>

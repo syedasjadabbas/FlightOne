@@ -1,6 +1,7 @@
 import { SiteNav } from "@/components/SiteNav";
 import { DeskShell } from "@/components/DeskShell";
 import { OpsPlatformClient } from "./OpsPlatformClient";
+import "./ops-hub.css";
 
 export const metadata = { title: "Operations — FlightOne" };
 

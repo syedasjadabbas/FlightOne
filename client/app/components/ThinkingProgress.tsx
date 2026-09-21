@@ -1,5 +1,6 @@
 "use client";
 
+import { Check, Plane } from "lucide-react";
 import type { SearchPhase } from "@/lib/ask-ai/types";
 import type { LoadingRouteCodes } from "@/lib/ask-ai/loadingRoute";
 import { LoadingRouteTrack } from "@/components/travel/TravelDoodles";
@@ -87,16 +88,7 @@ function DeskTimeline({ phase }: { phase: SearchPhase }) {
           >
             <span className="thinking-desk__marker">
               {state === "done" ? (
-                <svg viewBox="0 0 12 12" width="9" height="9" aria-hidden>
-                  <path
-                    d="M2.5 6.2 4.8 8.5 9.5 3.5"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.6"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                <Check className="h-2.5 w-2.5" strokeWidth={2.6} aria-hidden />
               ) : null}
             </span>
             <span className="thinking-desk__label">{step.label}</span>
@@ -128,6 +120,7 @@ export function ThinkingProgress({
       aria-label={primary}
     >
       <span className="message-row__label mb-1.5 pl-1">
+        <Plane className="message-row__label-icon h-3 w-3" strokeWidth={2.2} aria-hidden />
         Ava
         <span className="chat-page__ava-role">Travel consultant</span>
       </span>

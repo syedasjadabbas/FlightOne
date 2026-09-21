@@ -2,6 +2,30 @@
 
 import Link from 'next/link';
 import { useState, useEffect, useRef, useCallback } from 'react';
+import {
+  Briefcase,
+  Car,
+  ChevronDown,
+  Hotel,
+  KeyRound,
+  LayoutDashboard,
+  Lock,
+  LogOut,
+  Map,
+  Menu,
+  MessageCircle,
+  Mic,
+  Plane,
+  Sparkles,
+  Stamp,
+  Star,
+  Undo2,
+  User,
+  Users,
+  X,
+  Zap,
+  type LucideIcon,
+} from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
 import { useLogoutMutation } from '@/lib/api/auth.api';
 
@@ -9,31 +33,32 @@ import { useLogoutMutation } from '@/lib/api/auth.api';
    Types
 ───────────────────────────────────────────────────────────────────────────── */
 type DropdownId = 'explore' | 'services' | 'account' | null;
+type NavIcon = LucideIcon;
 
 /* ─────────────────────────────────────────────────────────────────────────────
    Static nav data
 ───────────────────────────────────────────────────────────────────────────── */
-const EXPLORE_ITEMS = [
-  { label: 'Flights',  href: '/#search', icon: '✈', desc: 'Search & compare live fares' },
-  { label: 'Stays',   href: '/#search', icon: '🏨', desc: 'Hotels, villas & resorts' },
-  { label: 'Cars',    href: '/#search', icon: '🚗', desc: 'Hire at 1 000+ destinations' },
+const EXPLORE_ITEMS: { label: string; href: string; icon: NavIcon; desc: string }[] = [
+  { label: 'Flights',  href: '/#search', icon: Plane, desc: 'Search & compare live fares' },
+  { label: 'Stays',   href: '/#search', icon: Hotel, desc: 'Hotels, villas & resorts' },
+  { label: 'Cars',    href: '/#search', icon: Car, desc: 'Hire at 1 000+ destinations' },
 ];
 
-const SERVICE_ITEMS = [
-  { label: 'Visa Advisory',    href: '/visa',        icon: '🛂', desc: 'End-to-end visa processing' },
-  { label: 'Corporate Travel', href: '/corporate',   icon: '💼', desc: 'Managed business trips' },
-  { label: 'Group Bookings',   href: '/groups',      icon: '👥', desc: 'Parties of 10 or more' },
-  { label: 'MICE & Events',    href: '/mice',        icon: '🎤', desc: 'Conferences & incentives' },
-  { label: 'Rewards & Points', href: '/rewards',     icon: '⭐', desc: 'Earn miles on every trip' },
-  { label: 'Support & Help',   href: '/escalations', icon: '💬', desc: 'Live agent assistance' },
-  { label: 'Refunds & Claims', href: '/refunds',     icon: '↩',  desc: 'Manage cancellations' },
-  { label: 'Operations Desk',  href: '/ops',         icon: '⚡',  desc: 'Supplier queues & revalidations' },
+const SERVICE_ITEMS: { label: string; href: string; icon: NavIcon; desc: string }[] = [
+  { label: 'Visa Advisory',    href: '/visa',        icon: Stamp, desc: 'End-to-end visa processing' },
+  { label: 'Corporate Travel', href: '/corporate',   icon: Briefcase, desc: 'Managed business trips' },
+  { label: 'Group Bookings',   href: '/groups',      icon: Users, desc: 'Parties of 10 or more' },
+  { label: 'MICE & Events',    href: '/mice',        icon: Mic, desc: 'Conferences & incentives' },
+  { label: 'Rewards & Points', href: '/rewards',     icon: Star, desc: 'Earn miles on every trip' },
+  { label: 'Support & Help',   href: '/escalations', icon: MessageCircle, desc: 'Live agent assistance' },
+  { label: 'Refunds & Claims', href: '/refunds',     icon: Undo2, desc: 'Manage cancellations' },
+  { label: 'Operations Desk',  href: '/ops',         icon: Zap, desc: 'Supplier queues & revalidations' },
 ];
 
-const ACCOUNT_ITEMS = [
-  { label: 'Profile',      href: '/profile', icon: '👤' },
-  { label: 'My Journey',   href: '/journey', icon: '🗺' },
-  { label: 'Travel Vault', href: '/vault',   icon: '🔒' },
+const ACCOUNT_ITEMS: { label: string; href: string; icon: NavIcon }[] = [
+  { label: 'Profile',      href: '/profile', icon: User },
+  { label: 'My Journey',   href: '/journey', icon: Map },
+  { label: 'Travel Vault', href: '/vault',   icon: Lock },
 ];
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -174,24 +199,16 @@ export default function Navigation() {
       }
     >
       {label}
-      <svg
-        width="10"
-        height="10"
-        viewBox="0 0 10 10"
-        fill="none"
+      <ChevronDown
+        size={12}
+        strokeWidth={2}
+        aria-hidden
         style={{
           transform: openDropdown === id ? 'rotate(180deg)' : 'rotate(0deg)',
           transition: 'transform 0.2s',
           opacity: 0.7,
         }}
-      >
-        <path
-          d="M2 3.5L5 6.5L8 3.5"
-          stroke={textColor}
-          strokeWidth="1.5"
-          strokeLinecap="round"
-        />
-      </svg>
+      />
     </button>
   );
 
@@ -239,12 +256,12 @@ export default function Navigation() {
   /* ── single dropdown item ── */
   const DropItem = ({
     href,
-    icon,
+    icon: Icon,
     label,
     desc,
   }: {
     href: string;
-    icon: string;
+    icon: NavIcon;
     label: string;
     desc?: string;
   }) => (
@@ -273,8 +290,18 @@ export default function Navigation() {
         ((e.currentTarget as HTMLElement).style.backgroundColor = 'transparent')
       }
     >
-      <span style={{ fontSize: '16px', lineHeight: 1, marginTop: '1px', flexShrink: 0 }}>
-        {icon}
+      <span
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginTop: '1px',
+          flexShrink: 0,
+          color: textColor,
+          opacity: 0.85,
+        }}
+      >
+        <Icon size={16} strokeWidth={1.75} aria-hidden />
       </span>
       <span style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
         <span style={{ color: textColor, fontSize: '13px', fontWeight: 500 }}>{label}</span>
@@ -466,7 +493,7 @@ export default function Navigation() {
             className="nav-desktop-right"
             style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
           >
-            <NavLink href="/chat"    label="Ava ✦" highlight />
+            <NavLink href="/chat"    label="Ava +" highlight />
             <NavLink href="/journey" label="My Journey" />
             <NavLink href="/vault"   label="Vault" />
 
@@ -516,10 +543,10 @@ export default function Navigation() {
                           </p>
                         )}
                       </div>
-                      <DropItem href="/profile" icon="👤" label="Profile" desc="Personal details & 2FA" />
-                      <DropItem href="/journey" icon="🗺" label="My Journey" desc="Active bookings & routes" />
-                      <DropItem href="/vault"   icon="🔒" label="Travel Vault" desc="Passports & secure docs" />
-                      <DropItem href="/dashboard" icon="⚡" label="Dashboard" desc="Operations & overview" />
+                      <DropItem href="/profile" icon={User} label="Profile" desc="Personal details & 2FA" />
+                      <DropItem href="/journey" icon={Map} label="My Journey" desc="Active bookings & routes" />
+                      <DropItem href="/vault"   icon={Lock} label="Travel Vault" desc="Passports & secure docs" />
+                      <DropItem href="/dashboard" icon={LayoutDashboard} label="Dashboard" desc="Operations & overview" />
                       <div
                         style={{
                           margin: '6px 8px',
@@ -556,7 +583,7 @@ export default function Navigation() {
                           (e.currentTarget.style.backgroundColor = 'transparent')
                         }
                       >
-                        <span style={{ fontSize: '15px' }}>🚪</span>
+                        <LogOut size={15} strokeWidth={1.75} aria-hidden />
                         {isLoggingOut ? 'Signing out…' : 'Log Out'}
                       </button>
                     </>
@@ -574,8 +601,8 @@ export default function Navigation() {
                             : 'rgba(245,244,223,0.08)',
                         }}
                       />
-                      <DropItem href="/login"  icon="🔑" label="Sign In"        desc="Access your account" />
-                      <DropItem href="/signup" icon="✨" label="Create Account" desc="Join FlightOne free"  />
+                      <DropItem href="/login"  icon={KeyRound} label="Sign In"        desc="Access your account" />
+                      <DropItem href="/signup" icon={Sparkles} label="Create Account" desc="Join FlightOne free"  />
                     </>
                   )}
                 </div>
@@ -601,34 +628,18 @@ export default function Navigation() {
               cursor: 'pointer',
               padding: '8px',
               pointerEvents: 'auto',
-              flexDirection: 'column',
-              gap: '5px',
               alignItems: 'center',
               justifyContent: 'center',
               width: '36px',
               height: '36px',
+              color: textColor,
             }}
           >
-            {[0, 1, 2].map(i => (
-              <span
-                key={i}
-                style={{
-                  display: 'block',
-                  width: '20px',
-                  height: '1.5px',
-                  backgroundColor: textColor,
-                  borderRadius: '2px',
-                  transition: 'transform 0.25s, opacity 0.25s',
-                  transform:
-                    mobileOpen && i === 0
-                      ? 'translateY(6.5px) rotate(45deg)'
-                      : mobileOpen && i === 2
-                      ? 'translateY(-6.5px) rotate(-45deg)'
-                      : 'none',
-                  opacity: mobileOpen && i === 1 ? 0 : 1,
-                }}
-              />
-            ))}
+            {mobileOpen ? (
+              <X size={20} strokeWidth={1.75} aria-hidden />
+            ) : (
+              <Menu size={20} strokeWidth={1.75} aria-hidden />
+            )}
           </button>
         </div>
       </header>
@@ -688,7 +699,7 @@ export default function Navigation() {
                 marginBottom: '8px',
               }}
             >
-              <span>✦</span> Chat with Ava
+              <Sparkles size={16} strokeWidth={1.75} aria-hidden /> Chat with Ava
             </Link>
 
             {/* Explore accordion */}
@@ -739,8 +750,8 @@ export default function Navigation() {
 
             {/* Direct links */}
             {[
-              { label: 'My Journey',   href: '/journey', icon: '🗺' },
-              { label: 'Travel Vault', href: '/vault',   icon: '🔒' },
+              { label: 'My Journey',   href: '/journey', icon: Map },
+              { label: 'Travel Vault', href: '/vault',   icon: Lock },
             ].map(item => (
               <MobileLink
                 key={item.label}
@@ -772,14 +783,14 @@ export default function Navigation() {
                   <MobileLink
                     href="/profile"
                     label="Profile & Preferences"
-                    icon="👤"
+                    icon={User}
                     textColor={textColor}
                     onClose={() => setMobileOpen(false)}
                   />
                   <MobileLink
                     href="/dashboard"
                     label="Management Dashboard"
-                    icon="⚡"
+                    icon={LayoutDashboard}
                     textColor={textColor}
                     onClose={() => setMobileOpen(false)}
                   />
@@ -803,7 +814,9 @@ export default function Navigation() {
                       textAlign: 'left',
                     }}
                   >
-                    <span style={{ width: '20px', textAlign: 'center' }}>🚪</span>
+                    <span style={{ width: '20px', display: 'flex', justifyContent: 'center' }}>
+                      <LogOut size={15} strokeWidth={1.75} aria-hidden />
+                    </span>
                     Log Out
                   </button>
                 </>
@@ -831,14 +844,14 @@ export default function Navigation() {
                   <MobileLink
                     href="/login"
                     label="Sign In"
-                    icon="🔑"
+                    icon={KeyRound}
                     textColor={textColor}
                     onClose={() => setMobileOpen(false)}
                   />
                   <MobileLink
                     href="/signup"
                     label="Create Account"
-                    icon="✨"
+                    icon={Sparkles}
                     textColor={textColor}
                     onClose={() => setMobileOpen(false)}
                   />
@@ -917,24 +930,16 @@ function MobileAccordion({
         }}
       >
         {label}
-        <svg
-          width="12"
-          height="12"
-          viewBox="0 0 12 12"
-          fill="none"
+        <ChevronDown
+          size={14}
+          strokeWidth={2}
+          aria-hidden
           style={{
             transform: open ? 'rotate(180deg)' : 'none',
             transition: 'transform 0.2s',
             opacity: 0.6,
           }}
-        >
-          <path
-            d="M2 4.5L6 8L10 4.5"
-            stroke={textColor}
-            strokeWidth="1.5"
-            strokeLinecap="round"
-          />
-        </svg>
+        />
       </button>
       {open && (
         <div
@@ -956,13 +961,13 @@ function MobileAccordion({
 function MobileLink({
   href,
   label,
-  icon,
+  icon: Icon,
   textColor,
   onClose,
 }: {
   href: string;
   label: string;
-  icon: string;
+  icon: NavIcon;
   textColor: string;
   onClose: () => void;
 }) {
@@ -985,7 +990,17 @@ function MobileLink({
         transition: 'background 0.15s',
       }}
     >
-      <span style={{ width: '20px', textAlign: 'center', fontSize: '15px' }}>{icon}</span>
+      <span
+        style={{
+          width: '20px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          opacity: 0.85,
+        }}
+      >
+        <Icon size={15} strokeWidth={1.75} aria-hidden />
+      </span>
       {label}
     </Link>
   );

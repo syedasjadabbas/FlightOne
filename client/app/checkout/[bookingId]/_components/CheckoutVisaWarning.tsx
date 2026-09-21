@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { AlertTriangle, Info, ArrowRight } from "lucide-react";
 
 type VisaWarning = {
   show: boolean;
@@ -18,34 +19,36 @@ export function CheckoutVisaWarning({ visaWarning }: { visaWarning: VisaWarning 
 
   return (
     <div
-      className={`rounded-2xl border p-5 shadow-xs space-y-2.5 ${
+      className={`fo-desk__panel space-y-2 ${
         isCaution
-          ? "border-amber-200 bg-amber-50/70 text-amber-950"
-          : "border-blue-200 bg-blue-50/70 text-blue-950"
+          ? "border-[color-mix(in_oklab,var(--danger)_28%,var(--fo-desk-line))] bg-[color-mix(in_oklab,var(--danger)_5%,var(--white))]"
+          : "border-[color-mix(in_oklab,var(--cyan)_28%,var(--fo-desk-line))] bg-[var(--fo-desk-wash)]"
       }`}
       role="status"
     >
-      <div className="flex items-center gap-2">
-        <span className="text-[16px]">{isCaution ? "⚠️" : "ℹ️"}</span>
-        <p className="text-[14px] font-bold">{visaWarning.title}</p>
-      </div>
-
-      <p className="text-[13px] leading-relaxed text-slate-700">{visaWarning.body}</p>
-
-      <p className="text-[11px] text-slate-500">
-        {visaWarning.isFact
-          ? "Attributed catalog fact — still not a booking block."
-          : "Guidance only — not confirmed visa eligibility."}
-        {visaWarning.escalateRecommended ? " Consider consultant review via Visa or Chat." : ""}
-      </p>
-
-      <div>
-        <Link
-          href="/visa"
-          className="inline-flex items-center gap-1 text-[12px] font-semibold text-blue-600 underline hover:text-blue-700"
-        >
-          Open visa intelligence check →
-        </Link>
+      <div className="flex items-start gap-2.5">
+        {isCaution ? (
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-[var(--danger)]" aria-hidden />
+        ) : (
+          <Info className="mt-0.5 h-4 w-4 shrink-0 text-[var(--cyan)]" aria-hidden />
+        )}
+        <div className="min-w-0 space-y-1.5">
+          <p className="text-[13px] font-semibold text-[var(--navy)]">{visaWarning.title}</p>
+          <p className="text-[13px] leading-relaxed text-[var(--ink-soft)]">{visaWarning.body}</p>
+          <p className="text-[11px] text-[var(--ink-faint)]">
+            {visaWarning.isFact
+              ? "Catalog fact — not a booking block."
+              : "Guidance only — not confirmed visa eligibility."}
+            {visaWarning.escalateRecommended ? " Consider a visa or chat review." : ""}
+          </p>
+          <Link
+            href="/visa"
+            className="inline-flex items-center gap-1 text-[12px] font-semibold text-[var(--cyan)] underline-offset-2 hover:underline"
+          >
+            Open visa check
+            <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+          </Link>
+        </div>
       </div>
     </div>
   );

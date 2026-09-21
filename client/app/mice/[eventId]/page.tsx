@@ -1,6 +1,7 @@
 import { SiteNav } from "@/components/SiteNav";
 import { DeskShell } from "@/components/DeskShell";
 import { MiceEventDetailClient } from "./MiceEventDetailClient";
+import "./mice-event-detail.css";
 
 export const metadata = { title: "MICE Event — FlightOne" };
 

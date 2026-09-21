@@ -3,10 +3,6 @@
 import { useState, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import { useResetPasswordMutation } from "@/lib/api/auth.api";
-import {
-  resetPasswordUiState,
-  validateResetPasswordInput,
-} from "@/lib/auth/passwordRecovery";
 
 /** Colocated to `/reset-password` only. */
 export function useResetPasswordForm() {

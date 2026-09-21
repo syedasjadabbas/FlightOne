@@ -1,7 +1,12 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import {
+  AlertTriangle,
+  Inbox,
+  Scale,
+  Wallet,
+} from "lucide-react";
 import {
   Button,
   Pagination,
@@ -25,6 +30,13 @@ import {
 } from "@/lib/api/operations.api";
 import { usePermissions } from "@/lib/permissions/usePermissions";
 import { useAuthStore } from "@/store/auth.store";
+import {
+  OpsField,
+  OpsHubHeader,
+  OpsPermissionGate,
+  OpsSignInGate,
+  OpsStatusPill,
+} from "./_components";
 
 type Tab =
   | "overview"
@@ -38,23 +50,12 @@ type Tab =
 
 const TABLE_PAGE_SIZE = 15;
 
-function StatePill({ state }: { state: string }) {
-  const warn =
-    /FAIL|MISMATCH|UNCONFIG|ERROR|ATTENTION/i.test(state) ||
-    state === "SKIPPED_UNCONFIGURED";
-  return (
-    <span className={warn ? "fo-desk__status fo-desk__status--warn" : "fo-desk__status"}>
-      {state}
-    </span>
-  );
-}
-
 function IntegrationRow({ cap }: { cap: OpsIntegrationCapability }) {
   return (
     <tr>
       <td className="font-medium">{cap.name}</td>
       <td>
-        <StatePill state={cap.state} />
+        <OpsStatusPill state={cap.state} />
       </td>
       <td className="text-ink-faint">
         {(cap.reasons || []).length ? (cap.reasons || []).join(" · ") : "—"}
@@ -102,6 +103,7 @@ export function OpsPlatformClient() {
 
   const [tab, setTab] = useState<Tab>("overview");
   const [msg, setMsg] = useState<string | null>(null);
+  const [msgWarn, setMsgWarn] = useState(false);
   const [bookingId, setBookingId] = useState("");
   const [invoicedMinor, setInvoicedMinor] = useState("");
   const [page, setPage] = useState(1);
@@ -155,74 +157,24 @@ export function OpsPlatformClient() {
     [],
   );
 
+  function flash(text: string, warn = false) {
+    setMsg(text);
+    setMsgWarn(warn);
+  }
+
   if (!hasHydrated || permsLoading) {
     return (
-      <div className="flex justify-center py-16">
+      <div className="flex justify-center py-16" role="status" aria-live="polite">
         <Spinner />
       </div>
     );
   }
-  if (!accessToken) {
-    return (
-      <div className="rounded-2xl border border-slate-200/90 bg-white p-8 shadow-xs max-w-xl mx-auto my-8 text-center space-y-4">
-        <div className="text-3xl">🔒</div>
-        <h1 className="text-xl font-bold tracking-tight text-slate-900">
-          FlightOne Operations Desk
-        </h1>
-        <p className="text-xs text-slate-600 leading-relaxed max-w-md mx-auto">
-          This is a restricted operations area reserved for authenticated FlightOne staff. Access requires verified staff credentials and mandatory two-factor authentication (2FA).
-        </p>
-        <div className="pt-2 flex justify-center gap-3">
-          <Link href="/login?redirect=%2Fops">
-            <Button size="sm">Staff Sign In & 2FA</Button>
-          </Link>
-          <Link href="/">
-            <Button size="sm" variant="secondary">Return to Public Portal</Button>
-          </Link>
-        </div>
-      </div>
-    );
-  }
-  if (!canRead) {
-    return (
-      <div className="rounded-2xl border border-amber-200/90 bg-amber-50/50 p-8 shadow-xs max-w-xl mx-auto my-8 text-center space-y-4">
-        <div className="text-3xl">🛡️</div>
-        <h1 className="text-xl font-bold tracking-tight text-slate-900">
-          Staff Role Authorization Required
-        </h1>
-        <p className="text-xs text-slate-700 leading-relaxed max-w-md mx-auto">
-          Your account is signed in but lacks the required <code className="bg-amber-100 px-1 py-0.5 rounded font-mono text-[11px]">ops:dashboard:read</code> staff permission. Access is granted to verified SuperAdmin, OpsManager, TravelConsultant, and FinanceOfficer roles.
-        </p>
-        <div className="pt-2 flex justify-center gap-3">
-          <Link href="/ops/escalations">
-            <Button size="sm" variant="secondary">Escalations Queue</Button>
-          </Link>
-          <Link href="/ops/refunds">
-            <Button size="sm" variant="secondary">Refunds Queue</Button>
-          </Link>
-          <Link href="/dashboard">
-            <Button size="sm" variant="ghost">Management Dashboard</Button>
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  if (!accessToken) return <OpsSignInGate />;
+  if (!canRead) return <OpsPermissionGate />;
 
   return (
-    <div className="fo-desk__stack" style={{ gap: "1.25rem" }}>
-      <header className="fo-desk__header">
-        <h1 className="fo-desk__title">Operations</h1>
-        <p className="fo-desk__lede">
-          Integration status, finance visibility, commissions, reconciliation, and audit. External
-          systems stay unconfigured until credentials are set.
-        </p>
-        <div className="fo-desk__links">
-          <Link href="/ops/escalations">Escalations</Link>
-          <Link href="/ops/refunds">Refunds</Link>
-          <Link href="/ops/knowledge">Knowledge</Link>
-          <Link href="/dashboard">Dashboard</Link>
-        </div>
-      </header>
+    <div className="fo-ops">
+      <OpsHubHeader />
 
       <nav className="fo-desk__tabs" aria-label="Operations sections">
         {tabs.map((t) => (
@@ -237,7 +189,11 @@ export function OpsPlatformClient() {
         ))}
       </nav>
 
-      {msg ? <p className="text-[13px] text-ink-soft">{msg}</p> : null}
+      {msg ? (
+        <p className={`fo-ops__msg${msgWarn ? " fo-ops__msg--warn" : ""}`} role="status">
+          {msg}
+        </p>
+      ) : null}
 
       {tab === "overview" ? (
         overviewLoading ? (
@@ -245,7 +201,10 @@ export function OpsPlatformClient() {
         ) : overview ? (
           <div className="fo-desk__kpi-strip" aria-label="Ops overview">
             <div className="fo-desk__kpi">
-              <p className="fo-desk__kpi-label">Outbox pending</p>
+              <p className="fo-desk__kpi-label">
+                <Inbox className="fo-ops__kpi-icon h-3 w-3" aria-hidden />
+                Outbox pending
+              </p>
               <p className="fo-desk__kpi-value">{overview.outbox.pending}</p>
               <p className="fo-desk__kpi-note">
                 failed {overview.outbox.failed} · delivered {overview.outbox.delivered}
@@ -256,17 +215,26 @@ export function OpsPlatformClient() {
               </p>
             </div>
             <div className="fo-desk__kpi">
-              <p className="fo-desk__kpi-label">Ledger</p>
+              <p className="fo-desk__kpi-label">
+                <Wallet className="fo-ops__kpi-icon h-3 w-3" aria-hidden />
+                Ledger
+              </p>
               <p className="fo-desk__kpi-value">{overview.accountingEntries}</p>
               <p className="fo-desk__kpi-note">commissions {overview.commissions}</p>
             </div>
             <div className="fo-desk__kpi">
-              <p className="fo-desk__kpi-label">Recon attention</p>
+              <p className="fo-desk__kpi-label">
+                <Scale className="fo-ops__kpi-icon h-3 w-3" aria-hidden />
+                Recon attention
+              </p>
               <p className="fo-desk__kpi-value">{overview.reconciliation.needsAttention}</p>
               <p className="fo-desk__kpi-note">mismatches {overview.reconciliation.mismatches}</p>
             </div>
             <div className="fo-desk__kpi">
-              <p className="fo-desk__kpi-label">Outbox failed</p>
+              <p className="fo-desk__kpi-label">
+                <AlertTriangle className="fo-ops__kpi-icon h-3 w-3" aria-hidden />
+                Outbox failed
+              </p>
               <p className="fo-desk__kpi-value">{overview.outbox.failed}</p>
               <p className="fo-desk__kpi-note">
                 {overview.outbox.processing ? `processing ${overview.outbox.processing}` : "steady"}
@@ -312,16 +280,15 @@ export function OpsPlatformClient() {
               size="sm"
               disabled={!canReconcile}
               onClick={async () => {
-                setMsg(null);
                 try {
                   const r = await drain({ limit: 50 }).unwrap();
-                  setMsg(
+                  flash(
                     `Drain → delivered ${r.delivered}, failed ${r.failed}, deferred ${r.deferred ?? 0}, unconfigured ${r.unconfigured ?? 0}`,
                   );
                   refetchOutbox();
                   refetchOverview();
                 } catch {
-                  setMsg("Drain failed (needs ops:reconcile:write).");
+                  flash("Drain failed (needs ops:reconcile:write).", true);
                 }
               }}
             >
@@ -332,14 +299,13 @@ export function OpsPlatformClient() {
                 size="sm"
                 variant="secondary"
                 onClick={async () => {
-                  setMsg(null);
                   try {
                     const r = await retry({ limit: 50 }).unwrap();
-                    setMsg(`Retry → delivered ${r.delivered}, failed ${r.failed}`);
+                    flash(`Retry → delivered ${r.delivered}, failed ${r.failed}`);
                     refetchOutbox();
                     refetchOverview();
                   } catch {
-                    setMsg("Retry failed.");
+                    flash("Retry failed.", true);
                   }
                 }}
               >
@@ -375,7 +341,7 @@ export function OpsPlatformClient() {
                       <tr key={e.id}>
                         <td className="font-medium">{e.type}</td>
                         <td>
-                          <StatePill state={e.displayStatus || e.status} />
+                          <OpsStatusPill state={e.displayStatus || e.status} />
                         </td>
                         <td className="fo-desk__mono">
                           {e.aggregateType}/{e.aggregateId}
@@ -484,15 +450,14 @@ export function OpsPlatformClient() {
 
       {tab === "finance" ? (
         <div className="fo-desk__stack">
-          <label className="block text-[13px] text-ink-soft">
-            Booking ID (optional filter)
-            <input
-              className="mt-1 w-full rounded border border-[var(--fo-desk-line)] bg-white px-3 py-2 text-[14px]"
-              value={bookingId}
-              onChange={(ev) => setBookingId(ev.target.value.trim())}
-              placeholder="cuid…"
-            />
-          </label>
+          <OpsField
+            id="ops-finance-booking"
+            label="Booking ID (optional filter)"
+            value={bookingId}
+            onChange={(ev) => setBookingId(ev.target.value.trim())}
+            placeholder="cuid…"
+            autoComplete="off"
+          />
           {financeLoading ? (
             <Spinner />
           ) : (
@@ -669,7 +634,10 @@ export function OpsPlatformClient() {
                   label="Commission rows"
                 />
                 {commissions.aggregates?.length ? (
-                  <div className="fo-desk__table-wrap" style={{ borderTop: "1px solid var(--fo-desk-line)" }}>
+                  <div
+                    className="fo-desk__table-wrap"
+                    style={{ borderTop: "1px solid var(--fo-desk-line)" }}
+                  >
                     <table className="fo-desk__table">
                       <thead>
                         <tr>
@@ -712,24 +680,28 @@ export function OpsPlatformClient() {
                 Reconcile a booking against an authoritative supplier invoice amount. Leave invoiced
                 blank → DATA_UNAVAILABLE (never invents supplier data).
               </p>
-              <input
-                className="w-full rounded border border-[var(--fo-desk-line)] bg-white px-3 py-2 text-[14px]"
+              <OpsField
+                id="ops-recon-booking"
+                label="Booking ID"
                 placeholder="bookingId"
                 value={bookingId}
                 onChange={(ev) => setBookingId(ev.target.value.trim())}
+                autoComplete="off"
               />
-              <input
-                className="w-full rounded border border-[var(--fo-desk-line)] bg-white px-3 py-2 text-[14px]"
-                placeholder="invoicedMinor (optional)"
+              <OpsField
+                id="ops-recon-invoiced"
+                label="Invoiced amount (minor units, optional)"
+                placeholder="invoicedMinor"
                 value={invoicedMinor}
                 onChange={(ev) => setInvoicedMinor(ev.target.value)}
+                inputMode="numeric"
+                autoComplete="off"
               />
               <Button
                 size="sm"
                 onClick={async () => {
-                  setMsg(null);
                   if (!bookingId) {
-                    setMsg("bookingId required");
+                    flash("bookingId required", true);
                     return;
                   }
                   try {
@@ -738,10 +710,10 @@ export function OpsPlatformClient() {
                       invoicedMinor:
                         invoicedMinor === "" ? null : Number.parseInt(invoicedMinor, 10),
                     }).unwrap();
-                    setMsg(`Recon → ${r.status}`);
+                    flash(`Recon → ${r.status}`);
                     refetchRecon();
                   } catch {
-                    setMsg("Reconcile failed.");
+                    flash("Reconcile failed.", true);
                   }
                 }}
               >
@@ -774,7 +746,7 @@ export function OpsPlatformClient() {
                       <tr key={r.id}>
                         <td className="font-medium">{r.supplierCode}</td>
                         <td>
-                          <StatePill state={r.status} />
+                          <OpsStatusPill state={r.status} />
                         </td>
                         <td className="fo-desk__mono">{r.bookingId || "—"}</td>
                         <td>{r.expectedMinor}</td>
