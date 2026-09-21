@@ -1,6 +1,15 @@
-import { SiteNav } from "@/components/SiteNav";
+import dynamic from "next/dynamic";
+import { RouteChunkFallback } from "@/components/RouteChunkFallback";
 import { DeskShell } from "@/components/DeskShell";
-import { MicePageClient } from "./MicePageClient";
+import { SiteNav } from "@/components/SiteNav";
+
+const MicePageClient = dynamic(
+  () =>
+    import("./MicePageClient").then((m) => ({
+      default: m.MicePageClient,
+    })),
+  { loading: () => <RouteChunkFallback label="Loading MICE…" /> },
+);
 
 export const metadata = {
   title: "MICE & Events — FlightOne",

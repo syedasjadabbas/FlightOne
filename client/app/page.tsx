@@ -1,8 +1,11 @@
 import type { Metadata } from 'next';
 import dynamic from 'next/dynamic';
-import SmoothScroll from '@/components/landing/SmoothScroll';
-import Navigation from '@/components/landing/Navigation';
 import HeroExperienceSequence from '@/components/landing/HeroExperienceSequence';
+
+/* First-paint: hero stays eager. Nav + Lenis wrapper hydrate as separate
+ * chunks so GSAP/Lenis and the lucide-heavy nav stay off the critical path. */
+const SmoothScroll = dynamic(() => import('@/components/landing/SmoothScroll'));
+const Navigation = dynamic(() => import('@/components/landing/Navigation'));
 
 /* Below-fold sections: keep SSR for content/SEO, split JS out of the
  * first-paint client bundle so hero + nav hydrate without dragging in

@@ -1,6 +1,15 @@
+import dynamic from "next/dynamic";
+import { RouteChunkFallback } from "@/components/RouteChunkFallback";
 import { SiteNav } from "@/components/SiteNav";
 import { TravellerShell } from "@/app/components/traveller";
-import { RefundCaseDetailClient } from "./RefundCaseDetailClient";
+
+const RefundCaseDetailClient = dynamic(
+  () =>
+    import("./RefundCaseDetailClient").then((m) => ({
+      default: m.RefundCaseDetailClient,
+    })),
+  { loading: () => <RouteChunkFallback label="Loading case…" /> },
+);
 
 export const metadata = { title: "Refund case — FlightOne" };
 

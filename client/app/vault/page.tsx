@@ -1,7 +1,16 @@
+import dynamic from "next/dynamic";
+import { RouteChunkFallback } from "@/components/RouteChunkFallback";
 import { SiteNav } from "@/components/SiteNav";
 import { TravellerShell } from "@/app/components/traveller";
-import { VaultPageClient } from "./VaultPageClient";
 import "./vault.css";
+
+const VaultPageClient = dynamic(
+  () =>
+    import("./VaultPageClient").then((m) => ({
+      default: m.VaultPageClient,
+    })),
+  { loading: () => <RouteChunkFallback label="Loading vault…" /> },
+);
 
 export const metadata = {
   title: "Vault — FlightOne",

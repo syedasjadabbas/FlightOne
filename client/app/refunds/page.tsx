@@ -1,7 +1,16 @@
+import dynamic from "next/dynamic";
+import { RouteChunkFallback } from "@/components/RouteChunkFallback";
 import { SiteNav } from "@/components/SiteNav";
 import { TravellerShell } from "@/app/components/traveller";
-import { RefundsPageClient } from "./RefundsPageClient";
 import "./refunds.css";
+
+const RefundsPageClient = dynamic(
+  () =>
+    import("./RefundsPageClient").then((m) => ({
+      default: m.RefundsPageClient,
+    })),
+  { loading: () => <RouteChunkFallback label="Loading refunds…" /> },
+);
 
 export const metadata = { title: "Refunds & servicing — FlightOne" };
 

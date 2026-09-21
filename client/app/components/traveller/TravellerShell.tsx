@@ -1,6 +1,9 @@
 import type { ReactNode } from "react";
 import { SiteChromeFooter } from "@/components/SiteChromeFooter";
 import { cn } from "@/utils/cn";
+import "@/app/styles/flightone-visual.css";
+import "@/app/styles/flightone-traveller.css";
+import "@/app/styles/flightone-ui.css";
 
 type TravellerShellWidth = "default" | "narrow" | "wide" | "full";
 

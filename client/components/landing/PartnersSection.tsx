@@ -64,6 +64,23 @@ export default function PartnersSection() {
   const rightColRef = useRef<HTMLDivElement>(null);
 
   const [activeCatIdx, setActiveCatIdx] = useState(0);
+  /* Destination JPGs stay off the network until the section is near viewport. */
+  const [assetsReady, setAssetsReady] = useState(false);
+
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) return;
+        setAssetsReady(true);
+        io.disconnect();
+      },
+      { rootMargin: '600px 0px' },
+    );
+    io.observe(track);
+    return () => io.disconnect();
+  }, []);
 
   useEffect(() => {
     let animId: number;
@@ -326,7 +343,7 @@ export default function PartnersSection() {
                   return (
                     <img
                       key={cat.id}
-                      src={cat.image}
+                      src={assetsReady ? cat.image : undefined}
                       alt={cat.label}
                       loading="lazy"
                       decoding="async"

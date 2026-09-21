@@ -1,6 +1,15 @@
-import { SiteNav } from "@/components/SiteNav";
+import dynamic from "next/dynamic";
+import { RouteChunkFallback } from "@/components/RouteChunkFallback";
 import { DeskShell } from "@/components/DeskShell";
-import { ManagementDashboardClient } from "./ManagementDashboardClient";
+import { SiteNav } from "@/components/SiteNav";
+
+const ManagementDashboardClient = dynamic(
+  () =>
+    import("./ManagementDashboardClient").then((m) => ({
+      default: m.ManagementDashboardClient,
+    })),
+  { loading: () => <RouteChunkFallback label="Loading dashboard…" /> },
+);
 
 export const metadata = { title: "Management dashboard — FlightOne" };
 

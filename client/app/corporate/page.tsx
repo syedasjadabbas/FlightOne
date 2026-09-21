@@ -1,6 +1,15 @@
-import { SiteNav } from "@/components/SiteNav";
+import dynamic from "next/dynamic";
+import { RouteChunkFallback } from "@/components/RouteChunkFallback";
 import { DeskShell } from "@/components/DeskShell";
-import { CorporatePageClient } from "./CorporatePageClient";
+import { SiteNav } from "@/components/SiteNav";
+
+const CorporatePageClient = dynamic(
+  () =>
+    import("./CorporatePageClient").then((m) => ({
+      default: m.CorporatePageClient,
+    })),
+  { loading: () => <RouteChunkFallback label="Loading corporate…" /> },
+);
 
 export const metadata = { title: "Corporate travel — FlightOne" };
 

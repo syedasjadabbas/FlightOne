@@ -136,11 +136,11 @@ export default function HeroExperienceSequence() {
       window.removeEventListener('scroll', onScroll);
     };
     window.addEventListener('scroll', onScroll, { passive: true });
-
+    /* Warm only after intent (scroll) or a long idle — avoid racing LCP fonts/hero. */
     if (typeof window.requestIdleCallback === 'function') {
-      idleId = window.requestIdleCallback(() => warmVideo(), { timeout: 2500 });
+      idleId = window.requestIdleCallback(() => warmVideo(), { timeout: 8000 });
     } else {
-      timeoutId = setTimeout(warmVideo, 2000);
+      timeoutId = setTimeout(warmVideo, 6000);
     }
 
     return () => {
@@ -219,11 +219,14 @@ export default function HeroExperienceSequence() {
         const videoOp = 1 - smoothstep(0.34, 0.38, p);
 
         const currentMargin = (1 - expandProgress) * maxEntranceMargin;
+        // Soft bottom scoops into the FlightOne blue band — scales with viewport,
+        // holds through expand so the edge never reads as a hard flat cut.
+        const scoopRadius = Math.min(Math.max(w * 0.055, 40), 88);
 
         if (videoFrameRef.current) {
           videoFrameRef.current.style.bottom = `${currentMargin}px`;
-          videoFrameRef.current.style.borderBottomLeftRadius = '0px';
-          videoFrameRef.current.style.borderBottomRightRadius = '0px';
+          videoFrameRef.current.style.borderBottomLeftRadius = `${scoopRadius}px`;
+          videoFrameRef.current.style.borderBottomRightRadius = `${scoopRadius}px`;
           videoFrameRef.current.style.transform = `translate3d(0, ${videoTy}%, 0)`;
           videoFrameRef.current.style.opacity = `${videoOp}`;
           videoFrameRef.current.style.display = videoOp <= 0.001 ? 'none' : 'block';
@@ -698,15 +701,15 @@ export default function HeroExperienceSequence() {
             left: 0,
             right: 0,
             bottom: 'clamp(110px, 15vh, 160px)',
-            borderBottomLeftRadius: 0,
-            borderBottomRightRadius: 0,
+            borderBottomLeftRadius: 'clamp(2.5rem, 5.5vw, 5.5rem)',
+            borderBottomRightRadius: 'clamp(2.5rem, 5.5vw, 5.5rem)',
             overflow: 'hidden',
             backgroundColor: '#0E1620',
             zIndex: 10,
             isolation: 'isolate',
             WebkitMaskImage: '-webkit-radial-gradient(white, black)',
-            boxShadow: '0 24px 60px rgba(0,0,0,0.45)',
-            willChange: 'transform, opacity, bottom',
+            boxShadow: '0 28px 64px rgba(0, 34, 80, 0.28), 0 12px 28px rgba(0,0,0,0.22)',
+            willChange: 'transform, opacity, bottom, border-radius',
           }}
         >
           {/* HD Video — preload=metadata keeps the 15MB file off the LCP race;
@@ -904,7 +907,7 @@ export default function HeroExperienceSequence() {
           </div>
         </div>
 
-        {/* Corner scoops removed — full-bleed square video edges */}
+        {/* Soft bottom scoops — video sits in the blue band with curved corners */}
 
         {/* ═════════════════════════════════════════════════════════════════
             "Popular Destinations, Available Worldwide" HEADLINE (Large Edge-to-Edge Typography)

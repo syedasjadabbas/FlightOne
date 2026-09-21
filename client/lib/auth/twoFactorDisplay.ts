@@ -1,4 +1,5 @@
 import type { LoginResponse } from "@/lib/api/auth.api";
+import { formatApiError } from "@/lib/api/formatApiError";
 
 /**
  * SDS Defined Staff Roles (M00, Appendix E).
@@ -85,33 +86,42 @@ export function resolvePostLoginRedirect(
 export function formatTwoFactorError(error: any): string {
   if (!error) return "An unexpected error occurred. Please try again.";
 
-  // RTK Query FetchBaseQueryError or serialized error
   const status = error.status ?? error?.originalStatus;
   const data = error.data;
-  const serverMsg = typeof data === "object" ? data?.error || data?.message : null;
+  const serverMsg =
+    typeof data === "object" && data && typeof data.message === "string"
+      ? data.message
+      : null;
+  const safeServer =
+    serverMsg && !/\b(prisma|invocation|column)\b/i.test(serverMsg)
+      ? serverMsg
+      : null;
 
   if (status === 429) {
     return (
-      serverMsg ||
+      safeServer ||
       "Too many failed verification attempts. Your account is temporarily locked for 15 minutes."
     );
   }
 
   if (status === 401 || status === 400) {
     return (
-      serverMsg ||
+      safeServer ||
       "Invalid verification code. Please check your authenticator app or backup code and try again."
     );
   }
 
   if (status === 403) {
-    return serverMsg || "Two-factor authentication is mandatory and cannot be bypassed.";
+    return (
+      safeServer ||
+      "Two-factor authentication is mandatory and cannot be bypassed."
+    );
   }
 
-  if (serverMsg) return serverMsg;
-  if (typeof error.message === "string") return error.message;
-
-  return "Verification failed. Please ensure your device clock is synchronized and try again.";
+  return formatApiError(
+    error,
+    "Verification failed. Please ensure your device clock is synchronized and try again.",
+  );
 }
 
 /** Check that one-time setup response does not leak internal server fields. */

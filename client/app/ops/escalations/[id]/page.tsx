@@ -1,8 +1,17 @@
-import { SiteNav } from "@/components/SiteNav";
+import dynamic from "next/dynamic";
+import { RouteChunkFallback } from "@/components/RouteChunkFallback";
 import { DeskShell } from "@/components/DeskShell";
-import { OpsEscalationDetailClient } from "./OpsEscalationDetailClient";
+import { SiteNav } from "@/components/SiteNav";
 import "../../ops-hub.css";
 import "./ops-escalation-detail.css";
+
+const OpsEscalationDetailClient = dynamic(
+  () =>
+    import("./OpsEscalationDetailClient").then((m) => ({
+      default: m.OpsEscalationDetailClient,
+    })),
+  { loading: () => <RouteChunkFallback label="Loading case…" /> },
+);
 
 export const metadata = {
   title: "Escalation detail — FlightOne",

@@ -1,7 +1,16 @@
+import dynamic from "next/dynamic";
+import { RouteChunkFallback } from "@/components/RouteChunkFallback";
 import { SiteNav } from "@/components/SiteNav";
 import { TravellerShell } from "@/app/components/traveller";
-import { RewardsPageClient } from "./RewardsPageClient";
 import "./rewards.css";
+
+const RewardsPageClient = dynamic(
+  () =>
+    import("./RewardsPageClient").then((m) => ({
+      default: m.RewardsPageClient,
+    })),
+  { loading: () => <RouteChunkFallback label="Loading rewards…" /> },
+);
 
 export const metadata = {
   title: "Rewards — FlightOne",

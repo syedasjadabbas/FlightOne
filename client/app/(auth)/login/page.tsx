@@ -1,8 +1,23 @@
+import dynamic from "next/dynamic";
 import { Suspense } from "react";
 import { AuthShell } from "../components/AuthShell";
-import { LoginForm } from "./components/LoginForm";
 import { LoginFormSkeleton } from "./components/LoginFormSkeleton";
 import "../auth-form.css";
+
+const LoginForm = dynamic(
+  () =>
+    import("./components/LoginForm").then((m) => ({ default: m.LoginForm })),
+  {
+    loading: () => (
+      <>
+        <p role="status" className="sr-only">
+          Loading sign-in form
+        </p>
+        <LoginFormSkeleton />
+      </>
+    ),
+  },
+);
 
 export const metadata = {
   title: "Log in — FlightOne",

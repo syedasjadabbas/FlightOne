@@ -1,9 +1,14 @@
-"use client";
+import type { ReactNode } from "react";
+import "../styles/flightone-visual.css";
+import "../styles/flightone-platform.css";
+import "../styles/flightone-chat-layout.css";
+import "../styles/flightone-chat-responsive.css";
+import "../styles/flightone-chat-landing.css";
+import "../styles/flightone-results-responsive.css";
 
 /**
- * Client wrapper for /chat — active-chat document lock is toggled by ChatLayout
- * when the user sends their first message (fo-chat-active on html/body).
+ * Chat-only CSS — keep chat / results / platform styles off landing & auth.
  */
-export default function ChatRouteLayout({ children }: { children: React.ReactNode }) {
+export default function ChatRouteLayout({ children }: { children: ReactNode }) {
   return children;
 }

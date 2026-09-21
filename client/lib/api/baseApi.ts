@@ -6,6 +6,7 @@ import type {
 } from "@reduxjs/toolkit/query";
 import { useAuthStore } from "@/store/auth.store";
 import type { AuthSession } from "@/store/auth.store";
+import { formatApiError } from "./formatApiError";
 
 /**
  * Single shared RTK Query instance (dev guide §1.2/§4). Per-page/global
@@ -99,6 +100,22 @@ const baseQueryWithReauth: BaseQueryFn<
 
   if (!result.error && result.data && typeof result.data === "object" && "data" in result.data) {
     return { ...result, data: (result.data as ApiEnvelope<unknown>).data };
+  }
+
+  // Normalize error.message so every UI path gets non-technical copy by default.
+  if (result.error && typeof result.error === "object") {
+    const friendly = formatApiError(result.error);
+    const data =
+      result.error.data && typeof result.error.data === "object"
+        ? { ...(result.error.data as object), message: friendly }
+        : { message: friendly };
+    return {
+      ...result,
+      error: {
+        ...result.error,
+        data,
+      },
+    };
   }
 
   return result;

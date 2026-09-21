@@ -1,7 +1,16 @@
+import dynamic from "next/dynamic";
+import { RouteChunkFallback } from "@/components/RouteChunkFallback";
 import { SiteNav } from "@/components/SiteNav";
 import { TravellerShell } from "@/app/components/traveller";
-import { SupportPageClient } from "./SupportPageClient";
 import "./support.css";
+
+const SupportPageClient = dynamic(
+  () =>
+    import("./SupportPageClient").then((m) => ({
+      default: m.SupportPageClient,
+    })),
+  { loading: () => <RouteChunkFallback label="Loading support…" /> },
+);
 
 export const metadata = {
   title: "Support — FlightOne",

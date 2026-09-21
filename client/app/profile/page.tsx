@@ -1,6 +1,15 @@
+import dynamic from "next/dynamic";
+import { RouteChunkFallback } from "@/components/RouteChunkFallback";
 import { SiteNav } from "@/components/SiteNav";
 import { TravellerShell } from "@/app/components/traveller";
-import { ProfilePageClient } from "./ProfilePageClient";
+
+const ProfilePageClient = dynamic(
+  () =>
+    import("./ProfilePageClient").then((m) => ({
+      default: m.ProfilePageClient,
+    })),
+  { loading: () => <RouteChunkFallback label="Loading profile…" /> },
+);
 
 export const metadata = {
   title: "Profile — FlightOne",

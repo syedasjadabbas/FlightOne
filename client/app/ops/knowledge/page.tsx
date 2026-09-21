@@ -1,8 +1,17 @@
-import { SiteNav } from "@/components/SiteNav";
+import dynamic from "next/dynamic";
+import { RouteChunkFallback } from "@/components/RouteChunkFallback";
 import { DeskShell } from "@/components/DeskShell";
-import { OpsKnowledgeClient } from "./OpsKnowledgeClient";
+import { SiteNav } from "@/components/SiteNav";
 import "../ops-hub.css";
 import "./knowledge.css";
+
+const OpsKnowledgeClient = dynamic(
+  () =>
+    import("./OpsKnowledgeClient").then((m) => ({
+      default: m.OpsKnowledgeClient,
+    })),
+  { loading: () => <RouteChunkFallback label="Loading knowledge…" /> },
+);
 
 export const metadata = { title: "Knowledge — FlightOne Ops" };
 

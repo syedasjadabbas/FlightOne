@@ -1,7 +1,16 @@
+import dynamic from "next/dynamic";
+import { RouteChunkFallback } from "@/components/RouteChunkFallback";
 import { SiteNav } from "@/components/SiteNav";
 import { TravellerShell } from "@/app/components/traveller";
-import { MorePageClient } from "./MorePageClient";
 import "./more.css";
+
+const MorePageClient = dynamic(
+  () =>
+    import("./MorePageClient").then((m) => ({
+      default: m.MorePageClient,
+    })),
+  { loading: () => <RouteChunkFallback label="Loading…" /> },
+);
 
 export const metadata = {
   title: "More — FlightOne",

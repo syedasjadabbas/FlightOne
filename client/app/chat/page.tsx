@@ -1,6 +1,15 @@
+import dynamic from "next/dynamic";
+import { RouteChunkFallback } from "@/components/RouteChunkFallback";
 import { Suspense } from "react";
-import { ChatConsole } from "@/app/components/ChatConsole";
 import { SiteNav } from "@/components/SiteNav";
+
+const ChatConsole = dynamic(
+  () =>
+    import("@/app/components/ChatConsole").then((m) => ({
+      default: m.ChatConsole,
+    })),
+  { loading: () => <RouteChunkFallback label="Connecting to Ava…" /> },
+);
 
 export const metadata = {
   title: "FlightOne — Travel Consultant",
@@ -17,18 +26,7 @@ export default function ChatPage() {
       </div>
       <div className="fo-chat-app relative z-10 flex min-w-0 flex-col overflow-x-clip">
         <Suspense
-          fallback={
-            <div
-              className="flex flex-1 flex-col items-center justify-center gap-2 py-20"
-              role="status"
-              aria-live="polite"
-            >
-              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--electric)]" aria-hidden />
-              <p className="text-xs font-medium text-[var(--ink-faint)]">
-                Connecting to Ava…
-              </p>
-            </div>
-          }
+          fallback={<RouteChunkFallback label="Connecting to Ava…" />}
         >
           <ChatConsole />
         </Suspense>
@@ -36,4 +34,3 @@ export default function ChatPage() {
     </main>
   );
 }
-

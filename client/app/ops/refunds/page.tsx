@@ -1,8 +1,17 @@
-import { SiteNav } from "@/components/SiteNav";
+import dynamic from "next/dynamic";
+import { RouteChunkFallback } from "@/components/RouteChunkFallback";
 import { DeskShell } from "@/components/DeskShell";
-import { OpsRefundsClient } from "./OpsRefundsClient";
+import { SiteNav } from "@/components/SiteNav";
 import "../ops-hub.css";
 import "./ops-refunds.css";
+
+const OpsRefundsClient = dynamic(
+  () =>
+    import("./OpsRefundsClient").then((m) => ({
+      default: m.OpsRefundsClient,
+    })),
+  { loading: () => <RouteChunkFallback label="Loading refunds ops…" /> },
+);
 
 export const metadata = { title: "Refunds ops — FlightOne" };
 

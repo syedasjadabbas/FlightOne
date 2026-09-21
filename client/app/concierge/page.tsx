@@ -1,6 +1,15 @@
+import dynamic from "next/dynamic";
+import { RouteChunkFallback } from "@/components/RouteChunkFallback";
 import { SiteNav } from "@/components/SiteNav";
 import { TravellerShell } from "@/app/components/traveller";
-import { ConciergePageClient } from "./ConciergePageClient";
+
+const ConciergePageClient = dynamic(
+  () =>
+    import("./ConciergePageClient").then((m) => ({
+      default: m.ConciergePageClient,
+    })),
+  { loading: () => <RouteChunkFallback label="Loading concierge…" /> },
+);
 
 export const metadata = {
   title: "Travel Concierge — FlightOne",

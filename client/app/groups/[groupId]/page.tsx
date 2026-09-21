@@ -1,6 +1,15 @@
-import { SiteNav } from "@/components/SiteNav";
+import dynamic from "next/dynamic";
+import { RouteChunkFallback } from "@/components/RouteChunkFallback";
 import { DeskShell } from "@/components/DeskShell";
-import { GroupDetailClient } from "./GroupDetailClient";
+import { SiteNav } from "@/components/SiteNav";
+
+const GroupDetailClient = dynamic(
+  () =>
+    import("./GroupDetailClient").then((m) => ({
+      default: m.GroupDetailClient,
+    })),
+  { loading: () => <RouteChunkFallback label="Loading group…" /> },
+);
 
 export const metadata = {
   title: "Group — FlightOne",

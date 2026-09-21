@@ -22,15 +22,8 @@ import { LogIn, ShieldOff } from "lucide-react";
 import { ConciergeSummaryStrip } from "./_components/ConciergeSummaryStrip";
 import { ConciergeRuleForm } from "./_components/ConciergeRuleForm";
 import { ConciergeRuleList } from "./_components/ConciergeRuleList";
+import { formatApiError } from "@/lib/api/formatApiError";
 import { ConciergeActivityList } from "./_components/ConciergeActivityList";
-
-function formatApiError(err: unknown): string {
-  if (err && typeof err === "object" && "data" in err) {
-    const msg = (err as { data?: { message?: string } }).data?.message;
-    if (msg && !/prisma|econnrefused|stack/i.test(msg)) return msg;
-  }
-  return "That request could not be completed. Nothing was booked.";
-}
 
 export function ConciergePageClient() {
   const hasHydrated = useAuthStore((s) => s.hasHydrated);
@@ -118,7 +111,9 @@ export function ConciergePageClient() {
       setMsg("Rule saved. It only runs on verified disruptions for your bookings.");
       void refetch();
     } catch (err) {
-      setMsg(formatApiError(err));
+      setMsg(
+        formatApiError(err, "That request could not be completed. Nothing was booked."),
+      );
     }
   }
 
@@ -141,7 +136,9 @@ export function ConciergePageClient() {
                 setMsg(`All rules paused (${r.disabledCount} disabled).`);
                 void refetch();
               } catch (err) {
-                setMsg(formatApiError(err));
+                setMsg(
+        formatApiError(err, "That request could not be completed. Nothing was booked."),
+      );
               }
             }}
           >
@@ -192,7 +189,9 @@ export function ConciergePageClient() {
             await disableRule(ruleId).unwrap();
             void refetch();
           } catch (err) {
-            setMsg(formatApiError(err));
+            setMsg(
+        formatApiError(err, "That request could not be completed. Nothing was booked."),
+      );
           }
         }}
         onEnable={async (ruleId) => {
@@ -200,7 +199,9 @@ export function ConciergePageClient() {
             await updateRule({ ruleId, body: { enabled: true } }).unwrap();
             void refetch();
           } catch (err) {
-            setMsg(formatApiError(err));
+            setMsg(
+        formatApiError(err, "That request could not be completed. Nothing was booked."),
+      );
           }
         }}
       />

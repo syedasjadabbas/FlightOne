@@ -8,6 +8,7 @@ import {
   useResendVerificationMutation,
 } from "@/lib/api/auth.api";
 import { useAttachReferralMutation } from "@/lib/api/rewards.api";
+import { formatApiError } from "@/lib/api/formatApiError";
 import { useAuthStore } from "@/store/auth.store";
 
 const MIN_PASSWORD = 8;
@@ -78,16 +79,13 @@ export function useSignupForm() {
         setStep("verify");
         setInfoMessage(`A 6-digit verification code was sent to ${trimmedEmail}.`);
       }
-    } catch (err: any) {
-      const msg =
-        err?.data?.message ||
-        err?.data?.error ||
-        (err?.status === 409
-          ? "An account with this email already exists. Try logging in."
-          : err?.status === 400
-            ? "Please check your details and try again."
-            : "Something went wrong — please try again.");
-      setLocalError(msg);
+    } catch (err: unknown) {
+      setLocalError(
+        formatApiError(
+          err,
+          "Something went wrong — please try again.",
+        ),
+      );
     }
   }
 
@@ -125,16 +123,19 @@ export function useSignupForm() {
       } else {
         router.replace(target);
       }
-    } catch (err: any) {
-      const msg =
-        err?.data?.message ||
-        err?.data?.error ||
-        (err?.status === 429
-          ? "Too many failed attempts. Please request a new code."
-          : err?.status === 400
-            ? "Invalid or expired verification code."
-            : "Something went wrong — please try again.");
-      setLocalError(msg);
+    } catch (err: unknown) {
+      const status =
+        err && typeof err === "object" && "status" in err
+          ? (err as { status?: number }).status
+          : undefined;
+      setLocalError(
+        formatApiError(
+          err,
+          status === 429
+            ? "Too many failed attempts. Please request a new code."
+            : "Invalid or expired verification code.",
+        ),
+      );
     }
   }
 
@@ -151,11 +152,17 @@ export function useSignupForm() {
     try {
       await resendVerification({ email: trimmedEmail }).unwrap();
       setInfoMessage(`A new 6-digit verification code has been sent to ${trimmedEmail}.`);
-    } catch (err: any) {
-      if (err?.status === 429) {
+    } catch (err: unknown) {
+      const status =
+        err && typeof err === "object" && "status" in err
+          ? (err as { status?: number }).status
+          : undefined;
+      if (status === 429) {
         setLocalError("Please wait a minute before requesting another code.");
       } else {
-        setLocalError(err?.data?.message || "Failed to resend code. Please try again.");
+        setLocalError(
+          formatApiError(err, "Failed to resend code. Please try again."),
+        );
       }
     }
   }

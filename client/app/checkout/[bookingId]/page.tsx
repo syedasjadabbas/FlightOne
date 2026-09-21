@@ -1,6 +1,15 @@
-import { SiteNav } from "@/components/SiteNav";
+import dynamic from "next/dynamic";
+import { RouteChunkFallback } from "@/components/RouteChunkFallback";
 import { DeskShell } from "@/components/DeskShell";
-import { CheckoutClient } from "./CheckoutClient";
+import { SiteNav } from "@/components/SiteNav";
+
+const CheckoutClient = dynamic(
+  () =>
+    import("./CheckoutClient").then((m) => ({
+      default: m.CheckoutClient,
+    })),
+  { loading: () => <RouteChunkFallback label="Loading checkout…" /> },
+);
 
 export const metadata = {
   title: "Checkout — FlightOne",

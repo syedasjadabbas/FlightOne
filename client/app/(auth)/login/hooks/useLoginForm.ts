@@ -16,6 +16,7 @@ import {
   resolvePostLoginRedirect,
   formatTwoFactorError,
 } from "@/lib/auth/twoFactorDisplay";
+import { formatApiError } from "@/lib/api/formatApiError";
 import { useAuthStore, type AuthSession } from "@/store/auth.store";
 
 export type LoginStep =
@@ -100,12 +101,17 @@ export function useLoginForm() {
         }
       }
     } catch (err: any) {
-      const msg =
-        err?.data?.message ||
-        err?.data?.error ||
-        (err?.status === 401 ? "Incorrect email or password." : null) ||
-        (err?.status === 403 ? "Email address not verified. Please verify your email to log in." : null);
-      setCustomError(msg || "Incorrect email or password.");
+      const status = err?.status;
+      if (status === 403) {
+        setCustomError(
+          formatApiError(
+            err,
+            "Please verify your email before signing in. Check your inbox for a code.",
+          ),
+        );
+      } else {
+        setCustomError(formatApiError(err, "Incorrect email or password."));
+      }
     }
   }
 

@@ -1,6 +1,15 @@
+import dynamic from "next/dynamic";
+import { RouteChunkFallback } from "@/components/RouteChunkFallback";
 import { SiteNav } from "@/components/SiteNav";
 import { TravellerShell } from "@/app/components/traveller";
-import { EscalationDetailClient } from "./EscalationDetailClient";
+
+const EscalationDetailClient = dynamic(
+  () =>
+    import("./EscalationDetailClient").then((m) => ({
+      default: m.EscalationDetailClient,
+    })),
+  { loading: () => <RouteChunkFallback label="Loading case…" /> },
+);
 
 export const metadata = {
   title: "Support case — FlightOne",
