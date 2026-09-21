@@ -21,7 +21,7 @@ const spaceGrotesk = Space_Grotesk({
 
 const sora = Sora({
   variable: "--font-sora",
-  subsets: ["latin"],
+  subsets: ["latin"], 
   weight: "700",
   display: "swap",
 });
