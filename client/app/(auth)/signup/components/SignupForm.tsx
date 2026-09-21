@@ -67,10 +67,11 @@ export function SignupForm() {
         <AuthPanel
           className="fo-signup__panel"
           title="Verify your email"
+          eyebrow="Almost there"
           lead={
             <>
               Enter the 6-digit code sent to{" "}
-              <strong className="font-semibold text-[var(--joby-navy)]">
+              <strong className="font-semibold text-navy">
                 {email || "your email"}
               </strong>
               .
@@ -166,6 +167,7 @@ export function SignupForm() {
       <AuthPanel
         className="fo-signup__panel"
         title="Create account"
+        eyebrow="Join FlightOne"
         lead="Save trips and continue planning on any device."
         footer={
           <p>

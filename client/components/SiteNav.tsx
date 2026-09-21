@@ -12,8 +12,12 @@ import {
   Bell,
   Briefcase,
   Car,
+  Check,
   ChevronDown,
+  ChevronRight,
+  Globe,
   Hotel,
+  KeyRound,
   LayoutDashboard,
   Lock,
   LogOut,
@@ -22,6 +26,7 @@ import {
   MessageCircle,
   Mic,
   Plane,
+  ShieldCheck,
   Sparkles,
   Stamp,
   Star,
@@ -36,15 +41,15 @@ import { useAuthStore } from "@/store/auth.store";
 import { useLogoutMutation } from "@/lib/api/auth.api";
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   Types & Static Data (Harmonized with Landing Page)
+   Types & Static Data
 ───────────────────────────────────────────────────────────────────────────── */
 type DropdownId = "explore" | "services" | "account" | "notifications" | null;
 type NavIcon = LucideIcon;
 
 const EXPLORE_ITEMS: { label: string; href: string; icon: NavIcon; desc: string }[] = [
   { label: "Flights", href: "/#search", icon: Plane, desc: "Search & compare live fares" },
-  { label: "Stays",   href: "/#search", icon: Hotel, desc: "Hotels, villas & resorts" },
-  { label: "Cars",    href: "/#search", icon: Car, desc: "Hire at 1 000+ destinations" },
+  { label: "Stays",   href: "/#search", icon: Hotel, desc: "Hotels, luxury villas & resorts" },
+  { label: "Cars",    href: "/#search", icon: Car, desc: "Hire at 1,000+ destinations" },
 ];
 
 const SERVICE_ITEMS: { label: string; href: string; icon: NavIcon; desc: string }[] = [
@@ -59,14 +64,14 @@ const SERVICE_ITEMS: { label: string; href: string; icon: NavIcon; desc: string 
 ];
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   Infinity Ribbon SVG Mark (Exact Homepage Mark)
+   Infinity Ribbon SVG Mark
 ───────────────────────────────────────────────────────────────────────────── */
 function InfinityMark({ className }: { className?: string }) {
   return (
     <svg
       className={className}
-      width="34"
-      height="24"
+      width="30"
+      height="22"
       viewBox="0 0 44 32"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
@@ -75,13 +80,13 @@ function InfinityMark({ className }: { className?: string }) {
       <path
         d="M12.5 7.5C7.253 7.5 3 11.753 3 17C3 22.247 7.253 26.5 12.5 26.5C18.5 26.5 24 16.5 31.5 16.5C36.747 16.5 41 20.753 41 26"
         stroke="currentColor"
-        strokeWidth="2.4"
+        strokeWidth="2.6"
         strokeLinecap="round"
       />
       <path
         d="M31.5 26.5C36.747 26.5 41 22.247 41 17C41 11.753 36.747 7.5 31.5 7.5C25.5 7.5 20 17.5 12.5 17.5C7.253 17.5 3 13.247 3 8"
         stroke="currentColor"
-        strokeWidth="2.4"
+        strokeWidth="2.6"
         strokeLinecap="round"
       />
     </svg>
@@ -93,7 +98,7 @@ function InfinityMark({ className }: { className?: string }) {
 ───────────────────────────────────────────────────────────────────────────── */
 export function SiteNav({
   variant = "bar",
-  theme = "dark",
+  theme = "light",
 }: {
   variant?: "bar" | "compact" | "marketplace";
   theme?: "light" | "dark";
@@ -171,25 +176,6 @@ export function SiteNav({
     };
   }, [mobileOpen]);
 
-  /* ── design tokens matching homepage navbar ── */
-  const isDark = theme !== "light";
-  const textColor = isDark ? "#F5F4DF" : "#0E1620";
-  const subTextColor = isDark ? "rgba(245, 244, 223, 0.65)" : "#55606E";
-  const faintTextColor = isDark ? "rgba(245, 244, 223, 0.4)" : "#8A96A6";
-  const hoverBg = isDark ? "rgba(245, 244, 223, 0.08)" : "rgba(14, 22, 32, 0.06)";
-  const activeBg = isDark ? "rgba(245, 244, 223, 0.12)" : "rgba(14, 22, 32, 0.08)";
-  const headerBg = isDark ? "rgba(10, 18, 30, 0.92)" : "rgba(252, 251, 245, 0.88)";
-  const borderBottom = isDark ? "1px solid rgba(245, 244, 223, 0.08)" : "1px solid rgba(14, 22, 32, 0.08)";
-  const dropdownBg = isDark ? "rgba(10, 18, 30, 0.97)" : "rgba(252, 251, 245, 0.97)";
-  const dropdownBorder = isDark ? "1px solid rgba(245, 244, 223, 0.1)" : "1px solid rgba(14, 22, 32, 0.1)";
-  const dropdownShadow = isDark
-    ? "0 24px 60px rgba(0,0,0,0.35), 0 4px 12px rgba(0,0,0,0.2)"
-    : "0 24px 60px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06)";
-  const dropdownDivider = isDark ? "1px solid rgba(245, 244, 223, 0.08)" : "1px solid rgba(14, 22, 32, 0.08)";
-  const dropdownItemHover = isDark ? "rgba(245, 244, 223, 0.07)" : "rgba(14, 22, 32, 0.05)";
-  const mobileBg = isDark ? "rgba(10, 18, 30, 0.98)" : "rgba(252, 251, 245, 0.98)";
-  const unreadItemBg = isDark ? "rgba(245, 244, 223, 0.04)" : "rgba(0, 122, 229, 0.05)";
-
   const toggle = useCallback((id: DropdownId) => {
     setOpenDropdown((prev) => (prev === id ? null : id));
   }, []);
@@ -200,6 +186,14 @@ export function SiteNav({
       window.dispatchEvent(new CustomEvent("flightone:new-chat"));
     }
   };
+
+  const isDark = theme === "dark";
+  const userInitials = (userLabel || "U")
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 
   /* ── Pill button for dropdown trigger ── */
   const PillBtn = ({
@@ -212,43 +206,25 @@ export function SiteNav({
     isActive?: boolean;
   }) => (
     <button
+      type="button"
       id={`nav-btn-${id}`}
       aria-haspopup="true"
       aria-expanded={openDropdown === id}
       onClick={() => toggle(id)}
-      style={{
-        background: openDropdown === id || isActive ? hoverBg : "transparent",
-        border: "none",
-        cursor: "pointer",
-        display: "flex",
-        alignItems: "center",
-        gap: "5px",
-        padding: "6px 13px",
-        borderRadius: "20px",
-        color: textColor,
-        fontSize: "13px",
-        fontFamily: "var(--font-display), var(--font-sans), sans-serif",
-        fontWeight: isActive ? 600 : 500,
-        letterSpacing: "0.02em",
-        transition: "background 0.2s, color 0.2s",
-        whiteSpace: "nowrap",
-      }}
-      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = hoverBg)}
-      onMouseLeave={(e) =>
-        (e.currentTarget.style.backgroundColor =
-          openDropdown === id || isActive ? hoverBg : "transparent")
-      }
+      className={`inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-full px-4 text-[13px] font-semibold tracking-[0.01em] whitespace-nowrap transition-all duration-150 cursor-pointer ${
+        openDropdown === id || isActive
+          ? "border border-black/10 bg-black/6 text-navy font-bold shadow-xs"
+          : "border border-transparent text-ink-soft hover:bg-black/5 hover:text-navy"
+      }`}
     >
-      {label}
+      <span>{label}</span>
       <ChevronDown
-        size={12}
-        strokeWidth={2}
+        size={13}
+        strokeWidth={2.2}
+        className={`transition-transform duration-200 opacity-60 ${
+          openDropdown === id ? "rotate-180" : ""
+        }`}
         aria-hidden
-        style={{
-          transform: openDropdown === id ? "rotate(180deg)" : "rotate(0deg)",
-          transition: "transform 0.2s",
-          opacity: 0.7,
-        }}
       />
     </button>
   );
@@ -269,59 +245,28 @@ export function SiteNav({
     const isNested = href !== "/" && !href.startsWith("/chat") && pathname.startsWith(href);
     const active = isExact || isNested;
 
+    if (highlight) {
+      return (
+        <Link
+          href={href}
+          onClick={onClick}
+          className="group inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-white/15 bg-[#0e1620] px-4 text-[13px] font-bold text-white shadow-[0_2px_8px_rgba(14,22,32,0.18),inset_0_1px_0_rgba(255,255,255,0.2)] whitespace-nowrap transition-all duration-150 hover:bg-[#020615] hover:shadow-[0_4px_14px_rgba(14,22,32,0.28)] hover:translate-y-[-0.5px] active:translate-y-0 active:scale-98"
+        >
+          <Sparkles size={13} strokeWidth={2.5} className="text-cyan" aria-hidden />
+          <span className="tracking-wide">Ava +</span>
+        </Link>
+      );
+    }
+
     return (
       <Link
         href={href}
         onClick={onClick}
-        style={{
-          padding: "6px 14px",
-          borderRadius: "20px",
-          color: highlight ? "#007AE5" : textColor,
-          fontSize: "13px",
-          fontFamily: "var(--font-display), var(--font-sans), sans-serif",
-          fontWeight: highlight || active ? 600 : 500,
-          letterSpacing: "0.02em",
-          textDecoration: "none",
-          whiteSpace: "nowrap",
-          transition: "background 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s",
-          backgroundColor:
-            highlight && active
-              ? "rgba(0, 122, 229, 0.16)"
-              : highlight
-              ? isDark
-                ? "rgba(0, 122, 229, 0.08)"
-                : "rgba(0, 122, 229, 0.06)"
-              : active
-              ? activeBg
-              : "transparent",
-          border: highlight
-            ? active
-              ? "1px solid #007AE5"
-              : isDark
-              ? "1px solid rgba(0, 122, 229, 0.5)"
-              : "1px solid rgba(0, 122, 229, 0.3)"
-            : "1px solid transparent",
-          boxShadow: highlight && active ? (isDark ? "0 0 14px rgba(0, 122, 229, 0.28)" : "0 0 12px rgba(0, 122, 229, 0.16)") : "none",
-        }}
-        onMouseEnter={(e) => {
-          (e.currentTarget as HTMLElement).style.backgroundColor = highlight
-            ? isDark
-              ? "rgba(0, 122, 229, 0.18)"
-              : "rgba(0, 122, 229, 0.14)"
-            : hoverBg;
-        }}
-        onMouseLeave={(e) => {
-          (e.currentTarget as HTMLElement).style.backgroundColor =
-            highlight && active
-              ? "rgba(0, 122, 229, 0.16)"
-              : highlight
-              ? isDark
-                ? "rgba(0, 122, 229, 0.08)"
-                : "rgba(0, 122, 229, 0.06)"
-              : active
-              ? activeBg
-              : "transparent";
-        }}
+        className={`inline-flex h-9 shrink-0 items-center justify-center rounded-full px-4 text-[13px] font-semibold tracking-[0.01em] whitespace-nowrap transition-all duration-150 ${
+          active
+            ? "border border-black/10 bg-black/6 text-navy font-bold shadow-xs"
+            : "border border-transparent text-ink-soft hover:bg-black/5 hover:text-navy"
+        }`}
       >
         {label}
       </Link>
@@ -334,75 +279,57 @@ export function SiteNav({
     icon: Icon,
     label,
     desc,
+    badge,
+    iconColor = "text-sky bg-sky/10",
   }: {
     href: string;
     icon: NavIcon;
     label: string;
     desc?: string;
+    badge?: string;
+    iconColor?: string;
   }) => (
     <Link
       href={href}
       onClick={() => {
         setTimeout(() => setOpenDropdown(null), 50);
       }}
-      style={{
-        display: "flex",
-        alignItems: "flex-start",
-        gap: "10px",
-        padding: "10px 14px",
-        borderRadius: "10px",
-        textDecoration: "none",
-        transition: "background 0.15s",
-      }}
-      onMouseEnter={(e) =>
-        ((e.currentTarget as HTMLElement).style.backgroundColor = dropdownItemHover)
-      }
-      onMouseLeave={(e) =>
-        ((e.currentTarget as HTMLElement).style.backgroundColor = "transparent")
-      }
+      className="group flex items-start gap-3 rounded-2xl p-2.5 transition-all duration-150 hover:bg-black/4 active:scale-[0.99]"
     >
-      <span
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          marginTop: "1px",
-          flexShrink: 0,
-          color: textColor,
-          opacity: 0.85,
-        }}
+      <div
+        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-transform duration-150 group-hover:scale-105 ${iconColor}`}
       >
-        <Icon size={16} strokeWidth={1.75} aria-hidden />
-      </span>
-      <span style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-        <span style={{ color: textColor, fontSize: "13px", fontWeight: 500 }}>{label}</span>
+        <Icon size={16} strokeWidth={2.2} aria-hidden />
+      </div>
+      <div className="flex flex-1 flex-col min-w-0">
+        <div className="flex items-center justify-between gap-1.5">
+          <span className="text-[13.5px] font-bold text-navy group-hover:text-sky transition-colors">
+            {label}
+          </span>
+          {badge ? (
+            <span className="rounded-full bg-emerald/15 px-2 py-0.2 text-[10px] font-bold text-emerald uppercase tracking-wider">
+              {badge}
+            </span>
+          ) : null}
+        </div>
         {desc && (
-          <span style={{ color: subTextColor, fontSize: "11px", lineHeight: 1.3 }}>
+          <span className="text-[11.5px] text-ink-faint leading-snug line-clamp-1">
             {desc}
           </span>
         )}
-      </span>
+      </div>
     </Link>
   );
 
   /* ─────────────────────────────────────────────────────────────────────────────
-     Compact Variant (Preserved for small account strip if requested)
+     Compact Variant
   ───────────────────────────────────────────────────────────────────────────── */
   if (variant === "compact") {
     if (!hasHydrated || !isAuthenticated) return null;
     return (
       <nav
         aria-label="Account shortcuts"
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-          padding: "4px 12px",
-          background: headerBg,
-          borderRadius: "12px",
-          border: borderBottom,
-          boxShadow: "0 4px 16px rgba(0,0,0,0.06)",
-        }}
+        className="flex items-center gap-2 rounded-2xl border border-black/10 bg-white/90 px-3 py-1.5 shadow-sm backdrop-blur-xl"
       >
         <NavLink href="/" label="Home" />
         <NavLink href="/chat?new=true" label="Ava +" highlight onClick={handleAvaClick} />
@@ -413,117 +340,62 @@ export function SiteNav({
   }
 
   /* ─────────────────────────────────────────────────────────────────────────────
-     Main Navigation (Matches Homepage 100%)
+     Main Navigation Bar
   ───────────────────────────────────────────────────────────────────────────── */
   return (
     <>
       <header
         ref={navRef}
         id="site-navigation"
-        className="fo-site-nav"
-        style={{
-          position: "sticky",
-          top: 0,
-          left: 0,
-          right: 0,
-          width: "100%",
-          maxWidth: "100%",
-          boxSizing: "border-box",
-          height: "64px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          paddingLeft: "clamp(16px, 3vw, 40px)",
-          paddingRight: "clamp(16px, 3vw, 40px)",
-          backgroundColor: headerBg,
-          backdropFilter: "blur(20px) saturate(1.4)",
-          WebkitBackdropFilter: "blur(20px) saturate(1.4)",
-          borderBottom: borderBottom,
-          zIndex: 100,
-        }}
+        className="sticky top-0 right-0 left-0 z-50 flex h-16 w-full items-center justify-between border-b border-black/6 bg-white/85 px-4 sm:px-6 lg:px-8 backdrop-blur-xl saturate-150 shadow-[0_2px_16px_rgba(14,22,32,0.02)] transition-all duration-200"
       >
-        {/* ── LEFT: Logo + Home + Explore + Services ── */}
-        <div style={{ display: "flex", alignItems: "center", gap: "clamp(8px, 1.5vw, 16px)" }}>
-          {/* Infinity Mark & FlightOne Brand */}
+        {/* ── LEFT: Logo & Primary Exploration Links ── */}
+        <div className="flex items-center gap-3 sm:gap-6">
           <Link
             href="/"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "9px",
-              textDecoration: "none",
-              color: textColor,
-              opacity: 0.95,
-              transition: "opacity 0.2s, transform 0.2s",
-              marginRight: "4px",
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.opacity = "1";
-              (e.currentTarget as HTMLElement).style.transform = "scale(1.02)";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.opacity = "0.95";
-              (e.currentTarget as HTMLElement).style.transform = "scale(1)";
-            }}
+            className="flex items-center gap-2.5 text-navy transition-transform duration-150 hover:scale-[1.02] active:scale-98"
           >
-            <span style={{ color: textColor, display: "flex", alignItems: "center" }}>
+            <span className="text-navy flex items-center">
               <InfinityMark />
             </span>
-            <span
-              style={{
-                fontFamily: "var(--font-display), sans-serif",
-                fontSize: "1.125rem",
-                fontWeight: 700,
-                color: textColor,
-                letterSpacing: "-0.03em",
-                lineHeight: 1,
-              }}
-            >
-              Flight<span style={{ color: "#007AE5" }}>One</span>
+            <span className="font-hero text-[1.125rem] font-extrabold tracking-tight text-navy">
+              Flight<span className="text-sky">One</span>
             </span>
+            <span className="hidden sm:inline-block h-1.5 w-1.5 rounded-full bg-sky animate-pulse" />
           </Link>
 
           {/* Desktop Left Nav Links */}
           <nav
             aria-label="Primary navigation"
-            className="nav-desktop-left"
-            style={{ display: "flex", alignItems: "center", gap: "2px" }}
+            className="hidden md:flex items-center gap-1 pl-2 border-l border-black/6"
           >
-            {/* 1. HOME: Redirects to / (replaces Search) */}
             <NavLink href="/" label="Home" />
 
-            {/* 2. Explore dropdown */}
-            <div style={{ position: "relative" }}>
+            {/* Explore Dropdown */}
+            <div className="relative">
               <PillBtn label="Explore" id="explore" />
               {openDropdown === "explore" && (
                 <div
                   role="menu"
                   aria-label="Explore menu"
-                  style={{
-                    position: "absolute",
-                    top: "calc(100% + 12px)",
-                    left: 0,
-                    width: "260px",
-                    background: dropdownBg,
-                    border: dropdownBorder,
-                    borderRadius: "16px",
-                    boxShadow: dropdownShadow,
-                    padding: "8px",
-                    backdropFilter: "blur(20px)",
-                    WebkitBackdropFilter: "blur(20px)",
-                    animation: "navDropIn 0.18s ease",
-                    zIndex: 200,
-                  }}
+                  className="absolute top-[calc(100%+10px)] left-0 z-50 w-72 rounded-3xl border border-black/10 bg-white p-2 shadow-[0_24px_54px_-12px_rgba(14,22,32,0.22),0_4px_16px_rgba(14,22,32,0.06)] backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-150"
                 >
-                  {EXPLORE_ITEMS.map((item) => (
-                    <DropItem key={item.label} {...item} />
-                  ))}
+                  <div className="px-3 py-1.5 mb-1 border-b border-black/4">
+                    <p className="text-[10.5px] font-bold uppercase tracking-wider text-ink-faint">
+                      Autonomous Travel Search
+                    </p>
+                  </div>
+                  <div className="space-y-0.5">
+                    {EXPLORE_ITEMS.map((item) => (
+                      <DropItem key={item.label} {...item} />
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
 
-            {/* 3. Services dropdown */}
-            <div style={{ position: "relative" }}>
+            {/* Services Dropdown */}
+            <div className="relative">
               <PillBtn
                 label="Services"
                 id="services"
@@ -533,79 +405,52 @@ export function SiteNav({
                 <div
                   role="menu"
                   aria-label="Services menu"
-                  style={{
-                    position: "absolute",
-                    top: "calc(100% + 12px)",
-                    left: 0,
-                    width: "280px",
-                    background: dropdownBg,
-                    border: dropdownBorder,
-                    borderRadius: "16px",
-                    boxShadow: dropdownShadow,
-                    padding: "8px",
-                    backdropFilter: "blur(20px)",
-                    WebkitBackdropFilter: "blur(20px)",
-                    animation: "navDropIn 0.18s ease",
-                    zIndex: 200,
-                  }}
+                  className="absolute top-[calc(100%+10px)] left-0 z-50 w-84 rounded-3xl border border-black/10 bg-white p-2 shadow-[0_24px_54px_-12px_rgba(14,22,32,0.22),0_4px_16px_rgba(14,22,32,0.06)] backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-150"
                 >
-                  {SERVICE_ITEMS.map((item) => (
-                    <DropItem key={item.label} {...item} />
-                  ))}
+                  <div className="px-3 py-1.5 mb-1 border-b border-black/4">
+                    <p className="text-[10.5px] font-bold uppercase tracking-wider text-ink-faint">
+                      Specialized Travel Operations
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-1 gap-0.5 max-h-[70vh] overflow-y-auto">
+                    {SERVICE_ITEMS.map((item) => (
+                      <DropItem key={item.label} {...item} />
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
           </nav>
         </div>
 
-        {/* ── RIGHT: Ava · Journey · Vault · Notifications · Account · Mobile Toggle ── */}
-        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+        {/* ── RIGHT: Ava · Journey · Vault · Notifications · Account ── */}
+        <div className="flex items-center gap-2 sm:gap-3">
           {/* Desktop Right Links */}
-          <div
-            className="nav-desktop-right"
-            style={{ display: "flex", alignItems: "center", gap: "4px" }}
-          >
+          <div className="hidden md:flex items-center gap-1.5">
             <NavLink href="/chat?new=true" label="Ava +" highlight onClick={handleAvaClick} />
             <NavLink href="/journey" label="My Journey" />
             <NavLink href="/vault" label="Vault" />
 
             {/* Notifications Bell (Authenticated) */}
             {hasHydrated && isAuthenticated && (
-              <div style={{ position: "relative" }}>
+              <div className="relative">
                 <button
                   type="button"
                   aria-label="Notifications"
                   aria-expanded={openDropdown === "notifications"}
                   onClick={() => toggle("notifications")}
-                  style={{
-                    background: openDropdown === "notifications" ? hoverBg : "transparent",
-                    border: "none",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    width: "34px",
-                    height: "34px",
-                    borderRadius: "50%",
-                    color: textColor,
-                    transition: "background 0.2s",
-                    position: "relative",
-                  }}
+                  className={`relative flex h-9 w-9 items-center justify-center rounded-full transition-all duration-150 cursor-pointer ${
+                    openDropdown === "notifications"
+                      ? "bg-black/8 text-navy"
+                      : "text-ink-soft hover:bg-black/5 hover:text-navy"
+                  }`}
                 >
-                  <Bell size={17} strokeWidth={1.8} aria-hidden />
+                  <Bell size={17} strokeWidth={2} aria-hidden />
                   {unreadCount > 0 && (
-                    <span
-                      style={{
-                        position: "absolute",
-                        top: "4px",
-                        right: "4px",
-                        width: "8px",
-                        height: "8px",
-                        borderRadius: "50%",
-                        backgroundColor: "#007AE5",
-                        boxShadow: "0 0 6px #007AE5",
-                      }}
-                    />
+                    <span className="absolute top-1.5 right-1.5 flex h-2 w-2">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky opacity-75" />
+                      <span className="relative inline-flex h-2 w-2 rounded-full bg-sky" />
+                    </span>
                   )}
                 </button>
 
@@ -613,86 +458,43 @@ export function SiteNav({
                   <div
                     role="menu"
                     aria-label="Notifications"
-                    style={{
-                      position: "absolute",
-                      top: "calc(100% + 12px)",
-                      right: 0,
-                      width: "300px",
-                      background: dropdownBg,
-                      border: dropdownBorder,
-                      borderRadius: "16px",
-                      boxShadow: dropdownShadow,
-                      padding: "12px",
-                      backdropFilter: "blur(20px)",
-                      WebkitBackdropFilter: "blur(20px)",
-                      animation: "navDropIn 0.18s ease",
-                      zIndex: 200,
-                    }}
+                    className="absolute top-[calc(100%+10px)] right-0 z-50 w-80 rounded-3xl border border-black/10 bg-white p-3 shadow-[0_24px_54px_-12px_rgba(14,22,32,0.22),0_4px_16px_rgba(14,22,32,0.06)] backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-150"
                   >
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        paddingBottom: "8px",
-                        marginBottom: "6px",
-                        borderBottom: dropdownDivider,
-                      }}
-                    >
-                      <span style={{ fontSize: "12px", fontWeight: 600, color: textColor }}>
-                        Notifications
-                      </span>
+                    <div className="flex items-center justify-between pb-2 mb-2 border-b border-black/6">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[13px] font-bold text-navy">Notifications</span>
+                        {unreadCount > 0 && (
+                          <span className="rounded-full bg-sky/15 px-2 py-0.2 text-[10.5px] font-bold text-sky">
+                            {unreadCount} new
+                          </span>
+                        )}
+                      </div>
                       {unreadCount > 0 && (
                         <button
                           type="button"
                           onClick={markAllRead}
-                          style={{
-                            background: "none",
-                            border: "none",
-                            cursor: "pointer",
-                            fontSize: "11px",
-                            fontWeight: 500,
-                            color: "#007AE5",
-                          }}
+                          className="text-[11.5px] font-semibold text-sky hover:underline cursor-pointer"
                         >
                           Mark all read
                         </button>
                       )}
                     </div>
 
-                    <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                    <div className="space-y-1.5">
                       {notifications.map((n) => (
                         <div
                           key={n.id}
-                          style={{
-                            padding: "8px 10px",
-                            borderRadius: "10px",
-                            backgroundColor: n.read ? "transparent" : unreadItemBg,
-                          }}
+                          className={`rounded-2xl p-3 transition-colors ${
+                            n.read ? "bg-transparent hover:bg-black/3" : "bg-sky/6 hover:bg-sky/9"
+                          }`}
                         >
-                          <p style={{ fontSize: "12px", fontWeight: 600, color: textColor, margin: 0 }}>
-                            {n.title}
-                          </p>
-                          <p
-                            style={{
-                              fontSize: "11px",
-                              color: subTextColor,
-                              margin: "2px 0 0",
-                              lineHeight: 1.35,
-                            }}
-                          >
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="text-[12.5px] font-bold text-navy">{n.title}</p>
+                            <span className="text-[10.5px] text-ink-faint shrink-0">{n.time}</span>
+                          </div>
+                          <p className="mt-0.5 text-[11.5px] text-ink-soft leading-relaxed">
                             {n.message}
                           </p>
-                          <span
-                            style={{
-                              fontSize: "10px",
-                              color: faintTextColor,
-                              marginTop: "4px",
-                              display: "block",
-                            }}
-                          >
-                            {n.time}
-                          </span>
                         </div>
                       ))}
                     </div>
@@ -701,114 +503,109 @@ export function SiteNav({
               </div>
             )}
 
-            {/* Account dropdown / Profile Avatar */}
+            {/* Account dropdown / Profile Avatar Pill */}
             {hasHydrated && isAuthenticated ? (
-              <div style={{ position: "relative" }}>
+              <div className="relative">
                 <button
                   type="button"
                   aria-label="Account menu"
                   aria-expanded={openDropdown === "account"}
                   onClick={() => toggle("account")}
-                  style={{
-                    background: openDropdown === "account" ? hoverBg : "transparent",
-                    border: "none",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    padding: "4px 8px 4px 4px",
-                    borderRadius: "20px",
-                    color: textColor,
-                    transition: "background 0.2s",
-                  }}
+                  className={`inline-flex h-9 shrink-0 items-center gap-2 rounded-full p-1 pr-3.5 transition-all duration-150 cursor-pointer border whitespace-nowrap ${
+                    openDropdown === "account"
+                      ? "border-black/20 bg-black/6 shadow-xs"
+                      : "border-black/10 bg-white/80 hover:border-black/20 hover:bg-white shadow-xs"
+                  }`}
                 >
-                  <div
-                    style={{
-                      width: "28px",
-                      height: "28px",
-                      borderRadius: "50%",
-                      backgroundColor: "#007AE5",
-                      color: "#FFFFFF",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: "12px",
-                      fontWeight: 700,
-                    }}
-                  >
-                    {(userLabel || "T").charAt(0).toUpperCase()}
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-navy text-[11.5px] font-bold text-white shadow-xs">
+                    {userInitials}
                   </div>
-                  <span style={{ fontSize: "13px", fontWeight: 500 }}>
-                    {userLabel?.split("@")[0] || "Account"}
+                  <span className="text-[13px] font-bold text-navy truncate max-w-28">
+                    {user?.name || userLabel?.split("@")[0] || "Traveler"}
                   </span>
-                  <ChevronDown size={12} strokeWidth={2} aria-hidden style={{ opacity: 0.7 }} />
+                  <ChevronDown
+                    size={12}
+                    strokeWidth={2.2}
+                    className={`text-ink-soft transition-transform duration-200 ${
+                      openDropdown === "account" ? "rotate-180" : ""
+                    }`}
+                    aria-hidden
+                  />
                 </button>
 
                 {openDropdown === "account" && (
                   <div
                     role="menu"
                     aria-label="Account menu"
-                    style={{
-                      position: "absolute",
-                      top: "calc(100% + 12px)",
-                      right: 0,
-                      width: "230px",
-                      background: dropdownBg,
-                      border: dropdownBorder,
-                      borderRadius: "16px",
-                      boxShadow: dropdownShadow,
-                      padding: "8px",
-                      backdropFilter: "blur(20px)",
-                      WebkitBackdropFilter: "blur(20px)",
-                      animation: "navDropIn 0.18s ease",
-                      zIndex: 200,
-                    }}
+                    className="absolute top-[calc(100%+10px)] right-0 z-50 w-72 rounded-3xl border border-black/10 bg-white p-2.5 shadow-[0_24px_54px_-12px_rgba(14,22,32,0.22),0_4px_16px_rgba(14,22,32,0.06)] backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-150"
                   >
-                    <div style={{ padding: "8px 12px", borderBottom: dropdownDivider }}>
-                      <p style={{ fontSize: "13px", fontWeight: 600, color: textColor, margin: 0 }}>
-                        {user?.name || "Traveler"}
-                      </p>
-                      {user?.email && (
-                        <p style={{ fontSize: "11px", color: subTextColor, margin: "2px 0 0" }}>
-                          {user.email}
+                    {/* User Identity Card Header */}
+                    <div className="flex items-center gap-3 p-3 mb-2 rounded-2xl bg-[#f8fafb] border border-black/6">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#0e1620] text-[13px] font-bold text-white shadow-sm ring-2 ring-sky/30">
+                        {userInitials}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5">
+                          <p className="text-[13.5px] font-bold text-navy truncate">
+                            {user?.name || "Verified Traveler"}
+                          </p>
+                          <span className="h-2 w-2 rounded-full bg-emerald shrink-0 ring-2 ring-emerald/20" />
+                        </div>
+                        <p className="text-[11.5px] text-ink-faint truncate">
+                          {user?.email || "Account Holder"}
                         </p>
-                      )}
+                        <div className="mt-1 flex items-center gap-1.5">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-sky/10 px-2 py-0.5 text-[9.5px] font-bold text-sky uppercase tracking-wider">
+                            <ShieldCheck size={10} strokeWidth={2.5} />
+                            <span>Dossier Active</span>
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                    <div style={{ padding: "4px 0" }}>
-                      <DropItem href="/profile" icon={User} label="Profile & Preferences" />
-                      <DropItem href="/vault" icon={Lock} label="Travel Vault" />
-                      <DropItem href="/dashboard" icon={LayoutDashboard} label="Management Dashboard" />
+
+                    {/* Menu links */}
+                    <div className="space-y-0.5">
+                      <DropItem
+                        href="/profile"
+                        icon={User}
+                        label="Profile & Preferences"
+                        desc="Autonomous booking dossiers & identity"
+                        iconColor="text-sky bg-sky/10"
+                      />
+                      <DropItem
+                        href="/vault"
+                        icon={Lock}
+                        label="Travel Vault"
+                        desc="Zero-knowledge biometric documents"
+                        badge="AES-256"
+                        iconColor="text-emerald bg-emerald/10"
+                      />
+                      <DropItem
+                        href="/journey"
+                        icon={Map}
+                        label="My Journey"
+                        desc="Active flight routes & timeline watches"
+                        iconColor="text-sky bg-sky/10"
+                      />
+                      <DropItem
+                        href="/dashboard"
+                        icon={LayoutDashboard}
+                        label="Operations Console"
+                        desc="Agent controls & management overview"
+                        iconColor="text-amber-600 bg-amber-500/10"
+                      />
                     </div>
-                    <div style={{ borderTop: dropdownDivider, paddingTop: "4px" }}>
+
+                    {/* Sign Out Footer */}
+                    <div className="mt-1.5 pt-1.5 border-t border-black/6">
                       <button
                         type="button"
                         disabled={isLoggingOut}
                         onClick={onLogout}
-                        style={{
-                          width: "100%",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "10px",
-                          padding: "9px 14px",
-                          borderRadius: "10px",
-                          border: "none",
-                          background: "transparent",
-                          color: "#ef4444",
-                          fontSize: "13px",
-                          fontWeight: 500,
-                          cursor: "pointer",
-                          textAlign: "left",
-                          transition: "background 0.15s",
-                        }}
-                        onMouseEnter={(e) =>
-                          (e.currentTarget.style.backgroundColor = "rgba(239, 68, 68, 0.08)")
-                        }
-                        onMouseLeave={(e) =>
-                          (e.currentTarget.style.backgroundColor = "transparent")
-                        }
+                        className="flex w-full items-center gap-2.5 rounded-2xl p-2.5 text-[13px] font-bold text-danger transition-colors hover:bg-danger/10 cursor-pointer"
                       >
-                        <LogOut size={15} strokeWidth={1.75} aria-hidden />
-                        {isLoggingOut ? "Signing out…" : "Log Out"}
+                        <LogOut size={15} strokeWidth={2.2} aria-hidden />
+                        <span>{isLoggingOut ? "Signing out…" : "Sign Out"}</span>
                       </button>
                     </div>
                   </div>
@@ -816,38 +613,16 @@ export function SiteNav({
               </div>
             ) : (
               /* Unauthenticated Auth Buttons */
-              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <div className="flex items-center gap-2">
                 <Link
                   href="/login"
-                  style={{
-                    padding: "6px 14px",
-                    borderRadius: "20px",
-                    color: textColor,
-                    fontSize: "13px",
-                    fontWeight: 500,
-                    textDecoration: "none",
-                    transition: "background 0.2s",
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = hoverBg)}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+                  className="inline-flex h-9 shrink-0 items-center justify-center rounded-full border border-black/10 bg-white/80 px-4 text-[13px] font-bold text-navy shadow-xs whitespace-nowrap transition-all hover:border-black/20 hover:bg-white active:scale-95"
                 >
                   Log in
                 </Link>
                 <Link
                   href="/signup"
-                  style={{
-                    padding: "6px 16px",
-                    borderRadius: "20px",
-                    backgroundColor: "#007AE5",
-                    color: "#FFFFFF",
-                    fontSize: "13px",
-                    fontWeight: 600,
-                    textDecoration: "none",
-                    boxShadow: "0 2px 10px rgba(0, 122, 229, 0.25)",
-                    transition: "opacity 0.2s, transform 0.2s",
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.9")}
-                  onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+                  className="inline-flex h-9 shrink-0 items-center justify-center rounded-full border border-white/15 bg-[#0e1620] px-4.5 text-[13px] font-bold text-white shadow-[0_2px_10px_rgba(14,22,32,0.18)] whitespace-nowrap transition-all hover:bg-[#020615] active:scale-95"
                 >
                   Sign up
                 </Link>
@@ -857,28 +632,17 @@ export function SiteNav({
 
           {/* Mobile Hamburger Button */}
           <button
+            type="button"
             id="nav-mobile-toggle"
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
             aria-expanded={mobileOpen}
-            className="nav-mobile-hamburger"
             onClick={() => setMobileOpen((prev) => !prev)}
-            style={{
-              display: "none",
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              padding: "8px",
-              alignItems: "center",
-              justifyContent: "center",
-              width: "36px",
-              height: "36px",
-              color: textColor,
-            }}
+            className="flex md:hidden h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white/80 text-navy transition-all hover:bg-white active:scale-95"
           >
             {mobileOpen ? (
-              <X size={20} strokeWidth={1.75} color={textColor} aria-hidden />
+              <X size={18} strokeWidth={2.2} aria-hidden />
             ) : (
-              <Menu size={20} strokeWidth={1.75} color={textColor} aria-hidden />
+              <Menu size={18} strokeWidth={2.2} aria-hidden />
             )}
           </button>
         </div>
@@ -891,46 +655,13 @@ export function SiteNav({
           role="dialog"
           aria-modal="true"
           aria-label="Mobile navigation"
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 199,
-            backgroundColor: mobileBg,
-            backdropFilter: "blur(24px)",
-            WebkitBackdropFilter: "blur(24px)",
-            display: "flex",
-            flexDirection: "column",
-            paddingTop: "76px",
-            paddingBottom: "32px",
-            overflowY: "auto",
-            animation: "mobileMenuIn 0.25s ease",
-          }}
+          className="fixed inset-0 z-40 flex flex-col bg-white/95 pt-20 pb-8 px-6 backdrop-blur-2xl overflow-y-auto animate-in fade-in duration-200"
         >
-          <nav
-            style={{
-              flex: 1,
-              padding: "0 24px",
-              display: "flex",
-              flexDirection: "column",
-              gap: "4px",
-            }}
-          >
-            {/* Primary Direct Links */}
+          <nav className="flex-1 flex flex-col gap-2">
             <Link
               href="/"
-              onClick={() => {
-                setTimeout(() => setMobileOpen(false), 50);
-              }}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                padding: "13px 16px",
-                borderRadius: "12px",
-                color: textColor,
-                textDecoration: "none",
-                fontSize: "15px",
-                fontWeight: 500,
-              }}
+              onClick={() => setTimeout(() => setMobileOpen(false), 50)}
+              className="flex items-center px-4 py-3 rounded-2xl text-[15px] font-bold text-navy hover:bg-black/5"
             >
               Home
             </Link>
@@ -944,175 +675,112 @@ export function SiteNav({
                 }
                 setTimeout(() => setMobileOpen(false), 50);
               }}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "13px 16px",
-                borderRadius: "12px",
-                backgroundColor: "rgba(0, 122, 229, 0.08)",
-                border: "1px solid rgba(0, 122, 229, 0.3)",
-                color: "#007AE5",
-                textDecoration: "none",
-                fontSize: "15px",
-                fontWeight: 600,
-                marginBottom: "4px",
-              }}
+              className="flex items-center gap-2 px-4 py-3 rounded-2xl bg-[#0e1620] text-white font-bold text-[15px] shadow-sm"
             >
-              <Sparkles size={16} strokeWidth={1.75} aria-hidden /> Chat with Ava
+              <Sparkles size={16} strokeWidth={2.5} className="text-cyan" aria-hidden />
+              <span>Chat with Ava</span>
             </Link>
 
-            {/* Explore accordion */}
-            <MobileAccordion
-              id="explore"
-              label="Explore"
-              open={mobileAccordion === "explore"}
-              onToggle={() =>
-                setMobileAccordion((p) => (p === "explore" ? null : "explore"))
-              }
-              textColor={textColor}
-              hoverBg={hoverBg}
-            >
-              {EXPLORE_ITEMS.map((item) => (
-                <MobileLink
-                  key={item.label}
-                  href={item.href}
-                  label={item.label}
-                  icon={item.icon}
-                  textColor={textColor}
-                  hoverBg={dropdownItemHover}
-                  onClose={() => setMobileOpen(false)}
-                />
-              ))}
-            </MobileAccordion>
+            {/* Mobile Explore Section */}
+            <div className="pt-2">
+              <p className="px-4 py-1 text-[11px] font-bold uppercase tracking-wider text-ink-faint">
+                Explore
+              </p>
+              <div className="space-y-1">
+                {EXPLORE_ITEMS.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <Link
+                      key={item.label}
+                      href={item.href}
+                      onClick={() => setMobileOpen(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 rounded-2xl text-[14px] font-semibold text-navy hover:bg-black/5"
+                    >
+                      <Icon size={16} strokeWidth={2} className="text-sky" />
+                      <span>{item.label}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
 
-            {/* Services accordion */}
-            <MobileAccordion
-              id="services"
-              label="Services"
-              open={mobileAccordion === "services"}
-              onToggle={() =>
-                setMobileAccordion((p) => (p === "services" ? null : "services"))
-              }
-              textColor={textColor}
-              hoverBg={hoverBg}
-            >
-              {SERVICE_ITEMS.map((item) => (
-                <MobileLink
-                  key={item.label}
-                  href={item.href}
-                  label={item.label}
-                  icon={item.icon}
-                  textColor={textColor}
-                  hoverBg={dropdownItemHover}
-                  onClose={() => setMobileOpen(false)}
-                />
-              ))}
-            </MobileAccordion>
+            {/* Mobile Services Section */}
+            <div className="pt-2">
+              <p className="px-4 py-1 text-[11px] font-bold uppercase tracking-wider text-ink-faint">
+                Services
+              </p>
+              <div className="space-y-1">
+                {SERVICE_ITEMS.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <Link
+                      key={item.label}
+                      href={item.href}
+                      onClick={() => setMobileOpen(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 rounded-2xl text-[14px] font-semibold text-navy hover:bg-black/5"
+                    >
+                      <Icon size={16} strokeWidth={2} className="text-sky" />
+                      <span>{item.label}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
 
-            {/* Direct links */}
-            {[
-              { label: "My Journey", href: "/journey", icon: Map },
-              { label: "Travel Vault", href: "/vault", icon: Lock },
-            ].map((item) => (
-              <MobileLink
-                key={item.label}
-                href={item.href}
-                label={item.label}
-                icon={item.icon}
-                textColor={textColor}
-                hoverBg={dropdownItemHover}
-                onClose={() => setMobileOpen(false)}
-              />
-            ))}
-
-            {/* Account / Auth */}
-            <div
-              style={{
-                marginTop: "12px",
-                paddingTop: "12px",
-                borderTop: dropdownDivider,
-              }}
-            >
+            {/* Mobile Account Section */}
+            <div className="mt-4 pt-4 border-t border-black/10">
               {isAuthenticated ? (
-                <>
-                  <p style={{ padding: "4px 16px", fontSize: "12px", color: subTextColor, margin: 0 }}>
-                    Signed in as {userLabel}
-                  </p>
-                  <MobileLink
+                <div className="space-y-1">
+                  <div className="px-4 py-2 mb-2 rounded-2xl bg-black/5">
+                    <p className="text-[13px] font-bold text-navy">{user?.name || "Traveler"}</p>
+                    <p className="text-[11.5px] text-ink-faint">{user?.email}</p>
+                  </div>
+                  <Link
                     href="/profile"
-                    label="Profile & Preferences"
-                    icon={User}
-                    textColor={textColor}
-                    hoverBg={dropdownItemHover}
-                    onClose={() => setMobileOpen(false)}
-                  />
-                  <MobileLink
-                    href="/dashboard"
-                    label="Management Dashboard"
-                    icon={LayoutDashboard}
-                    textColor={textColor}
-                    hoverBg={dropdownItemHover}
-                    onClose={() => setMobileOpen(false)}
-                  />
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-3 px-4 py-2.5 rounded-2xl text-[14px] font-semibold text-navy hover:bg-black/5"
+                  >
+                    <User size={16} strokeWidth={2} className="text-sky" />
+                    <span>Profile & Preferences</span>
+                  </Link>
+                  <Link
+                    href="/vault"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-3 px-4 py-2.5 rounded-2xl text-[14px] font-semibold text-navy hover:bg-black/5"
+                  >
+                    <Lock size={16} strokeWidth={2} className="text-emerald" />
+                    <span>Travel Vault</span>
+                  </Link>
+                  <Link
+                    href="/journey"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-3 px-4 py-2.5 rounded-2xl text-[14px] font-semibold text-navy hover:bg-black/5"
+                  >
+                    <Map size={16} strokeWidth={2} className="text-sky" />
+                    <span>My Journey</span>
+                  </Link>
                   <button
                     type="button"
                     onClick={onLogout}
-                    style={{
-                      width: "100%",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px",
-                      padding: "11px 16px",
-                      background: "none",
-                      border: "none",
-                      color: "#f87171",
-                      fontSize: "14px",
-                      cursor: "pointer",
-                      textAlign: "left",
-                    }}
+                    className="flex w-full items-center gap-3 px-4 py-2.5 rounded-2xl text-[14px] font-bold text-danger hover:bg-danger/10"
                   >
-                    <span style={{ width: "20px", display: "flex", justifyContent: "center" }}>
-                      <LogOut size={15} strokeWidth={1.75} aria-hidden />
-                    </span>
-                    Log Out
+                    <LogOut size={16} strokeWidth={2} />
+                    <span>Log Out</span>
                   </button>
-                </>
+                </div>
               ) : (
-                <div style={{ display: "flex", flexDirection: "column", gap: "8px", padding: "8px 16px" }}>
+                <div className="flex flex-col gap-2 px-2">
                   <Link
                     href="/login"
-                    onClick={() => {
-                      setTimeout(() => setMobileOpen(false), 50);
-                    }}
-                    style={{
-                      textAlign: "center",
-                      padding: "10px",
-                      borderRadius: "10px",
-                      border: isDark ? "1px solid rgba(245, 244, 223, 0.2)" : "1px solid rgba(14, 22, 32, 0.15)",
-                      color: textColor,
-                      textDecoration: "none",
-                      fontSize: "14px",
-                      fontWeight: 500,
-                    }}
+                    onClick={() => setMobileOpen(false)}
+                    className="flex justify-center items-center rounded-2xl border border-black/10 py-3 text-[14px] font-bold text-navy"
                   >
                     Log in
                   </Link>
                   <Link
                     href="/signup"
-                    onClick={() => {
-                      setTimeout(() => setMobileOpen(false), 50);
-                    }}
-                    style={{
-                      textAlign: "center",
-                      padding: "10px",
-                      borderRadius: "10px",
-                      backgroundColor: "#007AE5",
-                      color: "#FFFFFF",
-                      textDecoration: "none",
-                      fontSize: "14px",
-                      fontWeight: 600,
-                    }}
+                    onClick={() => setMobileOpen(false)}
+                    className="flex justify-center items-center rounded-2xl bg-[#0e1620] py-3 text-[14px] font-bold text-white shadow-sm"
                   >
                     Sign up
                   </Link>
@@ -1122,147 +790,6 @@ export function SiteNav({
           </nav>
         </div>
       )}
-
-      {/* ── Keyframe styles ── */}
-      <style>{`
-        @keyframes navDropIn {
-          from { opacity: 0; transform: translateY(-6px) scale(0.98); }
-          to   { opacity: 1; transform: translateY(0)   scale(1); }
-        }
-        @keyframes mobileMenuIn {
-          from { opacity: 0; }
-          to   { opacity: 1; }
-        }
-        @media (max-width: 860px) {
-          .nav-desktop-left    { display: none !important; }
-          .nav-desktop-right   { display: none !important; }
-          .nav-mobile-hamburger { display: flex !important; }
-        }
-      `}</style>
     </>
-  );
-}
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   Mobile sub-components
-───────────────────────────────────────────────────────────────────────────── */
-function MobileAccordion({
-  id,
-  label,
-  open,
-  onToggle,
-  children,
-  textColor,
-  hoverBg = "rgba(14, 22, 32, 0.05)",
-}: {
-  id: string;
-  label: string;
-  open: boolean;
-  onToggle: () => void;
-  children: React.ReactNode;
-  textColor: string;
-  hoverBg?: string;
-}) {
-  return (
-    <div>
-      <button
-        id={`mobile-accordion-${id}`}
-        aria-expanded={open}
-        onClick={onToggle}
-        style={{
-          width: "100%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "13px 16px",
-          background: "none",
-          border: "none",
-          borderRadius: "12px",
-          cursor: "pointer",
-          color: textColor,
-          fontSize: "15px",
-          fontWeight: 500,
-          fontFamily: "inherit",
-          backgroundColor: open ? hoverBg : "transparent",
-        }}
-      >
-        {label}
-        <ChevronDown
-          size={14}
-          strokeWidth={2}
-          aria-hidden
-          style={{
-            transform: open ? "rotate(180deg)" : "none",
-            transition: "transform 0.2s",
-            opacity: 0.6,
-          }}
-        />
-      </button>
-      {open && (
-        <div
-          style={{
-            paddingLeft: "12px",
-            paddingBottom: "4px",
-            display: "flex",
-            flexDirection: "column",
-            gap: "2px",
-          }}
-        >
-          {children}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function MobileLink({
-  href,
-  label,
-  icon: Icon,
-  textColor,
-  hoverBg = "rgba(14, 22, 32, 0.05)",
-  onClose,
-}: {
-  href: string;
-  label: string;
-  icon: NavIcon;
-  textColor: string;
-  hoverBg?: string;
-  onClose: () => void;
-}) {
-  return (
-    <Link
-      href={href}
-      onClick={() => {
-        setTimeout(onClose, 50);
-      }}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: "10px",
-        padding: "11px 16px",
-        borderRadius: "10px",
-        color: textColor,
-        textDecoration: "none",
-        fontSize: "14px",
-        fontWeight: 400,
-        transition: "background 0.15s",
-      }}
-      onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = hoverBg)}
-      onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = "transparent")}
-    >
-      <span
-        style={{
-          width: "20px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          opacity: 0.85,
-        }}
-      >
-        <Icon size={15} strokeWidth={1.75} aria-hidden />
-      </span>
-      {label}
-    </Link>
   );
 }

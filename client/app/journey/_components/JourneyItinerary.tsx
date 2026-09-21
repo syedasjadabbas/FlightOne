@@ -11,37 +11,50 @@ function legIcon(kind: string) {
 function legLabel(item: JourneyItineraryItem) {
   if (item.kind === "FLIGHT") {
     return (
-      <>
-        Flight {item.flightNumber || "—"}
+      <span className="flex flex-wrap items-center gap-1.5 font-medium text-navy">
+        <span className="font-bold tracking-tight text-navy">
+          Flight {item.flightNumber || "—"}
+        </span>
         <span className="fo-journey__leg-sep">·</span>
-        {item.origin || "—"} → {item.destination || "—"}
-      </>
+        <span className="font-semibold text-sky">
+          {item.origin || "—"} → {item.destination || "—"}
+        </span>
+      </span>
     );
   }
   if (item.kind === "HOTEL") {
     return (
-      <>
-        Hotel check-in {formatDate(item.checkInDate)}
+      <span className="flex flex-wrap items-center gap-1.5 font-medium text-navy">
+        <span>Hotel check-in</span>
+        <span className="font-semibold text-sky">{formatDate(item.checkInDate)}</span>
         {item.confirmationRef ? (
           <>
             <span className="fo-journey__leg-sep">·</span>
-            ref {item.confirmationRef}
+            <span className="rounded bg-black/5 px-1.5 py-0.5 text-xs font-mono text-ink-soft">
+              ref: {item.confirmationRef}
+            </span>
           </>
         ) : null}
-      </>
+      </span>
     );
   }
   if (item.kind === "TRANSFER") {
     return (
-      <>
-        Transfer{item.transferRef ? ` ${item.transferRef}` : ""}
+      <span className="flex flex-wrap items-center gap-1.5 font-medium text-navy">
+        <span>Transfer</span>
+        {item.transferRef ? (
+          <span className="font-bold text-navy">{item.transferRef}</span>
+        ) : null}
         {item.pickupAt ? (
           <>
             <span className="fo-journey__leg-sep">·</span>
-            pickup {formatDate(item.pickupAt)} {formatTime(item.pickupAt)}
+            <span className="text-ink-soft">
+              pickup {formatDate(item.pickupAt)} at{" "}
+              <span className="font-semibold text-navy">{formatTime(item.pickupAt)}</span>
+            </span>
           </>
         ) : null}
-      </>
+      </span>
     );
   }
   return <>{item.kind}</>;
@@ -59,7 +72,7 @@ export function JourneyItinerary({ items }: { items: JourneyItineraryItem[] }) {
         return (
           <li key={`${item.kind}-${idx}`} className="fo-journey__leg">
             <span className="fo-journey__leg-icon" aria-hidden="true">
-              <Icon size={14} strokeWidth={1.75} />
+              <Icon size={14} strokeWidth={2} />
             </span>
             <span className="fo-journey__leg-text">{legLabel(item)}</span>
           </li>

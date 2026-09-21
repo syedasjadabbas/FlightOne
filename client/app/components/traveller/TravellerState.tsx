@@ -25,7 +25,7 @@ export function TravellerState({
     >
       <p className="fo-traveller__state-title">{title}</p>
       {children ? <div className="fo-traveller__state-body">{children}</div> : null}
-      {action}
+      {action ? <div className="fo-traveller__state-action">{action}</div> : null}
     </div>
   );
 }

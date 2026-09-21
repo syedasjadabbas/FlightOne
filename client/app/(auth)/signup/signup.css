@@ -8,23 +8,35 @@
 
 /* Quiet two-step route (account → verify) */
 .fo-signup__progress {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.55rem;
-  margin-bottom: 0.15rem;
+  gap: 0.45rem;
+  margin-bottom: 0.35rem;
+  padding: 0.3rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: inset 0 1px 0 #ffffff;
   font-size: 0.6875rem;
   font-weight: 600;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--ink-faint);
 }
 
 .fo-signup__progress-label {
   flex-shrink: 0;
+  height: 1.75rem;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 0.65rem;
+  border-radius: 9999px;
 }
 
 .fo-signup__progress-label.is-active {
-  color: var(--fo-signup-navy);
+  color: #ffffff;
+  background: #0e1620;
+  font-weight: 700;
 }
 
 .fo-signup__progress-label.is-done {
@@ -33,7 +45,7 @@
 
 .fo-signup__progress-rail {
   position: relative;
-  flex: 1 1 auto;
+  width: 2.5rem;
   height: 2px;
   border-radius: 1px;
   background: color-mix(in oklab, var(--fo-signup-navy) 10%, transparent);

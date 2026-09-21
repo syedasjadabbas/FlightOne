@@ -157,12 +157,14 @@ async function seedBootstrapAdmin() {
 /**
  * Dev/demo traveller that logs in in one step:
  * - email already verified
- * - 2FA off
- * - no staff role (staff roles force mandatory 2FA enrollment on login)
+ * - Super Admin role (full permission keys for local desk/dashboard work)
  *
  * Skipped in production. Override with DEMO_USER_EMAIL / DEMO_USER_PASSWORD / DEMO_USER_NAME.
+ *
+ * In NODE_ENV=development, Super Admin login is treated as already 2FA-verified
+ * (see auth.service.js `trustSuperAdminMfa`) so local desk work skips TOTP.
  */
-async function seedDemoVerifiedTraveller() {
+async function seedDemoVerifiedTraveller(superAdminRole) {
   if (isProductionEnv()) {
     console.log("Skipping demo verified traveller seed in production");
     return null;
@@ -214,11 +216,11 @@ async function seedDemoVerifiedTraveller() {
     update: { displayName: name },
   });
 
-  // Strip any staff roles that would force 2FA enrollment.
   await prisma.userRole.deleteMany({ where: { userId: user.id } });
+  await assignRoleToUser(user.id, superAdminRole.id);
 
   console.log(
-    `Seeded demo verified traveller: ${user.email} (email verified, 2FA off, no staff role)`,
+    `Seeded demo verified traveller: ${user.email} (email verified, "${superAdminRole.name}" role)`,
   );
   return user;
 }
@@ -283,7 +285,7 @@ async function main() {
   await assignRoleToUser(admin.id, superAdminRole.id);
   console.log(`Assigned "${superAdminRole.name}" role to ${admin.email}`);
 
-  await seedDemoVerifiedTraveller();
+  await seedDemoVerifiedTraveller(superAdminRole);
 
   await seedPricingConfig();
   await deactivateLegacySampleMarkup();

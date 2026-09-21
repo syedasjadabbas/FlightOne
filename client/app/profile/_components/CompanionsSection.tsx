@@ -1,8 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import {
+  Calendar,
+  Lock,
+  Plus,
+  Trash2,
+  User,
+  UserPlus,
+  Users,
+} from "lucide-react";
 import { Button, Input, SearchableSelect, Spinner } from "@/components/ui";
-import { TravellerSection, TravellerState } from "@/app/components/traveller";
+import { TravellerChip, TravellerSection, TravellerState } from "@/app/components/traveller";
 import {
   useApplyProfileDedupeMutation,
   useCreateCompanionMutation,
@@ -62,12 +71,21 @@ export function CompanionsSection() {
   }
 
   return (
-    <TravellerSection title="Family & companions" panel>
+    <TravellerSection
+      title="Family & Companions"
+      note="Manage companion profiles for group travel and multi-passenger bookings."
+      panel
+    >
       {dupes?.hasDuplicates ? (
-        <div className="fo-traveller__panel" style={{ padding: "0.75rem 0.85rem" }}>
-          <p className="text-[13px] text-ink-soft">
-            Possible duplicates detected on this account.
-          </p>
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-500/20 bg-amber-500/10 p-4">
+          <div>
+            <p className="text-[13px] font-semibold text-amber-900">
+              Possible duplicates detected
+            </p>
+            <p className="text-[12px] text-amber-700/90">
+              Multiple identical companion profiles can be automatically merged.
+            </p>
+          </div>
           <Button
             type="button"
             size="sm"
@@ -77,98 +95,166 @@ export function CompanionsSection() {
           >
             {deduping ? "Merging…" : "Merge safe duplicates"}
           </Button>
-          <p className="fo-traveller__field-hint">
-            Conflicting passport numbers are never deleted automatically.
-          </p>
         </div>
       ) : null}
+
       {isLoading ? (
-        <Spinner label="Loading companions" />
+        <div className="py-8 flex justify-center">
+          <Spinner label="Loading companions…" />
+        </div>
       ) : data.length === 0 ? (
-        <TravellerState title="No saved travellers">
-          Add family or companions for multi-pax bookings.
-        </TravellerState>
+        <div className="mb-6 rounded-2xl border border-dashed border-black/10 bg-white/50 p-6 text-center">
+          <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-sky/10 text-sky">
+            <Users size={18} strokeWidth={2} />
+          </div>
+          <p className="text-[14px] font-semibold text-navy">No Saved Travellers</p>
+          <p className="text-[12.5px] text-ink-soft">Add family members or companions for fast multi-pax booking.</p>
+        </div>
       ) : (
-        <ul className="fo-traveller__list">
-          {data.map((c) => (
-            <li key={c.id} className="fo-traveller__row">
-              <div className="fo-traveller__row-top">
-                <div>
-                  <p className="fo-traveller__row-title">{c.fullName}</p>
-                  <p className="fo-traveller__row-meta">
-                    {c.kind === "FAMILY" ? "Family" : "Companion"}
-                    {c.relationship ? ` · ${c.relationship}` : ""}
-                    {c.dateOfBirth
-                      ? ` · DOB ${new Date(c.dateOfBirth).toLocaleDateString()}`
-                      : ""}
-                    {c.hasPassport ? " · passport on file (encrypted)" : ""}
-                  </p>
+        <div className="mb-6 space-y-2.5">
+          {data.map((c) => {
+            const initials = c.fullName
+              .split(" ")
+              .map((n) => n[0])
+              .join("")
+              .slice(0, 2)
+              .toUpperCase();
+            return (
+              <div
+                key={c.id}
+                className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-black/8 bg-white/90 p-3.5 shadow-sm transition-all hover:border-black/15"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-navy text-xs font-bold text-white shadow-sm">
+                    {initials}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <p className="text-[14px] font-bold text-navy">{c.fullName}</p>
+                      <span className="rounded-full bg-black/6 px-2 py-0.5 text-[11px] font-semibold text-ink-soft">
+                        {c.kind === "FAMILY" ? "Family" : "Companion"}
+                      </span>
+                      {c.relationship ? (
+                        <span className="text-[12px] text-ink-faint">· {c.relationship}</span>
+                      ) : null}
+                    </div>
+                    <div className="mt-0.5 flex flex-wrap items-center gap-3 text-[11.5px] text-ink-faint">
+                      {c.dateOfBirth ? (
+                        <span className="flex items-center gap-1">
+                          <Calendar size={11} strokeWidth={2} />
+                          DOB {new Date(c.dateOfBirth).toLocaleDateString()}
+                        </span>
+                      ) : null}
+                      {c.hasPassport ? (
+                        <span className="flex items-center gap-1 text-emerald">
+                          <Lock size={11} strokeWidth={2} />
+                          Encrypted Passport on File
+                        </span>
+                      ) : null}
+                    </div>
+                  </div>
                 </div>
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
                   onClick={() => remove(c.id)}
+                  className="text-danger hover:bg-danger/10"
                 >
-                  Remove
+                  <Trash2 size={13} strokeWidth={2} />
+                  <span>Remove</span>
                 </Button>
               </div>
-            </li>
-          ))}
-        </ul>
+            );
+          })}
+        </div>
       )}
-      <form onSubmit={onAdd} className="space-y-3 border-t border-line pt-4">
-        <Input
-          label="Full name"
-          value={fullName}
-          onChange={(e) => setFullName(e.target.value)}
-          required
-        />
-        <SearchableSelect
-          id="kind"
-          label="Type"
-          options={KIND_OPTIONS}
-          value={kind}
-          onChange={(v) => setKind(v as "COMPANION" | "FAMILY")}
-          searchable={false}
-        />
-        <Input
-          label="Relationship"
-          value={relationship}
-          onChange={(e) => setRelationship(e.target.value)}
-          placeholder="spouse, child…"
-          hint="Optional"
-        />
-        <Input
-          label="Date of birth"
-          type="date"
-          value={dateOfBirth}
-          onChange={(e) => setDateOfBirth(e.target.value)}
-          hint="Optional — helps dedupe"
-        />
-        <Input
-          label="Passport number"
-          value={passportNumber}
-          onChange={(e) => setPassportNumber(e.target.value)}
-          autoComplete="off"
-          hint="Encrypted at rest — never shown in the list"
-        />
-        <Input
-          label="Passport expiry"
-          type="date"
-          value={passportExpiry}
-          onChange={(e) => setPassportExpiry(e.target.value)}
-          hint="Optional"
-        />
-        {formError ? (
-          <p className="text-[13px] text-[var(--danger)]" role="alert">
-            {formError}
+
+      {/* Add Companion Form */}
+      <div className="rounded-2xl border border-black/8 bg-white/60 p-4.5 pt-4">
+        <div className="mb-3.5 flex items-center gap-2">
+          <span className="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-sky/10 text-sky">
+            <UserPlus size={13} strokeWidth={2.2} />
+          </span>
+          <p className="text-[12px] font-bold tracking-wider text-ink-faint uppercase">
+            Add New Companion
           </p>
-        ) : null}
-        <Button type="submit" disabled={saving} size="sm">
-          Add traveller
-        </Button>
-      </form>
+        </div>
+
+        <form onSubmit={onAdd} className="space-y-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <Input
+              label="Full name"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              placeholder="e.g. Sarah Jenkins"
+              required
+            />
+            <SearchableSelect
+              id="kind"
+              label="Passenger Type"
+              options={KIND_OPTIONS}
+              value={kind}
+              onChange={(v) => setKind(v as "COMPANION" | "FAMILY")}
+              searchable={false}
+            />
+            <Input
+              label="Relationship"
+              value={relationship}
+              onChange={(e) => setRelationship(e.target.value)}
+              placeholder="spouse, child, colleague…"
+              hint="Optional"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <Input
+              label="Date of birth"
+              type="date"
+              value={dateOfBirth}
+              onChange={(e) => setDateOfBirth(e.target.value)}
+              hint="Optional — helps dedupe passenger"
+            />
+            <Input
+              label="Passport number"
+              value={passportNumber}
+              onChange={(e) => setPassportNumber(e.target.value)}
+              autoComplete="off"
+              placeholder="e.g. AB123456"
+              hint="AES-256 encrypted at rest"
+            />
+            <Input
+              label="Passport expiry"
+              type="date"
+              value={passportExpiry}
+              onChange={(e) => setPassportExpiry(e.target.value)}
+              hint="Optional"
+            />
+          </div>
+
+          {formError ? (
+            <p className="text-[13px] font-medium text-danger" role="alert">
+              {formError}
+            </p>
+          ) : null}
+
+          <div className="flex justify-end pt-2">
+            <Button type="submit" disabled={saving} size="md">
+              {saving ? (
+                <>
+                  <Spinner size="sm" className="border-white/30 border-t-white" label={null} />
+                  Saving traveller…
+                </>
+              ) : (
+                <>
+                  <Plus size={14} strokeWidth={2.5} />
+                  <span>Add Traveller</span>
+                </>
+              )}
+            </Button>
+          </div>
+        </form>
+      </div>
     </TravellerSection>
   );
 }

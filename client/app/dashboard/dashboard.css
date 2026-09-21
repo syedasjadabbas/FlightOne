@@ -1,0 +1,334 @@
+/**
+ * Management dashboard — AIVENTURE desk chrome.
+ * Navy / sky / bone. Capsule rail + frosted panels. No glow soup.
+ */
+
+.fo-dash {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.fo-dash__master-stage {
+  position: relative;
+  width: 100%;
+  padding: clamp(0.85rem, 1.8vw, 1.35rem);
+  border-radius: clamp(1.25rem, 2.4vw, 1.75rem);
+  background:
+    radial-gradient(ellipse 60% 45% at 90% 8%, rgba(8, 150, 191, 0.07) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 40% at 8% 92%, rgba(37, 211, 102, 0.04) 0%, transparent 55%),
+    linear-gradient(175deg, #e9eeeb 0%, #e4e9e6 48%, #eef2ef 100%);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  box-shadow:
+    0 20px 48px -18px rgba(14, 22, 32, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.fo-dash__nav-rail {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  margin-bottom: 0.85rem;
+}
+
+.fo-dash__brand-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  color: var(--navy);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow: 0 4px 14px -3px rgba(14, 22, 32, 0.05), inset 0 1px 0 #ffffff;
+  backdrop-filter: blur(8px);
+}
+
+.fo-dash__brand-dot {
+  display: inline-block;
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 9999px;
+  background: var(--sky);
+  box-shadow: 0 0 0 3px rgba(8, 150, 191, 0.18);
+}
+
+.fo-dash__rail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+/* Capsule range — match Ava / profile tab height (h-9) */
+.fo-dash__master-stage .fo-dash__range {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 8px 20px -6px rgba(14, 22, 32, 0.05), inset 0 1px 0 #ffffff;
+  backdrop-filter: blur(12px);
+}
+
+.fo-dash__master-stage .fo-dash__pill-btn {
+  height: 2.25rem;
+  padding: 0 0.85rem;
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+  border: 1px solid transparent;
+  background: transparent;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fo-dash__master-stage .fo-dash__pill-btn:hover {
+  color: var(--navy);
+  background: rgba(255, 255, 255, 0.9);
+  transform: translateY(-0.5px);
+}
+
+.fo-dash__master-stage .fo-dash__pill-btn--active {
+  background: #0e1620 !important;
+  color: #ffffff !important;
+  font-weight: 600;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 4px 14px rgba(14, 22, 32, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
+}
+
+.fo-dash__hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem 1.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.fo-dash__hero-copy {
+  min-width: 0;
+  max-width: 40rem;
+}
+
+.fo-dash__eyebrow {
+  margin: 0 0 0.35rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.fo-dash__title {
+  margin: 0;
+  font-family: var(--font-hero);
+  font-size: clamp(1.55rem, 3vw, 1.95rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  color: var(--navy);
+}
+
+.fo-dash__lede {
+  margin: 0.45rem 0 0;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+.fo-dash__lede a {
+  color: var(--sky);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.fo-dash__lede a:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.12em;
+}
+
+.fo-dash__live-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  font-size: 0.6875rem;
+  color: var(--ink-faint);
+  box-shadow: inset 0 1px 0 #ffffff;
+}
+
+.fo-dash__live-meta strong {
+  color: var(--navy);
+  font-weight: 600;
+}
+
+.fo-dash__custom-range {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0 0;
+  margin-top: 0.5rem;
+  border-top: 1px solid color-mix(in oklab, var(--cyan) 12%, var(--line));
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+}
+
+.fo-dash__custom-range input[type="date"] {
+  border-radius: 0.5rem;
+  border: 1px solid var(--line);
+  background: white;
+  padding: 0.4rem 0.65rem;
+  font-size: 0.75rem;
+  color: var(--navy);
+}
+
+.fo-dash__custom-range input[type="date"]:focus {
+  outline: none;
+  border-color: var(--sky);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--sky) 18%, transparent);
+}
+
+.fo-dash__body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-top: 0.85rem;
+}
+
+/* Gates */
+.fo-dash__gate {
+  display: flex;
+  min-height: 52vh;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.fo-dash__gate-box {
+  max-width: 28rem;
+  width: 100%;
+  padding: 2rem 1.75rem;
+  border-radius: 1.5rem;
+  background: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 0 20px 50px -15px rgba(14, 22, 32, 0.1);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.fo-dash__gate-icon {
+  display: inline-flex;
+  height: 3.25rem;
+  width: 3.25rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: rgba(8, 150, 191, 0.1);
+  color: var(--sky);
+}
+
+.fo-dash__gate-icon--warn {
+  background: color-mix(in oklab, var(--danger) 10%, white);
+  color: var(--danger);
+}
+
+.fo-dash__gate-title {
+  margin: 0;
+  font-family: var(--font-hero);
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #0e1620;
+}
+
+.fo-dash__gate-desc {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+.fo-dash__gate-desc code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.75rem;
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.25rem;
+  background: color-mix(in oklab, var(--navy) 4%, white);
+  color: var(--navy);
+}
+
+.fo-dash__gate-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+}
+
+.fo-dash__error-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  padding: 0.9rem 1rem;
+  border-radius: 1rem;
+  border: 1px solid color-mix(in oklab, var(--danger) 28%, var(--line));
+  background: color-mix(in oklab, var(--danger) 6%, white);
+}
+
+.fo-dash__error-banner p {
+  margin: 0;
+}
+
+.fo-dash__boot {
+  display: flex;
+  min-height: 52vh;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 2rem;
+}
+
+.fo-dash__boot-label {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fo-dash__master-stage .fo-dash__pill-btn,
+  .fo-dash__brand-dot {
+    transition: none;
+  }
+
+  .fo-dash__master-stage .fo-dash__pill-btn:hover {
+    transform: none;
+  }
+
+  .fo-dash__pulse-dot {
+    animation: none;
+  }
+}

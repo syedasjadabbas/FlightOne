@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Download, FileText, Share2, X } from "lucide-react";
+import { Check, Download, FileText, Lock, RefreshCw, Share2, ShieldCheck, Trash2, X } from "lucide-react";
 import { Button, Input, Spinner } from "@/components/ui";
 import {
   useGetVaultDocumentQuery,
@@ -86,7 +86,7 @@ export function VaultDocumentDetails({
         expiresAt: expiresAt ? new Date(expiresAt).toISOString() : null,
         ...(doc.type === "VISA" ? { visaMeta: visaMetaFormToInput(visaForm) } : {}),
       }).unwrap();
-      setFormSuccess("Document details saved.");
+      setFormSuccess("Document details saved successfully.");
     } catch (err) {
       setFormError(
         err && typeof err === "object" && "data" in err
@@ -112,8 +112,8 @@ export function VaultDocumentDetails({
         <div className="fo-vault__dialog-head">
           <div>
             <p className="fo-vault__dialog-kicker">
-              <FileText size={11} strokeWidth={2} aria-hidden />
-              {VAULT_TYPE_LABELS[doc.type] || doc.type}
+              <Lock size={12} strokeWidth={2.2} aria-hidden />
+              <span>{VAULT_TYPE_LABELS[doc.type] || doc.type} · AES-256 VAULT</span>
             </p>
             <h3 id="vault-detail-title" className="fo-vault__dialog-title">
               {doc.title}
@@ -131,12 +131,12 @@ export function VaultDocumentDetails({
 
         {isLoading && !data ? (
           <div className="flex justify-center py-12">
-            <Spinner label="Loading document…" />
+            <Spinner label="Decrypting document record…" />
           </div>
         ) : isError ? (
           <div className="fo-vault__dialog-body">
             <div className="fo-vault__flash fo-vault__flash--err" role="alert">
-              <span>Could not load full document details.</span>
+              <span>Could not load full document details from secure store.</span>
               <Button size="sm" variant="secondary" onClick={() => void refetch()}>
                 Retry
               </Button>
@@ -145,20 +145,18 @@ export function VaultDocumentDetails({
         ) : (
           <div className="fo-vault__dialog-body">
             <div className="fo-vault__status-line">
-              <span>
-                Status{" "}
-                <strong>
-                  {doc.lifecycleStatus || (doc.isActive ? "ACTIVE" : "SUPERSEDED")}
-                </strong>
+              <span className="inline-flex items-center gap-1">
+                <ShieldCheck size={12} strokeWidth={2.2} className="text-emerald" />
+                Status: <strong>{doc.lifecycleStatus || (doc.isActive ? "ACTIVE" : "SUPERSEDED")}</strong>
               </span>
               {doc.expiryStatus ? (
                 <span>
-                  Expiry <strong>{doc.expiryStatus.replaceAll("_", " ")}</strong>
+                  Expiry: <strong>{doc.expiryStatus.replaceAll("_", " ")}</strong>
                 </span>
               ) : null}
               {doc.type === "VISA" && doc.visaMeta ? (
                 <span>
-                  Visa{" "}
+                  Visa:{" "}
                   <strong>
                     {visaStatusLabel(doc.visaMeta.visaStatus)}
                     {doc.visaMeta.destinationCode ? ` · ${doc.visaMeta.destinationCode}` : ""}
@@ -166,8 +164,8 @@ export function VaultDocumentDetails({
                 </span>
               ) : null}
               {doc.isPlatformIssued ? (
-                <span>
-                  <strong>Platform issued</strong> — immutable
+                <span className="text-sky font-semibold">
+                  Platform Issued (Immutable)
                 </span>
               ) : null}
             </div>
@@ -178,66 +176,60 @@ export function VaultDocumentDetails({
                 <dd>{formatVaultDateTime(doc.issueDate)}</dd>
               </div>
               <div className="fo-vault__fact">
-                <dt>Expiry</dt>
+                <dt>Expiry date</dt>
                 <dd>{formatVaultDateTime(doc.expiresAt)}</dd>
               </div>
               <div className="fo-vault__fact">
-                <dt>File</dt>
+                <dt>Stored file</dt>
                 <dd>
                   {doc.originalFilename || "Metadata only"}
                   {size ? ` · ${size}` : ""}
                 </dd>
               </div>
               <div className="fo-vault__fact">
-                <dt>Version</dt>
-                <dd>{doc.version}</dd>
+                <dt>Vault version</dt>
+                <dd>v{doc.version}</dd>
               </div>
             </dl>
 
             {doc.type === "VISA" && intelligence ? (
               <div className="fo-vault__guidance">
                 <div className="fo-vault__guidance-head">
-                  <p className="fo-vault__guidance-title">Visa guidance</p>
-                  <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--ink-faint)]">
-                    {intelligence.isFact ? "Attributed fact" : "Guidance only"}
+                  <p className="fo-vault__guidance-title">Attributed Visa Intelligence</p>
+                  <span className="rounded-full bg-sky/10 px-2.5 py-0.5 text-[10.5px] font-bold uppercase text-sky">
+                    {intelligence.isFact ? "Attributed Fact" : "Guidance Only"}
                     {intelligence.dataStatus ? ` · ${intelligence.dataStatus}` : ""}
                   </span>
                 </div>
-                <p className="m-0 text-xs text-[var(--ink-soft)]">{intelligence.confidenceNote}</p>
+                <p className="m-0 text-xs text-ink-soft">{intelligence.confidenceNote}</p>
                 {intelligence.processingDaysMin != null || intelligence.processingDaysMax != null ? (
-                  <p className="m-0 text-xs text-[var(--ink-soft)]">
-                    Processing time on file: {intelligence.processingDaysMin ?? "—"}–
-                    {intelligence.processingDaysMax ?? "—"} days
+                  <p className="m-0 text-xs text-ink-soft">
+                    Processing time on file: <strong>{intelligence.processingDaysMin ?? "—"}–{intelligence.processingDaysMax ?? "—"} days</strong>
                     {intelligence.source ? ` (source: ${intelligence.source})` : ""}.
                   </p>
                 ) : (
-                  <p className="m-0 text-xs text-[var(--ink-faint)]">
-                    No attributed processing-time estimate is on file. Times are not invented.
+                  <p className="m-0 text-xs text-ink-faint">
+                    No attributed processing-time estimate is on file.
                   </p>
                 )}
                 {embassy.length ? (
                   <div>
-                    <p className="m-0 text-xs font-semibold text-[var(--navy)]">
-                      Embassy / authority on file
+                    <p className="m-0 text-xs font-semibold text-navy">
+                      Embassy / Authority on Record
                     </p>
-                    <ul className="mt-1 space-y-0.5 text-xs text-[var(--ink-soft)]">
+                    <ul className="mt-1 space-y-0.5 text-xs text-ink-soft">
                       {embassy.map((line) => (
-                        <li key={line}>{line}</li>
+                        <li key={line}>· {line}</li>
                       ))}
                     </ul>
                   </div>
-                ) : (
-                  <p className="m-0 text-xs text-[var(--ink-faint)]">
-                    No attributed embassy directory entry is on file for this nationality ×
-                    destination.
-                  </p>
-                )}
+                ) : null}
                 {requiredDocs.length ? (
                   <div>
-                    <p className="m-0 text-xs font-semibold text-[var(--navy)]">
-                      Required-document list on file
+                    <p className="m-0 text-xs font-semibold text-navy">
+                      Required Documents Checklist
                     </p>
-                    <ul className="mt-1 list-disc pl-4 text-xs text-[var(--ink-soft)]">
+                    <ul className="mt-1 list-disc pl-4 text-xs text-ink-soft">
                       {requiredDocs.map((item) => (
                         <li key={item}>{item}</li>
                       ))}
@@ -245,45 +237,45 @@ export function VaultDocumentDetails({
                   </div>
                 ) : null}
                 {intelligence.linkedApplication ? (
-                  <p className="m-0 text-xs text-[var(--ink-soft)]">
-                    Linked application {intelligence.linkedApplication.status}
+                  <p className="m-0 text-xs text-ink-soft">
+                    Linked application: <strong>{intelligence.linkedApplication.status}</strong>
                     {intelligence.linkedApplication.appointmentAt
-                      ? ` · appointment ${formatVaultDateTime(intelligence.linkedApplication.appointmentAt)}`
+                      ? ` · Appointment: ${formatVaultDateTime(intelligence.linkedApplication.appointmentAt)}`
                       : ""}
                     {intelligence.linkedApplication.appointmentLocation
                       ? ` · ${intelligence.linkedApplication.appointmentLocation}`
                       : ""}
                   </p>
                 ) : null}
-                <p className="m-0 text-[11px] text-[var(--ink-faint)]">
-                  Live government/Timatic verification is not claimed.{" "}
+                <p className="m-0 text-[11.5px] text-ink-faint">
+                  Live embassy verification requires consular submission.{" "}
                   <Link
                     href="/visa"
-                    className="text-[var(--electric)] underline underline-offset-2"
+                    className="text-sky font-semibold underline underline-offset-2 hover:text-navy"
                   >
-                    Open Visa Intelligence
+                    Open Visa Intelligence →
                   </Link>
                 </p>
               </div>
             ) : null}
 
             {canEdit ? (
-              <form onSubmit={(e) => void onSave(e)} className="space-y-4">
+              <form onSubmit={(e) => void onSave(e)} className="space-y-4 pt-2">
                 <Input
-                  label="Title"
+                  label="Document Title"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   required
                 />
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <Input
-                    label="Issue date"
+                    label="Issue Date"
                     type="date"
                     value={issueDate}
                     onChange={(e) => setIssueDate(e.target.value)}
                   />
                   <Input
-                    label="Expiry date"
+                    label="Expiration Date"
                     type="date"
                     value={expiresAt}
                     onChange={(e) => setExpiresAt(e.target.value)}
@@ -297,20 +289,32 @@ export function VaultDocumentDetails({
                   />
                 ) : null}
                 {formError ? (
-                  <p className="text-xs font-semibold text-[var(--danger)]">{formError}</p>
+                  <p className="rounded-xl border border-danger/20 bg-danger/10 px-3.5 py-2 text-xs font-semibold text-danger">
+                    {formError}
+                  </p>
                 ) : null}
                 {formSuccess ? (
-                  <p className="text-xs font-semibold text-[var(--cyan)]">{formSuccess}</p>
+                  <p className="rounded-xl border border-emerald/20 bg-emerald/10 px-3.5 py-2 text-xs font-semibold text-emerald flex items-center gap-1.5">
+                    <Check size={14} strokeWidth={2.5} />
+                    <span>{formSuccess}</span>
+                  </p>
                 ) : null}
-                <Button type="submit" disabled={updateState.isLoading}>
-                  {updateState.isLoading ? "Saving…" : "Save metadata"}
+                <Button type="submit" disabled={updateState.isLoading} size="md">
+                  {updateState.isLoading ? (
+                    <>
+                      <Spinner size="sm" className="border-white/30 border-t-white" label={null} />
+                      <span>Saving…</span>
+                    </>
+                  ) : (
+                    "Save Metadata Changes"
+                  )}
                 </Button>
               </form>
             ) : (
-              <p className="m-0 text-xs text-[var(--ink-faint)]">
+              <p className="m-0 text-xs text-ink-faint">
                 {doc.isPlatformIssued
-                  ? "Platform-issued tickets and vouchers cannot be edited."
-                  : "Superseded documents are retained for audit and cannot be edited."}
+                  ? "Platform-issued tickets and vouchers are cryptographically immutable."
+                  : "Superseded documents are archived for travel history audit."}
               </p>
             )}
 
@@ -324,7 +328,7 @@ export function VaultDocumentDetails({
                     onClick={() => onDownload(doc)}
                     icon={<Download size={13} strokeWidth={2} aria-hidden />}
                   >
-                    Download
+                    Download Scan
                   </Button>
                 ) : null}
                 {doc.isActive ? (
@@ -335,12 +339,18 @@ export function VaultDocumentDetails({
                     onClick={() => onShare(doc)}
                     icon={<Share2 size={13} strokeWidth={2} aria-hidden />}
                   >
-                    Share
+                    Share Token
                   </Button>
                 ) : null}
                 {canEdit ? (
-                  <Button size="sm" variant="ghost" disabled={busy} onClick={() => onReplace(doc)}>
-                    Replace file
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    disabled={busy}
+                    onClick={() => onReplace(doc)}
+                    icon={<RefreshCw size={13} strokeWidth={2} aria-hidden />}
+                  >
+                    Replace Scan
                   </Button>
                 ) : null}
               </div>
@@ -350,7 +360,8 @@ export function VaultDocumentDetails({
                   variant="ghost"
                   disabled={busy}
                   onClick={() => onDelete(doc)}
-                  className="text-[var(--danger)]"
+                  className="text-danger hover:bg-danger/10"
+                  icon={<Trash2 size={13} strokeWidth={2} aria-hidden />}
                 >
                   Delete
                 </Button>

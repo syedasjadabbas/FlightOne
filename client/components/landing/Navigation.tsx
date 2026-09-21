@@ -528,25 +528,47 @@ export default function Navigation() {
                     <>
                       <div
                         style={{
-                          padding: '8px 12px',
-                          borderBottom: isLightSection
-                            ? '1px solid rgba(14,22,32,0.08)'
-                            : '1px solid rgba(245,244,223,0.08)',
+                          padding: '10px 12px',
+                          borderRadius: '12px',
+                          backgroundColor: isLightSection
+                            ? 'rgba(14,22,32,0.03)'
+                            : 'rgba(245,244,223,0.04)',
+                          marginBottom: '6px',
                         }}
                       >
-                        <p style={{ fontSize: '13px', fontWeight: 600, color: textColor, margin: 0 }}>
-                          {user?.name || 'Traveler'}
-                        </p>
-                        {user?.email && (
-                          <p style={{ fontSize: '11px', color: subTextColor, margin: '2px 0 0' }}>
-                            {user.email}
-                          </p>
-                        )}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <div
+                            style={{
+                              width: '28px',
+                              height: '28px',
+                              borderRadius: '50%',
+                              backgroundColor: '#0e1620',
+                              color: '#ffffff',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: '11px',
+                              fontWeight: 700,
+                            }}
+                          >
+                            {(userLabel || 'T').charAt(0).toUpperCase()}
+                          </div>
+                          <div style={{ minWidth: 0, flex: 1 }}>
+                            <p style={{ fontSize: '13px', fontWeight: 600, color: textColor, margin: 0 }}>
+                              {user?.name || 'Verified Traveler'}
+                            </p>
+                            {user?.email && (
+                              <p style={{ fontSize: '11px', color: subTextColor, margin: '1px 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                {user.email}
+                              </p>
+                            )}
+                          </div>
+                        </div>
                       </div>
-                      <DropItem href="/profile" icon={User} label="Profile" desc="Personal details & 2FA" />
-                      <DropItem href="/journey" icon={Map} label="My Journey" desc="Active bookings & routes" />
-                      <DropItem href="/vault"   icon={Lock} label="Travel Vault" desc="Passports & secure docs" />
-                      <DropItem href="/dashboard" icon={LayoutDashboard} label="Dashboard" desc="Operations & overview" />
+                      <DropItem href="/profile" icon={User} label="Profile & Preferences" desc="Autonomous dossiers & identity" />
+                      <DropItem href="/vault"   icon={Lock} label="Travel Vault" desc="AES-256 encrypted documents" />
+                      <DropItem href="/journey" icon={Map} label="My Journey" desc="Active flight routes & timeline" />
+                      <DropItem href="/dashboard" icon={LayoutDashboard} label="Operations Console" desc="Agent controls & overview" />
                       <div
                         style={{
                           margin: '6px 8px',
@@ -584,7 +606,7 @@ export default function Navigation() {
                         }
                       >
                         <LogOut size={15} strokeWidth={1.75} aria-hidden />
-                        {isLoggingOut ? 'Signing out…' : 'Log Out'}
+                        {isLoggingOut ? 'Signing out…' : 'Sign Out'}
                       </button>
                     </>
                   ) : (

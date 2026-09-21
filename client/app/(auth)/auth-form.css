@@ -48,14 +48,15 @@
 }
 
 .fo-auth-form .fo-auth__submit {
-  background: var(--fo-auth-blue) !important;
+  background: #0e1620 !important;
   gap: 0.45rem;
   margin-top: 0.35rem;
-  height: 2.65rem;
+  height: 2.5rem;
+  border-radius: 9999px !important;
 }
 
 .fo-auth-form .fo-auth__submit:hover:not(:disabled) {
-  background: color-mix(in oklab, var(--fo-auth-blue) 86%, var(--fo-auth-navy)) !important;
+  background: #020615 !important;
 }
 
 .fo-auth-form .fo-auth__submit:focus-visible {

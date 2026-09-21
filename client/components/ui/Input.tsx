@@ -26,7 +26,10 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   return (
     <div className="flex flex-col gap-1.5">
       {label && (
-        <label htmlFor={fieldId} className="cursor-pointer text-[13px] font-medium text-ink-soft">
+        <label
+          htmlFor={fieldId}
+          className="cursor-pointer text-[12px] font-semibold tracking-wide text-ink-soft uppercase"
+        >
           {label}
         </label>
       )}
@@ -38,13 +41,13 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           aria-invalid={Boolean(error) || undefined}
           aria-describedby={error ? `${fieldId}-error` : hint ? `${fieldId}-hint` : undefined}
           className={cn(
-            "w-full rounded-xl border bg-white px-3.5 py-2.5 text-[14px] leading-relaxed text-ink outline-none transition-colors duration-200",
-            "placeholder:text-ink-faint",
-            "focus-visible:ring-2 focus-visible:ring-[var(--sky)]/35",
+            "w-full rounded-2xl border bg-white/95 px-4 py-2.5 text-[14px] leading-relaxed text-ink shadow-[0_1px_3px_rgba(14,22,32,0.03),inset_0_1px_0_#ffffff] outline-none transition-all duration-150",
+            "placeholder:text-ink-faint/75",
+            "focus-visible:ring-4 focus-visible:ring-sky/15 focus-visible:border-sky focus-visible:bg-white focus-visible:shadow-[0_4px_14px_-2px_rgba(8,150,191,0.12)]",
             error
-              ? "border-[var(--danger)] focus-visible:border-[var(--danger)]"
-              : "border-line focus-visible:border-[var(--sky)]",
-            "disabled:cursor-not-allowed disabled:opacity-50",
+              ? "border-danger/60 focus-visible:border-danger focus-visible:ring-danger/15"
+              : "border-black/10 hover:border-black/20",
+            "disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-black/10",
             isPassword && allowTogglePassword ? "pr-10" : "",
             className,
           )}
@@ -97,11 +100,11 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
         )}
       </div>
       {error ? (
-        <p id={`${fieldId}-error`} className="text-[12px] font-medium text-[var(--danger)]">
+        <p id={`${fieldId}-error`} className="text-[12px] font-medium text-danger">
           {error}
         </p>
       ) : hint ? (
-        <p id={`${fieldId}-hint`} className="text-[12px] text-ink-faint">
+        <p id={`${fieldId}-hint`} className="text-[11.5px] text-ink-faint">
           {hint}
         </p>
       ) : null}

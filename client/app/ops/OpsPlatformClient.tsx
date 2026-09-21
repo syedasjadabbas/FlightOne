@@ -10,7 +10,6 @@ import {
 import {
   Button,
   Pagination,
-  Spinner,
   pageCountFor,
   paginateItems,
 } from "@/components/ui";
@@ -32,10 +31,14 @@ import { usePermissions } from "@/lib/permissions/usePermissions";
 import { useAuthStore } from "@/store/auth.store";
 import {
   OpsField,
+  OpsHubBoot,
   OpsHubHeader,
+  OpsPanelEmpty,
+  OpsPanelError,
   OpsPermissionGate,
   OpsSignInGate,
   OpsStatusPill,
+  OpsTabLoading,
 } from "./_components";
 
 type Tab =
@@ -108,33 +111,64 @@ export function OpsPlatformClient() {
   const [invoicedMinor, setInvoicedMinor] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(TABLE_PAGE_SIZE);
+  const [busyAction, setBusyAction] = useState<"drain" | "retry" | "recon" | null>(null);
 
   useEffect(() => {
     setPage(1);
   }, [tab]);
 
-  const { data: overview, isLoading: overviewLoading, refetch: refetchOverview } =
-    useGetOpsOverviewQuery(undefined, { skip: skip || !canRead });
-  const { data: outbox, isLoading: outboxLoading, refetch: refetchOutbox } = useListOpsOutboxQuery(
-    undefined,
-    { skip: skip || !canEvents },
-  );
-  const { data: accounting, isLoading: accountingLoading } = useListOpsAccountingQuery(undefined, {
+  const {
+    data: overview,
+    isLoading: overviewLoading,
+    isError: overviewError,
+    refetch: refetchOverview,
+  } = useGetOpsOverviewQuery(undefined, { skip: skip || !canRead });
+  const {
+    data: outbox,
+    isLoading: outboxLoading,
+    isError: outboxError,
+    refetch: refetchOutbox,
+  } = useListOpsOutboxQuery(undefined, {
+    skip: skip || !canEvents,
+  });
+  const {
+    data: accounting,
+    isLoading: accountingLoading,
+    isError: accountingError,
+    refetch: refetchAccounting,
+  } = useListOpsAccountingQuery(undefined, {
     skip: skip || !canRead || tab !== "accounting",
   });
-  const { data: finance, isLoading: financeLoading } = useGetOpsFinanceQuery(
-    bookingId ? { bookingId } : undefined,
-    { skip: skip || !canRead || tab !== "finance" },
-  );
-  const { data: commissions, isLoading: commissionsLoading } = useListOpsCommissionsQuery(
-    undefined,
-    { skip: skip || !canRead || tab !== "commissions" },
-  );
-  const { data: recon, isLoading: reconLoading, refetch: refetchRecon } =
-    useListOpsReconciliationQuery(undefined, {
-      skip: skip || !canRead || tab !== "reconcile",
-    });
-  const { data: audit, isLoading: auditLoading } = useListOpsAuditQuery(undefined, {
+  const {
+    data: finance,
+    isLoading: financeLoading,
+    isError: financeError,
+    refetch: refetchFinance,
+  } = useGetOpsFinanceQuery(bookingId ? { bookingId } : undefined, {
+    skip: skip || !canRead || tab !== "finance",
+  });
+  const {
+    data: commissions,
+    isLoading: commissionsLoading,
+    isError: commissionsError,
+    refetch: refetchCommissions,
+  } = useListOpsCommissionsQuery(undefined, {
+    skip: skip || !canRead || tab !== "commissions",
+  });
+  const {
+    data: recon,
+    isLoading: reconLoading,
+    isError: reconError,
+    refetch: refetchRecon,
+  } = useListOpsReconciliationQuery(undefined, {
+    skip: skip || !canRead || tab !== "reconcile",
+  });
+  const {
+    data: audit,
+    isLoading: auditLoading,
+    isError: auditError,
+    refetch: refetchAudit,
+  } = useListOpsAuditQuery(undefined, {
     skip: skip || !canRead || tab !== "audit",
   });
 
@@ -163,26 +197,22 @@ export function OpsPlatformClient() {
   }
 
   if (!hasHydrated || permsLoading) {
-    return (
-      <div className="flex justify-center py-16" role="status" aria-live="polite">
-        <Spinner />
-      </div>
-    );
+    return <OpsHubBoot />;
   }
   if (!accessToken) return <OpsSignInGate />;
   if (!canRead) return <OpsPermissionGate />;
 
   return (
-    <div className="fo-ops">
+    <div className="fo-ops fo-ops__master-stage">
       <OpsHubHeader />
 
-      <nav className="fo-desk__tabs" aria-label="Operations sections">
+      <nav className="fo-ops__tabs" aria-label="Operations sections">
         {tabs.map((t) => (
           <button
             key={t.id}
             type="button"
             onClick={() => setTab(t.id)}
-            className={`fo-desk__tab${tab === t.id ? " fo-desk__tab--active" : ""}`}
+            className={`fo-ops__tab${tab === t.id ? " fo-ops__tab--active" : ""}`}
           >
             {t.label}
           </button>
@@ -195,9 +225,16 @@ export function OpsPlatformClient() {
         </p>
       ) : null}
 
+      <div className="fo-ops__body">
       {tab === "overview" ? (
         overviewLoading ? (
-          <Spinner />
+          <OpsTabLoading label="Loading overview…" />
+        ) : overviewError ? (
+          <OpsPanelError
+            title="Overview unavailable"
+            body="Could not load ops KPIs from the server."
+            onRetry={() => void refetchOverview()}
+          />
         ) : overview ? (
           <div className="fo-desk__kpi-strip" aria-label="Ops overview">
             <div className="fo-desk__kpi">
@@ -242,15 +279,23 @@ export function OpsPlatformClient() {
             </div>
           </div>
         ) : (
-          <div className="fo-desk__panel">
-            <p className="fo-desk__empty">No overview data.</p>
-          </div>
+          <OpsPanelEmpty title="No overview data" body="Overview returned empty. Try another account or refresh later." />
         )
       ) : null}
 
       {tab === "integrations" ? (
         overviewLoading ? (
-          <Spinner />
+          <OpsTabLoading label="Loading integrations…" />
+        ) : overviewError ? (
+          <OpsPanelError
+            title="Integrations unavailable"
+            onRetry={() => void refetchOverview()}
+          />
+        ) : !Object.keys(overview?.integrations || {}).length ? (
+          <OpsPanelEmpty
+            title="No integrations listed"
+            body="Capability rows appear when the overview payload includes integration states."
+          />
         ) : (
           <section className="fo-desk__panel fo-desk__panel--flush">
             <div className="fo-desk__table-wrap">
@@ -278,8 +323,9 @@ export function OpsPlatformClient() {
           <div className="fo-desk__toolbar">
             <Button
               size="sm"
-              disabled={!canReconcile}
+              disabled={!canReconcile || busyAction !== null}
               onClick={async () => {
+                setBusyAction("drain");
                 try {
                   const r = await drain({ limit: 50 }).unwrap();
                   flash(
@@ -289,16 +335,20 @@ export function OpsPlatformClient() {
                   refetchOverview();
                 } catch {
                   flash("Drain failed (needs ops:reconcile:write).", true);
+                } finally {
+                  setBusyAction(null);
                 }
               }}
             >
-              Drain pending
+              {busyAction === "drain" ? "Draining…" : "Drain pending"}
             </Button>
             {canReconcile ? (
               <Button
                 size="sm"
                 variant="secondary"
+                disabled={busyAction !== null}
                 onClick={async () => {
+                  setBusyAction("retry");
                   try {
                     const r = await retry({ limit: 50 }).unwrap();
                     flash(`Retry → delivered ${r.delivered}, failed ${r.failed}`);
@@ -306,23 +356,26 @@ export function OpsPlatformClient() {
                     refetchOverview();
                   } catch {
                     flash("Retry failed.", true);
+                  } finally {
+                    setBusyAction(null);
                   }
                 }}
               >
-                Retry failed
+                {busyAction === "retry" ? "Retrying…" : "Retry failed"}
               </Button>
             ) : null}
           </div>
           {!canEvents ? (
-            <div className="fo-desk__panel">
-              <p className="fo-desk__empty">Missing `ops:events:read`.</p>
-            </div>
+            <OpsPanelEmpty
+              title="Missing events permission"
+              body="Your role needs ops:events:read to view the outbox queue."
+            />
           ) : outboxLoading ? (
-            <Spinner />
+            <OpsTabLoading label="Loading outbox…" />
+          ) : outboxError ? (
+            <OpsPanelError title="Outbox unavailable" onRetry={() => void refetchOutbox()} />
           ) : !outbox?.items?.length ? (
-            <div className="fo-desk__panel">
-              <p className="fo-desk__empty">Outbox empty.</p>
-            </div>
+            <OpsPanelEmpty title="Outbox empty" body="No pending or failed events in this queue." />
           ) : (
             <section className="fo-desk__panel fo-desk__panel--flush">
               <div className="fo-desk__table-wrap">
@@ -368,14 +421,14 @@ export function OpsPlatformClient() {
 
       {tab === "accounting" ? (
         accountingLoading ? (
-          <Spinner />
+          <OpsTabLoading label="Loading accounting…" />
+        ) : accountingError ? (
+          <OpsPanelError title="Accounting unavailable" onRetry={() => void refetchAccounting()} />
         ) : !accounting?.items?.length ? (
-          <div className="fo-desk__panel">
-            <p className="fo-desk__empty">
-              No internal accounting entries yet (created on BOOKING_TICKETED, PAYMENT_CAPTURED,
-              BOOKING_REFUNDED).
-            </p>
-          </div>
+          <OpsPanelEmpty
+            title="No accounting entries"
+            body="Internal ledger rows are created on BOOKING_TICKETED, PAYMENT_CAPTURED, and BOOKING_REFUNDED."
+          />
         ) : (
           <div className="fo-desk__stack">
             {accounting.aggregates?.length ? (
@@ -459,7 +512,9 @@ export function OpsPlatformClient() {
             autoComplete="off"
           />
           {financeLoading ? (
-            <Spinner />
+            <OpsTabLoading label="Loading finance…" />
+          ) : financeError ? (
+            <OpsPanelError title="Finance unavailable" onRetry={() => void refetchFinance()} />
           ) : (
             <>
               {finance?.capability ? (
@@ -568,7 +623,12 @@ export function OpsPlatformClient() {
 
       {tab === "commissions" ? (
         commissionsLoading ? (
-          <Spinner />
+          <OpsTabLoading label="Loading commissions…" />
+        ) : commissionsError ? (
+          <OpsPanelError
+            title="Commissions unavailable"
+            onRetry={() => void refetchCommissions()}
+          />
         ) : (
           <div className="fo-desk__stack">
             {commissions?.capability ? (
@@ -590,12 +650,10 @@ export function OpsPlatformClient() {
               </section>
             ) : null}
             {!commissions?.items?.length ? (
-              <div className="fo-desk__panel">
-                <p className="fo-desk__empty">
-                  No commission records. Configure OPS_COMMISSION_BPS (or PricingConfig
-                  ops_commission_bps) — rates are never invented.
-                </p>
-              </div>
+              <OpsPanelEmpty
+                title="No commission records"
+                body="Configure OPS_COMMISSION_BPS (or PricingConfig ops_commission_bps) — rates are never invented."
+              />
             ) : (
               <section className="fo-desk__panel fo-desk__panel--flush">
                 <div className="fo-desk__table-wrap">
@@ -670,9 +728,10 @@ export function OpsPlatformClient() {
             anyOf={["ops:reconcile:write"]}
             mode="fallback"
             fallback={
-              <div className="fo-desk__panel">
-                <p className="fo-desk__empty">Missing `ops:reconcile:write` for writes.</p>
-              </div>
+              <OpsPanelEmpty
+                title="Missing reconcile permission"
+                body="Your role needs ops:reconcile:write to create reconciliation rows."
+              />
             }
           >
             <section className="fo-desk__panel fo-desk__stack">
@@ -699,11 +758,13 @@ export function OpsPlatformClient() {
               />
               <Button
                 size="sm"
+                disabled={busyAction !== null}
                 onClick={async () => {
                   if (!bookingId) {
                     flash("bookingId required", true);
                     return;
                   }
+                  setBusyAction("recon");
                   try {
                     const r = await createRecon({
                       bookingId,
@@ -714,19 +775,24 @@ export function OpsPlatformClient() {
                     refetchRecon();
                   } catch {
                     flash("Reconcile failed.", true);
+                  } finally {
+                    setBusyAction(null);
                   }
                 }}
               >
-                Run reconciliation
+                {busyAction === "recon" ? "Running…" : "Run reconciliation"}
               </Button>
             </section>
           </PermissionGate>
           {reconLoading ? (
-            <Spinner />
+            <OpsTabLoading label="Loading reconciliation…" />
+          ) : reconError ? (
+            <OpsPanelError title="Reconciliation unavailable" onRetry={() => void refetchRecon()} />
           ) : !recon?.items?.length ? (
-            <div className="fo-desk__panel">
-              <p className="fo-desk__empty">No reconciliation items.</p>
-            </div>
+            <OpsPanelEmpty
+              title="No reconciliation items"
+              body="Run a reconciliation above, or wait for supplier invoice checks to land."
+            />
           ) : (
             <section className="fo-desk__panel fo-desk__panel--flush">
               <div className="fo-desk__table-wrap">
@@ -772,11 +838,11 @@ export function OpsPlatformClient() {
 
       {tab === "audit" ? (
         auditLoading ? (
-          <Spinner />
+          <OpsTabLoading label="Loading audit…" />
+        ) : auditError ? (
+          <OpsPanelError title="Audit unavailable" onRetry={() => void refetchAudit()} />
         ) : !audit?.items?.length ? (
-          <div className="fo-desk__panel">
-            <p className="fo-desk__empty">No audit rows in this page.</p>
-          </div>
+          <OpsPanelEmpty title="No audit rows" body="Staff actions will appear here as they are recorded." />
         ) : (
           <section className="fo-desk__panel fo-desk__panel--flush">
             <div className="fo-desk__table-wrap">
@@ -812,6 +878,7 @@ export function OpsPlatformClient() {
           </section>
         )
       ) : null}
+      </div>
     </div>
   );
 }

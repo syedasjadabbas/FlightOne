@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import dynamic from "next/dynamic";
 import { AuthShell } from "../components/AuthShell";
+import { AuthSessionGate } from "../components/AuthSessionGate";
 import { SignupFormSkeleton } from "./components/SignupFormSkeleton";
 import "../auth-form.css";
 import "./signup.css";
@@ -37,7 +38,9 @@ export default function SignupPage() {
           </>
         }
       >
-        <SignupForm />
+        <AuthSessionGate>
+          <SignupForm />
+        </AuthSessionGate>
       </Suspense>
     </AuthShell>
   );

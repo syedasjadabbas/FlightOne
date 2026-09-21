@@ -5,7 +5,7 @@ import type {
   FetchBaseQueryError,
 } from "@reduxjs/toolkit/query";
 import { useAuthStore } from "@/store/auth.store";
-import type { AuthSession } from "@/store/auth.store";
+import { refreshSessionOnce } from "@/lib/auth/refreshSession";
 import { formatApiError } from "./formatApiError";
 
 /**
@@ -38,38 +38,6 @@ const rawBaseQuery = fetchBaseQuery({
   },
 });
 
-/** Single-flight guard so N concurrent 401s trigger exactly one refresh call. */
-let refreshInFlight: Promise<boolean> | null = null;
-
-async function refreshSessionOnce(): Promise<boolean> {
-  const { setSession, clearSession } = useAuthStore.getState();
-
-  try {
-    const res = await fetch(`${API_BASE_URL}/auth/refresh`, {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        [CSRF_HEADER]: "1",
-      },
-      body: JSON.stringify({}),
-    });
-    const envelope = (await res.json()) as ApiEnvelope<AuthSession>;
-
-    if (!res.ok || !envelope.success) {
-      clearSession();
-      return false;
-    }
-
-    setSession(envelope.data);
-    return true;
-  } catch {
-    clearSession();
-    return false;
-  }
-}
-
 /**
  * Wraps `fetchBaseQuery` to:
  *  1. unwrap the `{ success, message, data }` envelope so every endpoint's
@@ -86,10 +54,7 @@ const baseQueryWithReauth: BaseQueryFn<
   let result = await rawBaseQuery(args, api, extraOptions);
 
   if (result.error?.status === 401) {
-    refreshInFlight ??= refreshSessionOnce().finally(() => {
-      refreshInFlight = null;
-    });
-    const refreshed = await refreshInFlight;
+    const refreshed = await refreshSessionOnce({ force: true });
 
     if (refreshed) {
       result = await rawBaseQuery(args, api, extraOptions);

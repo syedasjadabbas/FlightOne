@@ -290,7 +290,20 @@ export const authApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Me", "AuthSessions"],
       async onQueryStarted(_arg, { queryFulfilled }) {
+        const dest =
+          typeof window !== "undefined" &&
+          !window.location.pathname.startsWith("/login")
+            ? `/login?redirect=${encodeURIComponent(
+                `${window.location.pathname}${window.location.search}`,
+              )}`
+            : null;
+
+        // Hide auth-gates (show boot spinner) → clear session → hard-nav to login.
+        // Do not await the network first; that was causing the Auth Required flash.
+        useAuthStore.getState().beginLogout();
         useAuthStore.getState().clearSession();
+        if (dest) window.location.replace(dest);
+
         await queryFulfilled.catch(() => {});
       },
     }),

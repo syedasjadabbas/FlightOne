@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { KeyRound, Shield, ShieldCheck, ShieldOff } from "lucide-react";
+import { Check, Copy, KeyRound, Shield, ShieldCheck, ShieldOff } from "lucide-react";
 import { Button, Input, QrCode, Spinner } from "@/components/ui";
-import { TravellerSection, TravellerChip } from "@/app/components/traveller";
+import { TravellerSection } from "@/app/components/traveller";
 import { useAuthStore } from "@/store/auth.store";
 import {
   useTwoFactorSetupMutation,
@@ -51,7 +51,7 @@ export function TwoFactorSection() {
     setErrorMessage(null);
     try {
       await confirm2fa({ code: confirmCode.trim() }).unwrap();
-      setStatusMessage("Two-factor authentication is on.");
+      setStatusMessage("Two-factor authentication is now active on your account.");
       setMode("backup_codes");
     } catch (err: unknown) {
       setErrorMessage(extractError(err, "Invalid code. Check your authenticator and try again."));
@@ -72,7 +72,7 @@ export function TwoFactorSection() {
         password: disablePassword.trim() || undefined,
         code: disableCode.trim() || undefined,
       }).unwrap();
-      setStatusMessage("Two-factor authentication is off.");
+      setStatusMessage("Two-factor authentication has been disabled.");
       setDisablePassword("");
       setDisableCode("");
       setMode("idle");
@@ -101,34 +101,41 @@ export function TwoFactorSection() {
 
   return (
     <TravellerSection
-      title="Two-factor authentication"
-      note="Require a 6-digit authenticator code in addition to your password."
+      title="Two-Factor Authentication"
+      note="Require a hardware-backed TOTP code in addition to your password for elevated security."
+      panel
     >
-      <div className="fo-profile__2fa-status">
-        <div className="fo-profile__2fa-status-main">
-          <span
-            className={`fo-profile__2fa-icon${isEnabled ? " fo-profile__2fa-icon--on" : ""}`}
-            aria-hidden
+      {/* 2FA Status Card */}
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-black/8 bg-white/90 p-4.5 shadow-sm transition-all hover:border-black/15">
+        <div className="flex items-center gap-3.5">
+          <div
+            className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${
+              isEnabled ? "bg-emerald/15 text-emerald" : "bg-black/6 text-ink-faint"
+            }`}
           >
             {isEnabled ? (
-              <ShieldCheck size={18} strokeWidth={1.75} />
+              <ShieldCheck size={20} strokeWidth={2.2} />
             ) : (
-              <Shield size={18} strokeWidth={1.75} />
+              <Shield size={20} strokeWidth={2} />
             )}
-          </span>
+          </div>
           <div>
-            <div className="flex flex-wrap items-center gap-2">
-              <p className="fo-profile__2fa-title">
-                {isEnabled ? "2FA is on" : "2FA is off"}
+            <div className="flex items-center gap-2">
+              <p className="text-[15px] font-bold text-navy">
+                {isEnabled ? "Two-Factor Auth Active" : "Two-Factor Auth Inactive"}
               </p>
-              <TravellerChip tone={isEnabled ? "default" : "muted"}>
+              <span
+                className={`rounded-full px-2.5 py-0.5 text-[10.5px] font-bold uppercase ${
+                  isEnabled ? "bg-emerald/15 text-emerald" : "bg-black/6 text-ink-faint"
+                }`}
+              >
                 {isEnabled ? "Protected" : "Optional"}
-              </TravellerChip>
+              </span>
             </div>
-            <p className="fo-profile__2fa-note">
+            <p className="mt-0.5 text-[12.5px] text-ink-soft">
               {isEnabled
-                ? "Sign-in requires an authenticator code or a backup recovery code."
-                : "Turn on to protect bookings and personal details."}
+                ? "Sign-ins require an authenticator app code or saved backup recovery code."
+                : "Enable 2FA to protect personal identity documents and booking access."}
             </p>
           </div>
         </div>
@@ -149,10 +156,15 @@ export function TwoFactorSection() {
                 Disable 2FA
               </Button>
             ) : (
-              <Button type="button" size="sm" onClick={handleStartSetup} disabled={isStartingSetup}>
+              <Button
+                type="button"
+                size="md"
+                onClick={handleStartSetup}
+                disabled={isStartingSetup}
+              >
                 {isStartingSetup ? (
                   <>
-                    <Spinner size="sm" label={null} />
+                    <Spinner size="sm" className="border-white/30 border-t-white" label={null} />
                     Starting…
                   </>
                 ) : (
@@ -165,24 +177,28 @@ export function TwoFactorSection() {
       </div>
 
       {statusMessage && mode === "idle" ? (
-        <p className="text-[13px] font-medium text-[var(--sky)]" role="status">
-          {statusMessage}
+        <p className="mt-3 flex items-center gap-1.5 text-[13px] font-medium text-sky" role="status">
+          <Check size={14} strokeWidth={2.5} />
+          <span>{statusMessage}</span>
         </p>
       ) : null}
 
       {errorMessage && mode === "idle" ? (
-        <p className="text-[13px] font-medium text-[var(--danger)]" role="alert">
+        <p className="mt-3 text-[13px] font-medium text-danger" role="alert">
           {errorMessage}
         </p>
       ) : null}
 
+      {/* Enrolling Step */}
       {mode === "enrolling" && setupData ? (
-        <div className="fo-profile__2fa-panel">
-          <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="mt-4 rounded-2xl border border-black/8 bg-white/75 p-5">
+          <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
             <div>
-              <p className="fo-profile__form-label">Connect authenticator</p>
-              <p className="fo-profile__2fa-note mt-1">
-                Google Authenticator, 1Password, Microsoft Authenticator, or Bitwarden.
+              <p className="text-[12px] font-bold tracking-wider text-ink-faint uppercase">
+                Connect Authenticator App
+              </p>
+              <p className="mt-1 text-[13px] text-ink-soft">
+                Scan with Google Authenticator, 1Password, Apple Passwords, or Bitwarden.
               </p>
             </div>
             <Button
@@ -198,19 +214,19 @@ export function TwoFactorSection() {
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 items-start gap-5 md:grid-cols-[auto_1fr]">
-            <div className="flex flex-col items-center gap-2 rounded-[0.5rem] border border-[var(--line)] bg-white p-3">
-              <QrCode value={qrUri} size={160} alt="FlightOne 2FA QR code" />
-              <span className="text-[11px] text-[var(--ink-faint)]">Scan with your app</span>
+          <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-[auto_1fr]">
+            <div className="flex flex-col items-center gap-2 rounded-2xl border border-black/10 bg-white p-4 shadow-sm">
+              <QrCode value={qrUri} size={150} alt="FlightOne 2FA QR code" />
+              <span className="text-[11px] font-medium text-ink-faint">Scan QR in Authenticator</span>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="text-[13px] font-medium text-ink-soft">
-                  Or enter this secret manually
+                <label className="text-[12px] font-semibold tracking-wide text-ink-soft uppercase">
+                  Or enter manual setup key
                 </label>
-                <div className="mt-1 flex items-center gap-2">
-                  <code className="block flex-1 select-all rounded-[0.45rem] border border-[var(--line)] bg-white px-3 py-2 font-mono text-xs font-semibold tracking-wider text-[var(--navy)] sm:text-sm">
+                <div className="mt-1.5 flex items-center gap-2">
+                  <code className="block flex-1 select-all rounded-xl border border-black/10 bg-white px-3.5 py-2 font-mono text-[13px] font-bold tracking-wider text-navy">
                     {setupData.secret}
                   </code>
                   <Button
@@ -220,7 +236,17 @@ export function TwoFactorSection() {
                     onClick={handleCopySecret}
                     className="shrink-0"
                   >
-                    {copiedSecret ? "Copied" : "Copy"}
+                    {copiedSecret ? (
+                      <>
+                        <Check size={12} strokeWidth={2.5} className="text-emerald" />
+                        <span>Copied</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy size={12} strokeWidth={2} />
+                        <span>Copy Key</span>
+                      </>
+                    )}
                   </Button>
                 </div>
               </div>
@@ -228,41 +254,41 @@ export function TwoFactorSection() {
               <form onSubmit={handleConfirmSetup} className="space-y-3">
                 <Input
                   id="totp-confirm-input"
-                  label="6-digit code from your app"
+                  label="6-Digit Verification Code"
                   type="text"
                   inputMode="numeric"
                   pattern="[0-9]*"
                   maxLength={6}
                   autoFocus
                   required
-                  placeholder="000000"
+                  placeholder="000 000"
                   value={confirmCode}
                   onChange={(e) =>
                     setConfirmCode(e.target.value.replace(/\D/g, "").slice(0, 6))
                   }
-                  className="font-mono text-center text-lg tracking-widest font-semibold"
+                  className="font-mono text-center text-lg tracking-widest font-bold"
                   disabled={isConfirming}
                 />
 
                 {errorMessage ? (
-                  <p className="text-[13px] font-medium text-[var(--danger)]" role="alert">
+                  <p className="text-[13px] font-medium text-danger" role="alert">
                     {errorMessage}
                   </p>
                 ) : null}
 
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2 pt-1">
                   <Button
                     type="submit"
-                    size="sm"
+                    size="md"
                     disabled={confirmCode.length < 6 || isConfirming}
                   >
                     {isConfirming ? (
                       <>
-                        <Spinner size="sm" label={null} />
+                        <Spinner size="sm" className="border-white/30 border-t-white" label={null} />
                         Confirming…
                       </>
                     ) : (
-                      "Confirm & enable"
+                      "Confirm & Activate 2FA"
                     )}
                   </Button>
                   <Button
@@ -283,105 +309,114 @@ export function TwoFactorSection() {
         </div>
       ) : null}
 
+      {/* Backup Codes Display */}
       {mode === "backup_codes" && setupData ? (
-        <div className="fo-profile__2fa-panel fo-profile__2fa-panel--backup">
+        <div className="mt-4 rounded-2xl border border-emerald/20 bg-emerald/5 p-5">
           <div className="flex items-start gap-3">
-            <span className="fo-profile__2fa-icon" aria-hidden>
-              <KeyRound size={18} strokeWidth={1.75} />
-            </span>
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald/15 text-emerald">
+              <KeyRound size={18} strokeWidth={2} />
+            </div>
             <div>
-              <p className="fo-profile__2fa-title">Save your backup codes</p>
-              <p className="fo-profile__2fa-note">
-                Single-use recovery codes if you lose your authenticator. Store them offline.
-                They will not be shown again after you leave this page.
+              <p className="text-[15px] font-bold text-navy">Save Emergency Backup Codes</p>
+              <p className="text-[12.5px] text-ink-soft">
+                Single-use offline recovery codes. Store them securely. They will not be shown again.
               </p>
             </div>
           </div>
 
-          <div className="fo-profile__codes">
+          <div className="my-4 grid grid-cols-2 gap-2 sm:grid-cols-5">
             {setupData.backupCodes.map((code) => (
-              <div key={code} className="fo-profile__code">
+              <div
+                key={code}
+                className="rounded-xl border border-black/10 bg-white px-2.5 py-1.5 text-center font-mono text-[12.5px] font-semibold text-navy shadow-xs"
+              >
                 {code}
               </div>
             ))}
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
             <Button type="button" variant="secondary" size="sm" onClick={handleCopyBackupCodes}>
-              {copiedCodes ? "Copied" : "Copy all codes"}
+              {copiedCodes ? (
+                <>
+                  <Check size={12} strokeWidth={2.5} className="text-emerald" />
+                  <span>All Codes Copied</span>
+                </>
+              ) : (
+                <>
+                  <Copy size={12} strokeWidth={2} />
+                  <span>Copy All Codes</span>
+                </>
+              )}
             </Button>
-            <span className="text-[11px] text-[var(--ink-faint)]">
-              10 codes · single use each
-            </span>
-          </div>
 
-          <div className="flex justify-end">
-            <Button type="button" size="sm" onClick={handleDismissBackupCodes}>
-              I have saved my codes
+            <Button type="button" size="md" onClick={handleDismissBackupCodes}>
+              I Have Saved My Codes
             </Button>
           </div>
         </div>
       ) : null}
 
+      {/* Disable 2FA Panel */}
       {mode === "disabling" ? (
-        <div className="fo-profile__2fa-panel fo-profile__2fa-panel--warn">
+        <div className="mt-4 rounded-2xl border border-danger/20 bg-danger/5 p-5">
           <div className="flex items-start gap-3">
-            <span className="fo-profile__2fa-icon" aria-hidden>
-              <ShieldOff size={18} strokeWidth={1.75} />
-            </span>
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-danger/15 text-danger">
+              <ShieldOff size={18} strokeWidth={2} />
+            </div>
             <div>
-              <p className="fo-profile__2fa-title">Disable two-factor authentication</p>
-              <p className="fo-profile__2fa-note">
-                Confirm with your account password or a current authenticator code.
+              <p className="text-[15px] font-bold text-navy">Disable Two-Factor Authentication</p>
+              <p className="text-[12.5px] text-ink-soft">
+                Confirm with your current password or an active authenticator code.
               </p>
             </div>
           </div>
 
-          <form onSubmit={handleDisable2fa} className="max-w-md space-y-3">
+          <form onSubmit={handleDisable2fa} className="mt-4 max-w-md space-y-3">
             <Input
-              label="Account password"
+              label="Account Password"
               type="password"
               placeholder="••••••••"
               value={disablePassword}
               onChange={(e) => setDisablePassword(e.target.value)}
               disabled={isDisabling}
             />
-            <p className="text-center text-[11px] font-semibold uppercase tracking-wider text-[var(--ink-faint)]">
+            <p className="text-center text-[11px] font-bold uppercase tracking-wider text-ink-faint">
               or
             </p>
             <Input
-              label="Authenticator code"
+              label="Current Authenticator Code"
               type="text"
               inputMode="numeric"
               pattern="[0-9]*"
               maxLength={6}
-              placeholder="000000"
+              placeholder="000 000"
               value={disableCode}
               onChange={(e) => setDisableCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
               disabled={isDisabling}
-              className="font-mono tracking-widest"
+              className="font-mono tracking-widest text-center font-bold"
             />
 
             {errorMessage ? (
-              <p className="text-[13px] font-medium text-[var(--danger)]" role="alert">
+              <p className="text-[13px] font-medium text-danger" role="alert">
                 {errorMessage}
               </p>
             ) : null}
 
-            <div className="flex flex-wrap items-center gap-2 pt-1">
+            <div className="flex flex-wrap items-center gap-2 pt-2">
               <Button
                 type="submit"
-                variant="secondary"
-                size="sm"
+                variant="danger"
+                size="md"
                 disabled={(!disablePassword.trim() && disableCode.length < 6) || isDisabling}
               >
                 {isDisabling ? (
                   <>
-                    <Spinner size="sm" label={null} />
+                    <Spinner size="sm" className="border-white/30 border-t-white" label={null} />
                     Disabling…
                   </>
                 ) : (
-                  "Confirm disable"
+                  "Confirm Disable 2FA"
                 )}
               </Button>
               <Button

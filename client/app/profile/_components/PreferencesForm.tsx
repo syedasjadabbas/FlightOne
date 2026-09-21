@@ -1,7 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Check } from "lucide-react";
+import {
+  Check,
+  Plane,
+  ShieldCheck,
+  Sofa,
+  Sparkles,
+  UserRound,
+  UtensilsCrossed,
+} from "lucide-react";
 import { Button, Input, SearchableSelect, Spinner } from "@/components/ui";
 import { TravellerSection } from "@/app/components/traveller";
 import {
@@ -113,69 +121,87 @@ export function PreferencesForm({ profile }: { profile: TravellerProfile }) {
 
   return (
     <TravellerSection
-      title="Travel preferences"
-      note="Used to rank flights and prefill seat, meal, and airline choices."
+      title="Travel Preferences"
+      note="Used to calibrate automated search rankings, prefill seats, and lock in meal selections."
       panel
     >
-      <form onSubmit={onSave} className="space-y-0" aria-busy={isLoading || undefined}>
+      <form onSubmit={onSave} className="space-y-6" aria-busy={isLoading || undefined}>
+        {/* Block 1: Identity */}
         <div className="fo-profile__form-block">
-          <p className="fo-profile__form-label">Identity</p>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="flex items-center gap-2">
+            <span className="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-sky/10 text-sky">
+              <UserRound size={13} strokeWidth={2.2} />
+            </span>
+            <p className="fo-profile__form-label">Passenger Identity</p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <Input
-              label="Display name"
+              id="profile-field-displayName"
+              label="Display Name"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               placeholder="Asjad Abbas"
               required
             />
             <Input
-              label="Phone"
+              id="profile-field-phone"
+              label="Phone Number"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="+92 300 1234567"
               hint="For ticketing and SMS alerts"
             />
             <Input
+              id="profile-field-nationality"
               label="Nationality"
               value={nationality}
               onChange={(e) => setNationality(e.target.value)}
               placeholder="PK"
               maxLength={2}
-              hint="ISO 2-letter code"
+              hint="ISO 2-letter country code"
             />
           </div>
         </div>
 
+        {/* Block 2: Flight & Seating */}
         <div className="fo-profile__form-block">
-          <p className="fo-profile__form-label">Flight preferences</p>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <div>
-              <label className="mb-1 block text-[13px] font-medium text-ink-soft">
-                Preferred cabin
-              </label>
+          <div className="flex items-center gap-2">
+            <span className="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-sky/10 text-sky">
+              <Sofa size={13} strokeWidth={2.2} />
+            </span>
+            <p className="fo-profile__form-label">Flight Preferences & Comfort</p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div id="profile-field-cabin">
               <SearchableSelect
+                label="Preferred Cabin"
                 options={CABIN_OPTIONS}
                 value={cabin}
                 onChange={setCabin}
                 searchable={false}
                 clearable
-                placeholder="Any cabin"
+                placeholder="Any cabin tier"
               />
             </div>
             <Input
-              label="Seat"
+              id="profile-field-seatPref"
+              label="Seat Preference"
               value={seatPref}
               onChange={(e) => setSeatPref(e.target.value)}
-              placeholder="Aisle, window…"
+              placeholder="Aisle, window, bulkhead…"
             />
             <Input
-              label="Meal"
+              id="profile-field-mealPref"
+              label="Dietary / Meal"
               value={mealPref}
               onChange={(e) => setMealPref(e.target.value)}
-              placeholder="Halal, vegetarian…"
+              placeholder="Halal, vegetarian, vegan…"
             />
             <Input
-              label="Max layover (hours)"
+              id="profile-field-maxLayover"
+              label="Max Layover (Hours)"
               type="number"
               min={0}
               step={1}
@@ -186,17 +212,28 @@ export function PreferencesForm({ profile }: { profile: TravellerProfile }) {
           </div>
         </div>
 
-        <div className="fo-profile__form-block">
-          <p className="fo-profile__form-label">Preferred airlines</p>
+        {/* Block 3: Airlines */}
+        <div className="fo-profile__form-block" id="profile-field-airlines">
+          <div className="flex items-center gap-2">
+            <span className="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-sky/10 text-sky">
+              <Plane size={13} strokeWidth={2.2} />
+            </span>
+            <p className="fo-profile__form-label">Preferred Airlines & Alliances</p>
+          </div>
+
           <Input
-            label="IATA codes"
+            id="profile-field-airlines-input"
+            label="IATA Carrier Codes"
             value={airlines}
             onChange={(e) => setAirlines(e.target.value)}
-            placeholder="EK, QR, PK"
-            hint="Comma-separated · soft preference in search ranking"
+            placeholder="EK, QR, PK, EY, BA"
+            hint="Comma-separated IATA codes — soft preference in search rankings"
           />
+
           <div>
-            <p className="fo-traveller__field-hint mb-2">Quick add</p>
+            <p className="text-[11.5px] font-semibold text-ink-faint uppercase tracking-wider mb-2">
+              Quick Select Carriers
+            </p>
             <div className="fo-profile__airline-pills">
               {COMMON_AIRLINES.map((a) => {
                 const selected = selectedAirlinesList.includes(a.code);
@@ -208,8 +245,8 @@ export function PreferencesForm({ profile }: { profile: TravellerProfile }) {
                     onClick={() => toggleAirlinePill(a.code)}
                     className="fo-profile__airline-pill"
                   >
-                    {selected ? <Check size={12} strokeWidth={2.25} aria-hidden /> : null}
-                    {a.name} ({a.code})
+                    {selected ? <Check size={12} strokeWidth={2.5} className="text-sky" aria-hidden /> : null}
+                    <span>{a.name} ({a.code})</span>
                   </button>
                 );
               })}
@@ -217,24 +254,26 @@ export function PreferencesForm({ profile }: { profile: TravellerProfile }) {
           </div>
         </div>
 
-        <div className="fo-profile__form-block flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        {/* Footer actions */}
+        <div className="fo-profile__form-block flex flex-col gap-3 pt-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             {error ? (
-              <p className="text-[13px] font-medium text-[var(--danger)]" role="alert">
-                Could not save. Check fields and try again.
+              <p className="text-[13px] font-medium text-danger" role="alert">
+                Could not save preferences. Check fields and try again.
               </p>
             ) : null}
             {isSuccess ? (
-              <p className="text-[13px] font-medium text-[var(--sky)]" role="status">
-                Preferences saved.
+              <p className="text-[13px] font-medium text-sky flex items-center gap-1.5" role="status">
+                <Check size={14} strokeWidth={2.5} />
+                <span>Preferences saved successfully.</span>
               </p>
             ) : null}
           </div>
-          <Button type="submit" disabled={isLoading} size="sm">
+          <Button type="submit" disabled={isLoading} size="md">
             {isLoading ? (
               <>
                 <Spinner size="sm" className="border-white/30 border-t-white" label={null} />
-                Saving…
+                Saving preferences…
               </>
             ) : (
               "Save preferences"

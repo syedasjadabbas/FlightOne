@@ -19,7 +19,7 @@ export const metadata = {
 
 export default function VaultPage() {
   return (
-    <main className="fo-stage relative flex min-h-[100dvh] flex-col">
+    <main className="fo-stage relative flex min-h-dvh flex-col">
       <SiteNav />
       <TravellerShell width="wide">
         <VaultPageClient />

@@ -94,78 +94,88 @@ export function VisaMetaFields({
 
   return (
     <div className="fo-vault__visa-block">
-      <p className="fo-vault__visa-label">Visa details</p>
-      <SearchableSelect
-        label="Destination country"
-        options={destOptions}
-        value={value.destinationCode}
-        onChange={(destinationCode) => onChange({ ...value, destinationCode })}
-        searchable
-        clearable
-        disabled={disabled}
-        placeholder="Select destination…"
-        hint="ISO country for this visa — used for expiry grouping and attributed guidance when available."
-      />
+      <p className="fo-vault__visa-label">Visa &amp; Entry Meta Specifications</p>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <SearchableSelect
+          label="Destination Country"
+          options={destOptions}
+          value={value.destinationCode}
+          onChange={(destinationCode) => onChange({ ...value, destinationCode })}
+          searchable
+          clearable
+          disabled={disabled}
+          placeholder="Select destination…"
+          hint="ISO country for visa rule calibration"
+        />
+        <Input
+          label="ISO Country Code"
+          value={value.destinationCode}
+          onChange={(e) =>
+            onChange({
+              ...value,
+              destinationCode: e.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 2),
+            })
+          }
+          placeholder="e.g. US, AE, GB, SA"
+          maxLength={2}
+          disabled={disabled}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <SearchableSelect
+          label="Visa Classification"
+          options={typeOptions}
+          value={value.visaType}
+          onChange={(visaType) => onChange({ ...value, visaType })}
+          searchable
+          disabled={disabled}
+        />
+        <SearchableSelect
+          label="Visa Status"
+          options={[...VISA_HOLDER_STATUS_OPTIONS]}
+          value={value.holderStatus}
+          onChange={(holderStatus) =>
+            onChange({ ...value, holderStatus: holderStatus as VaultVisaHolderStatus })
+          }
+          disabled={disabled}
+        />
+      </div>
+
       <Input
-        label="Or enter ISO country code"
-        value={value.destinationCode}
-        onChange={(e) =>
-          onChange({
-            ...value,
-            destinationCode: e.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 2),
-          })
-        }
-        placeholder="AE"
-        maxLength={2}
-        disabled={disabled}
-      />
-      <SearchableSelect
-        label="Visa type"
-        options={typeOptions}
-        value={value.visaType}
-        onChange={(visaType) => onChange({ ...value, visaType })}
-        searchable
-        disabled={disabled}
-      />
-      <SearchableSelect
-        label="Visa status"
-        options={[...VISA_HOLDER_STATUS_OPTIONS]}
-        value={value.holderStatus}
-        onChange={(holderStatus) =>
-          onChange({ ...value, holderStatus: holderStatus as VaultVisaHolderStatus })
-        }
-        disabled={disabled}
-      />
-      <Input
-        label="Issuing authority (optional)"
+        label="Issuing Authority (optional)"
         value={value.issuingAuthority}
         onChange={(e) => onChange({ ...value, issuingAuthority: e.target.value })}
-        placeholder="e.g. UAE Embassy Islamabad — as printed on the visa"
-        disabled={disabled}
-        hint="Traveller-entered only. Embassy directory data is shown separately when attributed."
-      />
-      <Input
-        label="Appointment date & time (optional)"
-        type="datetime-local"
-        value={value.appointmentAt}
-        onChange={(e) => onChange({ ...value, appointmentAt: e.target.value })}
+        placeholder="e.g. US Embassy Islamabad / UAE Ministry"
         disabled={disabled}
       />
-      <Input
-        label="Appointment location (optional)"
-        value={value.appointmentLocation}
-        onChange={(e) => onChange({ ...value, appointmentLocation: e.target.value })}
-        placeholder="Embassy / VAC city"
-        disabled={disabled}
-      />
-      <label className="flex items-center gap-2 text-xs font-medium text-[var(--ink-soft)]">
+
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <Input
+          label="Appointment Date & Time (optional)"
+          type="datetime-local"
+          value={value.appointmentAt}
+          onChange={(e) => onChange({ ...value, appointmentAt: e.target.value })}
+          disabled={disabled}
+        />
+        <Input
+          label="Appointment Location (optional)"
+          value={value.appointmentLocation}
+          onChange={(e) => onChange({ ...value, appointmentLocation: e.target.value })}
+          placeholder="e.g. VAC Diplomatic Enclave"
+          disabled={disabled}
+        />
+      </div>
+
+      <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-ink-soft pt-1">
         <input
           type="checkbox"
           checked={value.remindersEnabled}
           onChange={(e) => onChange({ ...value, remindersEnabled: e.target.checked })}
           disabled={disabled}
+          className="h-4 w-4 rounded-md border-black/15 text-sky focus:ring-sky/20"
         />
-        Enable expiry reminders for this visa
+        <span>Enable automated 90-day expiry notifications for this visa</span>
       </label>
     </div>
   );

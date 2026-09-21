@@ -6,14 +6,13 @@ import {
   ArrowRight,
   Building2,
   Filter,
-  Lock,
   Percent,
   RefreshCw,
   Server,
   TrendingUp,
   Wallet,
 } from "lucide-react";
-import { Button, Spinner } from "@/components/ui";
+import { Button, buttonClassName } from "@/components/ui";
 import { PermissionGate } from "@/components/PermissionGate";
 import {
   useGetAdvancedAnalyticsQuery,
@@ -21,9 +20,16 @@ import {
 } from "@/lib/api/dashboard.api";
 import { AdvancedAnalyticsPanel } from "./AdvancedAnalyticsPanel";
 import { StatusBadge } from "./_components/StatusBadge";
+import {
+  DashboardBoot,
+  DashboardErrorGate,
+  DashboardPermissionGate,
+  DashboardSignInGate,
+} from "./_components/DashboardGates";
 import { clampPct, money, pct, rangeFor, type RangeKey } from "./_components/dashFormat";
 import { usePermissions } from "@/lib/permissions/usePermissions";
 import { useAuthStore } from "@/store/auth.store";
+import "./dashboard.css";
 
 export function ManagementDashboardClient() {
   const hasHydrated = useAuthStore((s) => s.hasHydrated);
@@ -47,16 +53,23 @@ export function ManagementDashboardClient() {
     rangeKey === "custom" &&
     (!customFrom || !customTo || new Date(customFrom) > new Date(customTo));
 
-  const { data, isLoading, isFetching, error, refetch } = useGetDashboardOverviewQuery(range, {
+  const { data, isLoading, isFetching, isError, refetch } = useGetDashboardOverviewQuery(range, {
     skip: skip || !canRead || customInvalid,
   });
   const {
     data: advanced,
     isLoading: advancedLoading,
     isError: advancedError,
+    isFetching: advancedFetching,
+    refetch: refetchAdvanced,
   } = useGetAdvancedAnalyticsQuery(range, {
     skip: skip || !canRead || customInvalid,
   });
+
+  function refreshAll() {
+    void refetch();
+    void refetchAdvanced();
+  }
 
   const creditAggregates = useMemo(() => {
     if (!data?.outstandingCredit?.companies?.length) return null;
@@ -82,29 +95,11 @@ export function ManagementDashboardClient() {
   }, [data?.outstandingCredit?.companies]);
 
   if (!hasHydrated || permsLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center gap-3 py-20">
-        <Spinner size="md" />
-        <p className="text-xs font-medium text-[var(--ink-faint)]">Loading dashboard…</p>
-      </div>
-    );
+    return <DashboardBoot />;
   }
 
   if (!accessToken) {
-    return (
-      <div className="fo-desk__panel flex flex-col items-center justify-center py-12 text-center">
-        <div className="fo-dash__empty-icon mb-3">
-          <Lock className="h-5 w-5" aria-hidden />
-        </div>
-        <h2 className="text-base font-bold text-[var(--navy)]">Sign in required</h2>
-        <p className="mt-1 mb-4 max-w-sm text-sm text-[var(--ink-soft)]">
-          Sign in with a management account to view booking volume, revenue, and ops health.
-        </p>
-        <Link href="/login" className="fo-site-nav__signup">
-          Sign in
-        </Link>
-      </div>
-    );
+    return <DashboardSignInGate />;
   }
 
   const salesRecognition =
@@ -112,180 +107,144 @@ export function ManagementDashboardClient() {
       ? clampPct((data.sales.recognizedSales / data.sales.volumeCreated) * 100)
       : 0;
 
+  const refreshing = isFetching || advancedFetching;
+
   return (
     <PermissionGate
       anyOf={["ops:dashboard:read", "dashboard:read"]}
       mode="fallback"
-      loading={
-        <div className="flex flex-col items-center justify-center gap-3 py-20">
-          <Spinner size="md" />
-          <p className="text-xs font-medium text-[var(--ink-faint)]">Checking permissions…</p>
-        </div>
-      }
-      fallback={
-        <div className="fo-desk__panel flex flex-col items-center justify-center py-12 text-center">
-          <div className="fo-dash__empty-icon mb-3 border-[color-mix(in_oklab,var(--electric)_30%,var(--fo-desk-line))] text-[var(--electric)]">
-            <Lock className="h-5 w-5" aria-hidden />
-          </div>
-          <h2 className="text-base font-bold text-[var(--navy)]">Access restricted</h2>
-          <p className="mt-1 max-w-md text-sm text-[var(--ink-soft)]">
-            Your account needs{" "}
-            <code className="rounded bg-[color-mix(in_oklab,var(--bone)_60%,white)] px-1 py-0.5 font-mono text-xs">
-              ops:dashboard:read
-            </code>{" "}
-            or{" "}
-            <code className="rounded bg-[color-mix(in_oklab,var(--bone)_60%,white)] px-1 py-0.5 font-mono text-xs">
-              dashboard:read
-            </code>
-            .
-          </p>
-          <p className="mt-2 text-xs text-[var(--ink-faint)]">
-            Ask a FlightOne admin for reporting access.
-          </p>
-        </div>
-      }
+      loading={<DashboardBoot />}
+      fallback={<DashboardPermissionGate />}
     >
-      <div className="fo-desk__stack" style={{ gap: "1.25rem" }}>
-        <header className="fo-desk__header pb-4">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div className="min-w-0">
-              <div className="mb-1.5 flex flex-wrap items-center gap-2">
-                <span className="fo-dash__tag">Management</span>
-                {data?.freshness ? (
-                  <div className="fo-dash__live">
-                    <span className="fo-dash__pulse-dot" aria-hidden />
-                    <span className="font-medium text-[var(--navy)]">Live</span>
-                    <span className="text-[var(--ink-faint)]">·</span>
-                    <span className="font-mono text-[10px] text-[var(--ink-faint)]">
-                      {new Date(data.freshness.computedAt).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        second: "2-digit",
-                      })}
-                    </span>
-                  </div>
-                ) : null}
-              </div>
-              <h1 className="fo-desk__title">Management dashboard</h1>
-              <p className="fo-desk__lede mt-1">
-                Booking volume, multi-currency revenue, conversion, and supplier fulfillment.
-                Day-to-day queues live on{" "}
-                <Link href="/ops" className="inline-flex items-center gap-0.5 font-semibold">
-                  /ops
-                  <ArrowRight className="inline h-3 w-3" aria-hidden />
-                </Link>
-              </p>
-            </div>
-
-            <div className="flex shrink-0 flex-col gap-2.5 sm:items-end">
-              <div className="fo-dash__range" role="group" aria-label="Date range">
-                {(["today", "7d", "30d", "90d", "custom"] as RangeKey[]).map((k) => (
-                  <button
-                    key={k}
-                    type="button"
-                    onClick={() => setRangeKey(k)}
-                    className={`fo-dash__pill-btn ${rangeKey === k ? "fo-dash__pill-btn--active" : ""}`}
-                  >
-                    {k === "today" ? "Today" : k === "custom" ? "Custom" : k}
-                  </button>
-                ))}
-              </div>
-
-              <div className="flex items-center gap-2">
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  onClick={() => refetch()}
-                  disabled={isFetching || customInvalid}
-                  className="inline-flex h-8 items-center gap-1.5 rounded-md px-3 text-xs"
-                >
-                  <RefreshCw
-                    className={`h-3.5 w-3.5 ${isFetching ? "animate-spin" : ""}`}
-                    aria-hidden
-                  />
-                  {isFetching ? "Refreshing…" : "Refresh"}
-                </Button>
-                <Link
-                  href="/ops"
-                  className="inline-flex items-center gap-1 rounded-md border border-[var(--fo-desk-line)] bg-[var(--white)] px-2.5 py-1.5 text-xs font-semibold text-[var(--navy)] transition-colors hover:bg-[color-mix(in_oklab,var(--bone)_50%,white)]"
-                >
-                  Ops console
-                  <ArrowRight className="h-3 w-3 text-[var(--cyan)]" aria-hidden />
-                </Link>
-              </div>
-            </div>
+      <div className="fo-dash fo-dash__master-stage">
+        <div className="fo-dash__nav-rail">
+          <span className="fo-dash__brand-badge">
+            <span className="fo-dash__brand-dot" aria-hidden />
+            Management
+          </span>
+          <div className="fo-dash__range" role="group" aria-label="Date range">
+            {(["today", "7d", "30d", "90d", "custom"] as RangeKey[]).map((k) => (
+              <button
+                key={k}
+                type="button"
+                onClick={() => setRangeKey(k)}
+                className={`fo-dash__pill-btn${rangeKey === k ? " fo-dash__pill-btn--active" : ""}`}
+              >
+                {k === "today" ? "Today" : k === "custom" ? "Custom" : k}
+              </button>
+            ))}
           </div>
+          <div className="fo-dash__rail-actions">
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={refreshAll}
+              disabled={refreshing || customInvalid}
+              icon={
+                <RefreshCw
+                  className={`h-3.5 w-3.5${refreshing ? " animate-spin" : ""}`}
+                  aria-hidden
+                />
+              }
+            >
+              {refreshing ? "Refreshing…" : "Refresh"}
+            </Button>
+            <Link href="/ops" className={buttonClassName({ size: "sm", variant: "dark" })}>
+              Ops console
+              <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+            </Link>
+          </div>
+        </div>
 
-          {rangeKey === "custom" ? (
-            <div className="mt-2 flex flex-wrap items-center gap-3 border-t border-[var(--fo-desk-line)] pt-3 text-xs text-[var(--ink-soft)]">
-              <label className="flex items-center gap-1.5">
-                <span className="font-semibold text-[var(--navy)]">From</span>
-                <input
-                  type="date"
-                  value={customFrom}
-                  onChange={(e) => setCustomFrom(e.target.value)}
-                  className="rounded-md border border-[var(--fo-desk-line)] bg-white px-3 py-1.5 text-xs text-[var(--navy)] focus:border-[var(--cyan)] focus:outline-none focus:ring-1 focus:ring-[var(--cyan)]"
-                />
-              </label>
-              <label className="flex items-center gap-1.5">
-                <span className="font-semibold text-[var(--navy)]">To</span>
-                <input
-                  type="date"
-                  value={customTo}
-                  onChange={(e) => setCustomTo(e.target.value)}
-                  className="rounded-md border border-[var(--fo-desk-line)] bg-white px-3 py-1.5 text-xs text-[var(--navy)] focus:border-[var(--cyan)] focus:outline-none focus:ring-1 focus:ring-[var(--cyan)]"
-                />
-              </label>
-              {customInvalid ? (
-                <span className="text-xs font-semibold text-[var(--danger)]">
-                  Start date must precede or equal end date.
-                </span>
-              ) : null}
+        <header className="fo-dash__hero">
+          <div className="fo-dash__hero-copy">
+            <p className="fo-dash__eyebrow">FlightOne reporting</p>
+            <h1 className="fo-dash__title">Management dashboard</h1>
+            <p className="fo-dash__lede">
+              Booking volume, multi-currency revenue, conversion, and supplier fulfillment.
+              Day-to-day queues live on{" "}
+              <Link href="/ops" className="inline-flex items-center gap-0.5">
+                /ops
+                <ArrowRight className="inline h-3 w-3" aria-hidden />
+              </Link>
+            </p>
+          </div>
+          {data?.freshness ? (
+            <div className="fo-dash__live-meta">
+              <span className="fo-dash__pulse-dot" aria-hidden />
+              <strong>Live</strong>
+              <span aria-hidden>·</span>
+              <span className="font-mono text-[10px]">
+                {new Date(data.freshness.computedAt).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  second: "2-digit",
+                })}
+              </span>
             </div>
           ) : null}
         </header>
 
-        {error ? (
-          <div className="flex items-center justify-between rounded-[var(--fo-desk-radius)] border border-[color-mix(in_oklab,var(--danger)_35%,var(--fo-desk-line))] bg-[color-mix(in_oklab,var(--danger)_6%,white)] p-4 text-[var(--navy)]">
-            <div>
-              <p className="text-sm font-bold">Failed to load dashboard</p>
-              <p className="mt-0.5 text-xs text-[var(--ink-soft)]">
-                Check connectivity or server logs, then retry.
-              </p>
-            </div>
-            <Button
-              size="sm"
-              variant="secondary"
-              onClick={() => refetch()}
-              className="text-xs font-semibold"
-            >
-              Retry
-            </Button>
+        {rangeKey === "custom" ? (
+          <div className="fo-dash__custom-range">
+            <label className="flex items-center gap-1.5">
+              <span className="font-semibold text-navy">From</span>
+              <input
+                type="date"
+                value={customFrom}
+                onChange={(e) => setCustomFrom(e.target.value)}
+              />
+            </label>
+            <label className="flex items-center gap-1.5">
+              <span className="font-semibold text-navy">To</span>
+              <input type="date" value={customTo} onChange={(e) => setCustomTo(e.target.value)} />
+            </label>
+            {customInvalid ? (
+              <span className="text-xs font-semibold text-[var(--danger)]">
+                Start date must precede or equal end date.
+              </span>
+            ) : null}
           </div>
         ) : null}
 
-        {isLoading || !data ? (
-          <div className="flex flex-col gap-4 py-4">
-            <div className="fo-dash__grid-4">
-              {[1, 2, 3, 4].map((i) => (
-                <div
-                  key={i}
-                  className="flex h-32 animate-pulse flex-col justify-between rounded-[var(--fo-desk-radius)] border border-[var(--fo-desk-line)] bg-white p-4"
-                >
-                  <div className="h-3 w-1/3 rounded bg-[color-mix(in_oklab,var(--navy)_8%,transparent)]" />
-                  <div className="my-2 h-7 w-1/2 rounded bg-[color-mix(in_oklab,var(--navy)_10%,transparent)]" />
-                  <div className="h-2.5 w-3/4 rounded bg-[color-mix(in_oklab,var(--navy)_6%,transparent)]" />
+        <div className="fo-dash__body">
+          {isError && !data ? (
+            <DashboardErrorGate onRetry={refreshAll} />
+          ) : isLoading || !data ? (
+            <div className="flex flex-col gap-4 py-2">
+              <div className="fo-dash__grid-4">
+                {[1, 2, 3, 4].map((i) => (
+                  <div
+                    key={i}
+                    className="flex h-32 animate-pulse flex-col justify-between rounded-2xl border border-black/8 bg-white/85 p-4"
+                  >
+                    <div className="h-3 w-1/3 rounded bg-navy/10" />
+                    <div className="my-2 h-7 w-1/2 rounded bg-navy/10" />
+                    <div className="h-2.5 w-3/4 rounded bg-navy/5" />
+                  </div>
+                ))}
+              </div>
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                <div className="h-56 animate-pulse rounded-2xl border border-black/8 bg-white/85" />
+                <div className="h-56 animate-pulse rounded-2xl border border-black/8 bg-white/85" />
+              </div>
+            </div>
+          ) : (
+            <>
+              {isError ? (
+                <div className="fo-dash__error-banner" role="alert">
+                  <div>
+                    <p className="text-sm font-bold text-navy">Could not refresh metrics</p>
+                    <p className="mt-0.5 text-xs text-ink-soft">
+                      Showing last loaded data. Retry to pull a fresh overview.
+                    </p>
+                  </div>
+                  <Button size="sm" variant="secondary" onClick={refreshAll}>
+                    Retry
+                  </Button>
                 </div>
-              ))}
-            </div>
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-              <div className="h-56 animate-pulse rounded-[var(--fo-desk-radius)] border border-[var(--fo-desk-line)] bg-white" />
-              <div className="h-56 animate-pulse rounded-[var(--fo-desk-radius)] border border-[var(--fo-desk-line)] bg-white" />
-            </div>
-          </div>
-        ) : (
-          <>
-            <section aria-label="Headline KPIs" className="fo-dash__grid-4">
+              ) : null}
+              <section aria-label="Headline KPIs" className="fo-dash__grid-4">
               <div className="fo-dash__kpi-card">
                 <div>
                   <div className="fo-dash__kpi-header">
@@ -1265,7 +1224,9 @@ export function ManagementDashboardClient() {
           data={advanced}
           isLoading={advancedLoading}
           isError={advancedError}
+          onRetry={() => void refetchAdvanced()}
         />
+        </div>
       </div>
     </PermissionGate>
   );

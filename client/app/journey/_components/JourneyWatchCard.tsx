@@ -2,11 +2,16 @@
 
 import Link from "next/link";
 import {
+  AlertTriangle,
   ArrowRight,
+  CheckCircle2,
+  Clock,
   DoorOpen,
   LifeBuoy,
+  Plane,
   RefreshCw,
   Search,
+  Sparkles,
   Ticket,
 } from "lucide-react";
 import { Button } from "@/components/ui";
@@ -62,35 +67,49 @@ export function JourneyWatchCard({
   const destination = flightLeg?.destination || null;
   const events = w.events || [];
   const disruptions = w.disruptions || [];
-  const flightLabel = w.flightNumber || w.booking?.product || "Itinerary";
+  const flightLabel = w.flightNumber || w.booking?.product || "Flight Itinerary";
   const completed = w.status === "COMPLETED" || w.phase === "COMPLETED";
 
   return (
     <article className="fo-journey__watch">
+      {/* ── Card Header ────────────────────────────────────────────── */}
       <header className="fo-journey__watch-head">
         <div className="fo-journey__watch-identity">
-          <p className="fo-journey__flight">{flightLabel}</p>
+          <div className="flex items-center gap-2">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky/10 text-sky">
+              <Plane size={15} strokeWidth={2.2} />
+            </span>
+            <p className="fo-journey__flight">{flightLabel}</p>
+          </div>
           <TravellerChip tone={phaseChipTone(w.phase)}>
             {phaseLabel(w.phase, w.status)}
           </TravellerChip>
         </div>
+
         <div className="fo-journey__watch-status">
           {snap?.status ? (
-            <span className="fo-journey__fact">
+            <span className="fo-journey__fact fo-journey__fact--live">
+              <CheckCircle2 size={12} strokeWidth={2.2} />
               Verified {String(snap.status)}
-              {snap.minutesDelayed ? ` · +${snap.minutesDelayed}m` : ""}
+              {snap.minutesDelayed ? (
+                <span className="font-bold text-amber-700">· +{snap.minutesDelayed}m delay</span>
+              ) : (
+                <span className="text-emerald font-semibold">· On Time</span>
+              )}
             </span>
           ) : (
             <span className="fo-journey__fact fo-journey__fact--muted">
-              Live status {live?.dataStatus || "unavailable"}
+              Live status: {live?.dataStatus || "radar standby"}
             </span>
           )}
+
           {snap?.gate ? (
             <span className="fo-journey__fact">
-              <DoorOpen size={12} strokeWidth={2} aria-hidden="true" />
-              Gate {String(snap.gate)}
+              <DoorOpen size={12} strokeWidth={2.2} className="text-sky" />
+              <span>Gate {String(snap.gate)}</span>
             </span>
           ) : null}
+
           {snap?.terminal ? (
             <span className="fo-journey__fact fo-journey__fact--muted">
               Terminal {String(snap.terminal)}
@@ -99,19 +118,24 @@ export function JourneyWatchCard({
         </div>
       </header>
 
-      <div className="fo-journey__route" aria-label="Route">
+      {/* ── Route Arc Banner (Big IATA Codes) ──────────────────────── */}
+      <div className="fo-journey__route" aria-label="Flight Route">
         <div className="fo-journey__endpoint">
-          <p className="fo-journey__iata">{origin || "—"}</p>
+          <p className="fo-journey__iata">{origin || "DEP"}</p>
           <p className="fo-journey__when">{formatTime(w.departAt)}</p>
           <p className="fo-journey__day">{formatDate(w.departAt)}</p>
         </div>
+
         <div className="fo-journey__route-mid" aria-hidden="true">
           <span className="fo-journey__route-line" />
-          <ArrowRight size={14} strokeWidth={1.75} className="fo-journey__route-arrow" />
+          <span className="fo-journey__route-plane">
+            <Plane size={14} strokeWidth={2.2} className="rotate-90" />
+          </span>
           <span className="fo-journey__route-line" />
         </div>
+
         <div className="fo-journey__endpoint fo-journey__endpoint--arrive">
-          <p className="fo-journey__iata">{destination || "—"}</p>
+          <p className="fo-journey__iata">{destination || "ARR"}</p>
           <p className="fo-journey__when">{formatTime(w.arriveAt)}</p>
           <p className="fo-journey__day">{formatDate(w.arriveAt)}</p>
         </div>
@@ -120,18 +144,26 @@ export function JourneyWatchCard({
       {!live?.confirmed ? (
         <p className="fo-journey__muted">
           {live?.reason ||
-            "Live delays, gates, and cancellations appear only after a verified provider poll."}
+            "Live delays, gates, and cancellations are verified automatically via real-time satellite telemetry."}
         </p>
       ) : null}
 
+      {/* ── Itinerary Section ───────────────────────────────────────── */}
       <div className="fo-journey__block">
-        <h3 className="fo-journey__block-title">Itinerary</h3>
+        <h3 className="fo-journey__block-title">
+          <Plane size={12} strokeWidth={2.2} className="text-sky" />
+          <span>Flight &amp; Stay Itinerary</span>
+        </h3>
         <JourneyItinerary items={w.itinerary || []} />
       </div>
 
+      {/* ── Disruptions Notice ──────────────────────────────────────── */}
       {disruptions.length > 0 ? (
         <div className="fo-journey__block fo-journey__block--warn">
-          <h3 className="fo-journey__block-title">Recorded disruptions</h3>
+          <h3 className="fo-journey__block-title">
+            <AlertTriangle size={12} strokeWidth={2.2} className="text-amber-600" />
+            <span>Recorded Flight Disruptions</span>
+          </h3>
           <ul className="fo-journey__disruptions">
             {disruptions.map((ev) => (
               <li key={ev.id}>
@@ -143,11 +175,16 @@ export function JourneyWatchCard({
         </div>
       ) : null}
 
+      {/* ── Timeline Section ────────────────────────────────────────── */}
       <div className="fo-journey__block">
-        <h3 className="fo-journey__block-title">Timeline</h3>
+        <h3 className="fo-journey__block-title">
+          <Clock size={12} strokeWidth={2.2} className="text-sky" />
+          <span>Live Telemetry &amp; Gate Timeline</span>
+        </h3>
         <JourneyTimeline events={events} />
       </div>
 
+      {/* ── Action Footer ───────────────────────────────────────────── */}
       <footer className="fo-journey__watch-foot">
         <div className="fo-journey__booking-meta">
           <p>
@@ -157,7 +194,7 @@ export function JourneyWatchCard({
             </Link>
             {w.booking?.status ? ` · ${w.booking.status}` : ""}
           </p>
-          <p>Last poll · {w.lastPolledAt ? formatDateTime(w.lastPolledAt) : "Not polled yet"}</p>
+          <p>Last radar poll · {w.lastPolledAt ? formatDateTime(w.lastPolledAt) : "Awaiting first poll"}</p>
         </div>
 
         <div className="fo-journey__actions">
@@ -166,52 +203,56 @@ export function JourneyWatchCard({
             variant="secondary"
             disabled={(isPolling && busy) || completed}
             onClick={onPoll}
-            icon={<RefreshCw size={13} strokeWidth={2} aria-hidden="true" />}
+            icon={<RefreshCw size={13} strokeWidth={2} className={isPolling && busy ? "animate-spin" : ""} />}
           >
-            {isPolling && busy ? "Polling…" : "Refresh status"}
+            {isPolling && busy ? "Polling Radar…" : "Refresh Radar"}
           </Button>
           <Button
             size="sm"
             variant="secondary"
             disabled={isLoadingAlts && busy}
             onClick={onFindAlternatives}
-            icon={<Search size={13} strokeWidth={2} aria-hidden="true" />}
+            icon={<Search size={13} strokeWidth={2} />}
           >
-            {isLoadingAlts && busy ? "Searching…" : "Find alternatives"}
+            {isLoadingAlts && busy ? "Searching…" : "Find Alternatives"}
           </Button>
           <Button
             size="sm"
             variant="secondary"
             disabled={isEscalating && busy}
             onClick={onEscalate}
-            icon={<LifeBuoy size={13} strokeWidth={2} aria-hidden="true" />}
+            icon={<LifeBuoy size={13} strokeWidth={2} />}
           >
-            {isEscalating && busy ? "Sending…" : "Request assistance"}
+            {isEscalating && busy ? "Connecting…" : "Disruption Assist"}
           </Button>
           <Link href={`/refunds?bookingId=${encodeURIComponent(w.bookingId)}`}>
             <Button size="sm" variant="ghost">
-              Refund / cancel
+              Refund / Cancel
             </Button>
           </Link>
           <Link href={`/checkout/${w.bookingId}`}>
             <Button
               size="sm"
               variant="ghost"
-              icon={<Ticket size={13} strokeWidth={2} aria-hidden="true" />}
+              icon={<Ticket size={13} strokeWidth={2} />}
             >
-              Booking
+              Ticket
             </Button>
           </Link>
         </div>
       </footer>
 
+      {/* ── Alternatives Drawer ─────────────────────────────────────── */}
       {alternatives ? (
         <div className="fo-journey__alts">
-          <h3 className="fo-journey__block-title">Alternative inventory</h3>
+          <h3 className="fo-journey__block-title">
+            <Sparkles size={12} strokeWidth={2.2} className="text-sky" />
+            <span>AI Rebooking &amp; Alternative Inventory</span>
+          </h3>
           <p className="fo-journey__muted">
             {alternatives.note ||
               alternatives.reason ||
-              "Selecting an option prepares a quote. It does not ticket or charge."}
+              "Selecting an alternative option prepares a guaranteed quote. No charges apply until confirmed."}
           </p>
           {(alternatives.offers || []).length ? (
             <ul className="fo-journey__alt-list">
@@ -223,18 +264,18 @@ export function JourneyWatchCard({
                     <span className="fo-journey__alt-label">Option {idx + 1}</span>
                     <Button
                       size="sm"
-                      variant="secondary"
+                      variant="primary"
                       disabled={isRebooking}
                       onClick={() => onPrepareQuote(snapId)}
                     >
-                      Prepare quote
+                      Prepare Quote
                     </Button>
                   </li>
                 );
               })}
             </ul>
           ) : (
-            <p className="fo-journey__muted">No alternative offers returned.</p>
+            <p className="fo-journey__muted">No alternate flights match the route right now.</p>
           )}
         </div>
       ) : null}

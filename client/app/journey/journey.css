@@ -1,10 +1,10 @@
 /**
- * FlightOne Travel Vault — AIVENTURE Design System
- * Luxury aviation & zero-knowledge document encryption desk.
+ * FlightOne My Journey — AIVENTURE Design System
+ * Luxury aviation mission control, live route radar & trip tracking.
  */
 
-/* ── Master Vault Stage Container ──────────────────────────── */
-.fo-vault__master-stage {
+/* ── Master Journey Stage Container ────────────────────────── */
+.fo-journey__master-stage {
   position: relative;
   width: 100%;
   max-width: 78rem;
@@ -25,7 +25,7 @@
 }
 
 /* ── Top Navigation Rail ──────────────────────────────────── */
-.fo-vault__nav-rail {
+.fo-journey__nav-rail {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -34,7 +34,7 @@
   padding: 0.35rem 0.4rem;
 }
 
-.fo-vault__brand-badge {
+.fo-journey__brand-badge {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -43,21 +43,33 @@
   background: rgba(255, 255, 255, 0.82);
   border: 1px solid rgba(255, 255, 255, 0.95);
   color: var(--navy);
-  text-decoration: none;
   box-shadow: 0 4px 14px -3px rgba(14, 22, 32, 0.05), inset 0 1px 0 #ffffff;
   backdrop-filter: blur(8px);
 }
 
-.fo-vault__brand-dot {
+.fo-journey__brand-dot {
   display: inline-block;
   width: 0.45rem;
   height: 0.45rem;
   border-radius: 9999px;
-  background: var(--sky);
-  box-shadow: 0 0 0 3px rgba(8, 150, 191, 0.2);
+  background: #25d366;
+  box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.25);
+  animation: fo-radar-pulse 2s infinite ease-out;
 }
 
-.fo-vault__nav-center {
+@keyframes fo-radar-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(37, 211, 102, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(37, 211, 102, 0);
+  }
+}
+
+.fo-journey__nav-center {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -65,7 +77,7 @@
   min-width: 0;
 }
 
-.fo-vault__nav-tabs {
+.fo-journey__nav-tabs {
   display: flex;
   align-items: center;
   gap: 0.25rem;
@@ -82,11 +94,11 @@
   scrollbar-width: none;
 }
 
-.fo-vault__nav-tabs::-webkit-scrollbar {
+.fo-journey__nav-tabs::-webkit-scrollbar {
   display: none;
 }
 
-.fo-vault__tab-pill {
+.fo-journey__tab-pill {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -106,16 +118,16 @@
   transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.fo-vault__tab-pill:hover {
+.fo-journey__tab-pill:hover {
   color: var(--navy);
   background: rgba(255, 255, 255, 0.85);
 }
 
-.fo-vault__tab-pill:active {
+.fo-journey__tab-pill:active {
   transform: scale(0.98);
 }
 
-.fo-vault__tab-pill--active {
+.fo-journey__tab-pill--active {
   background: #0e1620 !important;
   color: #ffffff !important;
   font-weight: 600;
@@ -123,18 +135,17 @@
   box-shadow: 0 4px 14px rgba(14, 22, 32, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
 }
 
-.fo-vault__tab-pill--active .fo-vault__tab-icon {
+.fo-journey__tab-pill--active .fo-journey__tab-icon {
   color: var(--sky);
 }
 
-.fo-vault__nav-actions {
+.fo-journey__nav-actions {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-left: auto;
 }
 
-.fo-vault__action-pill {
+.fo-journey__action-pill {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -155,23 +166,25 @@
     0 4px 14px rgba(14, 22, 32, 0.22),
     inset 0 1px 0 rgba(255, 255, 255, 0.18);
   transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  text-decoration: none;
 }
 
-.fo-vault__action-pill:hover {
+.fo-journey__action-pill:hover {
   background: #020615;
+  color: #ffffff;
   transform: translateY(-1px);
   box-shadow:
     0 8px 20px rgba(14, 22, 32, 0.32),
     inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
-.fo-vault__action-pill:active {
+.fo-journey__action-pill:active {
   transform: scale(0.97);
   box-shadow: 0 2px 8px rgba(14, 22, 32, 0.18);
 }
 
 /* ── Master Hero Showcase ─────────────────────────────────── */
-.fo-vault__hero-showcase {
+.fo-journey__hero-showcase {
   display: grid;
   grid-template-columns: 1fr;
   gap: clamp(1.25rem, 2.2vw, 2rem);
@@ -179,12 +192,12 @@
 }
 
 @media (min-width: 768px) {
-  .fo-vault__hero-showcase {
+  .fo-journey__hero-showcase {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
   }
 }
 
-.fo-vault__hero-left {
+.fo-journey__hero-left {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -192,7 +205,7 @@
   padding: clamp(1rem, 2vw, 1.75rem) clamp(0.75rem, 1.5vw, 1.25rem);
 }
 
-.fo-vault__hero-eyebrow {
+.fo-journey__hero-eyebrow {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
@@ -203,7 +216,7 @@
   color: var(--ink-soft);
 }
 
-.fo-vault__hero-title {
+.fo-journey__hero-title {
   margin: 0;
   font-family: var(--font-hero);
   font-size: clamp(2rem, 4.2vw, 3.25rem);
@@ -213,13 +226,13 @@
   color: #0e1620;
 }
 
-.fo-vault__hero-title-accent {
+.fo-journey__hero-title-accent {
   background: linear-gradient(135deg, #0e1620 30%, var(--sky) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-.fo-vault__hero-lede {
+.fo-journey__hero-lede {
   margin: 0;
   max-width: 28rem;
   font-size: 0.875rem;
@@ -227,7 +240,7 @@
   color: var(--ink-soft);
 }
 
-.fo-vault__hero-cta-group {
+.fo-journey__hero-cta-group {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -235,7 +248,7 @@
   margin-top: 0.35rem;
 }
 
-.fo-vault__cta-primary {
+.fo-journey__cta-primary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -255,26 +268,28 @@
   line-height: 1;
   flex-shrink: 0;
   cursor: pointer;
+  text-decoration: none;
   box-shadow:
     0 10px 24px -4px rgba(14, 22, 32, 0.35),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
   transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.fo-vault__cta-primary:hover {
+.fo-journey__cta-primary:hover {
   background: #020615;
+  color: #ffffff;
   transform: translateY(-2px);
   box-shadow:
     0 14px 28px -4px rgba(14, 22, 32, 0.45),
     inset 0 1px 0 rgba(255, 255, 255, 0.28);
 }
 
-.fo-vault__cta-primary:active {
+.fo-journey__cta-primary:active {
   transform: scale(0.97);
   box-shadow: 0 4px 12px rgba(14, 22, 32, 0.25);
 }
 
-.fo-vault__cta-icon-circle {
+.fo-journey__cta-icon-circle {
   display: inline-flex;
   height: 1.35rem;
   width: 1.35rem;
@@ -286,12 +301,12 @@
   transition: transform 0.15s ease;
 }
 
-.fo-vault__cta-primary:hover .fo-vault__cta-icon-circle {
+.fo-journey__cta-primary:hover .fo-journey__cta-icon-circle {
   transform: translateX(2px);
   background: rgba(255, 255, 255, 0.28);
 }
 
-.fo-vault__cta-secondary {
+.fo-journey__cta-secondary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -310,23 +325,25 @@
   line-height: 1;
   flex-shrink: 0;
   cursor: pointer;
+  text-decoration: none;
   box-shadow: 0 4px 14px -3px rgba(14, 22, 32, 0.06), inset 0 1px 0 #ffffff;
   backdrop-filter: blur(8px);
   transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.fo-vault__cta-secondary:hover {
+.fo-journey__cta-secondary:hover {
   background: #ffffff;
+  color: #0e1620;
   border-color: rgba(14, 22, 32, 0.15);
   transform: translateY(-1px);
   box-shadow: 0 8px 20px -4px rgba(14, 22, 32, 0.12), inset 0 1px 0 #ffffff;
 }
 
-.fo-vault__cta-secondary:active {
+.fo-journey__cta-secondary:active {
   transform: scale(0.97);
 }
 
-.fo-vault__feature-pills {
+.fo-journey__feature-pills {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -334,7 +351,7 @@
   margin-top: 0.5rem;
 }
 
-.fo-vault__feature-pill {
+.fo-journey__feature-pill {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
@@ -349,39 +366,39 @@
   transition: all 0.15s ease;
 }
 
-.fo-vault__feature-pill:hover {
+.fo-journey__feature-pill:hover {
   background: #ffffff;
   transform: translateY(-0.5px);
 }
 
-.fo-vault__feature-pill-dot {
+.fo-journey__feature-pill-dot {
   width: 0.4rem;
   height: 0.4rem;
   border-radius: 9999px;
 }
 
-.fo-vault__feature-pill-dot--cyan {
+.fo-journey__feature-pill-dot--cyan {
   background: var(--sky);
   box-shadow: 0 0 0 2px rgba(8, 150, 191, 0.25);
 }
 
-.fo-vault__feature-pill-dot--emerald {
+.fo-journey__feature-pill-dot--emerald {
   background: #25d366;
   box-shadow: 0 0 0 2px rgba(37, 211, 102, 0.25);
 }
 
-.fo-vault__feature-pill-dot--amber {
+.fo-journey__feature-pill-dot--amber {
   background: #f59e0b;
   box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.25);
 }
 
-/* ── Right Column Scenic Canvas with Floating Instrument Dials ─ */
-.fo-vault__hero-right {
+/* ── Right Column Scenic Canvas with Floating Radar Instruments ─ */
+.fo-journey__hero-right {
   display: flex;
   min-height: 26rem;
 }
 
-.fo-vault__canvas-container {
+.fo-journey__canvas-container {
   position: relative;
   width: 100%;
   min-height: 26rem;
@@ -400,34 +417,34 @@
   box-sizing: border-box;
 }
 
-.fo-vault__canvas-backdrop {
+.fo-journey__canvas-backdrop {
   position: absolute;
   inset: 0;
   z-index: 0;
-  background: #0d1a29;
+  background: #09131e;
 }
 
-.fo-vault__canvas-image {
+.fo-journey__canvas-image {
   position: absolute;
   inset: 0;
   background-image:
-    radial-gradient(ellipse at center, rgba(14, 22, 32, 0.1) 0%, rgba(14, 22, 32, 0.8) 100%),
-    url("https://images.unsplash.com/photo-1517479149777-5f3b1511d5ad?auto=format&fit=crop&w=1200&q=80");
+    radial-gradient(ellipse at center, rgba(14, 22, 32, 0.1) 0%, rgba(14, 22, 32, 0.82) 100%),
+    url("https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=1200&q=80");
   background-size: cover;
-  background-position: center 45%;
-  filter: contrast(1.08) saturate(1.1);
+  background-position: center 40%;
+  filter: contrast(1.1) saturate(1.15);
 }
 
-.fo-vault__canvas-glow {
+.fo-journey__canvas-glow {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 80% 20%, rgba(0, 210, 255, 0.25) 0%, transparent 60%),
-    linear-gradient(to top, rgba(10, 20, 30, 0.85) 0%, transparent 65%);
+    radial-gradient(circle at 75% 25%, rgba(0, 210, 255, 0.25) 0%, transparent 60%),
+    linear-gradient(to top, rgba(10, 20, 30, 0.88) 0%, transparent 65%);
   z-index: 1;
 }
 
-.fo-vault__canvas-route {
+.fo-journey__canvas-route {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -437,14 +454,14 @@
 }
 
 /* Floating Waypoint Chips */
-.fo-vault__canvas-tag {
+.fo-journey__canvas-tag {
   position: relative;
   z-index: 10;
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  height: 1.75rem;
-  padding: 0 0.75rem;
+  gap: 0.45rem;
+  height: 1.85rem;
+  padding: 0 0.85rem;
   box-sizing: border-box;
   border-radius: 9999px;
   background: rgba(14, 22, 32, 0.78);
@@ -459,7 +476,7 @@
   max-width: calc(100% - 0.5rem);
 }
 
-.fo-vault__canvas-tags {
+.fo-journey__canvas-tags {
   position: relative;
   z-index: 10;
   grid-row: 1;
@@ -471,8 +488,8 @@
   min-width: 0;
 }
 
-.fo-vault__canvas-tag--top,
-.fo-vault__canvas-tag--mid {
+.fo-journey__canvas-tag--top,
+.fo-journey__canvas-tag--mid {
   position: relative;
   top: auto;
   left: auto;
@@ -480,8 +497,20 @@
   animation: none;
 }
 
-/* Floating Dial Widget (Vault Health / Readiness Dial) */
-.fo-vault__dial-widget {
+.fo-journey__canvas-instruments {
+  position: relative;
+  z-index: 10;
+  grid-row: 3;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.85rem;
+  min-width: 0;
+}
+
+/* Floating Dial Widget (Flight Radar Dial — match /vault canvas) */
+.fo-journey__dial-widget {
   position: relative;
   z-index: 10;
   justify-self: start;
@@ -500,14 +529,14 @@
   gap: 0.75rem;
 }
 
-.fo-vault__dial-head {
+.fo-journey__dial-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
 }
 
-.fo-vault__dial-label {
+.fo-journey__dial-label {
   font-size: 0.6875rem;
   font-weight: 700;
   letter-spacing: 0.1em;
@@ -515,13 +544,13 @@
   text-transform: uppercase;
 }
 
-.fo-vault__dial-arrow {
+.fo-journey__dial-arrow {
   font-size: 0.75rem;
   color: var(--ink-faint);
   line-height: 1;
 }
 
-.fo-vault__dial-circle-wrap {
+.fo-journey__dial-circle-wrap {
   position: relative;
   display: flex;
   align-items: center;
@@ -530,23 +559,23 @@
   margin: 0.1rem 0;
 }
 
-.fo-vault__dial-svg {
+.fo-journey__dial-svg {
   width: 5.5rem;
   height: 5.5rem;
 }
 
-.fo-vault__dial-track {
+.fo-journey__dial-track {
   fill: none;
   stroke: rgba(14, 22, 32, 0.08);
 }
 
-.fo-vault__dial-progress {
+.fo-journey__dial-progress {
   fill: none;
   stroke: var(--sky);
   transition: stroke-dashoffset 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.fo-vault__dial-value {
+.fo-journey__dial-value {
   position: absolute;
   display: flex;
   align-items: baseline;
@@ -554,7 +583,7 @@
   color: #0e1620;
 }
 
-.fo-vault__dial-number {
+.fo-journey__dial-number {
   font-family: var(--font-hero);
   font-size: 1.55rem;
   font-weight: 800;
@@ -562,14 +591,14 @@
   line-height: 1;
 }
 
-.fo-vault__dial-percent {
+.fo-journey__dial-percent {
   font-size: 0.75rem;
   font-weight: 700;
   color: var(--sky);
   margin-left: 2px;
 }
 
-.fo-vault__dial-status-pills {
+.fo-journey__dial-status-pills {
   display: flex;
   align-items: stretch;
   gap: 0.4rem;
@@ -577,7 +606,7 @@
   border-top: 1px solid rgba(14, 22, 32, 0.05);
 }
 
-.fo-vault__dial-status-pill {
+.fo-journey__dial-status-pill {
   display: inline-flex;
   flex: 1 1 0;
   align-items: center;
@@ -601,7 +630,7 @@
   text-overflow: ellipsis;
 }
 
-.fo-vault__dial-status-pill--active {
+.fo-journey__dial-status-pill--active {
   background: #0e1620;
   color: #ffffff;
   border-color: rgba(255, 255, 255, 0.12);
@@ -610,8 +639,8 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.16);
 }
 
-/* Floating Credentials Widget (Bottom Right) */
-.fo-vault__credentials-widget {
+/* Floating Active Flight Widget (Bottom Right — match /vault credentials) */
+.fo-journey__flight-widget {
   position: relative;
   z-index: 10;
   justify-self: end;
@@ -631,19 +660,7 @@
     0 12px 28px -10px rgba(14, 22, 32, 0.14);
 }
 
-.fo-vault__canvas-instruments {
-  position: relative;
-  z-index: 10;
-  grid-row: 3;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 0.85rem;
-  min-width: 0;
-}
-
-.fo-vault__credentials-icon {
+.fo-journey__flight-icon {
   position: relative;
   width: 2.65rem;
   height: 2.65rem;
@@ -658,7 +675,7 @@
   justify-content: center;
 }
 
-.fo-vault__credentials-info {
+.fo-journey__flight-info {
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
@@ -666,7 +683,7 @@
   padding: 0.1rem 0;
 }
 
-.fo-vault__credentials-name {
+.fo-journey__flight-name {
   margin: 0;
   font-size: 0.8125rem;
   font-weight: 700;
@@ -675,14 +692,14 @@
   letter-spacing: -0.01em;
 }
 
-.fo-vault__credentials-sub {
+.fo-journey__flight-sub {
   margin: 0;
   font-size: 0.6875rem;
   line-height: 1.35;
   color: var(--ink-faint);
 }
 
-.fo-vault__credentials-status {
+.fo-journey__flight-status {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
@@ -693,7 +710,7 @@
   color: var(--ink-soft);
 }
 
-.fo-vault__credentials-dot {
+.fo-journey__flight-dot {
   width: 0.375rem;
   height: 0.375rem;
   flex-shrink: 0;
@@ -701,56 +718,8 @@
   background: #25d366;
 }
 
-.fo-vault__credentials-dot--warn {
-  background: #f59e0b;
-}
-
-/* ── Flash Messages ────────────────────────────────────────── */
-.fo-vault__flash {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0.85rem 1.15rem;
-  border-radius: 1.15rem;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 4px 14px -3px rgba(14, 22, 32, 0.04);
-}
-
-.fo-vault__flash--ok {
-  background: rgba(37, 211, 102, 0.1);
-  border: 1px solid rgba(37, 211, 102, 0.25);
-  color: #14532d;
-}
-
-.fo-vault__flash--err {
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.25);
-  color: #991b1b;
-}
-
-.fo-vault__flash-dismiss {
-  flex-shrink: 0;
-  border: none;
-  background: transparent;
-  padding: 0.2rem 0.4rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: inherit;
-  opacity: 0.7;
-  cursor: pointer;
-  border-radius: 9999px;
-  transition: opacity 0.15s ease;
-}
-
-.fo-vault__flash-dismiss:hover {
-  opacity: 1;
-}
-
-/* ── Summary Strip (Deck Style) ────────────────────────────── */
-.fo-vault__summary {
+/* ── Summary Strip (Deck Style — borderless white cards) ───── */
+.fo-journey__summary {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 10.5rem), 1fr));
   gap: 0.85rem;
@@ -758,7 +727,7 @@
   min-width: 0;
 }
 
-.fo-vault__stat {
+.fo-journey__stat {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -773,12 +742,12 @@
     box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.fo-vault__stat:hover {
+.fo-journey__stat:hover {
   transform: translateY(-1px);
   box-shadow: 0 12px 32px rgba(14, 22, 32, 0.09);
 }
 
-.fo-vault__stat-label {
+.fo-journey__stat-label {
   margin: 0;
   display: inline-flex;
   align-items: center;
@@ -792,33 +761,29 @@
   color: var(--ink-faint);
 }
 
-.fo-vault__stat-label > svg {
+.fo-journey__stat-label > svg {
   flex-shrink: 0;
 }
 
-.fo-vault__stat-label > span {
+.fo-journey__stat-label > span {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.fo-vault__stat-label--sky {
+.fo-journey__stat-label--sky {
   color: var(--sky);
 }
 
-.fo-vault__stat-label--emerald {
+.fo-journey__stat-label--emerald {
   color: #0f9f55;
 }
 
-.fo-vault__stat-label--amber {
+.fo-journey__stat-label--amber {
   color: #d97706;
 }
 
-.fo-vault__stat-label--danger {
-  color: var(--danger);
-}
-
-.fo-vault__stat-value {
+.fo-journey__stat-value {
   margin: 0.2rem 0 0;
   font-family: var(--font-hero);
   font-size: clamp(1.5rem, 2.8vw, 1.85rem);
@@ -829,13 +794,13 @@
   overflow-wrap: anywhere;
 }
 
-.fo-vault__stat-value--sm {
+.fo-journey__stat-value--sm {
   font-size: clamp(1.05rem, 2vw, 1.25rem);
   letter-spacing: -0.02em;
   line-height: 1.15;
 }
 
-.fo-vault__stat-note {
+.fo-journey__stat-note {
   margin: 0;
   font-size: 0.75rem;
   line-height: 1.4;
@@ -843,556 +808,501 @@
   overflow-wrap: anywhere;
 }
 
-.fo-vault__stat--warn .fo-vault__stat-value {
-  color: #d97706;
-}
-
-.fo-vault__stat--danger .fo-vault__stat-value {
-  color: var(--danger);
-}
-
-/* ── Toolbar & Search ──────────────────────────────────────── */
-.fo-vault__toolbar {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-@media (min-width: 768px) {
-  .fo-vault__toolbar {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-  }
-}
-
-.fo-vault__search {
-  width: 100%;
-  max-width: 20rem;
-}
-
-.fo-vault__search-wrap {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.fo-vault__search-icon {
-  position: absolute;
-  left: 0.85rem;
-  color: var(--ink-faint);
-  pointer-events: none;
-  z-index: 2;
-}
-
-.fo-vault__search-wrap input {
-  padding-left: 2.35rem !important;
-}
-
-/* ── Document Groups / Frosted Panels ──────────────────────── */
-.fo-vault__groups {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.fo-vault__panel {
-  border-radius: clamp(1.25rem, 2.2vw, 1.85rem);
-  background: rgba(255, 255, 255, 0.88);
-  border: 1px solid rgba(255, 255, 255, 0.95);
-  box-shadow:
-    0 16px 36px -10px rgba(14, 22, 32, 0.06),
-    0 1px 3px rgba(14, 22, 32, 0.02),
-    inset 0 1px 0 #ffffff;
-  backdrop-filter: blur(12px);
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.fo-vault__panel-head {
+/* ── Flash Notifications ──────────────────────────────────────── */
+.fo-journey__flash {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid rgba(14, 22, 32, 0.06);
-}
-
-.fo-vault__panel-title {
-  margin: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-family: var(--font-hero);
-  font-size: 0.9375rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  color: #0e1620;
-}
-
-.fo-vault__panel-count {
-  font-size: 0.6875rem;
-  font-weight: 600;
-  padding: 0.15rem 0.55rem;
-  border-radius: 9999px;
-  background: rgba(14, 22, 32, 0.06);
-  color: var(--ink-soft);
-}
-
-.fo-vault__list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-/* ── Document Row Card ─────────────────────────────────────── */
-.fo-vault__row {
-  display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
-  padding: 1rem 1.15rem;
-  border-radius: 1.25rem;
-  background: #ffffff;
-  border: 1px solid rgba(14, 22, 32, 0.08);
+  padding: 0.85rem 1.15rem;
+  border-radius: 1.15rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  backdrop-filter: blur(8px);
   box-shadow: 0 4px 14px -3px rgba(14, 22, 32, 0.04);
+}
+
+.fo-journey__flash--success {
+  background: rgba(37, 211, 102, 0.1);
+  border: 1px solid rgba(37, 211, 102, 0.25);
+  color: #14532d;
+}
+
+.fo-journey__flash--error {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #991b1b;
+}
+
+.fo-journey__flash--info {
+  background: rgba(8, 150, 191, 0.08);
+  border: 1px solid rgba(8, 150, 191, 0.25);
+  color: var(--navy);
+}
+
+.fo-journey__flash-dismiss {
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  padding: 0.2rem 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: inherit;
+  opacity: 0.7;
+  cursor: pointer;
+  border-radius: 9999px;
+  transition: opacity 0.15s ease;
+}
+
+.fo-journey__flash-dismiss:hover {
+  opacity: 1;
+}
+
+/* ── Journey Stack & Watch Cards ───────────────────────────── */
+.fo-journey__stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.fo-journey__watch {
+  border-radius: clamp(1.25rem, 2.2vw, 1.85rem);
+  background: #ffffff;
+  border: none;
+  box-shadow:
+    0 1px 2px rgba(14, 22, 32, 0.04),
+    0 12px 28px -10px rgba(14, 22, 32, 0.08);
+  padding: clamp(1.25rem, 2vw, 1.75rem);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
   transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.fo-vault__row:hover {
+.fo-journey__watch:hover {
   transform: translateY(-1px);
-  border-color: rgba(8, 150, 191, 0.35);
-  box-shadow: 0 10px 24px -5px rgba(14, 22, 32, 0.08);
+  box-shadow:
+    0 20px 45px -10px rgba(14, 22, 32, 0.1),
+    0 1px 3px rgba(14, 22, 32, 0.02),
+    inset 0 1px 0 #ffffff;
 }
 
-.fo-vault__row-main {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.85rem;
-  min-width: 0;
-}
-
-.fo-vault__doc-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.75rem;
-  height: 2.75rem;
-  flex-shrink: 0;
-  border-radius: 1rem;
-  background: #0e1620;
-  color: #ffffff;
-  box-shadow: 0 4px 12px rgba(14, 22, 32, 0.15);
-}
-
-.fo-vault__doc-body {
-  min-width: 0;
-  flex: 1;
-}
-
-.fo-vault__doc-top {
+.fo-journey__watch-head {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 0.35rem 0.75rem;
+  gap: 0.75rem 1rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid rgba(14, 22, 32, 0.06);
 }
 
-.fo-vault__doc-title {
+.fo-journey__watch-identity {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.fo-journey__flight {
   margin: 0;
   font-family: var(--font-hero);
-  font-size: 0.9375rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
   color: #0e1620;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-.fo-vault__doc-type {
-  margin: 0;
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-  background: rgba(14, 22, 32, 0.05);
-  padding: 0.15rem 0.45rem;
-  border-radius: 9999px;
+.fo-journey__watch-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.fo-vault__doc-meta {
-  margin: 0.25rem 0 0;
-  font-size: 0.75rem;
-  line-height: 1.45;
-  color: var(--ink-soft);
-}
-
-.fo-vault__doc-meta--muted {
-  color: var(--ink-faint);
-}
-
-.fo-vault__expiry {
+.fo-journey__fact {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  font-weight: 600;
-  color: #0e1620;
-}
-
-.fo-vault__expiry--ok {
-  color: #16a34a;
-}
-
-.fo-vault__expiry--warn {
-  color: #d97706;
-}
-
-.fo-vault__expiry--danger {
-  color: var(--danger);
-}
-
-.fo-vault__row-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  padding-top: 0.65rem;
-  border-top: 1px solid rgba(14, 22, 32, 0.05);
-}
-
-.fo-vault__action-group {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-.fo-vault__text-btn {
-  border: none;
-  background: transparent;
-  padding: 0.35rem 0.65rem;
+  padding: 0.25rem 0.65rem;
   border-radius: 9999px;
+  background: rgba(14, 22, 32, 0.05);
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--ink-soft);
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.fo-vault__text-btn:hover:not(:disabled) {
-  background: rgba(14, 22, 32, 0.05);
   color: #0e1620;
 }
 
-.fo-vault__text-btn--danger {
-  color: var(--danger);
+.fo-journey__fact--live {
+  background: rgba(37, 211, 102, 0.1);
+  color: #15803d;
+  border: 1px solid rgba(37, 211, 102, 0.2);
 }
 
-.fo-vault__text-btn--danger:hover:not(:disabled) {
-  background: rgba(239, 68, 68, 0.08);
-  color: var(--danger);
+.fo-journey__fact--muted {
+  color: var(--ink-faint);
+  font-weight: 500;
 }
 
-.fo-vault__text-btn:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
+/* ── Route Arc Header (Big IATA Codes) ─────────────────────── */
+.fo-journey__route {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 0;
 }
 
-.fo-vault__ocr {
-  margin-top: 0.5rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid rgba(14, 22, 32, 0.06);
-}
-
-/* ── Modals & Overlays (Frosted Luxury Dialogs) ─────────────── */
-.fo-vault__overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding: max(1rem, env(safe-area-inset-top)) 1rem max(1rem, env(safe-area-inset-bottom));
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  background: rgba(14, 22, 32, 0.65);
-  backdrop-filter: blur(12px);
-}
-
-.fo-vault__dialog {
-  position: relative;
-  width: 100%;
-  max-width: 32rem;
-  max-height: calc(100dvh - 2rem);
-  margin: auto 0;
-  overflow: hidden;
-  padding: 0;
-  border-radius: 1.85rem;
-  background: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  box-shadow:
-    0 24px 60px -15px rgba(0, 0, 0, 0.35),
-    inset 0 1px 0 #ffffff;
+.fo-journey__endpoint {
   display: flex;
   flex-direction: column;
 }
 
-.fo-vault__dialog--wide {
-  max-width: 42rem;
+.fo-journey__endpoint--arrive {
+  text-align: right;
+  align-items: flex-end;
 }
 
-.fo-vault__dialog--sm {
-  max-width: 26rem;
-}
-
-.fo-vault__dialog-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 0.75rem;
-  flex-shrink: 0;
-  padding: 1.35rem 1.5rem 0;
-}
-
-.fo-vault__dialog-kicker {
+.fo-journey__iata {
   margin: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--sky);
-}
-
-.fo-vault__dialog-title {
-  margin: 0.25rem 0 0;
   font-family: var(--font-hero);
-  font-size: 1.25rem;
+  font-size: clamp(2rem, 4.5vw, 2.75rem);
   font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
   color: #0e1620;
 }
 
-.fo-vault__dialog-sub {
-  margin: 0.15rem 0 0;
-  font-size: 0.75rem;
-  color: var(--ink-soft);
+.fo-journey__when {
+  margin: 0.35rem 0 0;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--sky);
 }
 
-.fo-vault__close {
+.fo-journey__day {
+  margin: 0.15rem 0 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--ink-faint);
+}
+
+.fo-journey__route-mid {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 6rem;
+  color: var(--sky);
+}
+
+.fo-journey__route-line {
+  flex: 1;
+  height: 2px;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, rgba(8, 150, 191, 0.3), var(--sky), rgba(8, 150, 191, 0.3));
+}
+
+.fo-journey__route-plane {
   display: inline-flex;
   height: 2rem;
   width: 2rem;
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  border: 1px solid rgba(14, 22, 32, 0.08);
-  background: rgba(14, 22, 32, 0.03);
-  color: var(--ink-soft);
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.fo-vault__close:hover {
-  background: rgba(14, 22, 32, 0.08);
-  color: var(--navy);
-  transform: scale(1.05);
-}
-
-.fo-vault__close:active {
-  transform: scale(0.95);
-}
-
-.fo-vault__dialog-form {
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow: hidden;
-}
-
-.fo-vault__dialog-body {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  padding: 1.15rem 1.5rem;
-  scrollbar-gutter: stable;
-}
-
-.fo-vault__dialog-foot {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
+  background: #0e1620;
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(14, 22, 32, 0.2);
   flex-shrink: 0;
-  padding: 0.85rem 1.5rem 1.25rem;
-  border-top: 1px solid rgba(14, 22, 32, 0.06);
-  background: #ffffff;
 }
 
-.fo-vault__dropzone {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.45rem;
-  min-height: 4.5rem;
-  padding: 1rem;
-  border-radius: 1.25rem;
-  border: 1.5px dashed rgba(8, 150, 191, 0.4);
-  background: rgba(8, 150, 191, 0.04);
-  text-align: center;
-  font-size: 0.8125rem;
-  color: var(--ink-soft);
-  cursor: pointer;
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.fo-vault__dropzone:hover {
-  border-color: var(--sky);
-  background: rgba(8, 150, 191, 0.08);
-  transform: translateY(-1px);
-}
-
-.fo-vault__dropzone input {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  cursor: pointer;
-}
-
-.fo-vault__dropzone-accent {
-  font-weight: 700;
-  color: var(--sky);
-}
-
-.fo-vault__dropzone-file {
-  font-weight: 700;
-  color: #0e1620;
-}
-
-.fo-vault__visa-block {
-  display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
-  padding: 1rem 1.15rem;
-  border: 1px solid rgba(14, 22, 32, 0.08);
-  border-radius: 1.15rem;
-  background: rgba(14, 22, 32, 0.02);
-}
-
-.fo-vault__visa-label {
+.fo-journey__muted {
   margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+/* ── Content Blocks & Warnings ─────────────────────────────── */
+.fo-journey__block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 1rem 1.15rem;
+  border-radius: 1.25rem;
+  background: #ffffff;
+  border: 1px solid rgba(14, 22, 32, 0.08);
+  box-shadow: 0 2px 8px rgba(14, 22, 32, 0.03);
+}
+
+.fo-journey__block-title {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
   font-size: 0.6875rem;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--ink-faint);
 }
 
-.fo-vault__guidance {
+.fo-journey__block--warn {
+  border-color: rgba(245, 158, 11, 0.3);
+  background: rgba(245, 158, 11, 0.05);
+}
+
+.fo-journey__legs {
+  margin: 0;
+  padding: 0;
+  list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 0.65rem;
-  padding: 1rem 1.15rem;
-  border: 1px solid rgba(8, 150, 191, 0.18);
-  border-radius: 1.15rem;
-  background: rgba(8, 150, 191, 0.04);
+  gap: 0.5rem;
 }
 
-.fo-vault__guidance-head {
+.fo-journey__leg {
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.35rem 0.75rem;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: #0e1620;
+  font-weight: 500;
 }
 
-.fo-vault__guidance-title {
+.fo-journey__leg-icon {
+  display: inline-flex;
+  height: 1.75rem;
+  width: 1.75rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
+  background: rgba(8, 150, 191, 0.1);
+  color: var(--sky);
+  flex-shrink: 0;
+}
+
+.fo-journey__leg-sep {
+  margin: 0 0.35rem;
+  color: var(--ink-faint);
+}
+
+.fo-journey__disruptions {
   margin: 0;
-  font-family: var(--font-hero);
-  font-size: 0.875rem;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.fo-journey__disruptions li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #b45309;
+}
+
+/* ── Timeline ──────────────────────────────────────────────── */
+.fo-journey__timeline {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.fo-journey__timeline-item {
+  display: grid;
+  grid-template-columns: 1.5rem minmax(0, 1fr);
+  gap: 0 0.85rem;
+  position: relative;
+}
+
+.fo-journey__timeline-rail {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding-top: 0.2rem;
+}
+
+.fo-journey__timeline-rail::after {
+  content: "";
+  position: absolute;
+  top: 1.35rem;
+  bottom: -0.2rem;
+  left: 50%;
+  width: 2px;
+  transform: translateX(-50%);
+  background: rgba(14, 22, 32, 0.08);
+}
+
+.fo-journey__timeline-item--last .fo-journey__timeline-rail::after {
+  display: none;
+}
+
+.fo-journey__timeline-node {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 9999px;
+  border: 1.5px solid rgba(8, 150, 191, 0.3);
+  background: #ffffff;
+  color: var(--sky);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.fo-journey__timeline-item--attention .fo-journey__timeline-node {
+  border-color: rgba(245, 158, 11, 0.4);
+  background: #fffbeb;
+  color: #d97706;
+}
+
+.fo-journey__timeline-item--critical .fo-journey__timeline-node {
+  border-color: rgba(239, 68, 68, 0.4);
+  background: #fef2f2;
+  color: var(--danger);
+}
+
+.fo-journey__timeline-body {
+  padding: 0 0 1.15rem;
+  min-width: 0;
+}
+
+.fo-journey__timeline-item--last .fo-journey__timeline-body {
+  padding-bottom: 0.2rem;
+}
+
+.fo-journey__timeline-title {
+  margin: 0;
+  font-size: 0.8125rem;
   font-weight: 700;
   color: #0e1620;
 }
 
-.fo-vault__facts {
-  margin: 0;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.65rem;
-  font-size: 0.8125rem;
+.fo-journey__timeline-copy {
+  margin: 0.2rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--ink-soft);
 }
 
-@media (min-width: 480px) {
-  .fo-vault__facts {
-    grid-template-columns: 1fr 1fr;
+.fo-journey__timeline-meta {
+  margin: 0.25rem 0 0;
+  font-size: 0.6875rem;
+  letter-spacing: 0.01em;
+  color: var(--ink-faint);
+}
+
+/* ── Watch Foot & Actions ─────────────────────────────────── */
+.fo-journey__watch-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(14, 22, 32, 0.06);
+}
+
+.fo-journey__booking-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.75rem;
+  color: var(--ink-faint);
+}
+
+.fo-journey__booking-meta p {
+  margin: 0;
+}
+
+.fo-journey__booking-link {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-weight: 700;
+  color: var(--sky);
+  text-decoration: none;
+}
+
+.fo-journey__booking-link:hover {
+  text-decoration: underline;
+}
+
+.fo-journey__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.fo-journey__alts {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem 1.15rem;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(8, 150, 191, 0.2);
+  background: rgba(8, 150, 191, 0.04);
+}
+
+.fo-journey__alt-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.65rem;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+}
+
+.fo-journey__alt {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 0.75rem 0.85rem;
+  border-radius: 0.85rem;
+  background: #ffffff;
+  border: 1px solid rgba(14, 22, 32, 0.08);
+}
+
+.fo-journey__alt-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #0e1620;
+}
+
+@media (max-width: 480px) {
+  .fo-journey__route {
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+  }
+
+  .fo-journey__route-mid {
+    min-width: 0;
+    max-width: 8rem;
+  }
+
+  .fo-journey__endpoint--arrive {
+    text-align: left;
+    align-items: flex-start;
   }
 }
 
-.fo-vault__fact dt {
-  margin: 0;
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-}
-
-.fo-vault__fact dd {
-  margin: 0.15rem 0 0;
-  font-weight: 600;
-  color: #0e1620;
-}
-
-.fo-vault__status-line {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem 0.85rem;
-  font-size: 0.75rem;
-  color: var(--ink-soft);
-}
-
-.fo-vault__status-line strong {
-  font-weight: 700;
-  color: #0e1620;
-}
-
-.fo-vault__btn-danger {
-  background: var(--danger) !important;
-  border-color: var(--danger) !important;
-  color: #ffffff !important;
-}
-
-.fo-vault__btn-danger:hover:not(:disabled) {
-  background: #b91c1c !important;
-  border-color: #b91c1c !important;
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .fo-vault__tab-pill,
-  .fo-vault__cta-primary,
-  .fo-vault__cta-secondary,
-  .fo-vault__action-pill,
-  .fo-vault__stat,
-  .fo-vault__row,
-  .fo-vault__canvas-tag,
-  .fo-vault__dial-progress,
-  .fo-vault__close {
+  .fo-journey__tab-pill,
+  .fo-journey__cta-primary,
+  .fo-journey__cta-secondary,
+  .fo-journey__action-pill,
+  .fo-journey__stat,
+  .fo-journey__watch,
+  .fo-journey__canvas-tag,
+  .fo-journey__dial-progress,
+  .fo-journey__brand-dot {
     transition: none !important;
     animation: none !important;
     transform: none !important;

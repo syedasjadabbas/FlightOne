@@ -1,13 +1,20 @@
 ﻿"use client";
 
 import { useMemo, useState } from "react";
-import { FilePlus2, Lock, Search } from "lucide-react";
-import { Button, Input, Spinner } from "@/components/ui";
 import {
-  TravellerPageHeader,
-  TravellerSection,
-  TravellerState,
-} from "@/app/components/traveller";
+  AlertCircle,
+  Check,
+  ChevronRight,
+  FilePlus2,
+  HardDrive,
+  Lock,
+  RefreshCw,
+  Search,
+  Shield,
+  ShieldCheck,
+  Sparkles,
+} from "lucide-react";
+import { Button, Input, Spinner } from "@/components/ui";
 import { useAuthStore } from "@/store/auth.store";
 import {
   useCreateDocumentMutation,
@@ -40,10 +47,14 @@ import {
   visaMetaFormToInput,
   type VisaMetaFormValue,
 } from "./_components/VisaMetaFields";
+import "./vault.css";
 
 export function VaultPageClient() {
   const accessToken = useAuthStore((s) => s.accessToken);
   const userId = useAuthStore((s) => s.user?.id);
+  const authUser = useAuthStore((s) => s.user);
+  const hasHydrated = useAuthStore((s) => s.hasHydrated);
+
   const [selectedCategory, setSelectedCategory] = useState<VaultCategory>("ALL");
   const [searchQuery, setSearchQuery] = useState("");
   const [showUploadModal, setShowUploadModal] = useState(false);
@@ -62,11 +73,18 @@ export function VaultPageClient() {
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
 
-  const { data: capability, isLoading: capLoading } = useGetVaultCapabilityQuery();
-  const { data: list, isLoading, isError, refetch } = useListVaultDocumentsQuery({
-    includeInactive: true,
+  const skipAuth = !hasHydrated || !accessToken;
+  const { data: capability, isLoading: capLoading } = useGetVaultCapabilityQuery(
+    undefined,
+    { skip: skipAuth },
+  );
+  const { data: list, isLoading, isError, refetch } = useListVaultDocumentsQuery(
+    { includeInactive: true },
+    { skip: skipAuth },
+  );
+  const { data: identityDocs } = useListDocumentsQuery(undefined, {
+    skip: skipAuth,
   });
-  const { data: identityDocs } = useListDocumentsQuery();
   const [createIdentityDoc] = useCreateDocumentMutation();
   const [upload, { isLoading: uploading }] = useUploadVaultDocumentMutation();
   const [replaceDoc] = useReplaceVaultDocumentMutation();
@@ -122,6 +140,13 @@ export function VaultPageClient() {
       expired: expiredCount,
     };
   }, [rawItems]);
+
+  // Health score calculation for instrument dial
+  const healthScore = useMemo(() => {
+    if (stats.total === 0) return 100;
+    const penalty = stats.expired * 35 + stats.expiring * 15;
+    return Math.max(0, Math.min(100, Math.round(100 - penalty)));
+  }, [stats]);
 
   const filteredItems = useMemo(() => {
     return rawItems.filter((doc) => {
@@ -249,7 +274,7 @@ export function VaultPageClient() {
       setUploadFile(null);
       setUploadVisa(emptyVisaMetaForm());
       setShowUploadModal(false);
-      setActionSuccess(`"${uploaded.title}" added to your Vault.`);
+      setActionSuccess(`"${uploaded.title}" encrypted and added to your Vault.`);
       setSelectedFallback(uploaded);
       setSelectedDocId(uploaded.id);
 
@@ -321,7 +346,7 @@ export function VaultPageClient() {
           contentType: gcs.mimeType,
           originalFilename: gcs.originalName,
         }).unwrap();
-        setActionSuccess(`Document "${doc.title}" replaced with new version.`);
+        setActionSuccess(`Document "${doc.title}" replaced with new encrypted version.`);
       } catch {
         setActionError("Replace failed.");
       } finally {
@@ -353,66 +378,242 @@ export function VaultPageClient() {
     }
   }
 
-  if (isLoading || capLoading) {
+  if (!hasHydrated || (accessToken && (isLoading || capLoading))) {
     return (
-      <div className="flex justify-center py-24">
-        <Spinner label="Opening secure Traveller Vault…" />
+      <div className="flex min-h-[60vh] items-center justify-center py-24">
+        <div className="flex flex-col items-center gap-3">
+          <Spinner label="Opening encrypted Travel Vault…" />
+          <p className="text-xs tracking-wider uppercase text-ink-faint">
+            Decrypting credentials &amp; certificates
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!accessToken) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center py-16">
+        <div className="max-w-md w-full rounded-3xl border border-white/95 bg-white/90 p-8 text-center shadow-xl backdrop-blur-xl">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-sky/10 text-sky">
+            <Lock size={26} strokeWidth={2} />
+          </div>
+          <h2 className="font-hero text-2xl font-bold text-navy">Authentication Required</h2>
+          <p className="mt-2 text-sm leading-relaxed text-ink-soft">
+            Sign in with verified credentials to access your AES-256 encrypted biometric vault and travel certificates.
+          </p>
+          <Button
+            size="lg"
+            className="mt-6 w-full rounded-full font-semibold shadow-lg"
+            onClick={() => {
+              window.location.href = "/login?redirect=/vault";
+            }}
+          >
+            Sign In to Travel Vault
+          </Button>
+        </div>
       </div>
     );
   }
 
   if (isError) {
     return (
-      <div className="fo-vault">
-        <TravellerPageHeader
-          title="Traveller Vault"
-          lede="Store and manage passports, visas, and travel documents in one place."
-        />
-        <TravellerState
-          variant="error"
-          title="Vault unavailable"
-          action={
-            <Button size="sm" variant="secondary" onClick={() => refetch()}>
-              Retry
-            </Button>
-          }
-        >
-          Could not retrieve your stored documents.
-        </TravellerState>
+      <div className="flex min-h-[60vh] items-center justify-center py-16">
+        <div className="max-w-md w-full rounded-3xl border border-white/95 bg-white/90 p-8 text-center shadow-xl backdrop-blur-xl">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-danger/10 text-danger">
+            <AlertCircle size={26} strokeWidth={2} />
+          </div>
+          <h2 className="font-hero text-xl font-bold text-navy">Vault Unavailable</h2>
+          <p className="mt-2 text-sm text-ink-soft">
+            Could not retrieve your stored documents from the secure vault cluster.
+          </p>
+          <Button size="md" variant="secondary" className="mt-5" onClick={() => refetch()}>
+            Retry Connection
+          </Button>
+        </div>
       </div>
     );
   }
 
-  const providerLabel = capability?.configured ? capability.provider : "Standard safe";
+  const providerLabel = capability?.configured ? capability.provider : "Standard Safe";
   const maxMbNote = capability?.maxBytes
     ? `Max ${(capability.maxBytes / (1024 * 1024)).toFixed(0)} MB / doc`
     : null;
 
-  return (
-    <div className="fo-vault">
-      <TravellerPageHeader
-        title="Traveller Vault"
-        lede="Passports, visas, loyalty cards, and vouchers — stored encrypted, ready when you travel."
-        actions={
-          <Button
-            size="md"
-            onClick={() => {
-              setActionError(null);
-              setShowUploadModal(true);
-            }}
-            icon={<FilePlus2 size={15} strokeWidth={2} aria-hidden />}
-          >
-            Add document
-          </Button>
-        }
-        meta={
-          <span className="inline-flex items-center gap-1.5">
-            <Lock size={12} strokeWidth={2} aria-hidden />
-            Encrypted travel credentials
-          </span>
-        }
-      />
+  // Geometry for Circular Readiness Gauge
+  const radius = 38;
+  const circumference = 2 * Math.PI * radius;
+  const strokeOffset = circumference - (healthScore / 100) * circumference;
 
+  return (
+    <div className="fo-vault__master-stage">
+      {/* ── Master Hero Showcase Section ─────────────────────────────── */}
+      <div className="fo-vault__hero-showcase">
+        {/* Left Column: Bold Typography & Action Controls */}
+        <div className="fo-vault__hero-left">
+          <div className="fo-vault__hero-eyebrow">
+            <Shield size={13} strokeWidth={2.2} className="text-sky" />
+            <span>ZERO-KNOWLEDGE BIOMETRIC STORAGE</span>
+          </div>
+
+          <h1 className="fo-vault__hero-title">
+            TRAVEL VAULT<br />
+            <span className="fo-vault__hero-title-accent">AI ENCRYPTED</span>
+          </h1>
+
+          <p className="fo-vault__hero-lede">
+            Encrypted biometric passports, national IDs, visas, and flight vouchers. Instant AI OCR verification unlocks autonomous hands-free booking.
+          </p>
+
+          <div className="fo-vault__hero-cta-group">
+            <button
+              type="button"
+              onClick={() => {
+                setActionError(null);
+                setShowUploadModal(true);
+              }}
+              className="fo-vault__cta-primary"
+            >
+              <span>Upload Document</span>
+              <span className="fo-vault__cta-icon-circle">
+                <ChevronRight size={14} strokeWidth={2.5} />
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedCategory("EXPIRING");
+              }}
+              className="fo-vault__cta-secondary"
+            >
+              <ShieldCheck size={14} strokeWidth={2} className="text-emerald" />
+              <span>Audit Validity</span>
+            </button>
+          </div>
+
+          {/* Bottom 3 Feature Pills */}
+          <div className="fo-vault__feature-pills">
+            <div className="fo-vault__feature-pill">
+              <span className="fo-vault__feature-pill-dot fo-vault__feature-pill-dot--cyan" />
+              <span>AES-256 Hardware Encrypted</span>
+            </div>
+            <div className="fo-vault__feature-pill">
+              <span className="fo-vault__feature-pill-dot fo-vault__feature-pill-dot--emerald" />
+              <span>Automated AI OCR</span>
+            </div>
+            <div className="fo-vault__feature-pill">
+              <span className="fo-vault__feature-pill-dot fo-vault__feature-pill-dot--amber" />
+              <span>Instant Booking Sync</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column: Scenic Canvas with Floating Instrument Dials */}
+        <div className="fo-vault__hero-right">
+          <div className="fo-vault__canvas-container">
+            <div className="fo-vault__canvas-backdrop">
+              <div className="fo-vault__canvas-glow" />
+              <div className="fo-vault__canvas-image" />
+
+              {/* Security Network / Cryptographic SVG Arcs */}
+              <svg className="fo-vault__canvas-route" viewBox="0 0 500 300" fill="none" preserveAspectRatio="none">
+                <path
+                  d="M 40 220 Q 160 80 280 160 T 460 100"
+                  stroke="rgba(255, 255, 255, 0.4)"
+                  strokeWidth="2.5"
+                  strokeDasharray="6 6"
+                />
+                <circle cx="40" cy="220" r="4.5" fill="#00D2FF" />
+                <circle cx="280" cy="160" r="4.5" fill="#FFFFFF" />
+                <circle cx="460" cy="100" r="5" fill="#25D366" />
+              </svg>
+            </div>
+
+            <div className="fo-vault__canvas-tags">
+              <div className="fo-vault__canvas-tag fo-vault__canvas-tag--mid">
+                <ShieldCheck size={12} strokeWidth={2.2} className="text-emerald" />
+                <span>Biometric Passport Ready</span>
+              </div>
+              <div className="fo-vault__canvas-tag fo-vault__canvas-tag--top">
+                <Lock size={12} strokeWidth={2.2} className="text-sky" />
+                <span>Zero-Knowledge Storage</span>
+              </div>
+            </div>
+
+            <div className="fo-vault__canvas-instruments">
+            {/* Floating Readiness Instrument (Health Dial) */}
+            <div className="fo-vault__dial-widget">
+              <div className="fo-vault__dial-head">
+                <span className="fo-vault__dial-label">VAULT HEALTH</span>
+                <span className="fo-vault__dial-arrow">↗</span>
+              </div>
+
+              <div className="fo-vault__dial-circle-wrap">
+                <svg className="fo-vault__dial-svg" viewBox="0 0 96 96">
+                  <circle
+                    cx="48"
+                    cy="48"
+                    r={radius}
+                    className="fo-vault__dial-track"
+                    strokeWidth="6"
+                  />
+                  <circle
+                    cx="48"
+                    cy="48"
+                    r={radius}
+                    className="fo-vault__dial-progress"
+                    strokeWidth="6"
+                    strokeDasharray={circumference}
+                    strokeDashoffset={strokeOffset}
+                    strokeLinecap="round"
+                    transform="rotate(-90 48 48)"
+                  />
+                </svg>
+
+                <div className="fo-vault__dial-value">
+                  <span className="fo-vault__dial-number">{healthScore}</span>
+                  <span className="fo-vault__dial-percent">%</span>
+                </div>
+              </div>
+
+              <div className="fo-vault__dial-status-pills">
+                <span className={`fo-vault__dial-status-pill${healthScore === 100 ? " fo-vault__dial-status-pill--active" : ""}`}>
+                  Optimal
+                </span>
+                <span className={`fo-vault__dial-status-pill${healthScore < 100 && healthScore >= 70 ? " fo-vault__dial-status-pill--active" : ""}`}>
+                  Expiring
+                </span>
+                <span className={`fo-vault__dial-status-pill${healthScore < 70 ? " fo-vault__dial-status-pill--active" : ""}`}>
+                  Attention
+                </span>
+              </div>
+            </div>
+
+            {/* Floating Credentials Widget (Bottom Right) */}
+            <div className="fo-vault__credentials-widget">
+              <div className="fo-vault__credentials-icon">
+                <ShieldCheck size={18} strokeWidth={2.2} className="text-emerald" />
+              </div>
+              <div className="fo-vault__credentials-info">
+                <p className="fo-vault__credentials-name">
+                  {stats.valid} of {stats.total} Valid Credentials
+                </p>
+                <p className="fo-vault__credentials-sub">
+                  {stats.expired > 0 ? `${stats.expired} expired action needed` : "All passports travel-ready"}
+                </p>
+                <div className="fo-vault__credentials-status">
+                  <span className={`fo-vault__credentials-dot${stats.expired > 0 ? " fo-vault__credentials-dot--warn" : ""}`} />
+                  <span>{stats.expired > 0 ? "Renewal Needed" : "Ready for Departure"}</span>
+                </div>
+              </div>
+            </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Summary Strip ───────────────────────────────────────────── */}
       <VaultSummaryStrip
         total={stats.total}
         valid={stats.valid}
@@ -422,9 +623,13 @@ export function VaultPageClient() {
         maxMbNote={maxMbNote}
       />
 
+      {/* ── Flash Notifications ──────────────────────────────────────── */}
       {actionSuccess ? (
         <div className="fo-vault__flash fo-vault__flash--ok" role="status">
-          <span>{actionSuccess}</span>
+          <span className="flex items-center gap-2">
+            <Check size={15} strokeWidth={2.5} className="text-emerald" />
+            <span>{actionSuccess}</span>
+          </span>
           <button
             type="button"
             className="fo-vault__flash-dismiss"
@@ -434,9 +639,13 @@ export function VaultPageClient() {
           </button>
         </div>
       ) : null}
+
       {actionError && !showUploadModal ? (
         <div className="fo-vault__flash fo-vault__flash--err" role="alert">
-          <span>{actionError}</span>
+          <span className="flex items-center gap-2">
+            <AlertCircle size={15} strokeWidth={2.5} className="text-danger" />
+            <span>{actionError}</span>
+          </span>
           <button
             type="button"
             className="fo-vault__flash-dismiss"
@@ -447,12 +656,13 @@ export function VaultPageClient() {
         </div>
       ) : null}
 
+      {/* ── Toolbar & Live Search ────────────────────────────────────── */}
       <div className="fo-vault__toolbar">
         <VaultCategoryTabs selected={selectedCategory} onChange={setSelectedCategory} />
         <div className="fo-vault__search">
           <div className="fo-vault__search-wrap">
             <Search
-              size={14}
+              size={15}
               strokeWidth={2}
               className="fo-vault__search-icon"
               aria-hidden
@@ -460,41 +670,55 @@ export function VaultPageClient() {
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search documents…"
-              aria-label="Search documents"
-              className="py-1.5 text-sm"
+              placeholder="Search title, IATA, or visa…"
+              aria-label="Search stored documents"
             />
           </div>
         </div>
       </div>
 
+      {/* ── Content Panels / Grouped Items ───────────────────────────── */}
       {filteredItems.length === 0 ? (
-        <TravellerState
-          title="No documents found"
-          action={
+        <div className="rounded-3xl border border-black/8 bg-white/85 p-12 text-center shadow-sm backdrop-blur-md">
+          <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-sky/10 text-sky">
+            <FilePlus2 size={26} strokeWidth={1.75} />
+          </div>
+          <h3 className="font-hero text-lg font-bold text-navy">
+            {searchQuery ? "No matching documents found" : "Your Travel Vault is Empty"}
+          </h3>
+          <p className="mx-auto mt-1 max-w-md text-sm text-ink-soft">
+            {searchQuery
+              ? "Try adjusting your search keywords or clear filters to view all documents."
+              : "Upload encrypted passports, visas, loyalty cards, and tickets for autonomous flight booking."}
+          </p>
+          <div className="mt-5 flex justify-center">
             <Button
-              size="sm"
+              size="md"
               onClick={() => {
                 setSearchQuery("");
+                setActionError(null);
                 setShowUploadModal(true);
               }}
-              icon={<FilePlus2 size={13} strokeWidth={2} aria-hidden />}
+              icon={<FilePlus2 size={15} strokeWidth={2} />}
             >
-              Upload document
+              {searchQuery ? "Clear Search & Add" : "Add Your First Document"}
             </Button>
-          }
-        >
-          {searchQuery
-            ? "No documents matched your search."
-            : "Upload a passport, national ID, visa, or voucher to get started."}
-        </TravellerState>
+          </div>
+        </div>
       ) : (
         <div className="fo-vault__groups">
           {groupedItems.map((group) => (
-            <TravellerSection
-              key={group.type}
-              title={`${VAULT_TYPE_LABELS[group.type] || group.type} · ${group.items.length}`}
-            >
+            <div key={group.type} className="fo-vault__panel">
+              <div className="fo-vault__panel-head">
+                <h3 className="fo-vault__panel-title">
+                  <ShieldCheck size={16} strokeWidth={2.2} className="text-sky" />
+                  <span>{VAULT_TYPE_LABELS[group.type] || group.type}</span>
+                </h3>
+                <span className="fo-vault__panel-count">
+                  {group.items.length} credential{group.items.length === 1 ? "" : "s"}
+                </span>
+              </div>
+
               <ul className="fo-vault__list">
                 {group.items.map((doc) => {
                   const identityDoc =
@@ -531,11 +755,12 @@ export function VaultPageClient() {
                   );
                 })}
               </ul>
-            </TravellerSection>
+            </div>
           ))}
         </div>
       )}
 
+      {/* ── Upload Modal ─────────────────────────────────────────────── */}
       {showUploadModal ? (
         <VaultUploadModal
           uploadTitle={uploadTitle}
@@ -557,6 +782,7 @@ export function VaultPageClient() {
         />
       ) : null}
 
+      {/* ── Document Details Modal ───────────────────────────────────── */}
       {selectedDocId && (selectedFallback || rawItems.find((d) => d.id === selectedDocId)) ? (
         <VaultDocumentDetails
           documentId={selectedDocId}
@@ -575,6 +801,7 @@ export function VaultPageClient() {
         />
       ) : null}
 
+      {/* ── Delete Confirmation Modal ────────────────────────────────── */}
       {pendingDelete ? (
         <DeleteDocumentConfirm
           title={pendingDelete.title}

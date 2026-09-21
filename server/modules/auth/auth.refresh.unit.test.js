@@ -37,7 +37,9 @@ after(async () => {
 describe("auth refresh reuse detection", () => {
   it("rotates legitimately and rejects reuse with family revoke", async () => {
     const prevGrace = process.env.REFRESH_ROTATE_GRACE_MS;
+    const prevEvery = process.env.REFRESH_ROTATE_EVERY_MS;
     process.env.REFRESH_ROTATE_GRACE_MS = "0";
+    process.env.REFRESH_ROTATE_EVERY_MS = "0";
 
     const user = await prisma.user.create({
       data: {
@@ -86,6 +88,96 @@ describe("auth refresh reuse detection", () => {
     } finally {
       if (prevGrace === undefined) delete process.env.REFRESH_ROTATE_GRACE_MS;
       else process.env.REFRESH_ROTATE_GRACE_MS = prevGrace;
+      if (prevEvery === undefined) delete process.env.REFRESH_ROTATE_EVERY_MS;
+      else process.env.REFRESH_ROTATE_EVERY_MS = prevEvery;
+    }
+  });
+
+  it("soft-refreshes without rotating inside the rotate interval", async () => {
+    const prevEvery = process.env.REFRESH_ROTATE_EVERY_MS;
+    process.env.REFRESH_ROTATE_EVERY_MS = String(60 * 60 * 1000);
+
+    const user = await prisma.user.create({
+      data: {
+        email: `fo.soft.${suffix}@example.com`,
+        name: "Soft",
+        passwordHash: await bcrypt.hash("TestPass123!", 10),
+        passwordChangedAt: new Date(),
+        emailVerifiedAt: new Date(),
+      },
+    });
+    userIds.push(user.id);
+
+    try {
+      const first = await auth.loginUser(
+        { email: user.email, password: "TestPass123!" },
+        { req: { headers: {}, ip: "127.0.0.1" } },
+      );
+      const soft = await auth.refreshSession(
+        { refreshToken: first.refreshToken },
+        { req: { headers: {}, ip: "127.0.0.1" } },
+      );
+      assert.equal(soft.refreshToken, first.refreshToken);
+      assert.ok(soft.accessToken);
+      assert.ok(soft.sessionId);
+
+      const rows = await prisma.refreshToken.findMany({ where: { userId: user.id } });
+      assert.equal(rows.filter((r) => !r.revokedAt).length, 1);
+      assert.equal(rows.length, 1);
+    } finally {
+      if (prevEvery === undefined) delete process.env.REFRESH_ROTATE_EVERY_MS;
+      else process.env.REFRESH_ROTATE_EVERY_MS = prevEvery;
+    }
+  });
+
+  it("concurrent refresh after rotate returns access within grace (no logout)", async () => {
+    const prevGrace = process.env.REFRESH_ROTATE_GRACE_MS;
+    const prevEvery = process.env.REFRESH_ROTATE_EVERY_MS;
+    process.env.REFRESH_ROTATE_GRACE_MS = "30000";
+    process.env.REFRESH_ROTATE_EVERY_MS = "0";
+
+    const user = await prisma.user.create({
+      data: {
+        email: `fo.grace.${suffix}@example.com`,
+        name: "Grace",
+        passwordHash: await bcrypt.hash("TestPass123!", 10),
+        passwordChangedAt: new Date(),
+        emailVerifiedAt: new Date(),
+      },
+    });
+    userIds.push(user.id);
+
+    try {
+      const first = await auth.loginUser(
+        { email: user.email, password: "TestPass123!" },
+        { req: { headers: {}, ip: "127.0.0.1" } },
+      );
+      const oldRefresh = first.refreshToken;
+
+      const winner = await auth.refreshSession(
+        { refreshToken: oldRefresh },
+        { req: { headers: {}, ip: "127.0.0.1" } },
+      );
+      assert.ok(winner.refreshToken);
+      assert.notEqual(winner.refreshToken, oldRefresh);
+
+      // Loser still presents the pre-rotate cookie within grace → new access, stay logged in.
+      const loser = await auth.refreshSession(
+        { refreshToken: oldRefresh },
+        { req: { headers: {}, ip: "127.0.0.1" } },
+      );
+      assert.ok(loser.accessToken);
+      assert.equal(loser.refreshToken, undefined);
+
+      const active = await prisma.refreshToken.findMany({
+        where: { userId: user.id, revokedAt: null },
+      });
+      assert.equal(active.length, 1);
+    } finally {
+      if (prevGrace === undefined) delete process.env.REFRESH_ROTATE_GRACE_MS;
+      else process.env.REFRESH_ROTATE_GRACE_MS = prevGrace;
+      if (prevEvery === undefined) delete process.env.REFRESH_ROTATE_EVERY_MS;
+      else process.env.REFRESH_ROTATE_EVERY_MS = prevEvery;
     }
   });
 

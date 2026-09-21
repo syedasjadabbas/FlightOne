@@ -1,6 +1,7 @@
 "use client";
 
-import { AlertTriangle, LineChart, Loader2, Users } from "lucide-react";
+import { AlertTriangle, LineChart, Users } from "lucide-react";
+import { Button, Spinner } from "@/components/ui";
 import type { AdvancedAnalyticsDto } from "@/lib/api/corporate.api";
 import { StatusBadge } from "./_components/StatusBadge";
 
@@ -8,10 +9,12 @@ export function AdvancedAnalyticsPanel({
   data,
   isLoading,
   isError,
+  onRetry,
 }: {
   data?: AdvancedAnalyticsDto;
   isLoading?: boolean;
   isError?: boolean;
+  onRetry?: () => void;
 }) {
   if (isLoading) {
     return (
@@ -19,8 +22,8 @@ export function AdvancedAnalyticsPanel({
         <div className="fo-desk__panel-head">
           <h2 className="fo-desk__section-label">Advanced analytics</h2>
         </div>
-        <div className="flex items-center gap-2 py-6 text-sm text-[var(--ink-soft)]">
-          <Loader2 className="h-4 w-4 animate-spin text-[var(--cyan)]" aria-hidden />
+        <div className="flex items-center gap-2 py-6 text-sm text-ink-soft">
+          <Spinner size="sm" label="Loading analytics" />
           Loading verified observations…
         </div>
       </section>
@@ -37,8 +40,15 @@ export function AdvancedAnalyticsPanel({
           <div className="fo-dash__empty-icon">
             <AlertTriangle className="h-4 w-4" aria-hidden />
           </div>
-          <p className="text-sm font-semibold text-[var(--navy)]">Could not load analytics</p>
-          <p className="mt-1 text-xs text-[var(--ink-soft)]">No fabricated values are shown.</p>
+          <p className="text-sm font-semibold text-navy">Could not load analytics</p>
+          <p className="mt-1 text-xs text-ink-soft">No fabricated values are shown.</p>
+          {onRetry ? (
+            <div className="mt-3">
+              <Button size="sm" variant="secondary" onClick={onRetry}>
+                Retry
+              </Button>
+            </div>
+          ) : null}
         </div>
       </section>
     );
@@ -51,7 +61,7 @@ export function AdvancedAnalyticsPanel({
       <div className="fo-desk__panel-head">
         <div>
           <h2 className="fo-desk__section-label">Advanced analytics</h2>
-          <p className="mt-0.5 text-[11.5px] text-[var(--ink-faint)]">
+          <p className="mt-0.5 text-[11.5px] text-ink-faint">
             Verified FlightOne observations. Forecasts are inferences, not guarantees. Fares and
             supplier contracts are unchanged.
             {data.forecasts.volume.provenance?.generatedAt
@@ -62,30 +72,30 @@ export function AdvancedAnalyticsPanel({
               : ""}
           </p>
         </div>
-        <LineChart className="h-4 w-4 text-[var(--cyan)]" aria-hidden />
+        <LineChart className="h-4 w-4 text-cyan" aria-hidden />
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <div className="rounded-[var(--fo-desk-radius)] border border-[var(--fo-desk-line)] bg-[color-mix(in_oklab,var(--bone)_40%,white)] p-3">
+        <div className="rounded-2xl border border-black/8 bg-[color-mix(in_oklab,var(--bone)_40%,white)] p-3">
           <div className="mb-1.5 flex items-center justify-between gap-2">
-            <p className="text-sm font-semibold text-[var(--navy)]">Forecast · volume</p>
+            <p className="text-sm font-semibold text-navy">Forecast · volume</p>
             <StatusBadge status={data.forecasts.volume.status} />
           </div>
-          <p className="text-xs text-[var(--ink-soft)]">{data.forecasts.volume.explanation}</p>
+          <p className="text-xs text-ink-soft">{data.forecasts.volume.explanation}</p>
           {data.forecasts.volume.available ? (
-            <p className="mt-2 font-mono text-sm text-[var(--navy)]">
+            <p className="mt-2 font-mono text-sm text-navy">
               Next period: {data.forecasts.volume.forecast}
             </p>
           ) : null}
         </div>
-        <div className="rounded-[var(--fo-desk-radius)] border border-[var(--fo-desk-line)] bg-[color-mix(in_oklab,var(--bone)_40%,white)] p-3">
+        <div className="rounded-2xl border border-black/8 bg-[color-mix(in_oklab,var(--bone)_40%,white)] p-3">
           <div className="mb-1.5 flex items-center justify-between gap-2">
-            <p className="text-sm font-semibold text-[var(--navy)]">Forecast · spend</p>
+            <p className="text-sm font-semibold text-navy">Forecast · spend</p>
             <StatusBadge status={data.forecasts.spend.status} />
           </div>
-          <p className="text-xs text-[var(--ink-soft)]">{data.forecasts.spend.explanation}</p>
+          <p className="text-xs text-ink-soft">{data.forecasts.spend.explanation}</p>
           {data.forecasts.spend.available ? (
-            <p className="mt-2 font-mono text-sm text-[var(--navy)]">
+            <p className="mt-2 font-mono text-sm text-navy">
               Next period (minor): {data.forecasts.spend.forecast}
             </p>
           ) : null}
@@ -94,10 +104,10 @@ export function AdvancedAnalyticsPanel({
 
       <div>
         <div className="mb-1 flex items-center gap-1.5">
-          <Users className="h-3.5 w-3.5 text-[var(--cyan)]" aria-hidden />
-          <p className="text-sm font-semibold text-[var(--navy)]">Cohorts</p>
+          <Users className="h-3.5 w-3.5 text-cyan" aria-hidden />
+          <p className="text-sm font-semibold text-navy">Cohorts</p>
         </div>
-        <p className="text-xs text-[var(--ink-faint)]">{data.cohorts.privacy}</p>
+        <p className="text-xs text-ink-faint">{data.cohorts.privacy}</p>
         {!data.cohorts.items.length ? (
           <p className="fo-desk__empty mt-2">{data.cohorts.emptyReason || "No cohort data."}</p>
         ) : (
@@ -131,25 +141,25 @@ export function AdvancedAnalyticsPanel({
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
           <div className="mb-1 flex items-center justify-between gap-2">
-            <p className="text-sm font-semibold text-[var(--navy)]">Pricing association</p>
+            <p className="text-sm font-semibold text-navy">Pricing association</p>
             <StatusBadge status={data.elasticity.status} />
           </div>
-          <p className="text-xs text-[var(--ink-soft)]">{data.elasticity.explanation}</p>
-          <p className="mt-1 text-[11px] text-[var(--ink-faint)]">
+          <p className="text-xs text-ink-soft">{data.elasticity.explanation}</p>
+          <p className="mt-1 text-[11px] text-ink-faint">
             Causal: {data.elasticity.causal ? "yes" : "no"} · Auto fare change:{" "}
             {data.elasticity.autoPriceChange ? "yes" : "no"}
           </p>
         </div>
         <div>
           <div className="mb-1 flex items-center justify-between gap-2">
-            <p className="text-sm font-semibold text-[var(--navy)]">Supplier insights</p>
+            <p className="text-sm font-semibold text-navy">Supplier insights</p>
             <StatusBadge status={data.suppliers.status} />
           </div>
-          <p className="text-xs text-[var(--ink-soft)]">{data.suppliers.explanation}</p>
+          <p className="text-xs text-ink-soft">{data.suppliers.explanation}</p>
           {data.suppliers.insights?.length ? (
             <ul className="mt-2 space-y-1">
               {data.suppliers.insights.map((i) => (
-                <li key={i.kind + (i.supplierCode || "")} className="text-xs text-[var(--ink-soft)]">
+                <li key={i.kind + (i.supplierCode || "")} className="text-xs text-ink-soft">
                   {i.body}
                 </li>
               ))}
@@ -159,7 +169,7 @@ export function AdvancedAnalyticsPanel({
       </div>
 
       {data.phase3Activity ? (
-        <p className="text-[11px] text-[var(--ink-faint)]">
+        <p className="text-[11px] text-ink-faint">
           Activity in range: voice {data.phase3Activity.voiceSessions}, concierge{" "}
           {data.phase3Activity.conciergeExecutions}, predictive signals{" "}
           {data.phase3Activity.predictiveSignals}

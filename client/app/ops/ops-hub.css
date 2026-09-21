@@ -1,66 +1,201 @@
 /**
- * Ops hub landing — calm desk chrome on fo-desk tokens.
- * Navy / cyan / bone. No glow, no badge soup.
+ * Ops hub — AIVENTURE desk chrome.
+ * Navy / sky / bone. Capsule rail + frosted stage. No glow soup.
  */
 
 .fo-ops {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1.15rem;
 }
 
-.fo-ops__eyebrow {
-  margin: 0;
+.fo-ops__master-stage {
+  position: relative;
+  width: 100%;
+  padding: clamp(0.85rem, 1.8vw, 1.35rem);
+  border-radius: clamp(1.25rem, 2.4vw, 1.75rem);
+  background:
+    radial-gradient(ellipse 60% 45% at 90% 8%, rgba(8, 150, 191, 0.07) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 40% at 8% 92%, rgba(37, 211, 102, 0.04) 0%, transparent 55%),
+    linear-gradient(175deg, #e9eeeb 0%, #e4e9e6 48%, #eef2ef 100%);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  box-shadow:
+    0 20px 48px -18px rgba(14, 22, 32, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+.fo-ops__nav-rail {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+}
+
+.fo-ops__brand-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  color: var(--navy);
   font-size: 0.6875rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--cyan);
+  box-shadow: 0 4px 14px -3px rgba(14, 22, 32, 0.05), inset 0 1px 0 #ffffff;
+  backdrop-filter: blur(8px);
+}
+
+.fo-ops__brand-dot {
+  display: inline-block;
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 9999px;
+  background: var(--sky);
+  box-shadow: 0 0 0 3px rgba(8, 150, 191, 0.18);
 }
 
 .fo-ops__queues {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 0.35rem;
-  margin-top: 0.15rem;
 }
 
 .fo-ops__queue {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.4rem 0.7rem;
-  border: 1px solid var(--fo-desk-line);
-  border-radius: 0.375rem;
-  background: var(--white);
+  height: 2.25rem;
+  padding: 0 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.78);
   color: var(--navy);
   font-size: 0.8125rem;
+  font-weight: 500;
   text-decoration: none;
-  line-height: 1.2;
-  transition: border-color 0.15s var(--ease-standard), background 0.15s var(--ease-standard);
+  line-height: 1;
+  box-shadow: inset 0 1px 0 #ffffff;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
 }
 
 .fo-ops__queue:hover {
-  border-color: color-mix(in oklab, var(--cyan) 40%, var(--fo-desk-line));
-  background: var(--fo-desk-wash);
+  background: #ffffff;
+  border-color: color-mix(in oklab, var(--sky) 35%, var(--line));
+  transform: translateY(-0.5px);
 }
 
 .fo-ops__queue:focus-visible {
-  outline: 2px solid color-mix(in oklab, var(--cyan) 55%, transparent);
+  outline: 2px solid color-mix(in oklab, var(--sky) 45%, transparent);
   outline-offset: 2px;
 }
 
 .fo-ops__queue svg {
-  color: var(--cyan);
+  color: var(--sky);
   flex-shrink: 0;
+}
+
+.fo-ops__hero {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-width: 42rem;
+}
+
+.fo-ops__eyebrow {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.fo-ops__title {
+  margin: 0;
+  font-family: var(--font-hero);
+  font-size: clamp(1.55rem, 3vw, 1.95rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  color: var(--navy);
+}
+
+.fo-ops__lede {
+  margin: 0.2rem 0 0;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+/* Capsule section tabs — h-9 like Ava / profile */
+.fo-ops__tabs {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem;
+  max-width: 100%;
+  padding: 0.3rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 8px 20px -6px rgba(14, 22, 32, 0.05), inset 0 1px 0 #ffffff;
+  backdrop-filter: blur(12px);
+}
+
+.fo-ops__tab {
+  appearance: none;
+  height: 2.25rem;
+  padding: 0 0.85rem;
+  border: 1px solid transparent;
+  border-radius: 9999px;
+  background: transparent;
+  color: var(--ink-soft);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fo-ops__tab:hover {
+  color: var(--navy);
+  background: rgba(255, 255, 255, 0.9);
+  transform: translateY(-0.5px);
+}
+
+.fo-ops__tab:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--sky) 45%, transparent);
+  outline-offset: 2px;
+}
+
+.fo-ops__tab--active {
+  background: #0e1620 !important;
+  color: #ffffff !important;
+  font-weight: 600;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 4px 14px rgba(14, 22, 32, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
+}
+
+.fo-ops__body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .fo-ops__msg {
   margin: 0;
   padding: 0.65rem 0.85rem;
-  border: 1px solid var(--fo-desk-line);
-  border-left: 3px solid var(--cyan);
-  border-radius: var(--fo-desk-radius);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--sky);
+  border-radius: 0.85rem;
   background: color-mix(in oklab, var(--bone) 55%, white);
   font-size: 0.8125rem;
   line-height: 1.4;
@@ -88,8 +223,8 @@
 .fo-ops__field input {
   width: 100%;
   box-sizing: border-box;
-  border: 1px solid var(--fo-desk-line);
-  border-radius: 0.375rem;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
   background: var(--white);
   padding: 0.55rem 0.75rem;
   font-size: 0.875rem;
@@ -102,15 +237,16 @@
 }
 
 .fo-ops__field input:hover {
-  border-color: var(--fo-desk-line-strong);
+  border-color: color-mix(in oklab, var(--sky) 30%, var(--line));
 }
 
 .fo-ops__field input:focus {
   outline: none;
-  border-color: color-mix(in oklab, var(--cyan) 55%, var(--fo-desk-line));
-  box-shadow: 0 0 0 3px color-mix(in oklab, var(--cyan) 14%, transparent);
+  border-color: var(--sky);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--sky) 14%, transparent);
 }
 
+/* Gates — legacy card OR profile-grade centered (with .fo-ops__gate-box) */
 .fo-ops__gate {
   display: flex;
   flex-direction: column;
@@ -119,41 +255,81 @@
   max-width: 28rem;
   margin: 1.5rem auto;
   padding: 1.25rem 1.35rem;
-  border: 1px solid var(--fo-desk-line);
-  border-radius: var(--fo-desk-radius);
+  border: 1px solid var(--line);
+  border-radius: 1rem;
   background: var(--white);
+  box-shadow: 0 12px 32px -16px rgba(14, 22, 32, 0.08);
+}
+
+.fo-ops__gate:has(.fo-ops__gate-box) {
+  min-height: 52vh;
+  max-width: none;
+  width: 100%;
+  margin: 0;
+  padding: 1.5rem;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.fo-ops__gate-box {
+  max-width: 28rem;
+  width: 100%;
+  padding: 2rem 1.75rem;
+  border-radius: 1.5rem;
+  background: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 0 20px 50px -15px rgba(14, 22, 32, 0.1);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
 }
 
 .fo-ops__gate-icon {
-  display: flex;
+  display: inline-flex;
+  height: 3.25rem;
+  width: 3.25rem;
   align-items: center;
   justify-content: center;
-  width: 2.25rem;
+  border-radius: 9999px;
+  background: rgba(8, 150, 191, 0.1);
+  color: var(--sky);
+}
+
+.fo-ops__gate:not(:has(.fo-ops__gate-box)) .fo-ops__gate-icon {
   height: 2.25rem;
+  width: 2.25rem;
   border-radius: 0.4rem;
-  background: color-mix(in oklab, var(--horizon-cool) 70%, white);
-  color: var(--cyan);
 }
 
 .fo-ops__gate-icon--warn {
-  background: color-mix(in oklab, var(--danger) 8%, white);
+  background: color-mix(in oklab, var(--danger) 10%, white);
   color: var(--danger);
 }
 
 .fo-ops__gate-title {
   margin: 0;
   font-family: var(--font-hero);
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #0e1620;
+  line-height: 1.25;
+}
+
+.fo-ops__gate:not(:has(.fo-ops__gate-box)) .fo-ops__gate-title {
   font-size: 1.15rem;
   font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--navy);
-  line-height: 1.25;
 }
 
 .fo-ops__gate-body {
   margin: 0;
   font-size: 0.875rem;
-  line-height: 1.5;
+  line-height: 1.55;
   color: var(--ink-soft);
 }
 
@@ -169,19 +345,92 @@
 .fo-ops__gate-actions {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 0.5rem;
-  margin-top: 0.25rem;
+  margin-top: 0.35rem;
+}
+
+.fo-ops__gate:has(.fo-ops__gate-box) .fo-ops__gate-actions {
+  justify-content: center;
+}
+
+.fo-ops__boot {
+  display: flex;
+  min-height: 52vh;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 2rem;
+}
+
+.fo-ops__boot-label {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.fo-ops__panel-state {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.55rem;
+  padding: 1.15rem 1.25rem;
+  border-radius: 1rem;
+  border: 1px solid color-mix(in oklab, var(--cyan) 14%, var(--line));
+  background: rgba(255, 255, 255, 0.88);
+}
+
+.fo-ops__panel-state--error {
+  border-color: color-mix(in oklab, var(--danger) 28%, var(--line));
+  background: color-mix(in oklab, var(--danger) 5%, white);
+}
+
+.fo-ops__panel-state-title {
+  margin: 0;
+  font-family: var(--font-hero);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--navy);
+}
+
+.fo-ops__panel-state-body {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  max-width: 36rem;
+}
+
+.fo-ops__tab-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-height: 8rem;
+  padding: 1.25rem;
+  color: var(--ink-soft);
+  font-size: 0.8125rem;
 }
 
 .fo-ops__kpi-icon {
   display: inline-flex;
   margin-right: 0.35rem;
   vertical-align: -0.1em;
-  color: var(--cyan);
+  color: var(--sky);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .fo-ops__queue {
+  .fo-ops__queue,
+  .fo-ops__tab {
     transition: none;
+  }
+
+  .fo-ops__queue:hover,
+  .fo-ops__tab:hover {
+    transform: none;
   }
 }

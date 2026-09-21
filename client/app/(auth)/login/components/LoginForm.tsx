@@ -68,6 +68,7 @@ export function LoginForm() {
       <div className="fo-auth-form fo-login">
         <AuthPanel
           title="Set up two-factor authentication"
+          eyebrow="Staff security"
           lead="Staff accounts require an authenticator app before accessing traveler and operational data."
           footer={
             <p>
@@ -97,7 +98,7 @@ export function LoginForm() {
 
               <div>
                 <span className="flex items-center gap-1.5 text-xs font-semibold text-navy">
-                  <KeyRound className="size-3.5 shrink-0 text-[var(--cyan)]" aria-hidden />
+                  <KeyRound className="size-3.5 shrink-0 text-cyan" aria-hidden />
                   Or enter this setup key
                 </span>
                 <div className="mt-1.5 flex items-center gap-2">
@@ -178,6 +179,7 @@ export function LoginForm() {
       <div className="fo-auth-form fo-login">
         <AuthPanel
           title="Save your recovery codes"
+          eyebrow="Staff security"
           lead="Store these single-use codes somewhere safe. They are the only fallback if you lose your authenticator."
         >
           <div className="fo-auth-form__fields">
@@ -251,6 +253,7 @@ export function LoginForm() {
       <div className="fo-auth-form fo-login">
         <AuthPanel
           title="Verify it's you"
+          eyebrow="Two-factor"
           lead={
             challengeMode === "totp"
               ? "Enter the 6-digit code from your authenticator app."
@@ -300,7 +303,7 @@ export function LoginForm() {
                   htmlFor="challenge-backup-code"
                   className="flex items-center gap-1.5 text-xs font-semibold text-navy"
                 >
-                  <KeyRound className="size-3.5 shrink-0 text-[var(--cyan)]" aria-hidden />
+                  <KeyRound className="size-3.5 shrink-0 text-cyan" aria-hidden />
                   Recovery code
                 </label>
                 <Input
@@ -384,6 +387,7 @@ export function LoginForm() {
     <div className="fo-auth-form fo-login">
       <AuthPanel
         title="Log in"
+        eyebrow="Welcome back"
         lead="Sign in to continue to your trips and bookings."
         footer={
           <p>

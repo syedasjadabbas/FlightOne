@@ -2,6 +2,7 @@ import dynamic from "next/dynamic";
 import { RouteChunkFallback } from "@/components/RouteChunkFallback";
 import { SiteNav } from "@/components/SiteNav";
 import { TravellerShell } from "@/app/components/traveller";
+import "./concierge.css";
 
 const ConciergePageClient = dynamic(
   () =>
@@ -21,7 +22,7 @@ export default function ConciergePage() {
   return (
     <main className="fo-stage relative flex min-h-[100dvh] flex-col">
       <SiteNav />
-      <TravellerShell width="narrow">
+      <TravellerShell width="wide">
         <ConciergePageClient />
       </TravellerShell>
     </main>

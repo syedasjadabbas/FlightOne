@@ -1,5 +1,15 @@
 "use client";
 
+import type { LucideIcon } from "lucide-react";
+import {
+  Clock,
+  CreditCard,
+  Files,
+  Stamp,
+  Ticket,
+  UserRound,
+} from "lucide-react";
+
 export type VaultCategory =
   | "ALL"
   | "IDENTITIES"
@@ -8,13 +18,13 @@ export type VaultCategory =
   | "VOUCHERS"
   | "EXPIRING";
 
-const CATEGORY_TABS: Array<{ id: VaultCategory; label: string }> = [
-  { id: "ALL", label: "All" },
-  { id: "IDENTITIES", label: "Passports & IDs" },
-  { id: "VISAS", label: "Visas" },
-  { id: "LOYALTY", label: "Loyalty" },
-  { id: "VOUCHERS", label: "Tickets & vouchers" },
-  { id: "EXPIRING", label: "Expiring ≤90d" },
+const CATEGORY_TABS: Array<{ id: VaultCategory; label: string; icon: LucideIcon }> = [
+  { id: "ALL", label: "All Items", icon: Files },
+  { id: "IDENTITIES", label: "Passports & IDs", icon: UserRound },
+  { id: "VISAS", label: "Visas", icon: Stamp },
+  { id: "LOYALTY", label: "Loyalty", icon: CreditCard },
+  { id: "VOUCHERS", label: "Tickets & Vouchers", icon: Ticket },
+  { id: "EXPIRING", label: "Expiring ≤90d", icon: Clock },
 ];
 
 export function VaultCategoryTabs({
@@ -25,19 +35,32 @@ export function VaultCategoryTabs({
   onChange: (id: VaultCategory) => void;
 }) {
   return (
-    <div role="tablist" aria-label="Document categories" className="fo-traveller__filters">
+    <div
+      role="tablist"
+      aria-label="Document categories"
+      className="fo-vault__nav-tabs"
+    >
       {CATEGORY_TABS.map((tab) => {
         const on = selected === tab.id;
+        const Icon = tab.icon;
         return (
           <button
             key={tab.id}
             type="button"
             role="tab"
+            id={`vault-tab-${tab.id.toLowerCase()}`}
             aria-selected={on}
+            aria-controls={`vault-panel-${tab.id.toLowerCase()}`}
             onClick={() => onChange(tab.id)}
-            className={`fo-traveller__toggle${on ? " fo-traveller__toggle--on" : ""}`}
+            className={`fo-vault__tab-pill${on ? " fo-vault__tab-pill--active" : ""}`}
           >
-            {tab.label}
+            <Icon
+              className="fo-vault__tab-icon"
+              size={13}
+              strokeWidth={on ? 2.2 : 1.75}
+              aria-hidden
+            />
+            <span>{tab.label}</span>
           </button>
         );
       })}

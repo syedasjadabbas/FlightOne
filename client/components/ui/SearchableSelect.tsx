@@ -82,7 +82,7 @@ function ClearIcon() {
 
 /**
  * Accessible combobox with typeahead — FlightOne tokens, no Radix.
- * Matches Input styling: rounded-xl, sky focus ring, --font-hero on labels.
+ * Matches Input styling: rounded-2xl, sky focus ring, tracking on labels.
  */
 export function SearchableSelect({
   options,
@@ -225,14 +225,13 @@ export function SearchableSelect({
       {label ? (
         <label
           htmlFor={fieldId}
-          className="text-[13px] font-medium text-ink-soft"
-          style={{ fontFamily: "var(--font-hero)" }}
+          className="cursor-pointer text-[12px] font-semibold tracking-wide text-ink-soft uppercase"
         >
           {label}
         </label>
       ) : null}
 
-      <div className="relative flex items-stretch gap-1">
+      <div className="relative flex items-stretch gap-1.5">
         <button
           ref={triggerRef}
           type="button"
@@ -250,20 +249,21 @@ export function SearchableSelect({
           onClick={() => (open ? close() : openList())}
           onKeyDown={onTriggerKeyDown}
           className={cn(
-            "flex w-full min-w-0 cursor-pointer items-center justify-between gap-2 border bg-white text-left text-ink outline-none transition-colors duration-200",
-            "focus-visible:ring-2 focus-visible:ring-[var(--sky)]/35",
-            size === "sm" ? "rounded-lg px-2.5 py-1.5 text-[13px]" : "rounded-xl px-3.5 py-2.5 text-[14px]",
+            "flex w-full min-w-0 cursor-pointer items-center justify-between gap-2 border bg-white/95 text-left text-ink outline-none transition-all duration-150",
+            "shadow-[0_1px_3px_rgba(14,22,32,0.03),inset_0_1px_0_#ffffff]",
+            "focus-visible:ring-4 focus-visible:ring-sky/15 focus-visible:border-sky focus-visible:bg-white focus-visible:shadow-[0_4px_14px_-2px_rgba(8,150,191,0.12)]",
+            size === "sm" ? "rounded-xl px-3 py-2 text-[13px]" : "rounded-2xl px-4 py-2.5 text-[14px]",
             error
-              ? "border-[var(--danger)] focus-visible:border-[var(--danger)]"
-              : "border-line focus-visible:border-[var(--sky)]",
-            disabled ? "cursor-not-allowed opacity-50" : null,
-            open && !error && "border-[var(--sky)]",
+              ? "border-danger/60 focus-visible:border-danger focus-visible:ring-danger/15"
+              : "border-black/10 hover:border-black/20",
+            disabled ? "cursor-not-allowed opacity-50 hover:border-black/10" : null,
+            open && !error && "border-sky ring-4 ring-sky/15 bg-white",
           )}
         >
           <span
             className={cn(
-              "min-w-0 truncate leading-relaxed",
-              !selected && "text-ink-faint",
+              "min-w-0 truncate leading-relaxed font-normal",
+              !selected && "text-ink-faint/75",
             )}
           >
             {selected?.label ?? placeholder}
@@ -277,10 +277,8 @@ export function SearchableSelect({
             aria-label="Clear selection"
             onClick={clear}
             className={cn(
-              "inline-flex shrink-0 items-center justify-center border border-line bg-white text-ink-faint transition-colors",
-              "hover:border-[var(--sky)] hover:text-[var(--navy)]",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sky)]/35",
-              size === "sm" ? "h-auto w-8 rounded-lg" : "w-11 rounded-xl",
+              "inline-flex shrink-0 items-center justify-center border border-black/10 bg-white/95 text-ink-faint transition-all hover:border-black/20 hover:text-ink active:scale-95",
+              size === "sm" ? "h-auto w-8 rounded-xl" : "w-11 rounded-2xl",
             )}
           >
             <ClearIcon />
@@ -290,11 +288,10 @@ export function SearchableSelect({
 
       {open ? (
         <div
-          className="fo-select-menu absolute top-full right-0 left-0 z-50 mt-1 overflow-hidden rounded-xl border border-line bg-white"
-          style={{ boxShadow: "var(--shadow-soft)" }}
+          className="fo-select-menu absolute top-full right-0 left-0 z-50 mt-1.5 overflow-hidden rounded-2xl border border-black/10 bg-white/95 backdrop-blur-xl shadow-[0_16px_36px_-8px_rgba(14,22,32,0.16)]"
         >
           {searchable ? (
-            <div className="border-b border-line p-2">
+            <div className="border-b border-black/6 p-2">
               <input
                 ref={searchRef}
                 type="search"
@@ -308,9 +305,9 @@ export function SearchableSelect({
                 aria-autocomplete="list"
                 aria-controls={listboxId}
                 className={cn(
-                  "w-full rounded-lg border border-line bg-[var(--light,#f7f8fa)] px-2.5 py-1.5 text-[13px] text-ink outline-none",
+                  "w-full rounded-xl border border-black/8 bg-[#f7f9fa] px-3 py-1.5 text-[13px] text-ink outline-none",
                   "placeholder:text-ink-faint",
-                  "focus-visible:border-[var(--sky)] focus-visible:ring-2 focus-visible:ring-[var(--sky)]/30",
+                  "focus-visible:border-sky focus-visible:ring-2 focus-visible:ring-sky/30 focus-visible:bg-white",
                 )}
               />
             </div>
@@ -321,7 +318,7 @@ export function SearchableSelect({
             id={listboxId}
             role="listbox"
             aria-labelledby={fieldId}
-            className="max-h-56 overflow-y-auto py-1"
+            className="max-h-56 overflow-y-auto p-1"
           >
             {filtered.length === 0 ? (
               <li className="px-3.5 py-2.5 text-[13px] text-ink-faint">{emptyMessage}</li>
@@ -341,14 +338,19 @@ export function SearchableSelect({
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => pick(opt)}
                     className={cn(
-                      "cursor-pointer px-3.5 py-2 text-[14px] leading-snug transition-colors",
-                      opt.disabled && "cursor-not-allowed opacity-40",
-                      isActive && !opt.disabled && "bg-[color-mix(in_oklab,var(--sky)_10%,white)]",
-                      isSelected && "font-medium text-[var(--navy)]",
-                      !isSelected && "text-ink",
+                      "flex cursor-pointer items-center justify-between rounded-xl px-3.5 py-2 text-[13.5px] transition-colors",
+                      opt.disabled
+                        ? "cursor-not-allowed opacity-40"
+                        : isActive
+                          ? "bg-black/5 text-[#0e1620] font-medium"
+                          : "text-[#55606e]",
+                      isSelected && "font-semibold text-sky bg-sky/8",
                     )}
                   >
-                    {opt.label}
+                    <span>{opt.label}</span>
+                    {isSelected ? (
+                      <span className="text-sky text-xs font-bold">✓</span>
+                    ) : null}
                   </li>
                 );
               })
@@ -358,11 +360,11 @@ export function SearchableSelect({
       ) : null}
 
       {error ? (
-        <p id={`${fieldId}-error`} className="text-[12px] font-medium text-[var(--danger)]">
+        <p id={`${fieldId}-error`} className="text-[12px] font-medium text-danger">
           {error}
         </p>
       ) : hint ? (
-        <p id={`${fieldId}-hint`} className="text-[12px] text-ink-faint">
+        <p id={`${fieldId}-hint`} className="text-[11.5px] text-ink-faint">
           {hint}
         </p>
       ) : null}

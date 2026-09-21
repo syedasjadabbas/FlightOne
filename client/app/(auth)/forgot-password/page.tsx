@@ -1,5 +1,8 @@
+import { Suspense } from "react";
 import { AuthShell } from "../components/AuthShell";
+import { AuthSessionGate } from "../components/AuthSessionGate";
 import { ForgotPasswordForm } from "./components/ForgotPasswordForm";
+import "../auth-form.css";
 
 export const metadata = {
   title: "Forgot password — FlightOne",
@@ -9,7 +12,17 @@ export const metadata = {
 export default function ForgotPasswordPage() {
   return (
     <AuthShell>
-      <ForgotPasswordForm />
+      <Suspense
+        fallback={
+          <p role="status" className="sr-only">
+            Loading password recovery
+          </p>
+        }
+      >
+        <AuthSessionGate>
+          <ForgotPasswordForm />
+        </AuthSessionGate>
+      </Suspense>
     </AuthShell>
   );
 }

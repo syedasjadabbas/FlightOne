@@ -27,6 +27,12 @@ export type LoginStep =
 
 export type ChallengeMode = "totp" | "backup_code";
 
+/** Seed defaults from server `DEMO_USER_*` — local login convenience only. */
+const LOCAL_DEMO_EMAIL =
+  process.env.NODE_ENV === "development" ? "demo@flightone.local" : "";
+const LOCAL_DEMO_PASSWORD =
+  process.env.NODE_ENV === "development" ? "DemoPass123!" : "";
+
 /** Colocated to `/login` only — multi-step auth handling standard & mandatory staff 2FA. */
 export function useLoginForm() {
   const router = useRouter();
@@ -39,8 +45,8 @@ export function useLoginForm() {
   const [setupData, setSetupData] = useState<TwoFactorSetupResponse | null>(null);
 
   // Form input states
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState(LOCAL_DEMO_EMAIL);
+  const [password, setPassword] = useState(LOCAL_DEMO_PASSWORD);
   const [totpCode, setTotpCode] = useState("");
   const [backupCode, setBackupCode] = useState("");
 

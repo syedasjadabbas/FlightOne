@@ -2,6 +2,19 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import {
+  CheckCircle2,
+  FileCheck2,
+  FileText,
+  Lock,
+  Plus,
+  RefreshCw,
+  ScanText,
+  ShieldAlert,
+  ShieldCheck,
+  Trash2,
+  UploadCloud,
+} from "lucide-react";
 import { Button, Input, SearchableSelect, Spinner } from "@/components/ui";
 import { TravellerSection, TravellerState } from "@/app/components/traveller";
 import {
@@ -30,7 +43,7 @@ function docTypeLabel(t: IdentityDocument["type"]) {
     case "VISA":
       return "Visa";
     case "RESIDENCE_PERMIT":
-      return "Residence permit";
+      return "Residence Permit";
     default:
       return t;
   }
@@ -73,7 +86,7 @@ export function DocumentsSection() {
   const companionName = useMemo(() => {
     const map = new Map(companions.map((c) => [c.id, c.fullName]));
     return (id: string | null | undefined) =>
-      id ? map.get(id) ?? "Saved traveller" : "You (account holder)";
+      id ? map.get(id) ?? "Saved traveller" : "Account Holder";
   }, [companions]);
 
   const active = useMemo(
@@ -141,187 +154,300 @@ export function DocumentsSection() {
 
   return (
     <TravellerSection
-      title="Identity documents"
+      title="Identity & Travel Documents"
       note={
-        <>
-          Numbers are encrypted and hidden here. Upload a scan via{" "}
-          <Link href="/vault" className="text-[var(--sky)] underline-offset-2 hover:underline">
-            Vault
-          </Link>
-          , review OCR fields, then confirm. Assign to family or companions when needed.
-        </>
+        <span>
+          Encrypted passport, CNIC, and visa records. Scans uploaded here are sent directly to the{" "}
+          <Link href="/vault" className="font-semibold text-sky underline-offset-2 hover:underline">
+            AES-256 Biometric Vault
+          </Link>{" "}
+          for AI OCR validation.
+        </span>
       }
       panel
     >
       {isLoading ? (
-        <Spinner label="Loading documents" />
+        <div className="py-8 flex justify-center">
+          <Spinner label="Loading document records…" />
+        </div>
       ) : active.length === 0 ? (
-        <TravellerState title="No active documents">
-          Add a passport or CNIC record, or upload a scan via Vault.
-        </TravellerState>
+        <div className="mb-6 rounded-2xl border border-dashed border-black/10 bg-white/50 p-6 text-center">
+          <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-sky/10 text-sky">
+            <FileText size={18} strokeWidth={2} />
+          </div>
+          <p className="text-[14px] font-semibold text-navy">No Travel Documents on File</p>
+          <p className="text-[12.5px] text-ink-soft">Add passport or national ID details to unlock automated bookings.</p>
+        </div>
       ) : (
-        <ul className="fo-traveller__list">
-          {active.map((d) => (
-            <li key={d.id} className="fo-traveller__row">
-              <div className="fo-traveller__row-top">
-                <div>
-                  <p className="fo-traveller__row-title">{docTypeLabel(d.type)}</p>
-                  <p className="fo-traveller__row-meta">
-                    Traveller: {companionName(d.companionId)} · {d.countryCode ?? "—"} ·{" "}
-                    {d.status} · {d.verificationStatus}
-                    {d.expiry?.state ? ` · ${d.expiry.state.replaceAll("_", " ")}` : ""}
-                    {d.expiresAt
-                      ? ` · exp ${new Date(d.expiresAt).toLocaleDateString()}`
-                      : ""}
-                  </p>
-                  <p className="fo-traveller__row-meta">
-                    Number:{" "}
-                    {d.hasDocumentNumber ? "on file (encrypted, hidden)" : "not set"}
-                    {d.documentSubtype ? ` · ${d.documentSubtype}` : ""}
-                    {d.vaultDocumentId ? ` · vault ${d.vaultDocumentId}` : " · no scan linked"}
-                  </p>
+        <div className="mb-6 space-y-3">
+          {active.map((d) => {
+            const isVerified = d.verificationStatus === "VERIFIED";
+            const isExpired = d.status === "EXPIRED";
+            return (
+              <div
+                key={d.id}
+                className="rounded-2xl border border-black/8 bg-white/95 p-4 shadow-sm transition-all hover:border-black/15"
+              >
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="flex items-start gap-3.5">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-navy text-white shadow-sm">
+                      <FileText size={18} strokeWidth={2} />
+                    </div>
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-[15px] font-bold text-navy">
+                          {docTypeLabel(d.type)}
+                        </span>
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-[10.5px] font-bold uppercase ${
+                            isVerified
+                              ? "bg-emerald/15 text-emerald"
+                              : "bg-amber-500/15 text-amber-700"
+                          }`}
+                        >
+                          {isVerified ? "Verified" : "Pending Review"}
+                        </span>
+                        {isExpired ? (
+                          <span className="rounded-full bg-danger/15 px-2 py-0.5 text-[10.5px] font-bold text-danger uppercase">
+                            Expired
+                          </span>
+                        ) : null}
+                      </div>
+
+                      <div className="mt-1 flex flex-wrap items-center gap-3 text-[12px] text-ink-soft">
+                        <span>Passenger: <strong>{companionName(d.companionId)}</strong></span>
+                        <span>Country: <strong>{d.countryCode ?? "—"}</strong></span>
+                        {d.expiresAt ? (
+                          <span>
+                            Expires: <strong>{new Date(d.expiresAt).toLocaleDateString()}</strong>
+                          </span>
+                        ) : null}
+                      </div>
+
+                      <div className="mt-1.5 flex flex-wrap items-center gap-2 text-[11.5px] text-ink-faint">
+                        <span className="inline-flex items-center gap-1 text-emerald">
+                          <Lock size={11} strokeWidth={2} />
+                          {d.hasDocumentNumber ? "Document number encrypted" : "No number"}
+                        </span>
+                        {d.vaultDocumentId ? (
+                          <span className="font-mono text-ink-soft">
+                            · Vault: {d.vaultDocumentId.slice(0, 16)}…
+                          </span>
+                        ) : (
+                          <span className="text-ink-faint">· No file scan linked</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {!isVerified ? (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => verify({ id: d.id, decision: "VERIFIED" })}
+                      >
+                        <CheckCircle2 size={13} strokeWidth={2} className="text-emerald" />
+                        <span>Verify</span>
+                      </Button>
+                    ) : null}
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => {
+                        const next = window.prompt(
+                          "New vault document id for re-upload",
+                          `${d.vaultDocumentId ?? "vault"}-v2`,
+                        );
+                        if (!next?.trim()) return;
+                        void reupload({ id: d.id, vaultDocumentId: next.trim() });
+                      }}
+                    >
+                      <RefreshCw size={13} strokeWidth={2} />
+                      <span>Re-link</span>
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() =>
+                        setOcrFocusId((cur) => (cur === d.id ? null : d.id))
+                      }
+                    >
+                      <ScanText size={13} strokeWidth={2} />
+                      <span>{ocrFocusId === d.id ? "Hide OCR" : "OCR Details"}</span>
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => remove(d.id)}
+                      className="text-danger hover:bg-danger/10"
+                    >
+                      <Trash2 size={13} strokeWidth={2} />
+                      <span>Remove</span>
+                    </Button>
+                  </div>
                 </div>
-              </div>
-              <div className="fo-traveller__row-actions">
-                {d.verificationStatus !== "VERIFIED" ? (
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => verify({ id: d.id, decision: "VERIFIED" })}
-                  >
-                    Mark verified
-                  </Button>
+
+                {ocrFocusId === d.id ? (
+                  <div className="mt-4 border-t border-black/6 pt-3">
+                    <DocumentOcrPanel document={d} />
+                  </div>
                 ) : null}
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => {
-                    const next = window.prompt(
-                      "New vault document id for re-upload",
-                      `${d.vaultDocumentId ?? "vault"}-v2`,
-                    );
-                    if (!next?.trim()) return;
-                    void reupload({ id: d.id, vaultDocumentId: next.trim() });
-                  }}
-                >
-                  Re-upload
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() =>
-                    setOcrFocusId((cur) => (cur === d.id ? null : d.id))
-                  }
-                >
-                  {ocrFocusId === d.id ? "Hide OCR" : "OCR"}
-                </Button>
-                <Button type="button" size="sm" variant="ghost" onClick={() => remove(d.id)}>
-                  Remove
-                </Button>
               </div>
-              {ocrFocusId === d.id ? <DocumentOcrPanel document={d} /> : null}
-            </li>
-          ))}
-        </ul>
+            );
+          })}
+        </div>
       )}
-      <form onSubmit={onAdd} className="space-y-3 border-t border-line pt-4">
-        <SearchableSelect
-          id="doc-traveller"
-          label="Traveller"
-          options={[
-            { value: "", label: "You (account holder)" },
-            ...companions.map((c) => ({
-              value: c.id,
-              label: c.kind === "FAMILY" ? `${c.fullName} (family)` : c.fullName,
-            })),
-          ]}
-          value={companionId}
-          onChange={setCompanionId}
-          searchable={companions.length > 6}
-        />
-        <SearchableSelect
-          id="doc-type"
-          label="Document type"
-          options={[
-            { value: "PASSPORT", label: "Passport" },
-            { value: "NATIONAL_ID", label: "CNIC / National ID" },
-            { value: "VISA", label: "Visa" },
-            { value: "RESIDENCE_PERMIT", label: "Residence permit" },
-          ]}
-          value={type}
-          onChange={(v) => setType(v as IdentityDocument["type"])}
-          searchable={false}
-        />
-        <Input
-          label="Document number"
-          value={documentNumber}
-          onChange={(e) => setDocumentNumber(e.target.value)}
-          autoComplete="off"
-          hint="Optional — or fill after OCR review. Encrypted at rest."
-        />
-        <Input
-          label="Country code"
-          value={countryCode}
-          onChange={(e) => setCountryCode(e.target.value)}
-          maxLength={2}
-          placeholder="PK"
-        />
-        {(type === "VISA" || type === "RESIDENCE_PERMIT" || type === "NATIONAL_ID") && (
-          <Input
-            label={type === "VISA" ? "Visa type" : "Document subtype"}
-            value={documentSubtype}
-            onChange={(e) => setDocumentSubtype(e.target.value)}
-            placeholder={type === "VISA" ? "tourist, work…" : "optional"}
-            hint="Optional"
-          />
-        )}
-        <Input
-          label="Issue date"
-          type="date"
-          value={issuedAt}
-          onChange={(e) => setIssuedAt(e.target.value)}
-          hint="Optional"
-        />
-        <Input
-          label="Expiry date"
-          type="date"
-          value={expiresAt}
-          onChange={(e) => setExpiresAt(e.target.value)}
-        />
-        <div className="flex flex-col gap-1.5">
-          <label className="text-[13px] font-medium text-ink-soft" htmlFor="doc-scan">
-            Scan file (Vault)
-          </label>
-          <input
-            id="doc-scan"
-            type="file"
-            accept="application/pdf,image/jpeg,image/png,image/webp"
-            className="text-[13px] text-ink"
-            onChange={(e) => setScanFile(e.target.files?.[0] ?? null)}
-          />
-          <p className="text-[12px] text-ink-faint">
-            Uploads to Module 07 Vault, then links the vault id. Prefer this over pasting an
-            id. Binary stays server-side for OCR.
+
+      {/* Add Document Record Form */}
+      <div className="rounded-2xl border border-black/8 bg-white/60 p-4.5 pt-4">
+        <div className="mb-3.5 flex items-center gap-2">
+          <span className="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-sky/10 text-sky">
+            <FileCheck2 size={13} strokeWidth={2.2} />
+          </span>
+          <p className="text-[12px] font-bold tracking-wider text-ink-faint uppercase">
+            Record New Document
           </p>
         </div>
-        <Input
-          label="Vault document id"
-          value={vaultDocumentId}
-          onChange={(e) => setVaultDocumentId(e.target.value)}
-          hint="Optional if you upload a scan above — or paste an existing vault id"
-        />
-        {formError ? (
-          <p className="text-[13px] text-[var(--danger)]" role="alert">
-            {formError}
-          </p>
-        ) : null}
-        <Button type="submit" disabled={saving || uploadingScan} size="sm">
-          {uploadingScan ? "Uploading scan…" : saving ? "Saving…" : "Add document record"}
-        </Button>
-      </form>
+
+        <form onSubmit={onAdd} className="space-y-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <SearchableSelect
+              id="doc-traveller"
+              label="Associated Passenger"
+              options={[
+                { value: "", label: "You (account holder)" },
+                ...companions.map((c) => ({
+                  value: c.id,
+                  label: c.kind === "FAMILY" ? `${c.fullName} (family)` : c.fullName,
+                })),
+              ]}
+              value={companionId}
+              onChange={setCompanionId}
+              searchable={companions.length > 6}
+            />
+            <SearchableSelect
+              id="doc-type"
+              label="Document Type"
+              options={[
+                { value: "PASSPORT", label: "Passport" },
+                { value: "NATIONAL_ID", label: "CNIC / National ID" },
+                { value: "VISA", label: "Visa" },
+                { value: "RESIDENCE_PERMIT", label: "Residence Permit" },
+              ]}
+              value={type}
+              onChange={(v) => setType(v as IdentityDocument["type"])}
+              searchable={false}
+            />
+            <Input
+              label="Document Number"
+              value={documentNumber}
+              onChange={(e) => setDocumentNumber(e.target.value)}
+              autoComplete="off"
+              placeholder="e.g. AB1234567"
+              hint="AES-256 encrypted at rest"
+            />
+            <Input
+              label="Issuing Country Code"
+              value={countryCode}
+              onChange={(e) => setCountryCode(e.target.value)}
+              maxLength={2}
+              placeholder="PK"
+              hint="ISO 2-letter code"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            {(type === "VISA" || type === "RESIDENCE_PERMIT" || type === "NATIONAL_ID") && (
+              <Input
+                label={type === "VISA" ? "Visa Classification" : "Document Subtype"}
+                value={documentSubtype}
+                onChange={(e) => setDocumentSubtype(e.target.value)}
+                placeholder={type === "VISA" ? "tourist, work, transit…" : "optional"}
+              />
+            )}
+            <Input
+              label="Issue Date"
+              type="date"
+              value={issuedAt}
+              onChange={(e) => setIssuedAt(e.target.value)}
+            />
+            <Input
+              label="Expiration Date"
+              type="date"
+              value={expiresAt}
+              onChange={(e) => setExpiresAt(e.target.value)}
+              required
+            />
+            <Input
+              label="Existing Vault ID"
+              value={vaultDocumentId}
+              onChange={(e) => setVaultDocumentId(e.target.value)}
+              placeholder="Optional if uploading below"
+            />
+          </div>
+
+          {/* File Upload Dropzone */}
+          <div className="rounded-2xl border border-dashed border-black/15 bg-white/80 p-4 transition-all hover:border-sky hover:bg-white">
+            <div className="flex flex-col sm:flex-row items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sky/10 text-sky">
+                <UploadCloud size={20} strokeWidth={2} />
+              </div>
+              <div className="flex-1 text-center sm:text-left">
+                <p className="text-[13px] font-semibold text-navy">
+                  Upload Document Scan (Encrypted Vault)
+                </p>
+                <p className="text-[12px] text-ink-faint">
+                  PDF, JPG, PNG, WebP. High resolution for automatic AI OCR verification.
+                </p>
+              </div>
+              <label className="cursor-pointer">
+                <input
+                  id="doc-scan"
+                  type="file"
+                  accept="application/pdf,image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  onChange={(e) => setScanFile(e.target.files?.[0] ?? null)}
+                />
+                <span className="inline-flex h-8.5 cursor-pointer items-center justify-center rounded-full border border-black/10 bg-white px-4 text-[13px] font-semibold text-[#0e1620] shadow-sm hover:bg-black/4">
+                  {scanFile ? scanFile.name.slice(0, 20) + "…" : "Browse File"}
+                </span>
+              </label>
+            </div>
+          </div>
+
+          {formError ? (
+            <p className="text-[13px] font-medium text-danger" role="alert">
+              {formError}
+            </p>
+          ) : null}
+
+          <div className="flex justify-end pt-2">
+            <Button type="submit" disabled={saving || uploadingScan} size="md">
+              {uploadingScan ? (
+                <>
+                  <Spinner size="sm" className="border-white/30 border-t-white" label={null} />
+                  Uploading Scan to Vault…
+                </>
+              ) : saving ? (
+                <>
+                  <Spinner size="sm" className="border-white/30 border-t-white" label={null} />
+                  Saving Document…
+                </>
+              ) : (
+                <>
+                  <Plus size={14} strokeWidth={2.5} />
+                  <span>Add Document Record</span>
+                </>
+              )}
+            </Button>
+          </div>
+        </form>
+      </div>
     </TravellerSection>
   );
 }

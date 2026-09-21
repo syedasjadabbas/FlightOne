@@ -38,7 +38,11 @@ export function ProfileTabs({
   onChange: (tab: ProfileTab) => void;
 }) {
   return (
-    <div role="tablist" aria-label="Profile sections" className="fo-profile__tabs">
+    <div
+      role="tablist"
+      aria-label="Profile sections"
+      className="fo-profile__nav-tabs"
+    >
       {TABS.map((tab) => {
         const selected = active === tab.id;
         const Icon = tab.icon;
@@ -51,10 +55,10 @@ export function ProfileTabs({
             aria-selected={selected}
             aria-controls={`profile-panel-${tab.id.toLowerCase()}`}
             onClick={() => onChange(tab.id)}
-            className={`fo-traveller__toggle${selected ? " fo-traveller__toggle--on" : ""}`}
+            className={`fo-profile__tab-pill${selected ? " fo-profile__tab-pill--active" : ""}`}
           >
-            <Icon size={14} strokeWidth={1.75} aria-hidden />
-            {tab.label}
+            <Icon className="fo-profile__tab-icon" size={14} strokeWidth={selected ? 2.2 : 1.75} aria-hidden />
+            <span>{tab.label}</span>
           </button>
         );
       })}

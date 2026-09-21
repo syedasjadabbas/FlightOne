@@ -54,6 +54,17 @@ export function isStaffRole(roleName) {
 }
 
 /**
+ * Platform Super Admin (`Super Admin` / `SuperAdmin` / `super_admin`).
+ * @param {string|null|undefined} roleName
+ * @returns {boolean}
+ */
+export function isSuperAdminRole(roleName) {
+  if (!roleName || typeof roleName !== "string") return false;
+  const normalized = roleName.toLowerCase().replace(/[\s_-]/g, "");
+  return normalized === "superadmin";
+}
+
+/**
  * Check if a user's role assignments contain at least one staff role.
  * @param {Array<{ role?: { name: string }, roleName?: string, name?: string }>} userRoles
  * @returns {boolean}
@@ -63,5 +74,18 @@ export function userHasStaffRole(userRoles) {
   return userRoles.some((ur) => {
     const name = ur?.role?.name || ur?.roleName || ur?.name;
     return isStaffRole(name);
+  });
+}
+
+/**
+ * Check if a user's role assignments include platform Super Admin.
+ * @param {Array<{ role?: { name: string }, roleName?: string, name?: string }>} userRoles
+ * @returns {boolean}
+ */
+export function userHasSuperAdminRole(userRoles) {
+  if (!Array.isArray(userRoles)) return false;
+  return userRoles.some((ur) => {
+    const name = ur?.role?.name || ur?.roleName || ur?.name;
+    return isSuperAdminRole(name);
   });
 }

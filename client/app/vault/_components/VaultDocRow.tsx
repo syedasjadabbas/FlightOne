@@ -2,17 +2,19 @@
 
 import {
   BookUser,
+  CreditCard,
   Download,
   FileText,
   Lock,
+  RefreshCw,
   ScanText,
   Share2,
-  Ticket,
-  CreditCard,
+  ShieldCheck,
   Stamp,
+  Ticket,
+  Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui";
-import { TravellerChip } from "@/app/components/traveller";
 import { DocumentOcrPanel } from "@/app/profile/_components/DocumentOcrPanel";
 import type { IdentityDocument } from "@/lib/api/profile.api";
 import type { VaultDocument } from "@/lib/api/vault.api";
@@ -26,7 +28,7 @@ import {
 
 function DocTypeIcon({ type }: { type: string }) {
   const kind = vaultDocIconKind(type);
-  const props = { size: 16, strokeWidth: 1.75, "aria-hidden": true as const };
+  const props = { size: 18, strokeWidth: 2, "aria-hidden": true as const };
   switch (kind) {
     case "passport":
       return <BookUser {...props} />;
@@ -71,6 +73,7 @@ export function VaultDocRow({
   const expiry = expiryDisplay(doc.expiresAt);
   const size = formatByteSize(doc.byteSize);
   const typeLabel = VAULT_TYPE_LABELS[doc.type] || doc.type.replaceAll("_", " ");
+  const isVerified = verification === "VERIFIED";
 
   return (
     <li className="fo-vault__row">
@@ -81,32 +84,45 @@ export function VaultDocRow({
         <div className="fo-vault__doc-body">
           <div className="fo-vault__doc-top">
             <h3 className="fo-vault__doc-title">{doc.title}</h3>
-            <p className="fo-vault__doc-type">{typeLabel}</p>
+            <span className="fo-vault__doc-type">{typeLabel}</span>
           </div>
 
-          <p className={`fo-vault__doc-meta fo-vault__expiry fo-vault__expiry--${expiry.tone}`}>
-            {expiry.label}
+          <div className="mt-1 flex flex-wrap items-center gap-2 text-[12px]">
+            <span className={`fo-vault__expiry fo-vault__expiry--${expiry.tone}`}>
+              {expiry.label}
+            </span>
             {doc.type === "VISA" && doc.visaMeta ? (
-              <>
-                {" · "}
-                {visaStatusLabel(doc.visaMeta.visaStatus)}
+              <span className="text-ink-soft">
+                · {visaStatusLabel(doc.visaMeta.visaStatus)}
                 {doc.visaMeta.destinationCode ? ` · ${doc.visaMeta.destinationCode}` : ""}
-              </>
+              </span>
             ) : null}
-          </p>
+            {verification ? (
+              <span
+                className={`rounded-full px-2 py-0.5 text-[10.5px] font-bold uppercase ${
+                  isVerified
+                    ? "bg-emerald/10 text-emerald"
+                    : "bg-amber-500/10 text-amber-700"
+                }`}
+              >
+                {isVerified ? "Profile Verified" : "Verification Pending"}
+              </span>
+            ) : null}
+            {doc.isPlatformIssued ? (
+              <span className="rounded-full bg-sky/10 px-2 py-0.5 text-[10.5px] font-bold uppercase text-sky">
+                Platform Issued
+              </span>
+            ) : null}
+          </div>
 
           <p className="fo-vault__doc-meta fo-vault__doc-meta--muted">
             {doc.originalFilename || "Metadata only"}
             {size ? ` · ${size}` : ""}
-            {doc.isPlatformIssued ? " · Platform issued" : ""}
-            {verification ? ` · Profile ${verification}` : ""}
+            <span className="inline-flex items-center gap-1 text-emerald font-medium ml-1.5">
+              <ShieldCheck size={11} strokeWidth={2.2} />
+              AES-256 Encrypted
+            </span>
           </p>
-
-          {doc.isPlatformIssued ? (
-            <div className="mt-1.5">
-              <TravellerChip tone="muted">Immutable</TravellerChip>
-            </div>
-          ) : null}
         </div>
       </div>
 
@@ -146,7 +162,7 @@ export function VaultDocRow({
               onClick={onToggleOcr}
               icon={<ScanText size={13} strokeWidth={2} aria-hidden />}
             >
-              {showOcr ? "Hide scan" : "Scan"}
+              {showOcr ? "Hide OCR" : "AI OCR"}
             </Button>
           ) : null}
         </div>
@@ -159,6 +175,7 @@ export function VaultDocRow({
               disabled={busy}
               onClick={onReplace}
             >
+              <RefreshCw size={12} strokeWidth={2} className="inline mr-1" />
               Replace
             </button>
             <button
@@ -167,6 +184,7 @@ export function VaultDocRow({
               disabled={busy}
               onClick={onDelete}
             >
+              <Trash2 size={12} strokeWidth={2} className="inline mr-1" />
               Delete
             </button>
           </div>

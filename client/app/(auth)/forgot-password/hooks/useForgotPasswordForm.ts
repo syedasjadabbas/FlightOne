@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useForgotPasswordMutation } from "@/lib/api/auth.api";
 import type { PasswordResetEmailDelivery } from "@/lib/api/auth.api";
+import { formatApiError } from "@/lib/api/formatApiError";
 import {
   forgotPasswordUiState,
   validateForgotPasswordEmail,
@@ -35,9 +36,13 @@ export function useForgotPasswordForm() {
       const data = await forgotPassword({ email: email.trim() }).unwrap();
       setEmailDelivery(data.emailDelivery);
       setSubmitted(true);
-      router.push(`/reset-password?email=${encodeURIComponent(email.trim())}`);
-    } catch {
-      // Surfaces via RTK error below.
+      // Stay on-page when mail is unconfigured so staff see the honest warning.
+      // Otherwise continue to enter the one-time code.
+      if (data.emailDelivery !== "UNCONFIGURED") {
+        router.push(`/reset-password?email=${encodeURIComponent(email.trim())}`);
+      }
+    } catch (err: unknown) {
+      setLocalError(formatApiError(err, "Something went wrong — please try again."));
     }
   }
 
@@ -45,13 +50,13 @@ export function useForgotPasswordForm() {
     isLoading,
     submitted,
     emailDelivery,
-    hasError: Boolean(error) && !localError,
+    hasError: Boolean(error || localError) && !submitted,
   });
 
   const errorMessage =
     localError ||
-    (error
-      ? "Something went wrong — please try again."
+    (error && !submitted
+      ? formatApiError(error, "Something went wrong — please try again.")
       : null);
 
   return {

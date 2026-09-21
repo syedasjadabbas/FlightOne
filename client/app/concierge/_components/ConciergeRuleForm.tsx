@@ -150,10 +150,7 @@ export function ConciergeRuleForm({
             {creating ? "Saving…" : "Save rule"}
           </Button>
           {message ? (
-            <p
-              className="m-0 text-[0.8125rem] leading-snug text-[var(--ink-soft)]"
-              role="status"
-            >
+            <p className="m-0 text-[0.8125rem] leading-snug text-ink-soft" role="status">
               {message}
             </p>
           ) : null}

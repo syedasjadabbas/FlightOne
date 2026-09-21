@@ -8,8 +8,9 @@ import { persist } from "zustand/middleware";
  * It is NOT persisted to localStorage. Refresh credentials are HttpOnly cookies set by
  * the API (`fo_refresh`) and are never readable by frontend JS.
  *
- * On reload, `bootstrapSessionFromCookie` (see lib/api/baseApi) uses the HttpOnly
- * refresh cookie + CSRF header to re-issue an access token.
+ * On reload, AuthBootstrap + RTK 401 reauth + proactive refresh share
+ * `refreshSessionOnce` (single-flight + cross-tab lock). Server soft-refreshes
+ * inside the rotate interval so multi-tab races do not false-logout.
  *
  * `fo_auth` is a non-secret presence cookie (value `1`) for Next `proxy.ts` route
  * gating only — it is NOT the access JWT and is not a credential.
@@ -39,6 +40,8 @@ interface AuthState {
   hasHydrated: boolean;
   setSession: (session: AuthSession) => void;
   clearSession: () => void;
+  /** Soft-hide protected UI (spinner) while navigating to /login after logout. */
+  beginLogout: () => void;
   updateUser: (patch: Partial<AuthUser>) => void;
   setHasHydrated: (value: boolean) => void;
 }
@@ -93,6 +96,12 @@ export const useAuthStore = create<AuthState>()(
           sessionId: null,
           user: null,
         });
+      },
+
+      beginLogout: () => {
+        // Flip hydration off so protected pages show their boot spinner instead
+        // of the "Authentication Required" gate for one paint before redirect.
+        set({ hasHydrated: false });
       },
 
       updateUser: (patch) =>

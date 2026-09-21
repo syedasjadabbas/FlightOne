@@ -3,65 +3,58 @@
 import { useEffect } from "react";
 import { Provider } from "react-redux";
 import { store } from "@/lib/api/store";
-import { API_BASE_URL, CSRF_HEADER } from "@/lib/api/baseApi";
-import type { ApiEnvelope } from "@/lib/api/baseApi";
 import {
-  hasPresenceCookie,
-  useAuthStore,
-  type AuthSession,
-} from "@/store/auth.store";
+  refreshSessionOnce,
+  startProactiveRefreshScheduler,
+} from "@/lib/auth/refreshSession";
+import { hasPresenceCookie, useAuthStore } from "@/store/auth.store";
 
 /**
  * After Zustand rehydrate, restore access JWT via HttpOnly refresh cookie.
  * Never reads refresh tokens from JS storage.
+ * Shares `refreshSessionOnce` with RTK Query reauth so reload never double-rotates.
+ * Arms proactive silent refresh so access JWT expiry does not force a 401 round-trip.
  */
 function AuthBootstrap({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let cancelled = false;
+    let stopProactive: (() => void) | undefined;
 
     async function bootstrap() {
-      const { setSession, clearSession, setHasHydrated, accessToken } =
-        useAuthStore.getState();
+      const { setHasHydrated, accessToken } = useAuthStore.getState();
 
       if (accessToken) {
         setHasHydrated(true);
+        if (!cancelled) stopProactive = startProactiveRefreshScheduler();
         return;
       }
 
       if (!hasPresenceCookie()) {
-        clearSession();
+        useAuthStore.getState().clearSession();
         setHasHydrated(true);
         return;
       }
 
       try {
-        const res = await fetch(`${API_BASE_URL}/auth/refresh`, {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-            [CSRF_HEADER]: "1",
-          },
-          body: JSON.stringify({}),
-        });
-        const envelope = (await res.json()) as ApiEnvelope<AuthSession>;
-        if (cancelled) return;
-        if (res.ok && envelope.success && envelope.data?.accessToken) {
-          setSession(envelope.data);
-        } else {
-          clearSession();
-        }
-      } catch {
-        if (!cancelled) clearSession();
+        // Bound wait so a hung refresh never leaves the app on a forever spinner.
+        await Promise.race([
+          refreshSessionOnce({ force: true }),
+          new Promise<boolean>((resolve) => {
+            window.setTimeout(() => resolve(false), 8_000);
+          }),
+        ]);
       } finally {
-        if (!cancelled) setHasHydrated(true);
+        if (!cancelled) {
+          setHasHydrated(true);
+          stopProactive = startProactiveRefreshScheduler();
+        }
       }
     }
 
     void bootstrap();
     return () => {
       cancelled = true;
+      stopProactive?.();
     };
   }, []);
 

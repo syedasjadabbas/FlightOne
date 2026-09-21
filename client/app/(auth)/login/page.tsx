@@ -1,6 +1,7 @@
 import dynamic from "next/dynamic";
 import { Suspense } from "react";
 import { AuthShell } from "../components/AuthShell";
+import { AuthSessionGate } from "../components/AuthSessionGate";
 import { LoginFormSkeleton } from "./components/LoginFormSkeleton";
 import "../auth-form.css";
 
@@ -37,7 +38,9 @@ export default function LoginPage() {
           </>
         }
       >
-        <LoginForm />
+        <AuthSessionGate>
+          <LoginForm />
+        </AuthSessionGate>
       </Suspense>
     </AuthShell>
   );

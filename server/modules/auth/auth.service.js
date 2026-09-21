@@ -18,7 +18,7 @@ import {
   generateTotpUri,
 } from "../../lib/totp.js";
 import { encryptField, decryptField } from "../../lib/fieldEncryption.js";
-import { isStaffRole, userHasStaffRole } from "../../lib/staffRoles.js";
+import { isStaffRole, userHasStaffRole, userHasSuperAdminRole } from "../../lib/staffRoles.js";
 import {
   captureSessionClientMeta,
   summarizeUserAgent,
@@ -26,6 +26,19 @@ import {
 
 const REFRESH_DEFAULT_MS = 7 * 86400000;
 const RESET_DEFAULT_MS = 10 * 60 * 1000; // 10 minutes for OTP
+
+/**
+ * Local/dev convenience: Super Admin logins issue an MFA-complete session
+ * without TOTP enrollment/challenge. Never in production (NFR-SEC-03).
+ * Override with AUTH_SUPER_ADMIN_TRUSTED_MFA=true|false.
+ */
+function trustSuperAdminMfa(env = process.env) {
+  const raw = (env.AUTH_SUPER_ADMIN_TRUSTED_MFA || "").trim().toLowerCase();
+  if (raw === "1" || raw === "true" || raw === "yes") return true;
+  if (raw === "0" || raw === "false" || raw === "no") return false;
+  // Default on for `npm run dev` only — tests/production keep mandatory 2FA.
+  return (env.NODE_ENV || "").trim() === "development";
+}
 
 function refreshExpiresAt() {
   return new Date(
@@ -503,6 +516,23 @@ export async function loginUser({ email, password }, { req } = {}) {
 
   const isStaff = userHasStaffRole(user.userRoles);
 
+  // Dev Super Admin: treat as already 2FA-verified (session mfa:true).
+  if (userHasSuperAdminRole(user.userRoles) && trustSuperAdminMfa()) {
+    await writeAudit({
+      userId: user.id,
+      action: "auth.login",
+      resourceType: "User",
+      resourceId: user.id,
+      req,
+      metadata: {
+        outcome: "success",
+        trustedSuperAdminMfa: true,
+        twoFactorEnabled: user.twoFactorEnabled,
+      },
+    }).catch(() => {});
+    return issueSession(user, { req, mfa: true });
+  }
+
   if (user.twoFactorEnabled) {
     // 2FA is active: issue 2FA challenge token
     const tempToken = signTempToken(
@@ -584,19 +614,98 @@ export async function getProfile(userId) {
 }
 
 /**
- * Rotate refresh token. Detects reuse of an already-rotated/revoked token and
- * revokes the entire session family. Concurrent double-refresh of the same
- * still-valid token: only one wins the atomic revoke; the loser gets 401
- * without family wipe when the revoke was a fresh rotate (race grace).
+ * How long after a rotate a concurrent presenter of the *old* token still gets
+ * a fresh access JWT (Auth0-style reuse interval). Outside this window, reuse
+ * is treated as theft and the whole family is revoked.
+ */
+function refreshRotateGraceMs(env = process.env) {
+  const graceRaw = Number(env.REFRESH_ROTATE_GRACE_MS);
+  return Number.isFinite(graceRaw) && graceRaw >= 0 ? graceRaw : 15_000;
+}
+
+/**
+ * Soft-refresh window: re-issue access JWT and echo the same refresh token
+ * (sliding cookie) without rotating. Avoids multi-tab / Strict-Mode races that
+ * previously 401'd the loser and cleared the client session. Hard rotate only
+ * when the current refresh row is older than this (default 15m). Set
+ * REFRESH_ROTATE_EVERY_MS=0 to rotate on every refresh (tests / max paranoia).
+ */
+function refreshRotateEveryMs(env = process.env) {
+  const raw = Number(env.REFRESH_ROTATE_EVERY_MS);
+  if (Number.isFinite(raw) && raw >= 0) return raw;
+  return 15 * 60 * 1000;
+}
+
+function buildAccessSession(user, { mfa, sessionId, refreshToken }) {
+  const isMfa = Boolean(mfa);
+  return {
+    accessToken: signAccessToken({
+      sub: user.id,
+      email: user.email,
+      mfa: isMfa,
+    }),
+    refreshToken,
+    sessionId,
+    user: toAuthUser(user),
+    mfa: isMfa,
+  };
+}
+
+/**
+ * Concurrent refresh lost the rotate race (or presented a just-rotated token
+ * within the grace window). Mint a new access JWT against the family's current
+ * head without touching the refresh cookie — the winner already Set-Cookie'd.
+ */
+async function sessionFromActiveFamilyMember(tx, familyId, { userFallback } = {}) {
+  const active = await tx.refreshToken.findFirst({
+    where: {
+      familyId,
+      revokedAt: null,
+      expiresAt: { gt: new Date() },
+    },
+    orderBy: { createdAt: "desc" },
+    select: {
+      id: true,
+      mfa: true,
+      user: {
+        select: { id: true, email: true, name: true, twoFactorEnabled: true },
+      },
+    },
+  });
+  if (!active) return null;
+
+  const user = active.user || userFallback;
+  if (!user) return null;
+
+  const isMfa = Boolean(active.mfa || user.twoFactorEnabled);
+  await tx.refreshToken.update({
+    where: { id: active.id },
+    data: { lastUsedAt: new Date() },
+  });
+
+  // Omit refreshToken so attachSessionCookies leaves the jar alone.
+  return buildAccessSession(user, {
+    mfa: isMfa,
+    sessionId: active.id,
+    refreshToken: undefined,
+  });
+}
+
+/**
+ * Soft refresh (same refresh token) or hard rotate. Detects reuse of an
+ * already-rotated token outside the grace window and revokes the family.
+ * Concurrent double-refresh: soft path is naturally idempotent; hard-rotate
+ * losers within grace receive a new access JWT against the family head (no
+ * 401 / no session wipe).
  */
 export async function refreshSession({ refreshToken }, { req } = {}) {
   if (typeof refreshToken !== "string" || !refreshToken.trim()) {
     throw new AppError(401, "Invalid or expired refresh token");
   }
-  const tokenHash = sha256Hex(refreshToken.trim());
-  const graceRaw = Number(process.env.REFRESH_ROTATE_GRACE_MS);
-  const RECENT_ROTATE_GRACE_MS =
-    Number.isFinite(graceRaw) && graceRaw >= 0 ? graceRaw : 15_000;
+  const presented = refreshToken.trim();
+  const tokenHash = sha256Hex(presented);
+  const RECENT_ROTATE_GRACE_MS = refreshRotateGraceMs();
+  const ROTATE_EVERY_MS = refreshRotateEveryMs();
 
   const outcome = await prisma.$transaction(async (tx) => {
     const row = await tx.refreshToken.findUnique({
@@ -607,6 +716,7 @@ export async function refreshSession({ refreshToken }, { req } = {}) {
         expiresAt: true,
         revokedAt: true,
         revokeReason: true,
+        createdAt: true,
         mfa: true,
         user: {
           select: { id: true, email: true, name: true, twoFactorEnabled: true },
@@ -626,16 +736,21 @@ export async function refreshSession({ refreshToken }, { req } = {}) {
         ageMs >= 0 &&
         ageMs < RECENT_ROTATE_GRACE_MS;
 
-      if (!recentRotate) {
-        await revokeFamilyTokens(tx, row.familyId, { reason: "reuse_detected" });
-        return {
-          type: "reuse",
-          userId: row.user.id,
-          tokenId: row.id,
-          familyId: row.familyId,
-        };
+      if (recentRotate) {
+        const session = await sessionFromActiveFamilyMember(tx, row.familyId, {
+          userFallback: row.user,
+        });
+        if (session) return { type: "ok", session, audit: null };
+        return { type: "reject" };
       }
-      return { type: "reject" };
+
+      await revokeFamilyTokens(tx, row.familyId, { reason: "reuse_detected" });
+      return {
+        type: "reuse",
+        userId: row.user.id,
+        tokenId: row.id,
+        familyId: row.familyId,
+      };
     }
 
     if (row.expiresAt < new Date()) {
@@ -646,21 +761,47 @@ export async function refreshSession({ refreshToken }, { req } = {}) {
       return { type: "reject" };
     }
 
+    const isMfa = Boolean(row.mfa || row.user.twoFactorEnabled);
+    const tokenAgeMs = Date.now() - new Date(row.createdAt).getTime();
+    const shouldRotate = ROTATE_EVERY_MS === 0 || tokenAgeMs >= ROTATE_EVERY_MS;
+
+    // Soft refresh: new access JWT, same refresh credential (sliding cookie).
+    if (!shouldRotate) {
+      const now = new Date();
+      const meta = captureSessionClientMeta(req);
+      await tx.refreshToken.update({
+        where: { id: row.id },
+        data: {
+          lastUsedAt: now,
+          userAgent: meta.userAgent ?? undefined,
+          ip: meta.ip ?? undefined,
+        },
+      });
+      return {
+        type: "ok",
+        session: buildAccessSession(row.user, {
+          mfa: isMfa,
+          sessionId: row.id,
+          refreshToken: presented,
+        }),
+        audit: null,
+      };
+    }
+
     const claimed = await tx.refreshToken.updateMany({
       where: { id: row.id, revokedAt: null },
       data: { revokedAt: new Date(), revokeReason: "refresh_rotate" },
     });
 
+    // Lost the atomic rotate race — treat as grace, not logout.
     if (claimed.count !== 1) {
+      const session = await sessionFromActiveFamilyMember(tx, row.familyId, {
+        userFallback: row.user,
+      });
+      if (session) return { type: "ok", session, audit: null };
       return { type: "reject" };
     }
 
-    const isMfa = Boolean(row.mfa || row.user.twoFactorEnabled);
-    const accessToken = signAccessToken({
-      sub: row.user.id,
-      email: row.user.email,
-      mfa: isMfa,
-    });
     const nextRefresh = randomToken();
     const now = new Date();
     const meta = captureSessionClientMeta(req);
@@ -680,13 +821,11 @@ export async function refreshSession({ refreshToken }, { req } = {}) {
 
     return {
       type: "ok",
-      session: {
-        accessToken,
-        refreshToken: nextRefresh,
-        sessionId: next.id,
-        user: toAuthUser(row.user),
+      session: buildAccessSession(row.user, {
         mfa: isMfa,
-      },
+        sessionId: next.id,
+        refreshToken: nextRefresh,
+      }),
       audit: {
         userId: row.user.id,
         rotatedFrom: row.id,
@@ -698,27 +837,29 @@ export async function refreshSession({ refreshToken }, { req } = {}) {
   });
 
   if (outcome.type === "ok") {
-    await writeAudit({
-      userId: outcome.audit.userId,
-      action: "auth.session.revoke",
-      resourceType: "RefreshToken",
-      resourceId: outcome.audit.rotatedFrom,
-      req,
-      metadata: { reason: "refresh_rotate", familyId: outcome.audit.familyId },
-    }).catch(() => {});
-    await writeAudit({
-      userId: outcome.audit.userId,
-      action: "auth.session.create",
-      resourceType: "RefreshToken",
-      resourceId: outcome.audit.nextId,
-      req,
-      metadata: {
-        userAgent: outcome.audit.meta.userAgent,
-        ip: outcome.audit.meta.ip,
-        familyId: outcome.audit.familyId,
-        rotatedFrom: outcome.audit.rotatedFrom,
-      },
-    }).catch(() => {});
+    if (outcome.audit) {
+      await writeAudit({
+        userId: outcome.audit.userId,
+        action: "auth.session.revoke",
+        resourceType: "RefreshToken",
+        resourceId: outcome.audit.rotatedFrom,
+        req,
+        metadata: { reason: "refresh_rotate", familyId: outcome.audit.familyId },
+      }).catch(() => {});
+      await writeAudit({
+        userId: outcome.audit.userId,
+        action: "auth.session.create",
+        resourceType: "RefreshToken",
+        resourceId: outcome.audit.nextId,
+        req,
+        metadata: {
+          userAgent: outcome.audit.meta.userAgent,
+          ip: outcome.audit.meta.ip,
+          familyId: outcome.audit.familyId,
+          rotatedFrom: outcome.audit.rotatedFrom,
+        },
+      }).catch(() => {});
+    }
     return outcome.session;
   }
 
