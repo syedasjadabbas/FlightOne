@@ -87,9 +87,18 @@ export const uploadVaultDocumentSchema = z
     ...metadataFields,
     contentType: z.string().trim().min(3).max(100),
     originalFilename: z.string().trim().min(1).max(200),
-    contentBase64: z.string().min(1).max(20_000_000),
+    contentBase64: z.string().min(1).max(20_000_000).optional(),
+    fileUrl: z.string().url().max(2048).optional(),
+    byteSize: z.number().int().positive().max(10 * 1024 * 1024).optional(),
   })
   .strict()
+  .refine((body) => Boolean(body.contentBase64) !== Boolean(body.fileUrl), {
+    message: "Provide exactly one of fileUrl or contentBase64",
+  })
+  .refine((body) => !body.fileUrl || body.byteSize != null, {
+    message: "byteSize is required when fileUrl is provided",
+    path: ["byteSize"],
+  })
   .refine(rejectVisaMetaUnlessVisa, {
     message: "visaMeta is only allowed for VISA documents",
     path: ["visaMeta"],
@@ -99,12 +108,21 @@ export const replaceVaultBinarySchema = z
   .object({
     contentType: z.string().trim().min(3).max(100).optional(),
     originalFilename: z.string().trim().min(1).max(200).optional(),
-    contentBase64: z.string().min(1).max(20_000_000),
+    contentBase64: z.string().min(1).max(20_000_000).optional(),
+    fileUrl: z.string().url().max(2048).optional(),
+    byteSize: z.number().int().positive().max(10 * 1024 * 1024).optional(),
     title: z.string().trim().min(1).max(200).optional(),
     issueDate: z.coerce.date().nullable().optional(),
     expiresAt: z.coerce.date().nullable().optional(),
   })
-  .strict();
+  .strict()
+  .refine((body) => Boolean(body.contentBase64) !== Boolean(body.fileUrl), {
+    message: "Provide exactly one of fileUrl or contentBase64",
+  })
+  .refine((body) => !body.fileUrl || body.byteSize != null, {
+    message: "byteSize is required when fileUrl is provided",
+    path: ["byteSize"],
+  });
 
 export const updateVaultDocumentSchema = z
   .object({

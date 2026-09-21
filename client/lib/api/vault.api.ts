@@ -158,7 +158,11 @@ export const vaultApi = baseApi.injectEndpoints({
         title: string;
         contentType: string;
         originalFilename: string;
-        contentBase64: string;
+        /** Preferred: GCS public URL after signed client upload. */
+        fileUrl?: string;
+        byteSize?: number;
+        /** Legacy / server-side path. */
+        contentBase64?: string;
         companionId?: string;
         issueDate?: string;
         expiresAt?: string;
@@ -189,7 +193,9 @@ export const vaultApi = baseApi.injectEndpoints({
       VaultDocument,
       {
         id: string;
-        contentBase64: string;
+        fileUrl?: string;
+        byteSize?: number;
+        contentBase64?: string;
         contentType?: string;
         originalFilename?: string;
         title?: string;

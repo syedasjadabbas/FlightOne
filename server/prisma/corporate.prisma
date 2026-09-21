@@ -284,6 +284,7 @@ model Expense {
   ocrExtracted  Json?
   ocrProvenance Json?
 
+  /// GCS or local:// URL for the receipt binary (opaque key no longer written).
   receiptStorageKey        String?
   receiptContentType       String?
   receiptByteSize          Int?

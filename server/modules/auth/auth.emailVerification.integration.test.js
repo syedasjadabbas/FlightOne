@@ -14,6 +14,7 @@ process.env.FLIGHTONE_API_LISTEN = "false";
 process.env.NODE_ENV = "test";
 process.env.EMAIL_VERIFICATION_RETURN_TOKEN = "true";
 delete process.env.NOTIFY_EMAIL_WEBHOOK_URL;
+delete process.env.RESEND_API_KEY;
 if (!process.env.JWT_SECRET) {
   process.env.JWT_SECRET = "test-jwt-secret-min-32-characters-long";
 }

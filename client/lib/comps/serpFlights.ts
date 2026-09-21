@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "@/lib/api/baseApi";
 import { isSerpConfigured } from "./serpHotels";
 
 export type SerpFlightSegment = {
@@ -23,207 +24,41 @@ export type SerpFlightOption = {
   segments?: SerpFlightSegment[];
 };
 
-type SerpFlightLeg = {
-  airline?: string;
-  flight_number?: string;
-  departure_airport?: { id?: string; time?: string };
-  arrival_airport?: { id?: string; time?: string };
-  duration?: number;
+type ApiEnvelope<T> = {
+  success: boolean;
+  message?: string;
+  data?: T;
 };
-
-type SerpFlightRow = {
-  flights?: SerpFlightLeg[];
-  price?: number;
-  total_duration?: number;
-  layovers?: unknown[];
-};
-
-type SerpFlightsResponse = {
-  error?: string;
-  best_flights?: SerpFlightRow[];
-  other_flights?: SerpFlightRow[];
-  price_insights?: { lowest_price?: number; price_level?: string };
-  search_parameters?: { currency?: string };
-};
-
-const IATA_RE = /^[A-Z]{3}$/;
-const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
-const AIRLINE_CODE_RE = /^[A-Z0-9]{2}$/;
 
 const EMPTY: { options: SerpFlightOption[]; lowestPriceMajor: number | null } = {
   options: [],
   lowestPriceMajor: null,
 };
 
-/** Align Google locale with quote currency — mismatched gl often empties results. */
-function glForCurrency(currency: string): string {
-  switch (currency) {
-    case "PKR":
-      return "pk";
-    case "INR":
-      return "in";
-    case "AED":
-      return "ae";
-    case "SAR":
-      return "sa";
-    case "GBP":
-      return "uk";
-    case "EUR":
-      return "de";
-    default:
-      return "us";
+function compsBase(): string {
+  return (
+    process.env.FLIGHTONE_API_URL ||
+    process.env.NEXT_PUBLIC_API_URL ||
+    API_BASE_URL
+  ).replace(/\/$/, "");
+}
+
+function authHeaders(): HeadersInit | null {
+  const internalKey = process.env.INTERNAL_API_KEY;
+  if (!internalKey) {
+    console.warn("[comps] INTERNAL_API_KEY missing — cannot reach backend Serp");
+    return null;
   }
-}
-
-function carrierFromLeg(leg: SerpFlightLeg): string | null {
-  const num = leg.flight_number?.trim().toUpperCase() || "";
-  const m = num.match(/^([A-Z0-9]{2})\d/);
-  if (m) return m[1];
-  const name = (leg.airline || "").toUpperCase();
-  if (/^[A-Z0-9]{2}$/.test(name)) return name;
-  return null;
-}
-
-const TIME_LOCAL_RE = /(\d{1,2}:\d{2})/;
-
-function timeLocalFromSerp(time?: string): string | undefined {
-  if (!time) return undefined;
-  const m = time.match(TIME_LOCAL_RE);
-  if (!m) return undefined;
-  const [h, min] = m[1].split(":");
-  return `${h.padStart(2, "0")}:${min}`;
-}
-
-function parseSegments(legs: SerpFlightLeg[]): SerpFlightSegment[] | undefined {
-  if (!legs.length) return undefined;
-  const out: SerpFlightSegment[] = [];
-  for (const leg of legs) {
-    const originCode = leg.departure_airport?.id?.trim().toUpperCase();
-    const destinationCode = leg.arrival_airport?.id?.trim().toUpperCase();
-    if (!originCode || !destinationCode) continue;
-    const carrier =
-      carrierFromLeg(leg) ||
-      (leg.airline || "XX").trim().toUpperCase().slice(0, 2) ||
-      "XX";
-    const flightNumber = leg.flight_number?.trim().toUpperCase() || carrier;
-    const departTimeLocal = timeLocalFromSerp(leg.departure_airport?.time);
-    const arriveTimeLocal = timeLocalFromSerp(leg.arrival_airport?.time);
-    const durationMinutes =
-      typeof leg.duration === "number" && leg.duration > 0 ? leg.duration : undefined;
-    out.push({
-      carrier,
-      flightNumber,
-      originCode,
-      destinationCode,
-      ...(departTimeLocal ? { departTimeLocal } : {}),
-      ...(arriveTimeLocal ? { arriveTimeLocal } : {}),
-      ...(durationMinutes != null ? { durationMinutes } : {}),
-    });
-  }
-  return out.length > 0 ? out : undefined;
-}
-
-function toOption(row: SerpFlightRow, currency: string): SerpFlightOption | null {
-  const legs = row.flights || [];
-  if (legs.length === 0 && row.price == null) return null;
-  const airlines = [
-    ...new Set(legs.map((l) => l.airline).filter((a): a is string => Boolean(a))),
-  ];
-  const carriers = legs.map(carrierFromLeg).filter((c): c is string => Boolean(c));
-  const segments = parseSegments(legs);
   return {
-    airlines,
-    carrierHint: carriers[0] || null,
-    priceMajor: typeof row.price === "number" && row.price > 0 ? row.price : null,
-    currency,
-    stops:
-      typeof row.layovers?.length === "number"
-        ? row.layovers.length
-        : Math.max(0, legs.length - 1),
-    durationMinutes:
-      typeof row.total_duration === "number" ? row.total_duration : null,
-    departureId: legs[0]?.departure_airport?.id || null,
-    arrivalId: legs[legs.length - 1]?.arrival_airport?.id || null,
-    ...(segments ? { segments } : {}),
+    "Content-Type": "application/json",
+    Accept: "application/json",
+    "X-Internal-Api-Key": internalKey,
   };
 }
 
-function normalizeIata(code: string): string | null {
-  const c = code.trim().toUpperCase();
-  return IATA_RE.test(c) ? c : null;
-}
-
-function normalizeDate(raw: string): string | null {
-  const d = raw.trim();
-  if (!DATE_RE.test(d)) return null;
-  // Compare as UTC calendar days to avoid local TZ flipping "today".
-  const today = new Date();
-  const todayUtc = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
-  const [y, m, day] = d.split("-").map(Number);
-  const dateUtc = Date.UTC(y, m - 1, day);
-  if (dateUtc < todayUtc) return null;
-  return d;
-}
-
-function normalizeAirlineCodes(codes?: string[]): string[] {
-  if (!codes?.length) return [];
-  return [
-    ...new Set(
-      codes
-        .map((c) => c.trim().toUpperCase())
-        .filter((c) => AIRLINE_CODE_RE.test(c)),
-    ),
-  ];
-}
-
-function parseResponse(json: SerpFlightsResponse, fallbackCurrency: string) {
-  const ccy = json.search_parameters?.currency || fallbackCurrency;
-  const rows = [...(json.best_flights || []), ...(json.other_flights || [])];
-  const options = rows
-    .map((r) => toOption(r, ccy))
-    .filter((o): o is SerpFlightOption => o != null)
-    .slice(0, 16);
-  const lowest =
-    json.price_insights?.lowest_price ??
-    options.reduce<number | null>((min, o) => {
-      if (o.priceMajor == null) return min;
-      if (min == null || o.priceMajor < min) return o.priceMajor;
-      return min;
-    }, null);
-  return { options, lowestPriceMajor: lowest };
-}
-
-async function fetchFlights(
-  params: URLSearchParams,
-  timeoutMs: number,
-): Promise<SerpFlightsResponse | null> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    const res = await fetch(`https://serpapi.com/search.json?${params}`, {
-      method: "GET",
-      signal: controller.signal,
-      cache: "no-store",
-    });
-    if (!res.ok) {
-      console.warn(`[serp/flights] HTTP ${res.status}`);
-      return null;
-    }
-    return (await res.json()) as SerpFlightsResponse;
-  } catch (e) {
-    console.warn("[serp/flights] failed:", e instanceof Error ? e.message : e);
-    return null;
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
 /**
- * Google Flights via SerpAPI. Soft-fail → [].
- * One-way by default; set returnDate for round trip (type=1).
- *
- * Prefer filtering airlines locally — Serp `include_airlines` often returns
- * empty for otherwise valid routes (especially round trips).
+ * Google Flights via Express `/api/v1/comps/flights`. Soft-fail → [].
+ * One-way by default; set returnDate for round trip.
  */
 export async function searchGoogleFlights(opts: {
   origin: string;
@@ -237,89 +72,38 @@ export async function searchGoogleFlights(opts: {
   timeoutMs?: number;
 }): Promise<{ options: SerpFlightOption[]; lowestPriceMajor: number | null }> {
   if (!isSerpConfigured()) return EMPTY;
-  const key = process.env.SERPAPI_API_KEY || process.env.SERP_API_KEY;
-  if (!key) return EMPTY;
 
-  const origin = normalizeIata(opts.origin);
-  const destination = normalizeIata(opts.destination);
-  const outboundDate = normalizeDate(opts.outboundDate);
-  if (!origin || !destination || !outboundDate) {
-    console.warn(
-      `[serp/flights] skip invalid query origin=${opts.origin} dest=${opts.destination} date=${opts.outboundDate}`,
-    );
-    return EMPTY;
-  }
+  const headers = authHeaders();
+  if (!headers) return EMPTY;
 
-  const currency = opts.currency.toUpperCase().slice(0, 3);
-  const returnDate = opts.returnDate ? normalizeDate(opts.returnDate) : null;
-  // Round-trip only when return is valid and after outbound; else force one-way.
-  const isRoundTrip = Boolean(
-    returnDate && returnDate > outboundDate,
-  );
-  const airlines = normalizeAirlineCodes(opts.includeAirlines);
   const timeoutMs = opts.timeoutMs ?? 20000;
-  const gl = glForCurrency(currency);
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs + 5000);
 
-  const buildParams = (deep: boolean, withAirlines: boolean) => {
-    const params = new URLSearchParams({
-      engine: "google_flights",
-      departure_id: origin,
-      arrival_id: destination,
-      outbound_date: outboundDate,
-      currency,
-      adults: String(Math.max(1, opts.adults ?? 1)),
-      hl: "en",
-      gl,
-      type: isRoundTrip ? "1" : "2",
-      api_key: key,
+  try {
+    const res = await fetch(`${compsBase()}/comps/flights`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(opts),
+      signal: ctrl.signal,
+      cache: "no-store",
     });
-    if (isRoundTrip && returnDate) params.set("return_date", returnDate);
-    if (deep) params.set("deep_search", "true");
-    if (withAirlines && airlines.length) {
-      params.set("include_airlines", airlines.join(","));
+    if (!res.ok) {
+      console.warn(`[comps/flights] HTTP ${res.status}`);
+      return EMPTY;
     }
-    return params;
-  };
-
-  const route = `${origin}→${destination} ${outboundDate}${isRoundTrip ? `/${returnDate}` : ""}`;
-
-  // 1) Broad market search (no airline filter — most reliable).
-  let json = await fetchFlights(buildParams(false, false), timeoutMs);
-  if (json?.error || !json || parseResponse(json, currency).options.length === 0) {
-    // 2) deep_search retry for flaky Google empty responses.
-    json = await fetchFlights(buildParams(true, false), timeoutMs);
-  }
-
-  if (!json) return EMPTY;
-  if (json.error) {
-    console.warn(`[serp/flights] ${route}: ${json.error}`);
+    const body = (await res.json()) as ApiEnvelope<{
+      options?: SerpFlightOption[];
+      lowestPriceMajor?: number | null;
+    }>;
+    return {
+      options: body?.data?.options ?? [],
+      lowestPriceMajor: body?.data?.lowestPriceMajor ?? null,
+    };
+  } catch (e) {
+    console.warn("[comps/flights] failed:", e instanceof Error ? e.message : e);
     return EMPTY;
+  } finally {
+    clearTimeout(timer);
   }
-
-  let result = parseResponse(json, currency);
-  if (result.options.length === 0) {
-    console.warn(`[serp/flights] ${route}: empty after retry`);
-    return EMPTY;
-  }
-
-  // Optional: if caller still asked for carriers, keep a filtered view only when hits exist.
-  if (airlines.length) {
-    const filtered = result.options.filter(
-      (o) =>
-        (o.carrierHint && airlines.includes(o.carrierHint)) ||
-        o.airlines.some((name) =>
-          airlines.some((code) => name.toUpperCase().includes(code)),
-        ),
-    );
-    if (filtered.length > 0) {
-      const lowest = filtered.reduce<number | null>((min, o) => {
-        if (o.priceMajor == null) return min;
-        if (min == null || o.priceMajor < min) return o.priceMajor;
-        return min;
-      }, null);
-      return { options: filtered, lowestPriceMajor: lowest };
-    }
-  }
-
-  return result;
 }

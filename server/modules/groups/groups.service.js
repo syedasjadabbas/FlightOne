@@ -14,7 +14,6 @@ import {
   decodeBase64Content,
   getVaultStorage,
   getVaultStorageCapability,
-  sha256Buffer,
   validateUploadPayload,
 } from "../vault/vault.storage.js";
 import { getJourneyStatusCapability, fetchFlightStatus } from "../journey/journey.statusProvider.js";
@@ -982,7 +981,11 @@ export async function uploadGroupPhoto(groupId, actorUserId, actorPerms, body) {
   const photoId = crypto.randomBytes(12).toString("hex");
   const storageKey = `groups/${groupId}/${photoId}/${validated.originalFilename}`;
   const storage = getVaultStorage();
-  await storage.put({ storageKey, buffer });
+  const stored = await storage.put({
+    storageKey,
+    buffer,
+    contentType: validated.contentType,
+  });
 
   return prisma.groupPhoto.create({
     data: {
@@ -992,8 +995,7 @@ export async function uploadGroupPhoto(groupId, actorUserId, actorPerms, body) {
       caption: body.caption || null,
       contentType: validated.contentType,
       byteSize: buffer.length,
-      storageKey,
-      contentSha256: sha256Buffer(buffer),
+      fileUrl: stored.fileUrl,
     },
     select: {
       id: true,
@@ -1002,6 +1004,7 @@ export async function uploadGroupPhoto(groupId, actorUserId, actorPerms, body) {
       caption: true,
       contentType: true,
       byteSize: true,
+      fileUrl: true,
       createdAt: true,
     },
   });
@@ -1019,6 +1022,7 @@ export async function listGroupPhotos(groupId, actorUserId, actorPerms) {
       caption: true,
       contentType: true,
       byteSize: true,
+      fileUrl: true,
       createdAt: true,
     },
   });
@@ -1029,12 +1033,13 @@ export async function getGroupPhotoContent(groupId, photoId, actorUserId, actorP
   await assertActiveMember(groupId, actorUserId, actorPerms);
   const photo = await prisma.groupPhoto.findFirst({ where: { id: photoId, groupId } });
   if (!photo) throw new AppError(404, "Photo not found");
-  const buffer = await getVaultStorage().get({ storageKey: photo.storageKey });
+  const buffer = await getVaultStorage().get({ fileUrl: photo.fileUrl });
   return {
     contentBase64: buffer.toString("base64"),
     contentType: photo.contentType,
     byteSize: photo.byteSize,
     caption: photo.caption,
+    fileUrl: photo.fileUrl,
   };
 }
 
@@ -1046,7 +1051,7 @@ export async function deleteGroupPhoto(groupId, photoId, actorUserId, actorPerms
   if (photo.uploadedByUserId !== actorUserId && !isOrg) {
     throw new AppError(403, "Only the uploader or an organizer can delete this photo");
   }
-  await getVaultStorage().remove({ storageKey: photo.storageKey }).catch(() => {});
+  await getVaultStorage().remove({ fileUrl: photo.fileUrl }).catch(() => {});
   await prisma.groupPhoto.delete({ where: { id: photoId } });
   return { deleted: true };
 }

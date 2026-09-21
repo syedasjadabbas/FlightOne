@@ -145,7 +145,7 @@ describe("vault Module 07", () => {
     assert.equal(up.body.data.storageKey, undefined);
     assert.equal(up.body.data.contentSha256, undefined);
     assert.equal(up.body.data.encryptedNote, undefined);
-    assert.ok(String(JSON.stringify(up.body)).includes("vault://document/"));
+    assert.ok(String(up.body.data.fileUrl || "").startsWith("local://"));
     assert.ok(!String(JSON.stringify(up.body)).includes(vaultRoot));
 
     const dl = await httpRequest("GET", `/api/v1/vault/${up.body.data.id}/download`, {

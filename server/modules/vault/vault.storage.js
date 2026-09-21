@@ -1,16 +1,28 @@
 /**
  * Module 07 — Vault binary storage providers.
  *
- * Fail-closed when unconfigured. Local provider is for development/tests only
- * (VAULT_STORAGE_PROVIDER=local + VAULT_LOCAL_ROOT). Never invent cloud credentials.
+ * Providers:
+ *  - gcs  — Google Cloud Storage (production). DB stores public GCS fileUrl only.
+ *  - local — filesystem under VAULT_LOCAL_ROOT (dev/test). DB stores local://… URL.
  *
- * Object keys are opaque server-side paths; callers must never accept client-supplied
- * absolute paths (path-traversal prevention).
+ * Fail-closed when unconfigured. Never invent cloud credentials.
  */
 import fs from "node:fs/promises";
 import path from "node:path";
 import crypto from "node:crypto";
 import { AppError } from "../../lib/customError.js";
+import {
+  isAllowedGcsUrl,
+  isLocalStorageUrl,
+  objectKeyFromGcsUrl,
+  objectKeyFromLocalUrl,
+} from "../../lib/storageUrl.js";
+import {
+  deleteGcsObject,
+  downloadGcsObject,
+  isGcsConfigured,
+  uploadBufferToGcs,
+} from "../uploads/uploads.service.js";
 
 export const VAULT_MAX_BYTES = 10 * 1024 * 1024; // 10 MiB
 
@@ -25,18 +37,57 @@ export function getVaultStorageCapability() {
   const provider = (process.env.VAULT_STORAGE_PROVIDER || "unconfigured").trim().toLowerCase();
   const root = process.env.VAULT_LOCAL_ROOT?.trim() || null;
   const localReady = provider === "local" && Boolean(root);
+  const gcsReady = provider === "gcs" && isGcsConfigured();
+
+  if (gcsReady) {
+    return {
+      provider: "gcs",
+      configured: true,
+      canUpload: true,
+      canDownload: true,
+      maxBytes: VAULT_MAX_BYTES,
+      allowedMimeTypes: [...VAULT_ALLOWED_MIME],
+      reasons: [],
+    };
+  }
+  if (localReady) {
+    return {
+      provider: "local",
+      configured: true,
+      canUpload: true,
+      canDownload: true,
+      maxBytes: VAULT_MAX_BYTES,
+      allowedMimeTypes: [...VAULT_ALLOWED_MIME],
+      reasons: [],
+    };
+  }
+
+  const reasons = [];
+  if (provider === "gcs") {
+    reasons.push(
+      "VAULT_STORAGE_PROVIDER=gcs requires GCLOUD_PROJECT_ID, GCLOUD_BUCKET, and GCP_KEY_FILE_PATH (or GCP_KEY_BASE64)",
+    );
+  } else if (provider === "local" && !root) {
+    reasons.push("VAULT_LOCAL_ROOT is required when VAULT_STORAGE_PROVIDER=local");
+  } else {
+    reasons.push(
+      "Vault binary storage is not configured — set VAULT_STORAGE_PROVIDER=gcs (prod) or local (dev)",
+    );
+  }
+
   return {
-    provider: localReady ? "local" : provider === "local" ? "local_misconfigured" : "unconfigured",
-    configured: localReady,
-    canUpload: localReady,
-    canDownload: localReady,
+    provider:
+      provider === "gcs"
+        ? "gcs_misconfigured"
+        : provider === "local"
+          ? "local_misconfigured"
+          : "unconfigured",
+    configured: false,
+    canUpload: false,
+    canDownload: false,
     maxBytes: VAULT_MAX_BYTES,
     allowedMimeTypes: [...VAULT_ALLOWED_MIME],
-    reasons: localReady
-      ? []
-      : provider === "local" && !root
-        ? ["VAULT_LOCAL_ROOT is required when VAULT_STORAGE_PROVIDER=local"]
-        : ["Vault binary storage is not configured — set VAULT_STORAGE_PROVIDER=local and VAULT_LOCAL_ROOT for dev/test"],
+    reasons,
   };
 }
 
@@ -53,7 +104,6 @@ export function assertSafeObjectKey(storageKey) {
   if (storageKey.includes("..") || path.isAbsolute(storageKey) || storageKey.includes("\\")) {
     throw new AppError(500, "Invalid vault storage key");
   }
-  // ownerId/docId/filename — three segments minimum
   const parts = storageKey.split("/");
   if (parts.length < 3 || parts.some((p) => !p || p === "." || p === "..")) {
     throw new AppError(500, "Invalid vault storage key");
@@ -111,16 +161,24 @@ function localProvider(root) {
     return abs;
   }
 
+  function keyFromFileUrl(fileUrl) {
+    if (isLocalStorageUrl(fileUrl)) {
+      return assertSafeObjectKey(objectKeyFromLocalUrl(fileUrl));
+    }
+    // Legacy rows stored bare relative keys in storageKey / fileUrl.
+    return assertSafeObjectKey(String(fileUrl).replace(/^local:\/\//i, ""));
+  }
+
   return {
     name: "local",
     async put({ storageKey, buffer }) {
       const abs = await absolutePathFor(storageKey);
       await fs.mkdir(path.dirname(abs), { recursive: true });
       await fs.writeFile(abs, buffer);
-      return { storageKey, byteSize: buffer.length };
+      return { fileUrl: `local://${storageKey}`, byteSize: buffer.length };
     },
-    async get({ storageKey }) {
-      const abs = await absolutePathFor(storageKey);
+    async get({ fileUrl }) {
+      const abs = await absolutePathFor(keyFromFileUrl(fileUrl));
       try {
         return await fs.readFile(abs);
       } catch (e) {
@@ -130,9 +188,9 @@ function localProvider(root) {
         throw e;
       }
     },
-    async remove({ storageKey }) {
+    async remove({ fileUrl }) {
       try {
-        const abs = await absolutePathFor(storageKey);
+        const abs = await absolutePathFor(keyFromFileUrl(fileUrl));
         await fs.unlink(abs);
       } catch (e) {
         if (e && e.code !== "ENOENT") throw e;
@@ -141,9 +199,50 @@ function localProvider(root) {
   };
 }
 
+function gcsProvider() {
+  return {
+    name: "gcs",
+    async put({ storageKey, buffer, contentType }) {
+      const safe = assertSafeObjectKey(storageKey);
+      const fileUrl = await uploadBufferToGcs({
+        buffer,
+        objectKey: safe,
+        contentType: contentType || "application/octet-stream",
+      });
+      return { fileUrl, byteSize: buffer.length };
+    },
+    async get({ fileUrl }) {
+      if (!isAllowedGcsUrl(fileUrl)) {
+        throw new AppError(500, "Invalid GCS file URL");
+      }
+      const objectKey = objectKeyFromGcsUrl(fileUrl);
+      if (!objectKey) {
+        throw new AppError(500, "Invalid GCS file URL");
+      }
+      try {
+        return await downloadGcsObject(objectKey);
+      } catch (e) {
+        if (e?.code === 404) {
+          throw new AppError(404, "Vault file not found");
+        }
+        throw e;
+      }
+    },
+    async remove({ fileUrl }) {
+      if (!isAllowedGcsUrl(fileUrl)) return;
+      const objectKey = objectKeyFromGcsUrl(fileUrl);
+      if (!objectKey) return;
+      await deleteGcsObject(objectKey);
+    },
+  };
+}
+
 /** Resolve the active storage provider (fail-closed by default). */
 export function getVaultStorage() {
   const cap = getVaultStorageCapability();
+  if (cap.configured && cap.provider === "gcs") {
+    return gcsProvider();
+  }
   if (cap.configured && cap.provider === "local") {
     return localProvider(process.env.VAULT_LOCAL_ROOT.trim());
   }
@@ -167,7 +266,6 @@ export function decodeBase64Content(contentBase64) {
   if (!contentBase64 || typeof contentBase64 !== "string") {
     throw new AppError(400, "contentBase64 is required");
   }
-  // Strip data-URL prefix if present.
   const raw = contentBase64.includes(",")
     ? contentBase64.slice(contentBase64.indexOf(",") + 1)
     : contentBase64;
@@ -184,4 +282,19 @@ export function decodeBase64Content(contentBase64) {
     throw new AppError(400, `File exceeds maximum size of ${VAULT_MAX_BYTES} bytes`);
   }
   return buffer;
+}
+
+/** Resolve the stored URL used to fetch/delete bytes (fileUrl preferred; legacy storageKey fallback). */
+export function resolveStoredFileUrl(doc) {
+  if (!doc) return null;
+  if (doc.fileUrl && (isAllowedGcsUrl(doc.fileUrl) || isLocalStorageUrl(doc.fileUrl))) {
+    return doc.fileUrl;
+  }
+  if (doc.storageKey) {
+    if (isAllowedGcsUrl(doc.storageKey) || isLocalStorageUrl(doc.storageKey)) {
+      return doc.storageKey;
+    }
+    return `local://${doc.storageKey}`;
+  }
+  return null;
 }

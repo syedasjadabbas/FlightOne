@@ -101,6 +101,10 @@ export default function HeroExperienceSequence() {
   // State for active slide index & images
   const [activeExpIdx, setActiveExpIdx] = useState(0);
   const activeExpIdxRef = useRef(0);
+  /* Showcase cards 1–3 (~2.1MB of destination JPGs) stay off the network
+   * until scroll approaches the ivory morph (~p=0.28). Card 0 is first. */
+  const showcaseImgsReadyRef = useRef(false);
+  const [showcaseImgsReady, setShowcaseImgsReady] = useState(false);
 
   const setVideoRef = useCallback((el: HTMLVideoElement | null) => {
     videoRef.current = el;
@@ -110,6 +114,42 @@ export default function HeroExperienceSequence() {
       el.playsInline = true;
       el.pause();
     }
+  }, []);
+
+  /* Hero MP4 is 15MB — start with metadata only so it does not compete with
+   * LCP (headline + fonts). Warm the full file on first scroll or idle. */
+  useEffect(() => {
+    let warmed = false;
+    let idleId: number | undefined;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+    const warmVideo = () => {
+      if (warmed) return;
+      const video = videoRef.current;
+      if (!video) return;
+      warmed = true;
+      video.preload = 'auto';
+    };
+
+    const onScroll = () => {
+      warmVideo();
+      window.removeEventListener('scroll', onScroll);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    if (typeof window.requestIdleCallback === 'function') {
+      idleId = window.requestIdleCallback(() => warmVideo(), { timeout: 2500 });
+    } else {
+      timeoutId = setTimeout(warmVideo, 2000);
+    }
+
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      if (idleId !== undefined && typeof window.cancelIdleCallback === 'function') {
+        window.cancelIdleCallback(idleId);
+      }
+      if (timeoutId !== undefined) clearTimeout(timeoutId);
+    };
   }, []);
 
   /* ── 120fps Inertial Scroll & Fluid Transformation Engine ── */
@@ -134,6 +174,11 @@ export default function HeroExperienceSequence() {
         const diffP = rawP - lerpedP;
         lerpedP += diffP * 0.12;
         const p = lerpedP;
+
+        if (!showcaseImgsReadyRef.current && p > 0.28) {
+          showcaseImgsReadyRef.current = true;
+          setShowcaseImgsReady(true);
+        }
 
         const w = document.documentElement.clientWidth || window.innerWidth;
         const h = window.innerHeight;
@@ -664,14 +709,15 @@ export default function HeroExperienceSequence() {
             willChange: 'transform, opacity, bottom',
           }}
         >
-          {/* HD Video */}
+          {/* HD Video — preload=metadata keeps the 15MB file off the LCP race;
+              warm-up effect above promotes to auto on scroll/idle. */}
           <div className="absolute inset-0 bg-[#0E1620] overflow-hidden">
             <video
               ref={setVideoRef}
               src="/videos/flightone-hero.mp4"
               muted
               playsInline
-              preload="auto"
+              preload="metadata"
               className="w-full h-full object-cover"
               style={{
                 width: '100%',
@@ -986,27 +1032,24 @@ export default function HeroExperienceSequence() {
                   display: i === 0 ? 'block' : 'none',
                 }}
               >
-                <img
-                  src={slide.image}
-                  alt={slide.copy}
-                  /* Cards 1-3 start display:none and are only flipped to
-                     visible by the RAF loop as the user scrolls into the
-                     showcase phase (~p=0.42+), so native loading="lazy"
-                     (which needs a laid-out box to judge viewport distance)
-                     can't safely prefetch them ahead of time without risking
-                     a pop-in. fetchPriority="low" still deprioritizes them
-                     behind the hero video/LCP content on the network without
-                     changing *when* the fetch starts. */
-                  fetchPriority={i === 0 ? undefined : 'low'}
-                  decoding="async"
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                    display: 'block',
-                    borderRadius: 'inherit',
-                  }}
-                />
+                {showcaseImgsReady && (
+                  <img
+                    src={slide.image}
+                    alt={slide.copy}
+                    /* All four cards (~2.1MB) mount only after scroll nears
+                       the showcase morph (p>0.28), so they never compete
+                       with LCP. fetchPriority="low" for non-first cards. */
+                    fetchPriority={i === 0 ? undefined : 'low'}
+                    decoding="async"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      display: 'block',
+                      borderRadius: 'inherit',
+                    }}
+                  />
+                )}
               </div>
             ))}
 

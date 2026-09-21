@@ -177,6 +177,7 @@ model GroupAttendanceRecord {
 }
 
 /// Group photo gallery — separate from personal Vault; uses same storage provider.
+/// DB stores fileUrl only (GCS https://… or local://…).
 model GroupPhoto {
   id               String      @id @default(cuid())
   groupId          String
@@ -185,8 +186,7 @@ model GroupPhoto {
   caption          String?
   contentType      String
   byteSize         Int
-  storageKey       String
-  contentSha256    String?
+  fileUrl          String
   createdAt        DateTime    @default(now())
 
   @@index([groupId])

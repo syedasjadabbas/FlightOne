@@ -50,6 +50,7 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@google-cloud/storage": "^7.22.0",
     "@prisma/client": "^6.6.0",
     "bcryptjs": "^3.0.2",
     "compression": "^1.8.1",
@@ -61,7 +62,6 @@
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
     "morgan": "~1.10.0",
-    "nodemailer": "^10.0.10",
     "winston": "^3.17.0",
     "zod": "^3.24.2"
   },

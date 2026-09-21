@@ -5,7 +5,8 @@
  * Invariants enforced here:
  *  - Owner-only access — no cross-user read/download/link path.
  *  - Binary storage via vault.storage.js (fail-closed when unconfigured).
- *  - storageKey / contentSha256 / raw bytes never leave the service layer.
+ *  - DB stores fileUrl only (GCS https://… or local://…); no storageKey writes.
+ *  - Raw bytes never leave the service layer in list/detail responses.
  *  - Every read/download is access-logged via writeAudit.
  *  - PATCH creates a new version (supersedesId); soft-delete retains rows.
  *  - Platform-issued TICKET/HOTEL_VOUCHER rows are immutable once ingested.
@@ -14,12 +15,13 @@ import prisma from "../../config/prisma.js";
 import { AppError } from "../../lib/customError.js";
 import { writeAudit } from "../../lib/audit.js";
 import { randomToken, sha256Hex } from "../../lib/crypto.js";
+import { isAllowedGcsUrl } from "../../lib/storageUrl.js";
 import {
   buildStorageKey,
   decodeBase64Content,
   getVaultStorage,
   getVaultStorageCapability,
-  sha256Buffer,
+  resolveStoredFileUrl,
   validateUploadPayload,
 } from "./vault.storage.js";
 import {
@@ -60,9 +62,12 @@ const DOCUMENT_SELECT = {
 const DOCUMENT_INTERNAL_SELECT = {
   ...DOCUMENT_SELECT,
   storageKey: true,
-  contentSha256: true,
   encryptedNote: true,
 };
+
+function documentHasBinary(row) {
+  return Boolean(resolveStoredFileUrl(row) || (row.byteSize && row.fileUrl));
+}
 
 function toPublicDocument(row) {
   if (!row) return row;
@@ -90,7 +95,7 @@ function toPublicDocument(row) {
 
   return {
     ...rest,
-    hasBinary: Boolean(row.storageKey || row.byteSize),
+    hasBinary: documentHasBinary(row),
     lifecycleStatus,
     expiryStatus: expiry.state,
     daysUntilExpiry: expiry.daysRemaining,
@@ -182,7 +187,7 @@ export async function createDocument(userId, req, body) {
   await assertCompanionOwned(userId, body.companionId);
 
   // Never accept client-controlled storage paths or binary fields on metadata create.
-  if (body.storageKey || body.contentBase64 || body.contentSha256) {
+  if (body.storageKey || body.contentBase64 || body.contentSha256 || body.fileUrl) {
     throw new AppError(400, "Use POST /vault/upload to store binary content");
   }
 
@@ -241,21 +246,140 @@ export async function createDocument(userId, req, body) {
 
 /**
  * Authenticated binary upload — creates a VaultDocument owned by the caller.
+ * Prefer client GCS signed upload (fileUrl). contentBase64 remains for server/
+ * legacy callers and is uploaded by the active storage provider.
  * Fails closed when storage is unconfigured (never fakes success).
  */
 export async function uploadDocument(userId, req, body) {
   await assertCompanionOwned(userId, body.companionId);
 
-  const buffer = decodeBase64Content(body.contentBase64);
-  const validated = validateUploadPayload({
-    contentType: body.contentType,
-    originalFilename: body.originalFilename,
-    byteLength: buffer.length,
-  });
+  const hasFileUrl = Boolean(body.fileUrl);
+  const hasBase64 = Boolean(body.contentBase64);
+  if (hasFileUrl === hasBase64) {
+    throw new AppError(400, "Provide exactly one of fileUrl or contentBase64");
+  }
 
-  const storage = getVaultStorage();
-  // Create metadata row first so the storage key includes a stable document id.
-  const stub = await prisma.vaultDocument.create({
+  let fileUrl = null;
+  let validated;
+
+  if (hasFileUrl) {
+    if (!isAllowedGcsUrl(body.fileUrl)) {
+      throw new AppError(400, "fileUrl must be a valid GCS public URL");
+    }
+    const cap = getVaultStorageCapability();
+    if (!cap.canUpload) {
+      const err = new AppError(503, "Vault storage is not configured");
+      err.code = "VAULT_STORAGE_UNCONFIGURED";
+      err.details = { capability: cap };
+      throw err;
+    }
+    validated = validateUploadPayload({
+      contentType: body.contentType,
+      originalFilename: body.originalFilename,
+      byteLength: Number(body.byteSize) || 1,
+    });
+    // byteSize from client is advisory; clamp to known max already done in validate.
+    if (!Number.isInteger(body.byteSize) || body.byteSize <= 0) {
+      throw new AppError(400, "byteSize is required when uploading via fileUrl");
+    }
+    validated = {
+      ...validated,
+      byteLength: body.byteSize,
+    };
+    fileUrl = body.fileUrl.trim();
+  } else {
+    const buffer = decodeBase64Content(body.contentBase64);
+    validated = validateUploadPayload({
+      contentType: body.contentType,
+      originalFilename: body.originalFilename,
+      byteLength: buffer.length,
+    });
+    const storage = getVaultStorage();
+    const stub = await prisma.vaultDocument.create({
+      data: {
+        ownerUserId: userId,
+        type: body.type,
+        title: body.title,
+        companionId: body.companionId ?? null,
+        bookingId: body.bookingId ?? null,
+        issueDate: body.issueDate ?? null,
+        expiresAt: body.expiresAt ?? null,
+        contentType: validated.contentType,
+        byteSize: validated.byteLength,
+        originalFilename: validated.originalFilename,
+        fileUrl: null,
+      },
+      select: { id: true },
+    });
+
+    const storageKey = buildStorageKey({
+      ownerUserId: userId,
+      documentId: stub.id,
+      originalFilename: validated.originalFilename,
+    });
+
+    try {
+      const stored = await storage.put({
+        storageKey,
+        buffer,
+        contentType: validated.contentType,
+      });
+      fileUrl = stored.fileUrl;
+    } catch (e) {
+      await prisma.vaultDocument.delete({ where: { id: stub.id } }).catch(() => {});
+      throw e;
+    }
+
+    const doc = await prisma.vaultDocument.update({
+      where: { id: stub.id },
+      data: {
+        storageKey: null,
+        contentSha256: null,
+        fileUrl,
+        fileMeta: {
+          uploadedAt: new Date().toISOString(),
+          contentType: validated.contentType,
+          byteSize: validated.byteLength,
+          originalFilename: validated.originalFilename,
+        },
+      },
+      select: DOCUMENT_SELECT,
+    });
+
+    if (doc.type === "VISA") {
+      await upsertVisaRecord({
+        documentId: doc.id,
+        ownerUserId: userId,
+        type: doc.type,
+        visaMeta: body.visaMeta,
+      });
+    }
+
+    const stored = await prisma.vaultDocument.findFirst({
+      where: { id: doc.id, ownerUserId: userId },
+      select: DOCUMENT_SELECT,
+    });
+
+    await writeAudit({
+      userId,
+      action: "vault.document.upload",
+      resourceType: "VaultDocument",
+      resourceId: doc.id,
+      req,
+      metadata: {
+        type: doc.type,
+        contentType: validated.contentType,
+        byteSize: validated.byteLength,
+        hasVisaMeta: doc.type === "VISA",
+        via: "contentBase64",
+      },
+    });
+
+    return toPublicDocument(stored || doc);
+  }
+
+  // Client already uploaded bytes to GCS via signed URL — metadata only.
+  const doc = await prisma.vaultDocument.create({
     data: {
       ownerUserId: userId,
       type: body.type,
@@ -267,36 +391,15 @@ export async function uploadDocument(userId, req, body) {
       contentType: validated.contentType,
       byteSize: validated.byteLength,
       originalFilename: validated.originalFilename,
-      fileUrl: null,
-    },
-    select: { id: true },
-  });
-
-  const storageKey = buildStorageKey({
-    ownerUserId: userId,
-    documentId: stub.id,
-    originalFilename: validated.originalFilename,
-  });
-  const contentSha256 = sha256Buffer(buffer);
-
-  try {
-    await storage.put({ storageKey, buffer });
-  } catch (e) {
-    await prisma.vaultDocument.delete({ where: { id: stub.id } }).catch(() => {});
-    throw e;
-  }
-
-  const doc = await prisma.vaultDocument.update({
-    where: { id: stub.id },
-    data: {
-      storageKey,
-      contentSha256,
-      fileUrl: `vault://document/${stub.id}`,
+      fileUrl,
+      storageKey: null,
+      contentSha256: null,
       fileMeta: {
         uploadedAt: new Date().toISOString(),
         contentType: validated.contentType,
         byteSize: validated.byteLength,
         originalFilename: validated.originalFilename,
+        via: "gcs_signed_upload",
       },
     },
     select: DOCUMENT_SELECT,
@@ -327,7 +430,7 @@ export async function uploadDocument(userId, req, body) {
       contentType: validated.contentType,
       byteSize: validated.byteLength,
       hasVisaMeta: doc.type === "VISA",
-      // Never log contentSha256 of sensitive docs in clear — omit hash entirely.
+      via: "fileUrl",
     },
   });
 
@@ -367,7 +470,8 @@ export async function getDocumentById(userId, req, documentId) {
 export async function downloadDocument(userId, req, documentId) {
   const doc = await getOwnedDocumentOrThrow(userId, documentId, DOCUMENT_INTERNAL_SELECT);
 
-  if (!doc.storageKey) {
+  const fileUrl = resolveStoredFileUrl(doc);
+  if (!fileUrl) {
     throw new AppError(404, "Document has no stored file");
   }
   if (!doc.isActive) {
@@ -375,7 +479,7 @@ export async function downloadDocument(userId, req, documentId) {
   }
 
   const storage = getVaultStorage();
-  const buffer = await storage.get({ storageKey: doc.storageKey });
+  const buffer = await storage.get({ fileUrl });
 
   await writeAudit({
     userId,
@@ -421,6 +525,7 @@ export async function updateDocument(userId, req, documentId, patch) {
     patch.storageKey !== undefined ||
     patch.contentSha256 !== undefined ||
     patch.byteSize !== undefined ||
+    patch.fileUrl !== undefined ||
     patch.ownerUserId !== undefined
   ) {
     throw new AppError(400, "Storage and ownership fields are not client-writable");
@@ -455,6 +560,8 @@ export async function updateDocument(userId, req, documentId, patch) {
     return toPublicDocument(stored);
   }
 
+  const preservedFileUrl = resolveStoredFileUrl(current);
+
   const next = await prisma.$transaction(async (tx) => {
     await tx.vaultDocument.update({
       where: { id: current.id },
@@ -471,13 +578,13 @@ export async function updateDocument(userId, req, documentId, patch) {
         bookingId: current.bookingId,
         issueDate: patch.issueDate !== undefined ? patch.issueDate : current.issueDate,
         expiresAt: patch.expiresAt !== undefined ? patch.expiresAt : current.expiresAt,
-        fileUrl: null,
+        fileUrl: preservedFileUrl,
         fileMeta: patch.fileMeta !== undefined ? patch.fileMeta : current.fileMeta,
-        storageKey: current.storageKey,
+        storageKey: null,
         contentType: current.contentType,
         byteSize: current.byteSize,
         originalFilename: current.originalFilename,
-        contentSha256: current.contentSha256,
+        contentSha256: null,
         encryptedNote:
           patch.encryptedNote !== undefined ? patch.encryptedNote : current.encryptedNote,
         version: current.version + 1,
@@ -488,12 +595,7 @@ export async function updateDocument(userId, req, documentId, patch) {
     });
   });
 
-  const withUrl = await prisma.vaultDocument.update({
-    where: { id: next.id },
-    data: { fileUrl: `vault://document/${next.id}` },
-    select: DOCUMENT_SELECT,
-  });
-
+  const withUrl = next;
   if (withUrl.type === "VISA") {
     await upsertVisaRecord({
       documentId: withUrl.id,
@@ -524,6 +626,7 @@ export async function updateDocument(userId, req, documentId, patch) {
 /**
  * Replace binary content — new version row; prior retained (isActive=false).
  * Old object bytes are left in place for audit retention (soft retention).
+ * Accepts fileUrl (GCS signed upload) or contentBase64 (server/legacy).
  */
 export async function replaceDocumentBinary(userId, req, documentId, body) {
   const current = await getOwnedDocumentOrThrow(userId, documentId, DOCUMENT_INTERNAL_SELECT);
@@ -535,16 +638,112 @@ export async function replaceDocumentBinary(userId, req, documentId, body) {
     throw new AppError(409, "Cannot replace a superseded/deleted document");
   }
 
+  const hasFileUrl = Boolean(body.fileUrl);
+  const hasBase64 = Boolean(body.contentBase64);
+  if (hasFileUrl === hasBase64) {
+    throw new AppError(400, "Provide exactly one of fileUrl or contentBase64");
+  }
+
+  let fileUrl;
+  let validated;
+
+  if (hasFileUrl) {
+    if (!isAllowedGcsUrl(body.fileUrl)) {
+      throw new AppError(400, "fileUrl must be a valid GCS public URL");
+    }
+    if (!Number.isInteger(body.byteSize) || body.byteSize <= 0) {
+      throw new AppError(400, "byteSize is required when uploading via fileUrl");
+    }
+    const cap = getVaultStorageCapability();
+    if (!cap.canUpload) {
+      const err = new AppError(503, "Vault storage is not configured");
+      err.code = "VAULT_STORAGE_UNCONFIGURED";
+      err.details = { capability: cap };
+      throw err;
+    }
+    validated = validateUploadPayload({
+      contentType: body.contentType ?? current.contentType,
+      originalFilename: body.originalFilename ?? current.originalFilename,
+      byteLength: body.byteSize,
+    });
+    fileUrl = body.fileUrl.trim();
+
+    const next = await prisma.$transaction(async (tx) => {
+      await tx.vaultDocument.update({
+        where: { id: current.id },
+        data: { isActive: false },
+      });
+
+      return tx.vaultDocument.create({
+        data: {
+          ownerUserId: current.ownerUserId,
+          companionId: current.companionId,
+          type: current.type,
+          title: body.title !== undefined ? body.title : current.title,
+          bookingId: current.bookingId,
+          issueDate: body.issueDate !== undefined ? body.issueDate : current.issueDate,
+          expiresAt: body.expiresAt !== undefined ? body.expiresAt : current.expiresAt,
+          contentType: validated.contentType,
+          byteSize: validated.byteLength,
+          originalFilename: validated.originalFilename,
+          fileUrl,
+          storageKey: null,
+          contentSha256: null,
+          version: current.version + 1,
+          supersedesId: current.id,
+          isActive: true,
+          fileMeta: {
+            replacedAt: new Date().toISOString(),
+            contentType: validated.contentType,
+            byteSize: validated.byteLength,
+            originalFilename: validated.originalFilename,
+            supersedesId: current.id,
+            via: "gcs_signed_upload",
+          },
+        },
+        select: DOCUMENT_SELECT,
+      });
+    });
+
+    if (next.type === "VISA") {
+      await upsertVisaRecord({
+        documentId: next.id,
+        ownerUserId: userId,
+        type: next.type,
+        copyFromDocumentId: current.id,
+      });
+    }
+
+    const stored = await prisma.vaultDocument.findFirst({
+      where: { id: next.id, ownerUserId: userId },
+      select: DOCUMENT_SELECT,
+    });
+
+    await writeAudit({
+      userId,
+      action: "vault.document.replace",
+      resourceType: "VaultDocument",
+      resourceId: next.id,
+      req,
+      metadata: {
+        supersedesId: current.id,
+        contentType: validated.contentType,
+        byteSize: validated.byteLength,
+        via: "fileUrl",
+      },
+    });
+
+    return toPublicDocument(stored || next);
+  }
+
   const buffer = decodeBase64Content(body.contentBase64);
-  const validated = validateUploadPayload({
+  validated = validateUploadPayload({
     contentType: body.contentType ?? current.contentType,
     originalFilename: body.originalFilename ?? current.originalFilename,
     byteLength: buffer.length,
   });
 
-  const storage = getVaultStorage();
-
-  const next = await prisma.$transaction(async (tx) => {
+  const nextStub = await prisma.$transaction(async (tx) => {
     await tx.vaultDocument.update({
       where: { id: current.id },
       data: { isActive: false },
@@ -572,16 +771,19 @@ export async function replaceDocumentBinary(userId, req, documentId, body) {
 
   const storageKey = buildStorageKey({
     ownerUserId: userId,
-    documentId: next.id,
+    documentId: nextStub.id,
     originalFilename: validated.originalFilename,
   });
-  const contentSha256 = sha256Buffer(buffer);
 
   try {
-    await storage.put({ storageKey, buffer });
+    const storedBytes = await getVaultStorage().put({
+      storageKey,
+      buffer,
+      contentType: validated.contentType,
+    });
+    fileUrl = storedBytes.fileUrl;
   } catch (e) {
-    // Roll back the new row to avoid orphan metadata claiming a successful store.
-    await prisma.vaultDocument.delete({ where: { id: next.id } }).catch(() => {});
+    await prisma.vaultDocument.delete({ where: { id: nextStub.id } }).catch(() => {});
     await prisma.vaultDocument
       .update({ where: { id: current.id }, data: { isActive: true } })
       .catch(() => {});
@@ -589,11 +791,11 @@ export async function replaceDocumentBinary(userId, req, documentId, body) {
   }
 
   const doc = await prisma.vaultDocument.update({
-    where: { id: next.id },
+    where: { id: nextStub.id },
     data: {
-      storageKey,
-      contentSha256,
-      fileUrl: `vault://document/${next.id}`,
+      storageKey: null,
+      contentSha256: null,
+      fileUrl,
       fileMeta: {
         replacedAt: new Date().toISOString(),
         contentType: validated.contentType,
@@ -614,7 +816,7 @@ export async function replaceDocumentBinary(userId, req, documentId, body) {
     });
   }
 
-  const stored = await prisma.vaultDocument.findFirst({
+  const storedRow = await prisma.vaultDocument.findFirst({
     where: { id: doc.id, ownerUserId: userId },
     select: DOCUMENT_SELECT,
   });
@@ -629,10 +831,11 @@ export async function replaceDocumentBinary(userId, req, documentId, body) {
       supersedesId: current.id,
       contentType: validated.contentType,
       byteSize: validated.byteLength,
+      via: "contentBase64",
     },
   });
 
-  return toPublicDocument(stored || doc);
+  return toPublicDocument(storedRow || doc);
 }
 
 export async function deleteDocument(userId, req, documentId) {
@@ -743,13 +946,14 @@ export async function getVaultContentMetaForOcr(userId, vaultDocumentId) {
     where: { id: doc.id, ownerUserId: userId },
     select: {
       storageKey: true,
+      fileUrl: true,
       contentType: true,
       byteSize: true,
       isActive: true,
     },
   });
   return {
-    hasBinary: Boolean(full?.storageKey),
+    hasBinary: Boolean(resolveStoredFileUrl(full)),
     contentType: full?.contentType ?? null,
     byteSize: full?.byteSize ?? null,
     isActive: full?.isActive ?? false,
@@ -763,10 +967,11 @@ export async function getVaultContentMetaForOcr(userId, vaultDocumentId) {
 export async function getVaultBinaryForOcr(userId, vaultDocumentId) {
   if (!vaultDocumentId) return null;
   const doc = await getOwnedDocumentOrThrow(userId, vaultDocumentId, DOCUMENT_INTERNAL_SELECT);
-  if (!doc.storageKey) return null;
+  const fileUrl = resolveStoredFileUrl(doc);
+  if (!fileUrl) return null;
   const storage = getVaultStorage();
   try {
-    const buffer = await storage.get({ storageKey: doc.storageKey });
+    const buffer = await storage.get({ fileUrl });
     return {
       contentBase64: buffer.toString("base64"),
       contentType: doc.contentType || "application/octet-stream",
@@ -823,7 +1028,7 @@ async function persistPlatformPrintable({
     return prisma.vaultDocument.update({
       where: { id: row.id },
       data: {
-        fileUrl: `vault://document/${row.id}`,
+        fileUrl: null,
         fileMeta: {
           ...fileMeta,
           printableStatus: printable
@@ -841,15 +1046,33 @@ async function persistPlatformPrintable({
     documentId: row.id,
     originalFilename: printable.filename,
   });
-  const contentSha256 = sha256Buffer(printable.buffer);
 
   try {
-    await storage.put({ storageKey, buffer: printable.buffer });
+    const stored = await storage.put({
+      storageKey,
+      buffer: printable.buffer,
+      contentType: "application/pdf",
+    });
+    return prisma.vaultDocument.update({
+      where: { id: row.id },
+      data: {
+        storageKey: null,
+        contentSha256: null,
+        fileUrl: stored.fileUrl,
+        fileMeta: {
+          ...fileMeta,
+          ...printable.meta,
+          printableStatus: "stored",
+          printableReady: true,
+        },
+      },
+      select: DOCUMENT_SELECT,
+    });
   } catch {
     return prisma.vaultDocument.update({
       where: { id: row.id },
       data: {
-        fileUrl: `vault://document/${row.id}`,
+        fileUrl: null,
         fileMeta: {
           ...fileMeta,
           printableStatus: "store_failed",
@@ -859,22 +1082,6 @@ async function persistPlatformPrintable({
       select: DOCUMENT_SELECT,
     });
   }
-
-  return prisma.vaultDocument.update({
-    where: { id: row.id },
-    data: {
-      storageKey,
-      contentSha256,
-      fileUrl: `vault://document/${row.id}`,
-      fileMeta: {
-        ...fileMeta,
-        ...printable.meta,
-        printableStatus: "stored",
-        printableReady: true,
-      },
-    },
-    select: DOCUMENT_SELECT,
-  });
 }
 
 /**

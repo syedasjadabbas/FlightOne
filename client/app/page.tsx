@@ -1,14 +1,31 @@
 import type { Metadata } from 'next';
+import dynamic from 'next/dynamic';
 import SmoothScroll from '@/components/landing/SmoothScroll';
 import Navigation from '@/components/landing/Navigation';
 import HeroExperienceSequence from '@/components/landing/HeroExperienceSequence';
-import AppPreviewSection from '@/components/landing/AppPreviewSection';
-import TechPreviewSection from '@/components/landing/TechPreviewSection';
-import NewsPreviewSection from '@/components/landing/NewsPreviewSection';
-import PartnersSection from '@/components/landing/PartnersSection';
-import CompanyPreviewSection from '@/components/landing/CompanyPreviewSection';
-import VisionCarouselSection from '@/components/landing/VisionCarouselSection';
-import Footer from '@/components/landing/Footer';
+
+/* Below-fold sections: keep SSR for content/SEO, split JS out of the
+ * first-paint client bundle so hero + nav hydrate without dragging in
+ * App/Tech/News/Partners/Company/Vision/Footer code (and Vision's GSAP). */
+const AppPreviewSection = dynamic(
+  () => import('@/components/landing/AppPreviewSection'),
+);
+const TechPreviewSection = dynamic(
+  () => import('@/components/landing/TechPreviewSection'),
+);
+const NewsPreviewSection = dynamic(
+  () => import('@/components/landing/NewsPreviewSection'),
+);
+const PartnersSection = dynamic(
+  () => import('@/components/landing/PartnersSection'),
+);
+const CompanyPreviewSection = dynamic(
+  () => import('@/components/landing/CompanyPreviewSection'),
+);
+const VisionCarouselSection = dynamic(
+  () => import('@/components/landing/VisionCarouselSection'),
+);
+const Footer = dynamic(() => import('@/components/landing/Footer'));
 
 export const metadata: Metadata = {
   title: 'FlightOne – Custom Tour Packages Around the World, Designed Around You',
@@ -64,6 +81,3 @@ export default function Home() {
     </SmoothScroll>
   );
 }
-
-
-

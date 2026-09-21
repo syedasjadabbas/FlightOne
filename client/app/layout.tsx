@@ -30,6 +30,8 @@ const playfair = Playfair_Display({
   variable: "--font-playfair",
   subsets: ["latin"],
   display: "swap",
+  // Landing LCP uses Space Grotesk / Sora only; defer Playfair preload.
+  preload: false,
 });
 
 export const metadata: Metadata = {

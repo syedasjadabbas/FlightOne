@@ -30,30 +30,3 @@ export interface CompletionResult {
   /** Thoughts/thinking tokens when reported (Gemini 3.x). */
   thoughtsTokenCount?: number;
 }
-
-export interface LlmProvider {
-  readonly name: string;
-  /** True when the provider is configured enough to be worth calling. */
-  isConfigured(): boolean;
-  complete(req: CompletionRequest): Promise<CompletionResult>;
-  /**
-   * Optional token stream. Yields text deltas; implementations that cannot
-   * stream should omit this and the registry will fall back to complete().
-   */
-  completeStream?(req: CompletionRequest): AsyncGenerator<string, CompletionResult, void>;
-}
-
-/** Small helper: fetch with an AbortController-based timeout. */
-export async function fetchWithTimeout(
-  url: string,
-  init: RequestInit,
-  timeoutMs = 20000,
-): Promise<Response> {
-  const ctrl = new AbortController();
-  const t = setTimeout(() => ctrl.abort(), timeoutMs);
-  try {
-    return await fetch(url, { ...init, signal: ctrl.signal });
-  } finally {
-    clearTimeout(t);
-  }
-}

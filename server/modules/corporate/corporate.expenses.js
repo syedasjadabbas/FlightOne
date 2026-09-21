@@ -11,7 +11,6 @@ import {
   getVaultStorageCapability,
   validateUploadPayload,
   decodeBase64Content,
-  sha256Buffer,
   buildStorageKey,
 } from "../vault/vault.storage.js";
 import { requireCompanyMembership } from "./corporate.service.js";
@@ -469,16 +468,20 @@ export async function attachReceipt(userId, companyId, expenseId, body = {}) {
     originalFilename: body.originalFilename || "receipt",
     byteLength: buffer.length,
   });
-  sha256Buffer(buffer);
 
-  let storageKey = null;
+  let fileUrl = null;
   if (storageCap.canUpload) {
-    storageKey = buildStorageKey({
+    const storageKey = buildStorageKey({
       ownerUserId: userId,
       documentId: expenseId,
       originalFilename: meta.originalFilename,
     });
-    await getVaultStorage().put({ storageKey, buffer });
+    const stored = await getVaultStorage().put({
+      storageKey,
+      buffer,
+      contentType: meta.contentType,
+    });
+    fileUrl = stored.fileUrl;
   }
 
   const ocr = await extractReceiptOcr({
@@ -489,16 +492,16 @@ export async function attachReceipt(userId, companyId, expenseId, body = {}) {
   const updated = await prisma.expense.update({
     where: { id: expenseId },
     data: {
-      receiptStorageKey: storageKey,
+      receiptStorageKey: fileUrl,
       receiptContentType: meta.contentType,
       receiptByteSize: meta.byteLength,
       receiptOriginalFilename: meta.originalFilename,
-      ocrStatus: storageKey || ocr.status === "UNCONFIGURED" ? ocr.status : ocr.status,
+      ocrStatus: fileUrl || ocr.status === "UNCONFIGURED" ? ocr.status : ocr.status,
       ocrProvider: ocr.provider,
       ocrExtracted: ocr.fields,
       ocrProvenance: {
         ...ocr.provenance,
-        stored: Boolean(storageKey),
+        stored: Boolean(fileUrl),
         storageConfigured: storageCap.canUpload,
       },
     },
@@ -507,7 +510,7 @@ export async function attachReceipt(userId, companyId, expenseId, body = {}) {
   await auditExpense(userId, "corporate.expense.receipt", expenseId, {
     companyId,
     ocrStatus: updated.ocrStatus,
-    stored: Boolean(storageKey),
+    stored: Boolean(fileUrl),
   });
   return {
     ...publicExpense(updated),
@@ -523,7 +526,7 @@ export async function downloadReceipt(userId, companyId, expenseId) {
   if (!row.receiptStorageKey) {
     throw new AppError(404, "No receipt file is stored for this expense");
   }
-  const buffer = await getVaultStorage().get({ storageKey: row.receiptStorageKey });
+  const buffer = await getVaultStorage().get({ fileUrl: row.receiptStorageKey });
   return {
     contentType: row.receiptContentType || "application/octet-stream",
     filename: row.receiptOriginalFilename || "receipt",

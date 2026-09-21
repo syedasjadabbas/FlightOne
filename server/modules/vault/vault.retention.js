@@ -8,7 +8,7 @@
  */
 import prisma from "../../config/prisma.js";
 import { writeAudit } from "../../lib/audit.js";
-import { getVaultStorage } from "./vault.storage.js";
+import { getVaultStorage, resolveStoredFileUrl } from "./vault.storage.js";
 
 const PLATFORM_TYPES = new Set(["TICKET", "HOTEL_VOUCHER"]);
 
@@ -42,6 +42,7 @@ export async function runVaultRetentionPurge({ limit = 100, now = new Date() } =
       type: true,
       bookingId: true,
       storageKey: true,
+      fileUrl: true,
       supersedesId: true,
     },
   });
@@ -64,15 +65,12 @@ export async function runVaultRetentionPurge({ limit = 100, now = new Date() } =
       continue;
     }
 
-    // Also protect if any newer version still points at this id via supersedes
-    // chain while remaining referenced — already covered by vaultDocumentId check
-    // on active rows; soft-deleted identity rows still count above.
-
-    if (doc.storageKey) {
+    const fileUrl = resolveStoredFileUrl(doc);
+    if (fileUrl) {
       try {
-        await storage.remove({ storageKey: doc.storageKey });
+        await storage.remove({ fileUrl });
       } catch {
-        // Continue — metadata purge still proceeds; orphaned local files are acceptable.
+        // Continue — metadata purge still proceeds; orphaned objects are acceptable.
       }
     }
 
@@ -88,7 +86,7 @@ export async function runVaultRetentionPurge({ limit = 100, now = new Date() } =
       metadata: {
         type: doc.type,
         retentionDays,
-        hadStorageKey: Boolean(doc.storageKey),
+        hadFileUrl: Boolean(fileUrl),
       },
     });
 

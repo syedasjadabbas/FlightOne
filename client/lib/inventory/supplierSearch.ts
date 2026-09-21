@@ -489,8 +489,6 @@ export async function searchSuppliers(
   body: SupplierSearchBody,
   options?: { userId?: string },
 ): Promise<Offer[] | null> {
-  if (process.env.TRAVELPORT_LIVE_SEARCH === "false") return null;
-
   const internalKey = process.env.INTERNAL_API_KEY;
   if (!internalKey) {
     console.warn("[supplier-search] INTERNAL_API_KEY missing — skipping Travelport");

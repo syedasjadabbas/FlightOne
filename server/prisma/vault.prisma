@@ -46,15 +46,16 @@ model VaultDocument {
   issueDate DateTime?
   expiresAt DateTime?
 
-  /// Opaque logical URL for clients (`vault://document/{id}`). Never a raw FS path.
+  /// Public GCS URL or local:// object URL. Never a raw FS path.
   fileUrl  String?
   fileMeta Json?
 
-  /// Server-only object key for the storage provider. Never returned to clients.
+  /// Legacy local object key — no longer written; kept for read fallback during migration.
   storageKey       String?
   contentType      String?
   byteSize         Int?
   originalFilename String?
+  /// Legacy content hash — no longer written.
   contentSha256    String?
 
   // Placeholder for optional encrypted notes — never log or list this field.

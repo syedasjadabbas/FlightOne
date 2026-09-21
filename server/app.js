@@ -35,6 +35,7 @@ import escalationsRouter from "./modules/escalations/index.js";
 import groupsRouter from "./modules/groups/index.js";
 import journeyRouter from "./modules/journey/index.js";
 import knowledgeRouter from "./modules/knowledge/index.js";
+import llmRouter from "./modules/llm/index.js";
 import meRouter from "./modules/me/index.js";
 import miceRouter from "./modules/mice/index.js";
 import notificationsRouter from "./modules/notifications/index.js";
@@ -48,8 +49,10 @@ import rewardsRouter from "./modules/rewards/index.js";
 import suppliersRouter from "./modules/suppliers/index.js";
 import visaRouter from "./modules/visa/index.js";
 import vaultRouter from "./modules/vault/index.js";
+import uploadsRouter from "./modules/uploads/index.js";
 import voiceRouter from "./modules/voice/index.js";
 import conciergeRouter from "./modules/concierge/index.js";
+import compsRouter from "./modules/comps/index.js";
 
 dotenv.config();
 
@@ -126,6 +129,7 @@ app.use("/api/v1/escalations", escalationsRouter);
 app.use("/api/v1/groups", groupsRouter);
 app.use("/api/v1/journey", journeyRouter);
 app.use("/api/v1/knowledge", knowledgeRouter);
+app.use("/api/v1/llm", llmRouter);
 app.use("/api/v1/me", meRouter);
 app.use("/api/v1/mice", miceRouter);
 app.use("/api/v1/notifications", notificationsRouter);
@@ -140,8 +144,10 @@ app.use("/api/v1/rewards", rewardsRouter);
 app.use("/api/v1/suppliers", suppliersRouter);
 app.use("/api/v1/visa", visaRouter);
 app.use("/api/v1/vault", vaultRouter);
+app.use("/api/v1/uploads", uploadsRouter);
 app.use("/api/v1/voice", voiceRouter);
 app.use("/api/v1/concierge", conciergeRouter);
+app.use("/api/v1/comps", compsRouter);
 
 app.use((req, res) => {
   appLogger.debug("Route not found", { method: req.method, path: req.path });

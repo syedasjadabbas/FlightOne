@@ -16,6 +16,7 @@ process.env.NODE_ENV = "test";
 process.env.PASSWORD_RESET_RETURN_TOKEN = "true";
 process.env.PASSWORD_RESET_EXPIRES_IN = "1h";
 delete process.env.NOTIFY_EMAIL_WEBHOOK_URL;
+delete process.env.RESEND_API_KEY;
 if (!process.env.JWT_SECRET) {
   process.env.JWT_SECRET = "test-jwt-secret-min-32-characters-long";
 }
@@ -370,6 +371,12 @@ describe("passwordResetEmailDeliveryStatus", () => {
     assert.equal(
       authService.passwordResetEmailDeliveryStatus({}),
       "UNCONFIGURED",
+    );
+    assert.equal(
+      authService.passwordResetEmailDeliveryStatus({
+        RESEND_API_KEY: "re_test",
+      }),
+      "QUEUED",
     );
     assert.equal(
       authService.passwordResetEmailDeliveryStatus({

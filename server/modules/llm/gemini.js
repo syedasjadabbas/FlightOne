@@ -1,31 +1,26 @@
-import type {
-  CompletionRequest,
-  CompletionResult,
-  LlmProvider,
-} from "./types";
-import { fetchWithTimeout } from "./types";
+import { fetchWithTimeout } from "./helpers.js";
 
 /**
  * Google Gemini provider (REST — no SDK dependency).
  * Config via env: GEMINI_API_KEY, GEMINI_MODEL (default gemini-2.0-flash).
  */
-export class GeminiProvider implements LlmProvider {
-  readonly name = "gemini";
+export class GeminiProvider {
+  name = "gemini";
 
-  private get key(): string | undefined {
+  get key() {
     return process.env.GEMINI_API_KEY;
   }
-  private get model(): string {
+
+  get model() {
     return process.env.GEMINI_MODEL || "gemini-2.0-flash";
   }
 
-  isConfigured(): boolean {
+  isConfigured() {
     return !!this.key;
   }
 
-  private buildBody(req: CompletionRequest) {
-    const thinkingLevel =
-      req.thinkingLevel ?? (req.json ? "minimal" : undefined);
+  buildBody(req) {
+    const thinkingLevel = req.thinkingLevel ?? (req.json ? "minimal" : undefined);
     const requested = req.maxTokens ?? 400;
     // Gemini 3.x: maxOutputTokens is a combined thinking+output budget.
     // JSON extraction needs headroom so thinking cannot starve the payload.
@@ -42,14 +37,12 @@ export class GeminiProvider implements LlmProvider {
         temperature: req.temperature ?? 0.7,
         maxOutputTokens,
         ...(req.json ? { responseMimeType: "application/json" } : {}),
-        ...(thinkingLevel
-          ? { thinkingConfig: { thinkingLevel } }
-          : {}),
+        ...(thinkingLevel ? { thinkingConfig: { thinkingLevel } } : {}),
       },
     };
   }
 
-  async complete(req: CompletionRequest): Promise<CompletionResult> {
+  async complete(req) {
     if (!this.key) throw new Error("GEMINI_API_KEY not set");
 
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent?key=${this.key}`;
@@ -68,17 +61,7 @@ export class GeminiProvider implements LlmProvider {
       throw new Error(`Gemini ${res.status}: ${detail.slice(0, 300)}`);
     }
 
-    const json = (await res.json()) as {
-      candidates?: {
-        finishReason?: string;
-        content?: { parts?: { text?: string; thought?: boolean }[] };
-      }[];
-      usageMetadata?: {
-        thoughtsTokenCount?: number;
-        candidatesTokenCount?: number;
-        promptTokenCount?: number;
-      };
-    };
+    const json = await res.json();
     const candidate = json.candidates?.[0];
     const text = candidate?.content?.parts
       ?.filter((p) => !p.thought)
@@ -95,9 +78,7 @@ export class GeminiProvider implements LlmProvider {
     };
   }
 
-  async *completeStream(
-    req: CompletionRequest,
-  ): AsyncGenerator<string, CompletionResult, void> {
+  async *completeStream(req) {
     if (!this.key) throw new Error("GEMINI_API_KEY not set");
 
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:streamGenerateContent?alt=sse&key=${this.key}`;
@@ -128,7 +109,7 @@ export class GeminiProvider implements LlmProvider {
         if (done) break;
         buffer += decoder.decode(value, { stream: true });
 
-        let sep: number;
+        let sep;
         while ((sep = buffer.indexOf("\n\n")) >= 0) {
           const block = buffer.slice(0, sep);
           buffer = buffer.slice(sep + 2);
@@ -140,9 +121,7 @@ export class GeminiProvider implements LlmProvider {
             if (!payload || payload === "[DONE]") continue;
 
             try {
-              const json = JSON.parse(payload) as {
-                candidates?: { content?: { parts?: { text?: string }[] } }[];
-              };
+              const json = JSON.parse(payload);
               const delta =
                 json.candidates?.[0]?.content?.parts
                   ?.map((p) => p.text ?? "")

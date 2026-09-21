@@ -25,6 +25,7 @@ import {
   type VaultDocType,
   type VaultDocument,
 } from "@/lib/api/vault.api";
+import { uploadFileToGcs } from "@/lib/upload/gcsUpload";
 import { isIdentityVaultType } from "@/lib/profile/ocrReview";
 import { VAULT_TYPE_LABELS, VAULT_TYPE_ORDER } from "@/lib/vault/visaStatus";
 import { DeleteDocumentConfirm } from "./_components/DeleteDocumentConfirm";
@@ -40,21 +41,9 @@ import {
   type VisaMetaFormValue,
 } from "./_components/VisaMetaFields";
 
-function fileToBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = String(reader.result || "");
-      const comma = result.indexOf(",");
-      resolve(comma >= 0 ? result.slice(comma + 1) : result);
-    };
-    reader.onerror = () => reject(reader.error ?? new Error("read failed"));
-    reader.readAsDataURL(file);
-  });
-}
-
 export function VaultPageClient() {
   const accessToken = useAuthStore((s) => s.accessToken);
+  const userId = useAuthStore((s) => s.user?.id);
   const [selectedCategory, setSelectedCategory] = useState<VaultCategory>("ALL");
   const [searchQuery, setSearchQuery] = useState("");
   const [showUploadModal, setShowUploadModal] = useState(false);
@@ -239,13 +228,16 @@ export function VaultPageClient() {
     }
 
     try {
-      const contentBase64 = await fileToBase64(uploadFile);
+      const gcs = await uploadFileToGcs(uploadFile, {
+        folder: `vault/${userId || "anon"}`,
+      });
       const uploaded = await upload({
         type: uploadType,
         title: uploadTitle.trim() || uploadFile.name,
-        contentType: uploadFile.type || "application/pdf",
-        originalFilename: uploadFile.name,
-        contentBase64,
+        contentType: gcs.mimeType,
+        originalFilename: gcs.originalName,
+        fileUrl: gcs.url,
+        byteSize: gcs.sizeBytes,
         ...(uploadIssue ? { issueDate: new Date(uploadIssue).toISOString() } : {}),
         ...(uploadExpiry ? { expiresAt: new Date(uploadExpiry).toISOString() } : {}),
         ...(uploadType === "VISA" ? { visaMeta: visaMetaFormToInput(uploadVisa) } : {}),
@@ -319,12 +311,15 @@ export function VaultPageClient() {
       setBusyId(doc.id);
       setActionError(null);
       try {
-        const contentBase64 = await fileToBase64(next);
+        const gcs = await uploadFileToGcs(next, {
+          folder: `vault/${userId || "anon"}/replace`,
+        });
         await replaceDoc({
           id: doc.id,
-          contentBase64,
-          contentType: next.type || "application/pdf",
-          originalFilename: next.name,
+          fileUrl: gcs.url,
+          byteSize: gcs.sizeBytes,
+          contentType: gcs.mimeType,
+          originalFilename: gcs.originalName,
         }).unwrap();
         setActionSuccess(`Document "${doc.title}" replaced with new version.`);
       } catch {

@@ -1,5 +1,5 @@
 /**
- * Live SerpAPI probe — verify SERPAPI_API_KEY + app search path.
+ * Live SerpAPI probe — requires server SERPAPI_API_KEY + Next INTERNAL_API_KEY.
  * Run: npx vitest run lib/comps/serpFlights.probe.test.ts
  */
 import { readFileSync, existsSync } from "node:fs";

@@ -50,13 +50,15 @@ function publicAppBaseUrl(env = process.env) {
   return raw.replace(/\/$/, "");
 }
 
-function emailWebhookConfigured(env = process.env) {
-  return Boolean(env.NOTIFY_EMAIL_WEBHOOK_URL?.trim());
+function emailDeliveryConfigured(env = process.env) {
+  return Boolean(
+    env.RESEND_API_KEY?.trim() || env.NOTIFY_EMAIL_WEBHOOK_URL?.trim(),
+  );
 }
 
 /** Enumeration-safe delivery status — reflects provider config only, never account existence. */
 export function passwordResetEmailDeliveryStatus(env = process.env) {
-  return emailWebhookConfigured(env) ? "QUEUED" : "UNCONFIGURED";
+  return emailDeliveryConfigured(env) ? "QUEUED" : "UNCONFIGURED";
 }
 
 function toAuthUser(user) {

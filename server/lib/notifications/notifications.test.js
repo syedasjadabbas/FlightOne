@@ -35,7 +35,7 @@ describe("notification channel adapters", () => {
       { env: {} },
     );
     assert.equal(r.ok, false);
-    assert.equal(r.reason, "email_webhook_not_configured");
+    assert.equal(r.reason, "email_not_configured");
     assert.equal(r.retryable, false);
   });
 
@@ -59,10 +59,52 @@ describe("notification channel adapters", () => {
       },
       {
         env: { NOTIFY_EMAIL_WEBHOOK_URL: "https://hooks.test/email" },
-        fetchImpl: async () => ({ ok: true, status: 200 }),
+        fetchImpl: async () => ({ ok: true, status: 200, json: async () => ({}) }),
+        resolveRecipient: async () => ({ email: "u1@example.com", name: "U" }),
       },
     );
     assert.equal(r.ok, true);
+  });
+
+  it("EMAIL Resend success marks ok", async () => {
+    let calledUrl = null;
+    let calledBody = null;
+    const r = await deliverEmailNotification(
+      {
+        id: "n4r",
+        userId: "u1",
+        title: "Verify",
+        body: "code 123456",
+        dedupeKey: "email-verification:u1:1",
+        payload: { kind: "email_verification_otp", otp: "123456" },
+      },
+      {
+        env: {
+          RESEND_API_KEY: "re_test",
+          RESEND_FROM_EMAIL: "FlightOne <noreply@example.com>",
+        },
+        resolveRecipient: async () => ({
+          email: "traveller@example.com",
+          name: "Traveller",
+        }),
+        fetchImpl: async (url, init) => {
+          calledUrl = url;
+          calledBody = JSON.parse(init.body);
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({ id: "re_msg_1" }),
+          };
+        },
+      },
+    );
+    assert.equal(r.ok, true);
+    assert.equal(r.provider, "resend");
+    assert.equal(r.messageId, "re_msg_1");
+    assert.equal(calledUrl, "https://api.resend.com/emails");
+    assert.deepEqual(calledBody.to, ["traveller@example.com"]);
+    assert.equal(calledBody.from, "FlightOne <noreply@example.com>");
+    assert.match(calledBody.html, /123456/);
   });
 
   it("EMAIL webhook 5xx is retryable", async () => {
@@ -70,7 +112,8 @@ describe("notification channel adapters", () => {
       { id: "n5", userId: "u1", channel: "EMAIL", title: "t", body: "b" },
       {
         env: { NOTIFY_EMAIL_WEBHOOK_URL: "https://hooks.test/email" },
-        fetchImpl: async () => ({ ok: false, status: 502 }),
+        fetchImpl: async () => ({ ok: false, status: 502, json: async () => ({}) }),
+        resolveRecipient: async () => ({ email: "u1@example.com", name: "U" }),
       },
     );
     assert.equal(r.ok, false);

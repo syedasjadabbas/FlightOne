@@ -1,12 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-if (typeof window !== 'undefined') {
-  gsap.registerPlugin(ScrollTrigger);
-}
+import React, { useEffect, useRef, useState } from 'react';
 
 /*
  * ── Dream of Flight / Our Future Vision ──────────────────────────────────
@@ -41,6 +35,9 @@ const BACKGROUND_LAYER = {
   desktop: `${BASE_PATH}/layer-01-sky-desktop.webp`,
   mobile: `${BASE_PATH}/layer-01-sky-mobile.webp`,
 };
+
+/** Desktop/mobile bg intrinsic size — holds stack height before assets mount. */
+const BG_ASPECT = { desktop: '2400 / 6045', mobile: '563 / 3527' } as const;
 
 const OVERLAY_LAYERS: OverlayLayer[] = [
   { id: 'clouds-a', desktop: `${BASE_PATH}/layer-02-clouds-a-desktop.webp`, mobile: `${BASE_PATH}/layer-02-clouds-a-mobile.webp`, top: 3, z: 2, speed: 0.85, alt: '' },
@@ -184,119 +181,155 @@ export default function VisionCarouselSection() {
   const textStackRef = useRef<HTMLDivElement>(null);
   const bgImgRef = useRef<HTMLImageElement>(null);
   const layerElRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  /* ~4.1MB Joby webps — mount src only when section is within ~800px. */
+  const [assetsReady, setAssetsReady] = useState(false);
 
   useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) return;
+        setAssetsReady(true);
+        io.disconnect();
+      },
+      { rootMargin: '800px 0px' },
+    );
+    io.observe(section);
+    return () => io.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!assetsReady) return;
     if (!sectionRef.current || !stackRef.current || !sheetRef.current) return;
 
-    const ctx = gsap.context(() => {
-      const section = sectionRef.current!;
-      const sheet = sheetRef.current!;
-      const stack = stackRef.current!;
-      const textStack = textStackRef.current;
-      const footerEl = document.querySelector('#footer') as HTMLElement | null;
+    let cancelled = false;
+    let cleanup: (() => void) | undefined;
 
-      const calcTranslateY = () => {
-        const stackHeight = stack.offsetHeight || stack.getBoundingClientRect().height;
-        const vh = window.innerHeight;
-        return -(Math.max(0, stackHeight - vh));
-      };
+    void (async () => {
+      const gsapMod = await import('gsap');
+      const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+      if (cancelled) return;
 
-      // Synchronize text coordinate space with tall artwork height
-      const syncTextStackHeight = () => {
-        if (textStack && stack) {
-          textStack.style.height = `${stack.offsetHeight}px`;
-        }
-      };
+      const gsap = gsapMod.default;
+      gsap.registerPlugin(ScrollTrigger);
 
-      // ── Exit curtain ──────────────────────────────────────────────────
-      // The pin's scroll range is split into two back-to-back phases:
-      //   1) Storytelling (0..storytellingDistance) — the pin stays engaged
-      //      while the artwork stack and text stack scroll through the scene.
-      //   2) Curtain Lift (storytellingDistance..+exitDistance) — Section 8
-      //      remains pinned at the end, and the entire Section 8 composition
-      //      moves upward as ONE rigid sheet (y: 0 -> -exitDistance),
-      //      progressively revealing the stationary next section underneath
-      //      from the bottom until Section 8 completely clears the viewport.
-      const exitDistance = () => window.innerHeight;
+      const ctx = gsap.context(() => {
+        const section = sectionRef.current!;
+        const sheet = sheetRef.current!;
+        const stack = stackRef.current!;
+        const textStack = textStackRef.current;
+        const footerEl = document.querySelector('#footer') as HTMLElement | null;
 
-      const st = ScrollTrigger.create({
-        trigger: section,
-        start: 'top top',
-        end: () => `+=${Math.abs(calcTranslateY()) + exitDistance()}`,
-        pin: true,
-        scrub: 1,
-        anticipatePin: 1,
-        invalidateOnRefresh: true,
-        onRefresh: () => {
-          syncTextStackHeight();
-          if (footerEl) gsap.set(footerEl, { y: 0 });
-        },
-        onLeave: () => {
-          if (footerEl) gsap.set(footerEl, { y: 0 });
-        },
-        onLeaveBack: () => {
-          if (footerEl) gsap.set(footerEl, { y: 0 });
-        },
-        onUpdate: (self) => {
-          const storytellingDistance = Math.abs(calcTranslateY());
-          const totalDistance = storytellingDistance + exitDistance();
-          const scrolledPx = self.progress * totalDistance;
+        const calcTranslateY = () => {
+          const stackHeight = stack.offsetHeight || stack.getBoundingClientRect().height;
+          const vh = window.innerHeight;
+          return -(Math.max(0, stackHeight - vh));
+        };
 
-          // Phase 1: storytelling artwork and text scrub
-          const p = storytellingDistance > 0 ? Math.min(1, scrolledPx / storytellingDistance) : 1;
-
-          const baseY = p * calcTranslateY();
-          gsap.set(stack, { y: baseY });
-          if (textStack) gsap.set(textStack, { y: baseY });
-
-          OVERLAY_LAYERS.forEach((layer) => {
-            if (layer.speed === 1) return;
-            const el = layerElRefs.current[layer.id];
-            if (!el) return;
-            const extra = (layer.speed - 1) * p * PARALLAX_RANGE;
-            gsap.set(el, { y: extra });
-          });
-
-          // Phase 2: animated curtain lift — Section 8 moves upward as ONE rigid sheet
-          // while holding the next section stationary underneath for a true curtain-lift reveal
-          const exitP = Math.max(0, Math.min(1, (scrolledPx - storytellingDistance) / exitDistance()));
-          gsap.set(sheet, { y: -exitP * exitDistance() });
-
-          const footer = footerEl || (document.querySelector('#footer') as HTMLElement | null);
-          if (footer) {
-            if (exitP > 0 && exitP < 1) {
-              gsap.set(footer, { y: -(1 - exitP) * exitDistance() });
-            } else {
-              gsap.set(footer, { y: 0 });
-            }
+        // Synchronize text coordinate space with tall artwork height
+        const syncTextStackHeight = () => {
+          if (textStack && stack) {
+            textStack.style.height = `${stack.offsetHeight}px`;
           }
-        },
-      });
+        };
 
-      // Refresh once the background artwork has finished loading
-      const bgEl = bgImgRef.current;
-      const handleImageLoad = () => ScrollTrigger.refresh();
-      if (bgEl) {
-        if (bgEl.complete) {
-          ScrollTrigger.refresh();
-        } else {
-          bgEl.addEventListener('load', handleImageLoad);
+        // ── Exit curtain ──────────────────────────────────────────────────
+        // The pin's scroll range is split into two back-to-back phases:
+        //   1) Storytelling (0..storytellingDistance) — the pin stays engaged
+        //      while the artwork stack and text stack scroll through the scene.
+        //   2) Curtain Lift (storytellingDistance..+exitDistance) — Section 8
+        //      remains pinned at the end, and the entire Section 8 composition
+        //      moves upward as ONE rigid sheet (y: 0 -> -exitDistance),
+        //      progressively revealing the stationary next section underneath
+        //      from the bottom until Section 8 completely clears the viewport.
+        const exitDistance = () => window.innerHeight;
+
+        const st = ScrollTrigger.create({
+          trigger: section,
+          start: 'top top',
+          end: () => `+=${Math.abs(calcTranslateY()) + exitDistance()}`,
+          pin: true,
+          scrub: 1,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+          onRefresh: () => {
+            syncTextStackHeight();
+            if (footerEl) gsap.set(footerEl, { y: 0 });
+          },
+          onLeave: () => {
+            if (footerEl) gsap.set(footerEl, { y: 0 });
+          },
+          onLeaveBack: () => {
+            if (footerEl) gsap.set(footerEl, { y: 0 });
+          },
+          onUpdate: (self) => {
+            const storytellingDistance = Math.abs(calcTranslateY());
+            const totalDistance = storytellingDistance + exitDistance();
+            const scrolledPx = self.progress * totalDistance;
+
+            // Phase 1: storytelling artwork and text scrub
+            const p = storytellingDistance > 0 ? Math.min(1, scrolledPx / storytellingDistance) : 1;
+
+            const baseY = p * calcTranslateY();
+            gsap.set(stack, { y: baseY });
+            if (textStack) gsap.set(textStack, { y: baseY });
+
+            OVERLAY_LAYERS.forEach((layer) => {
+              if (layer.speed === 1) return;
+              const el = layerElRefs.current[layer.id];
+              if (!el) return;
+              const extra = (layer.speed - 1) * p * PARALLAX_RANGE;
+              gsap.set(el, { y: extra });
+            });
+
+            // Phase 2: animated curtain lift — Section 8 moves upward as ONE rigid sheet
+            // while holding the next section stationary underneath for a true curtain-lift reveal
+            const exitP = Math.max(0, Math.min(1, (scrolledPx - storytellingDistance) / exitDistance()));
+            gsap.set(sheet, { y: -exitP * exitDistance() });
+
+            const footer = footerEl || (document.querySelector('#footer') as HTMLElement | null);
+            if (footer) {
+              if (exitP > 0 && exitP < 1) {
+                gsap.set(footer, { y: -(1 - exitP) * exitDistance() });
+              } else {
+                gsap.set(footer, { y: 0 });
+              }
+            }
+          },
+        });
+
+        // Refresh once the background artwork has finished loading
+        const bgEl = bgImgRef.current;
+        const handleImageLoad = () => ScrollTrigger.refresh();
+        if (bgEl) {
+          if (bgEl.complete) {
+            ScrollTrigger.refresh();
+          } else {
+            bgEl.addEventListener('load', handleImageLoad);
+          }
         }
-      }
 
-      syncTextStackHeight();
-      window.addEventListener('resize', syncTextStackHeight);
+        syncTextStackHeight();
+        window.addEventListener('resize', syncTextStackHeight);
 
-      return () => {
-        if (bgEl) bgEl.removeEventListener('load', handleImageLoad);
-        window.removeEventListener('resize', syncTextStackHeight);
-        if (footerEl) gsap.set(footerEl, { y: 0 });
-        st.kill();
-      };
-    }, sectionRef);
+        return () => {
+          if (bgEl) bgEl.removeEventListener('load', handleImageLoad);
+          window.removeEventListener('resize', syncTextStackHeight);
+          if (footerEl) gsap.set(footerEl, { y: 0 });
+          st.kill();
+        };
+      }, sectionRef);
 
-    return () => ctx.revert();
-  }, []);
+      cleanup = () => ctx.revert();
+    })();
+
+    return () => {
+      cancelled = true;
+      cleanup?.();
+    };
+  }, [assetsReady]);
 
   return (
     <section
@@ -344,50 +377,67 @@ export default function VisionCarouselSection() {
         >
           <div ref={stackRef} className="vision-stack" style={{ position: 'relative', width: '100%', willChange: 'transform' }} aria-hidden="true">
             {/* Layer 1 — tall master sky/ground background.
-                <picture>/<source> lets the browser fetch ONLY the variant
-                that matches the viewport (same 768px breakpoint the CSS
-                used to gate with display:none/block) instead of always
-                downloading both the desktop and mobile asset. Below-fold
-                for every visitor, so it's lazy-loaded like every other
-                layer here — Section 8's ~36MB of artwork no longer competes
-                with the hero video/critical assets on initial load. */}
+                Assets mount only when the section nears the viewport
+                (assetsReady). Until then an aspect-ratio shell holds height. */}
             <div style={{ position: 'relative', width: '100%', zIndex: 1 }}>
-              <picture>
-                <source media="(max-width: 768px)" srcSet={BACKGROUND_LAYER.mobile} />
-                <img
-                  ref={bgImgRef}
-                  src={BACKGROUND_LAYER.desktop}
-                  alt="Aerial sky and skyline illustration"
-                  className="vision-layer-img"
-                  loading="lazy"
-                  decoding="async"
-                />
-              </picture>
+              {assetsReady ? (
+                <picture>
+                  <source media="(max-width: 768px)" srcSet={BACKGROUND_LAYER.mobile} />
+                  <img
+                    ref={bgImgRef}
+                    src={BACKGROUND_LAYER.desktop}
+                    alt="Aerial sky and skyline illustration"
+                    className="vision-layer-img"
+                    loading="lazy"
+                    decoding="async"
+                    fetchPriority="low"
+                  />
+                </picture>
+              ) : (
+                <>
+                  <div
+                    className="vision-bg-placeholder vision-bg-placeholder-desktop"
+                    style={{ width: '100%', aspectRatio: BG_ASPECT.desktop, background: '#07162C' }}
+                  />
+                  <div
+                    className="vision-bg-placeholder vision-bg-placeholder-mobile"
+                    style={{ width: '100%', aspectRatio: BG_ASPECT.mobile, background: '#07162C' }}
+                  />
+                </>
+              )}
             </div>
 
             {/* Layers 2–11 — transparent overlay illustrations */}
-            {OVERLAY_LAYERS.map((layer) => (
-              <div
-                key={layer.id}
-                ref={(el) => {
-                  layerElRefs.current[layer.id] = el;
-                }}
-                className="vision-overlay-layer"
-                style={{
-                  position: 'absolute',
-                  top: `${layer.top}%`,
-                  left: 0,
-                  width: '100%',
-                  zIndex: layer.z,
-                  willChange: layer.speed !== 1 ? 'transform' : undefined,
-                }}
-              >
-                <picture>
-                  <source media="(max-width: 768px)" srcSet={layer.mobile} />
-                  <img src={layer.desktop} alt={layer.alt} className="vision-layer-img" loading="lazy" decoding="async" />
-                </picture>
-              </div>
-            ))}
+            {assetsReady &&
+              OVERLAY_LAYERS.map((layer) => (
+                <div
+                  key={layer.id}
+                  ref={(el) => {
+                    layerElRefs.current[layer.id] = el;
+                  }}
+                  className="vision-overlay-layer"
+                  style={{
+                    position: 'absolute',
+                    top: `${layer.top}%`,
+                    left: 0,
+                    width: '100%',
+                    zIndex: layer.z,
+                    willChange: layer.speed !== 1 ? 'transform' : undefined,
+                  }}
+                >
+                  <picture>
+                    <source media="(max-width: 768px)" srcSet={layer.mobile} />
+                    <img
+                      src={layer.desktop}
+                      alt={layer.alt}
+                      className="vision-layer-img"
+                      loading="lazy"
+                      decoding="async"
+                      fetchPriority="low"
+                    />
+                  </picture>
+                </div>
+              ))}
           </div>
         </div>
 
@@ -485,6 +535,13 @@ export default function VisionCarouselSection() {
           display: block;
           width: 100%;
           height: auto;
+        }
+
+        .vision-bg-placeholder-desktop { display: block; }
+        .vision-bg-placeholder-mobile { display: none; }
+        @media (max-width: 768px) {
+          .vision-bg-placeholder-desktop { display: none; }
+          .vision-bg-placeholder-mobile { display: block; }
         }
 
         .vision-overlay-layer { pointer-events: none; }

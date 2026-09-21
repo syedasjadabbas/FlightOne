@@ -1,9 +1,4 @@
-import type {
-  CompletionRequest,
-  CompletionResult,
-  LlmProvider,
-} from "./types";
-import { fetchWithTimeout } from "./types";
+import { fetchWithTimeout } from "./helpers.js";
 
 /**
  * LM Studio provider — OpenAI-compatible `/v1/chat/completions`.
@@ -19,41 +14,43 @@ import { fetchWithTimeout } from "./types";
  * reliable disable is an assistant prefill of an empty `<think></think>`
  * block (verified ~17s JSON vs ~120s+ empty content with thinking on).
  */
-export class LmStudioProvider implements LlmProvider {
-  readonly name = "lmstudio";
+export class LmStudioProvider {
+  name = "lmstudio";
 
-  private get baseUrl(): string {
+  get baseUrl() {
     const raw = process.env.LMSTUDIO_BASE_URL || "http://localhost:1234/v1";
     return raw.replace(/\/$/, "");
   }
 
-  private get model(): string {
+  get model() {
     return process.env.LMSTUDIO_MODEL || "qwen/qwen3.8-27b";
   }
 
-  private get apiKey(): string | undefined {
+  get apiKey() {
     const key = process.env.LMSTUDIO_API_KEY;
     return key && key.length > 0 ? key : undefined;
   }
 
   /** Default off — thinking burns the whole max_tokens budget on this stack. */
-  private get thinkEnabled(): boolean {
-    return process.env.LMSTUDIO_THINK === "true" || process.env.LMSTUDIO_THINK === "1";
+  get thinkEnabled() {
+    return (
+      process.env.LMSTUDIO_THINK === "true" || process.env.LMSTUDIO_THINK === "1"
+    );
   }
 
-  isConfigured(): boolean {
+  isConfigured() {
     return process.env.LMSTUDIO_ENABLED !== "false";
   }
 
-  private headers(): Record<string, string> {
-    const headers: Record<string, string> = {
+  headers() {
+    const headers = {
       "Content-Type": "application/json",
     };
     if (this.apiKey) headers.Authorization = `Bearer ${this.apiKey}`;
     return headers;
   }
 
-  private buildBody(req: CompletionRequest, stream: boolean) {
+  buildBody(req, stream) {
     // This LM Studio build rejects OpenAI's `json_object`; it only allows
     // `json_schema` or `text`. Extraction already prompts for JSON + repairs
     // malformed replies, so we omit response_format and rely on the prompt.
@@ -61,7 +58,7 @@ export class LmStudioProvider implements LlmProvider {
       ? `${req.system}\n\nRespond with a single valid JSON object only. No markdown fences, no prose before or after the JSON.`
       : req.system;
 
-    const messages: { role: string; content: string }[] = [
+    const messages = [
       { role: "system", content: system },
       ...req.messages.map((m) => ({ role: m.role, content: m.content })),
     ];
@@ -86,21 +83,20 @@ export class LmStudioProvider implements LlmProvider {
    * Prefer `content`; if empty (CoT ate the budget), pull JSON/text from
    * `reasoning_content` as a last resort.
    */
-  private extractText(choice?: {
-    message?: { content?: string | null; reasoning_content?: string | null };
-  }): string {
+  extractText(choice) {
     const content = stripThinkBlocks(choice?.message?.content ?? "");
     if (content) return content;
 
     const reasoning = (choice?.message?.reasoning_content ?? "").trim();
     if (!reasoning) return "";
-    const fromReasoning = extractJsonObject(reasoning) ?? stripThinkBlocks(reasoning);
+    const fromReasoning =
+      extractJsonObject(reasoning) ?? stripThinkBlocks(reasoning);
     return fromReasoning;
   }
 
-  async complete(req: CompletionRequest): Promise<CompletionResult> {
+  async complete(req) {
     const url = `${this.baseUrl}/chat/completions`;
-    let res: Response;
+    let res;
     try {
       res = await fetchWithTimeout(
         url,
@@ -120,12 +116,7 @@ export class LmStudioProvider implements LlmProvider {
       throw new Error(`LM Studio ${res.status}: ${detail.slice(0, 300)}`);
     }
 
-    const json = (await res.json()) as {
-      choices?: {
-        message?: { content?: string | null; reasoning_content?: string | null };
-        finish_reason?: string;
-      }[];
-    };
+    const json = await res.json();
     const text = this.extractText(json.choices?.[0]);
     if (!text) {
       throw new Error(
@@ -135,15 +126,13 @@ export class LmStudioProvider implements LlmProvider {
     return { text, provider: `lmstudio:${this.model}` };
   }
 
-  async *completeStream(
-    req: CompletionRequest,
-  ): AsyncGenerator<string, CompletionResult, void> {
+  async *completeStream(req) {
     const url = `${this.baseUrl}/chat/completions`;
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), req.timeoutMs ?? 60000);
 
     try {
-      let res: Response;
+      let res;
       try {
         res = await fetch(url, {
           method: "POST",
@@ -173,7 +162,7 @@ export class LmStudioProvider implements LlmProvider {
         if (done) break;
         buffer += decoder.decode(value, { stream: true });
 
-        let sep: number;
+        let sep;
         while ((sep = buffer.indexOf("\n")) >= 0) {
           const line = buffer.slice(0, sep).trim();
           buffer = buffer.slice(sep + 1);
@@ -181,11 +170,9 @@ export class LmStudioProvider implements LlmProvider {
           const payload = line.slice(5).trim();
           if (!payload || payload === "[DONE]") continue;
 
-          let chunk: {
-            choices?: { delta?: { content?: string | null } }[];
-          };
+          let chunk;
           try {
-            chunk = JSON.parse(payload) as typeof chunk;
+            chunk = JSON.parse(payload);
           } catch {
             continue;
           }
@@ -223,7 +210,7 @@ export class LmStudioProvider implements LlmProvider {
   }
 }
 
-function networkErrorMessage(baseUrl: string, err: unknown): string {
+function networkErrorMessage(baseUrl, err) {
   const cause =
     err instanceof Error
       ? err.message
@@ -234,7 +221,7 @@ function networkErrorMessage(baseUrl: string, err: unknown): string {
 }
 
 /** Remove complete `<think>…</think>` (and legacy `<thinking>`) blocks. */
-export function stripThinkBlocks(text: string): string {
+export function stripThinkBlocks(text) {
   return text
     .replace(/<think>[\s\S]*?<\/think>/gi, "")
     .replace(/<thinking>[\s\S]*?<\/thinking>/gi, "")
@@ -242,7 +229,7 @@ export function stripThinkBlocks(text: string): string {
 }
 
 /** Best-effort first JSON object in a blob (reasoning fallback). */
-export function extractJsonObject(text: string): string | null {
+export function extractJsonObject(text) {
   const start = text.indexOf("{");
   if (start < 0) return null;
   let depth = 0;
@@ -253,10 +240,10 @@ export function extractJsonObject(text: string): string | null {
     if (inString) {
       if (escape) escape = false;
       else if (ch === "\\") escape = true;
-      else if (ch === "\"") inString = false;
+      else if (ch === '"') inString = false;
       continue;
     }
-    if (ch === "\"") {
+    if (ch === '"') {
       inString = true;
       continue;
     }
@@ -281,7 +268,7 @@ export function extractJsonObject(text: string): string | null {
  * Yield only content that is outside an open think block. Keeps an incomplete
  * open tag in `rest` until the closing tag arrives (or stream ends).
  */
-function takeSafeContent(pending: string): { safe: string; rest: string } {
+function takeSafeContent(pending) {
   const open = pending.search(/<think(?:ing)?>/i);
   if (open < 0) return { safe: pending, rest: "" };
 

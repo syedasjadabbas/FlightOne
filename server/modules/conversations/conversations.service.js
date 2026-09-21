@@ -3,10 +3,10 @@
  *
  * Persists conversation threads + messages server-side so they are resumable
  * across sessions/devices (per docs/modules/01-ai-travel-consultant.md,
- * "Conversation core" checklist). The actual LLM orchestration still lives
- * client-side in flight-one/lib/consultant/* for now — `generateAssistantReply`
- * below is an intentional stub, not a real model call, until that logic moves
- * server-side.
+ * "Conversation core" checklist). Provider HTTP (Gemini / LM Studio) lives under
+ * `/api/v1/llm`. Ask AI orchestration still runs on Next (`client/lib/ask-ai`)
+ * and proxies completions there. `generateAssistantReply` below remains a stub
+ * until the orchestrator moves server-side.
  */
 import prisma from "../../config/prisma.js";
 import { AppError } from "../../lib/customError.js";

@@ -633,7 +633,7 @@ async function runTest(test) {
 }
 
 console.log("E2E Flight Search Verification");
-console.log("Live search enabled:", process.env.TRAVELPORT_LIVE_SEARCH !== "false");
+console.log("Live search proxy ready:", Boolean(process.env.INTERNAL_API_KEY));
 console.log("API base:", apiBase());
 
 const results = [];

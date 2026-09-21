@@ -1,7 +1,10 @@
 import dotenv from "dotenv";
 import prisma from "../config/prisma.js";
 import { hashPassword } from "../lib/password.js";
-import { assertProductionBootstrapAdminSafe } from "../lib/productionConfig.js";
+import {
+  assertProductionBootstrapAdminSafe,
+  isProductionEnv,
+} from "../lib/productionConfig.js";
 
 dotenv.config();
 
@@ -151,6 +154,75 @@ async function seedBootstrapAdmin() {
   return user;
 }
 
+/**
+ * Dev/demo traveller that logs in in one step:
+ * - email already verified
+ * - 2FA off
+ * - no staff role (staff roles force mandatory 2FA enrollment on login)
+ *
+ * Skipped in production. Override with DEMO_USER_EMAIL / DEMO_USER_PASSWORD / DEMO_USER_NAME.
+ */
+async function seedDemoVerifiedTraveller() {
+  if (isProductionEnv()) {
+    console.log("Skipping demo verified traveller seed in production");
+    return null;
+  }
+
+  const email = (process.env.DEMO_USER_EMAIL || "demo@flightone.local")
+    .trim()
+    .toLowerCase();
+  const password = process.env.DEMO_USER_PASSWORD || "DemoPass123!";
+  const name = process.env.DEMO_USER_NAME || "Demo Traveller";
+  const passwordHash = await hashPassword(password);
+
+  const user = await prisma.user.upsert({
+    where: { email },
+    create: {
+      email,
+      name,
+      passwordHash,
+      passwordChangedAt: new Date(),
+      emailVerifiedAt: new Date(),
+      twoFactorEnabled: false,
+      twoFactorSecret: null,
+      twoFactorPendingSecret: null,
+      twoFactorBackupCodes: null,
+      twoFactorLastStep: null,
+      twoFactorAttempts: 0,
+      twoFactorLockedUntil: null,
+    },
+    update: {
+      name,
+      passwordHash,
+      passwordChangedAt: new Date(),
+      emailVerifiedAt: new Date(),
+      twoFactorEnabled: false,
+      twoFactorSecret: null,
+      twoFactorPendingSecret: null,
+      twoFactorBackupCodes: null,
+      twoFactorLastStep: null,
+      twoFactorAttempts: 0,
+      twoFactorLockedUntil: null,
+    },
+    select: { id: true, email: true, name: true },
+  });
+
+  // Ensure a blank profile exists so profile screens don't 404.
+  await prisma.travellerProfile.upsert({
+    where: { userId: user.id },
+    create: { userId: user.id, displayName: name },
+    update: { displayName: name },
+  });
+
+  // Strip any staff roles that would force 2FA enrollment.
+  await prisma.userRole.deleteMany({ where: { userId: user.id } });
+
+  console.log(
+    `Seeded demo verified traveller: ${user.email} (email verified, 2FA off, no staff role)`,
+  );
+  return user;
+}
+
 // Module 16 — do NOT seed invented SOPs/policies into production knowledge.
 // Isolated tests create their own fixtures.
 
@@ -210,6 +282,8 @@ async function main() {
   const admin = await seedBootstrapAdmin();
   await assignRoleToUser(admin.id, superAdminRole.id);
   console.log(`Assigned "${superAdminRole.name}" role to ${admin.email}`);
+
+  await seedDemoVerifiedTraveller();
 
   await seedPricingConfig();
   await deactivateLegacySampleMarkup();

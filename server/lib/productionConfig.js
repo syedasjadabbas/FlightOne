@@ -100,6 +100,24 @@ export function assertProductionConfigSafe(env = process.env) {
       "VAULT_STORAGE_PROVIDER=local is development-only and not allowed in production",
     );
   }
+  if (vault === "gcs") {
+    if (!env.GCLOUD_PROJECT_ID?.trim()) {
+      errors.push("GCLOUD_PROJECT_ID is required when VAULT_STORAGE_PROVIDER=gcs");
+    }
+    if (!env.GCLOUD_BUCKET?.trim()) {
+      errors.push("GCLOUD_BUCKET is required when VAULT_STORAGE_PROVIDER=gcs");
+    }
+    const hasCreds = Boolean(
+      env.GCP_KEY_BASE64?.trim() ||
+        env.GCP_KEY_FILE_PATH?.trim() ||
+        env.GOOGLE_APPLICATION_CREDENTIALS?.trim(),
+    );
+    if (!hasCreds) {
+      errors.push(
+        "GCP_KEY_FILE_PATH (or GCP_KEY_BASE64 / GOOGLE_APPLICATION_CREDENTIALS) is required when VAULT_STORAGE_PROVIDER=gcs",
+      );
+    }
+  }
 
   if (errors.length) {
     throw new ProductionConfigError(errors);

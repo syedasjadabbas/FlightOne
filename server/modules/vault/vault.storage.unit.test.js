@@ -80,7 +80,7 @@ describe("vault.storage", () => {
     );
   });
 
-  it("local provider put/get round-trip", async () => {
+  it("local provider put/get round-trip via fileUrl", async () => {
     process.env.VAULT_STORAGE_PROVIDER = "local";
     process.env.VAULT_LOCAL_ROOT = root;
     const { getVaultStorage, getVaultStorageCapability } = await import(
@@ -89,8 +89,9 @@ describe("vault.storage", () => {
     assert.equal(getVaultStorageCapability().configured, true);
     const storage = getVaultStorage();
     const key = "user1/doc1/passport.pdf";
-    await storage.put({ storageKey: key, buffer: Buffer.from("%PDF-test") });
-    const got = await storage.get({ storageKey: key });
+    const put = await storage.put({ storageKey: key, buffer: Buffer.from("%PDF-test") });
+    assert.equal(put.fileUrl, `local://${key}`);
+    const got = await storage.get({ fileUrl: put.fileUrl });
     assert.equal(got.toString(), "%PDF-test");
   });
 });

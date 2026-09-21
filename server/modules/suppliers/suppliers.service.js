@@ -253,8 +253,15 @@ async function searchSupplierOffers(product, query) {
  * Route a validated search request to the right adapter. When `userId` is
  * provided, real supplier offers are persisted as user-scoped snapshots and
  * returned with `supplierOfferSnapshotId` for the booking quote flow.
+ *
+ * Set TRAVELPORT_LIVE_SEARCH=false on the server to short-circuit all GDS/hotel
+ * live inventory (Ask AI / Next no longer gate this).
  */
 export async function search({ product, query, userId }) {
+  if (process.env.TRAVELPORT_LIVE_SEARCH === "false") {
+    return [];
+  }
+
   let offers = await searchSupplierOffers(product, query);
 
   // Real fulfillment history only — omit when sample is thin (never invent %).
