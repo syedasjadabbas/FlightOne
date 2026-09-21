@@ -12,7 +12,7 @@ import "./styles/flightone-chat-responsive.css";
 import "./styles/flightone-chat-landing.css";
 import "./styles/flightone-desk.css";
 import "./styles/flightone-groups-mice.css";
-
+ 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
   subsets: ["latin"],
