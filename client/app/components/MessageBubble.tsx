@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Plane } from "lucide-react";
+import { Plane, WifiOff } from "lucide-react";
 import type { UiMessage } from "./chat.types";
 import { isTravelSearchError } from "./chat/SearchErrorFooter";
 
@@ -62,6 +62,7 @@ export function MessageBubble({
             {isError ? (
               <>
                 <p className="search-error-footer__eyebrow message-bubble__error-eyebrow">
+                  <WifiOff className="search-error-footer__eyebrow-icon" aria-hidden />
                   Live search unavailable
                 </p>
                 <p className="message-bubble__error-body">{message.content}</p>

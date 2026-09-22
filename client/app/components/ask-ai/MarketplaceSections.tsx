@@ -573,9 +573,7 @@ export function MarketplaceFooter({
             <span className="results-market__footer-sep" aria-hidden>
               ·
             </span>
-            <a href={whatsappHref()} target="_blank" rel="noopener noreferrer">
-              Support
-            </a>
+            <Link href="/escalations">Support</Link>
           </div>
         </div>
       </div>

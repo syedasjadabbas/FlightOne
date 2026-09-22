@@ -136,10 +136,10 @@ export function ItinerarySummaryCard({
 
   return (
     <article
-      className="trip-card offer-enter offer-surface w-full overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--surface)]"
+      className="trip-card offer-enter offer-surface w-full overflow-hidden rounded-2xl border border-transparent bg-[var(--surface)]"
       style={{
         animationDelay: `${60 + index * 50}ms`,
-        boxShadow: "var(--shadow-soft)",
+        boxShadow: "var(--shadow-soft), inset 0 1px 0 #ffffff",
       }}
     >
       {/* Header — badges + price across full width */}

@@ -22,11 +22,7 @@ export function EscalationsTabs({
   caseCount: number;
 }) {
   return (
-    <div
-      role="tablist"
-      aria-label="Support sections"
-      className="fo-traveller__filters border-b border-[var(--line)] pb-3"
-    >
+    <div role="tablist" aria-label="Support sections" className="fo-escalations__tabs">
       {TABS.map((tab) => {
         if (tab.needsAuth && !signedIn) return null;
         const selected = active === tab.id;
@@ -48,7 +44,7 @@ export function EscalationsTabs({
             aria-selected={selected}
             aria-controls={`escalations-panel-${tab.id}`}
             onClick={() => onChange(tab.id)}
-            className={`fo-traveller__toggle${selected ? " fo-traveller__toggle--on" : ""}`}
+            className={`fo-escalations__tab${selected ? " fo-escalations__tab--active" : ""}`}
           >
             {label}
           </button>

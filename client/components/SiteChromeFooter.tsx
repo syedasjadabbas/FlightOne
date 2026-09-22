@@ -86,13 +86,10 @@ export function SiteChromeFooter({ variant = "app" }: SiteChromeFooterProps) {
             <Phone size={13} strokeWidth={2} />
             <span>WhatsApp</span>
           </a>
-          <a
-            href={`mailto:${FLIGHTONE_BRAND.email}`}
-            className="fo-chrome-footer__link-pill"
-          >
+          <Link href="/escalations" className="fo-chrome-footer__link-pill">
             <Mail size={13} strokeWidth={2} />
             <span>Support</span>
-          </a>
+          </Link>
         </nav>
       </div>
     </footer>

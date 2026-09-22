@@ -3,6 +3,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { COMPANY_INFO } from '@/data/company';
+import { useSubscribeToNewsletterMutation } from '@/lib/api/newsletter.api';
+import { FooterInfoModal, type FooterInfoTopic } from './FooterInfoModal';
 
 /**
  * The five wavy ribbon paths in the footer graphic, as a pure function of
@@ -36,6 +38,9 @@ export default function Footer() {
   const [email, setEmail] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [subscribeError, setSubscribeError] = useState(false);
+  const [subscribe, { isLoading: subscribing }] = useSubscribeToNewsletterMutation();
+  const [infoTopic, setInfoTopic] = useState<FooterInfoTopic | null>(null);
 
   // The 5 ribbon <path> elements driven from RAF loop
   const navyPathRef = useRef<SVGPathElement>(null);
@@ -85,12 +90,17 @@ export default function Footer() {
     };
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email) {
+    if (!email) return;
+    setSubscribeError(false);
+    try {
+      await subscribe({ email }).unwrap();
       setSubmitted(true);
       setEmail('');
       setTimeout(() => setSubmitted(false), 4000);
+    } catch {
+      setSubscribeError(true);
     }
   };
 
@@ -457,27 +467,33 @@ export default function Footer() {
               }}
             >
               {[
-                { label: 'Why Choose Us', href: '/#why-choose-us' },
-                { label: 'Transparent Pricing', href: '/#itinerary' },
-                { label: 'Frequently Asked Questions', href: '/support' },
-                { label: 'Customer Support', href: '/escalations' },
-                { label: 'Refund Policies', href: '/refunds' },
+                { label: 'Why Choose Us', topic: 'why-choose-us' as FooterInfoTopic },
+                { label: 'Transparent Pricing', topic: 'transparent-pricing' as FooterInfoTopic },
+                { label: 'Frequently Asked Questions', topic: 'faq' as FooterInfoTopic },
+                { label: 'Customer Support', topic: 'customer-support' as FooterInfoTopic },
+                { label: 'Refund Policies', topic: 'refund-policies' as FooterInfoTopic },
               ].map((link) => (
                 <li key={link.label}>
-                  <Link
-                    href={link.href}
+                  <button
+                    type="button"
+                    onClick={() => setInfoTopic(link.topic)}
                     style={{
                       fontFamily: 'var(--font-sans)',
                       fontSize: '0.9375rem',
                       fontWeight: 450,
                       color: 'rgba(245, 244, 223, 0.85)',
                       textDecoration: 'none',
+                      background: 'none',
+                      border: 'none',
+                      padding: 0,
+                      cursor: 'pointer',
+                      textAlign: 'left',
                       transition: 'color 0.2s ease, transform 0.2s ease',
                     }}
                     className="hover:text-white hover:translate-x-1"
                   >
                     {link.label}
-                  </Link>
+                  </button>
                 </li>
               ))}
             </ul>
@@ -548,6 +564,7 @@ export default function Footer() {
               <button
                 type="submit"
                 aria-label="Submit email"
+                disabled={subscribing}
                 style={{
                   width: '32px',
                   height: '32px',
@@ -556,7 +573,8 @@ export default function Footer() {
                   border: 'none',
                   color: '#FFFFFF',
                   fontSize: '1rem',
-                  cursor: 'pointer',
+                  cursor: subscribing ? 'default' : 'pointer',
+                  opacity: subscribing ? 0.6 : 1,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -565,13 +583,17 @@ export default function Footer() {
                 }}
                 className="hover:bg-[#0066cc] hover:scale-105"
               >
-                →
+                {subscribing ? '···' : '→'}
               </button>
             </form>
 
             {submitted ? (
-              <p style={{ margin: 0, fontSize: '0.8125rem', color: '#25D366' }}>
+              <p style={{ margin: 0, fontSize: '0.8125rem', color: '#25D366' }} role="status">
                 Thank you for subscribing!
+              </p>
+            ) : subscribeError ? (
+              <p style={{ margin: 0, fontSize: '0.8125rem', color: '#FF6B6B' }} role="alert">
+                Couldn&apos;t subscribe — please try again.
               </p>
             ) : (
               <span style={{ fontSize: '0.72rem', color: 'rgba(245, 244, 223, 0.5)' }}>
@@ -798,6 +820,8 @@ export default function Footer() {
           }
         }
       `}</style>
+
+      <FooterInfoModal topic={infoTopic} onClose={() => setInfoTopic(null)} />
     </footer>
   );
 }

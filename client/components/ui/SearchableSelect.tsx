@@ -4,10 +4,12 @@ import {
   useCallback,
   useEffect,
   useId,
+  useLayoutEffect,
   useRef,
   useState,
   type KeyboardEvent,
 } from "react";
+import { createPortal } from "react-dom";
 import { cn } from "@/utils/cn";
 
 export type SearchableSelectOption = {
@@ -112,6 +114,9 @@ export function SearchableSelect({
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(-1);
+  const [menuRect, setMenuRect] = useState<{ top: number; left: number; width: number } | null>(
+    null,
+  );
 
   const selected = options.find((o) => o.value === value);
   const filtered = filterOptions(options, searchable ? query : "");
@@ -138,6 +143,23 @@ export function SearchableSelect({
     document.addEventListener("mousedown", onDoc);
     return () => document.removeEventListener("mousedown", onDoc);
   }, [open, close]);
+
+  useLayoutEffect(() => {
+    if (!open) return;
+    const updateRect = () => {
+      const trigger = triggerRef.current;
+      if (!trigger) return;
+      const rect = trigger.getBoundingClientRect();
+      setMenuRect({ top: rect.bottom + 6, left: rect.left, width: rect.width });
+    };
+    updateRect();
+    window.addEventListener("resize", updateRect);
+    window.addEventListener("scroll", updateRect, true);
+    return () => {
+      window.removeEventListener("resize", updateRect);
+      window.removeEventListener("scroll", updateRect, true);
+    };
+  }, [open]);
 
   useEffect(() => {
     if (!open || !searchable) return;
@@ -286,78 +308,82 @@ export function SearchableSelect({
         ) : null}
       </div>
 
-      {open ? (
-        <div
-          className="fo-select-menu absolute top-full right-0 left-0 z-50 mt-1.5 overflow-hidden rounded-2xl border border-black/10 bg-white/95 backdrop-blur-xl shadow-[0_16px_36px_-8px_rgba(14,22,32,0.16)]"
-        >
-          {searchable ? (
-            <div className="border-b border-black/6 p-2">
-              <input
-                ref={searchRef}
-                type="search"
-                value={query}
-                onChange={(e) => {
-                  setQuery(e.target.value);
-                  setActiveIndex(0);
-                }}
-                onKeyDown={onSearchKeyDown}
-                placeholder={searchPlaceholder}
-                aria-autocomplete="list"
-                aria-controls={listboxId}
-                className={cn(
-                  "w-full rounded-xl border border-black/8 bg-[#f7f9fa] px-3 py-1.5 text-[13px] text-ink outline-none",
-                  "placeholder:text-ink-faint",
-                  "focus-visible:border-sky focus-visible:ring-2 focus-visible:ring-sky/30 focus-visible:bg-white",
-                )}
-              />
-            </div>
-          ) : null}
-
-          <ul
-            ref={listRef}
-            id={listboxId}
-            role="listbox"
-            aria-labelledby={fieldId}
-            className="max-h-56 overflow-y-auto p-1"
-          >
-            {filtered.length === 0 ? (
-              <li className="px-3.5 py-2.5 text-[13px] text-ink-faint">{emptyMessage}</li>
-            ) : (
-              filtered.map((opt, idx) => {
-                const isSelected = opt.value === value;
-                const isActive = idx === activeIndex;
-                return (
-                  <li
-                    key={opt.value || `empty-${idx}`}
-                    id={`${fieldId}-opt-${idx}`}
-                    role="option"
-                    aria-selected={isSelected}
-                    aria-disabled={opt.disabled || undefined}
-                    data-idx={idx}
-                    onMouseEnter={() => !opt.disabled && setActiveIndex(idx)}
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => pick(opt)}
+      {open && menuRect && typeof document !== "undefined"
+        ? createPortal(
+            <div
+              className="fo-select-menu fixed z-50 overflow-hidden rounded-2xl border border-black/10 bg-white/95 backdrop-blur-xl shadow-[0_16px_36px_-8px_rgba(14,22,32,0.16)]"
+              style={{ top: menuRect.top, left: menuRect.left, width: menuRect.width }}
+            >
+              {searchable ? (
+                <div className="border-b border-black/6 p-2">
+                  <input
+                    ref={searchRef}
+                    type="search"
+                    value={query}
+                    onChange={(e) => {
+                      setQuery(e.target.value);
+                      setActiveIndex(0);
+                    }}
+                    onKeyDown={onSearchKeyDown}
+                    placeholder={searchPlaceholder}
+                    aria-autocomplete="list"
+                    aria-controls={listboxId}
                     className={cn(
-                      "flex cursor-pointer items-center justify-between rounded-xl px-3.5 py-2 text-[13.5px] transition-colors",
-                      opt.disabled
-                        ? "cursor-not-allowed opacity-40"
-                        : isActive
-                          ? "bg-black/5 text-[#0e1620] font-medium"
-                          : "text-[#55606e]",
-                      isSelected && "font-semibold text-sky bg-sky/8",
+                      "w-full rounded-xl border border-black/8 bg-[#f7f9fa] px-3 py-1.5 text-[13px] text-ink outline-none",
+                      "placeholder:text-ink-faint",
+                      "focus-visible:border-sky focus-visible:ring-2 focus-visible:ring-sky/30 focus-visible:bg-white",
                     )}
-                  >
-                    <span>{opt.label}</span>
-                    {isSelected ? (
-                      <span className="text-sky text-xs font-bold">✓</span>
-                    ) : null}
-                  </li>
-                );
-              })
-            )}
-          </ul>
-        </div>
-      ) : null}
+                  />
+                </div>
+              ) : null}
+
+              <ul
+                ref={listRef}
+                id={listboxId}
+                role="listbox"
+                aria-labelledby={fieldId}
+                className="max-h-56 overflow-y-auto p-1"
+              >
+                {filtered.length === 0 ? (
+                  <li className="px-3.5 py-2.5 text-[13px] text-ink-faint">{emptyMessage}</li>
+                ) : (
+                  filtered.map((opt, idx) => {
+                    const isSelected = opt.value === value;
+                    const isActive = idx === activeIndex;
+                    return (
+                      <li
+                        key={opt.value || `empty-${idx}`}
+                        id={`${fieldId}-opt-${idx}`}
+                        role="option"
+                        aria-selected={isSelected}
+                        aria-disabled={opt.disabled || undefined}
+                        data-idx={idx}
+                        onMouseEnter={() => !opt.disabled && setActiveIndex(idx)}
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => pick(opt)}
+                        className={cn(
+                          "flex cursor-pointer items-center justify-between rounded-xl px-3.5 py-2 text-[13.5px] transition-colors",
+                          opt.disabled
+                            ? "cursor-not-allowed opacity-40"
+                            : isActive
+                              ? "bg-black/5 text-[#0e1620] font-medium"
+                              : "text-[#55606e]",
+                          isSelected && "font-semibold text-sky bg-sky/8",
+                        )}
+                      >
+                        <span>{opt.label}</span>
+                        {isSelected ? (
+                          <span className="text-sky text-xs font-bold">✓</span>
+                        ) : null}
+                      </li>
+                    );
+                  })
+                )}
+              </ul>
+            </div>,
+            document.body,
+          )
+        : null}
 
       {error ? (
         <p id={`${fieldId}-error`} className="text-[12px] font-medium text-danger">

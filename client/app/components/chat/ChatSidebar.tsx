@@ -258,7 +258,7 @@ export function ChatSidebar({
           <button
             type="button"
             onClick={onNewChat}
-            className="group flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--electric)] px-3.5 py-2.5 text-xs font-bold text-white transition-colors hover:bg-[color-mix(in_oklab,var(--electric)_88%,white)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--electric)]/50 active:scale-[0.98]"
+            className="group flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--electric)] px-3.5 py-2.5 text-xs font-bold text-white shadow-[0_4px_14px_-2px_rgba(0,122,229,0.45),inset_0_1px_0_rgba(255,255,255,0.2)] transition-all hover:-translate-y-px hover:bg-[color-mix(in_oklab,var(--electric)_88%,white)] hover:shadow-[0_6px_18px_-2px_rgba(0,122,229,0.55),inset_0_1px_0_rgba(255,255,255,0.22)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--electric)]/50 active:translate-y-0 active:scale-[0.98]"
             aria-label="Start a new chat"
           >
             <Plus className="h-4 w-4" strokeWidth={2.4} aria-hidden />
@@ -313,10 +313,15 @@ export function ChatSidebar({
               </Link>
             </div>
           ) : isLoading ? (
-            <div className="space-y-3 px-1">
+            <div className="space-y-3 px-1" role="status" aria-label="Loading conversations">
               {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="h-12 animate-pulse rounded-xl bg-white/[0.04]" />
+                <div
+                  key={i}
+                  className="h-12 animate-pulse rounded-xl bg-white/[0.04]"
+                  style={{ animationDelay: `${i * 80}ms` }}
+                />
               ))}
+              <span className="sr-only">Loading conversations…</span>
             </div>
           ) : filteredConversations.length === 0 ? (
             <div className="px-3 py-12 text-center">

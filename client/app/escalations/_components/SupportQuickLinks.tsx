@@ -40,7 +40,7 @@ export function SupportQuickLinks() {
         <Link
           key={href}
           href={href}
-          className="flex items-start gap-2.5 border-b border-[var(--line)] py-2.5 transition-colors hover:border-[var(--sky)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sky)]"
+          className="flex items-start gap-2.5 rounded-2xl border border-transparent bg-white px-3 py-2.5 shadow-[0_2px_8px_rgba(14,22,32,0.04),inset_0_1px_0_#ffffff] transition-all hover:-translate-y-px hover:shadow-[0_6px_16px_rgba(14,22,32,0.08),inset_0_1px_0_#ffffff] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sky)]"
         >
           <span className="mt-0.5 shrink-0 text-[var(--sky)]">
             <Icon size={16} aria-hidden />

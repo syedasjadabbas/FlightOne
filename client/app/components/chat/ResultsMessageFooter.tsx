@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, CircleCheck } from "lucide-react";
 import type { ChatResultsState } from "@/lib/ask-ai/chatResultsState";
 
 export function ResultsMessageFooter({
@@ -25,8 +25,9 @@ export function ResultsMessageFooter({
   const destPhrase = destinationLabel ? ` for ${destinationLabel}` : "";
 
   return (
-    <div className="results-msg-cta space-y-2.5">
-      <p className="text-[14px] leading-relaxed text-[var(--ink-soft)]">
+    <div className="results-msg-cta results-msg-cta--success space-y-2.5" role="status">
+      <p className="results-msg-cta__found text-[14px] leading-relaxed text-[var(--ink-soft)]">
+        <CircleCheck className="results-msg-cta__found-icon" strokeWidth={2.2} aria-hidden />
         I found{" "}
         <span className="results-msg-cta__highlight">
           {resultCount} live {resultNoun}

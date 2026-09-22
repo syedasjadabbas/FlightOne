@@ -329,7 +329,7 @@ export function ResultsRail({
           <button
             type="button"
             onClick={() => setExpanded(true)}
-            className="w-full rounded-xl border border-[var(--line)] bg-[var(--surface)] px-3 py-2.5 text-center text-[13px] font-semibold tracking-[-0.01em] text-[var(--signal)] hover:bg-[var(--mist)]"
+            className="w-full rounded-xl bg-white px-3 py-2.5 text-center text-[13px] font-semibold tracking-[-0.01em] text-[var(--signal)] shadow-[0_2px_8px_rgba(14,22,32,0.05),inset_0_1px_0_#ffffff] transition-shadow hover:shadow-[0_4px_12px_rgba(14,22,32,0.08),inset_0_1px_0_#ffffff]"
           >
             See all {sortedItineraries.length} trips
           </button>
@@ -380,7 +380,7 @@ export function ResultsRail({
         <button
           type="button"
           onClick={() => setExpanded(true)}
-          className="w-full rounded-xl border border-[var(--line)] bg-[var(--surface)] px-3 py-2.5 text-center text-[13px] font-semibold tracking-[-0.01em] text-[var(--signal)] hover:bg-[var(--mist)]"
+          className="w-full rounded-xl bg-white px-3 py-2.5 text-center text-[13px] font-semibold tracking-[-0.01em] text-[var(--signal)] shadow-[0_2px_8px_rgba(14,22,32,0.05),inset_0_1px_0_#ffffff] transition-shadow hover:shadow-[0_4px_12px_rgba(14,22,32,0.08),inset_0_1px_0_#ffffff]"
         >
           See all {totalForSeeAll} {tab === "flights" || tab === "all" ? "flights" : "options"}
         </button>
@@ -398,7 +398,7 @@ export function ResultsRail({
   ) : panel?.legPanels && panel.legPanels.length > 0 ? (
     <div className="space-y-4">
       {panel.legPanels.map((leg) => (
-        <section key={leg.legRoute} className="rounded-xl border border-[var(--line)] bg-white p-3">
+        <section key={leg.legRoute} className="rounded-xl bg-white p-3 shadow-[0_4px_14px_-4px_rgba(14,22,32,0.05),inset_0_1px_0_#ffffff]">
           <header className="mb-2">
             {leg.stageLabel ? (
               <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--signal)]">

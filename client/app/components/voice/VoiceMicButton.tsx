@@ -193,10 +193,10 @@ export function VoiceMicButton({
       <button
         type="button"
         onClick={() => (listening ? stopListening() : void startListening())}
-        className={`flex h-9 w-9 items-center justify-center rounded-xl border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--electric)]/35 ${
+        className={`flex h-9 w-9 items-center justify-center rounded-xl transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--electric)]/35 ${
           listening
-            ? "border-[color-mix(in_oklab,var(--danger)_35%,var(--line))] bg-[color-mix(in_oklab,var(--danger)_8%,white)] text-[var(--danger)]"
-            : "border-[var(--line)] bg-white text-[var(--ink-soft)] hover:border-[color-mix(in_oklab,var(--electric)_40%,var(--line))] hover:text-[var(--electric)]"
+            ? "bg-[color-mix(in_oklab,var(--danger)_10%,white)] text-[var(--danger)] shadow-[0_2px_10px_rgba(220,38,38,0.18),inset_0_1px_0_#ffffff]"
+            : "bg-white text-[var(--ink-soft)] shadow-[0_2px_8px_rgba(14,22,32,0.06),inset_0_1px_0_#ffffff] hover:text-[var(--electric)] hover:shadow-[0_4px_12px_rgba(14,22,32,0.1),inset_0_1px_0_#ffffff]"
         }`}
         aria-label={listening ? "Stop listening" : "Talk with Ava"}
         title={label}
@@ -211,7 +211,7 @@ export function VoiceMicButton({
       </button>
       {uiState !== "idle" ? (
         <p
-          className="absolute bottom-full right-0 mb-1 max-w-[12rem] rounded-md border border-[var(--line)] bg-white px-2 py-1 text-[10px] leading-snug text-[var(--ink-soft)] shadow-[var(--shadow-soft)]"
+          className="absolute bottom-full right-0 mb-1.5 max-w-[12rem] rounded-lg bg-white px-2.5 py-1.5 text-[10px] leading-snug text-[var(--ink-soft)] shadow-[0_6px_16px_-4px_rgba(14,22,32,0.15),inset_0_1px_0_#ffffff]"
           aria-live="polite"
         >
           {label}

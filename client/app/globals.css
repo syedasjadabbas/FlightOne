@@ -1137,15 +1137,6 @@ textarea:not(:disabled) {
   max-width: min(100%, var(--chat-bubble-user));
 }
 
-.chat-page .message-bubble--assistant {
-  border-color: color-mix(in oklab, var(--line) 50%, transparent);
-  box-shadow: none;
-}
-
-.chat-page .message-bubble--user {
-  box-shadow: none;
-}
-
 .chat-page .message-bubble__footer {
   margin-top: 0.75rem;
   padding-top: 0.75rem;
@@ -1239,9 +1230,8 @@ textarea:not(:disabled) {
 }
 
 .chat-page .quick-chip {
-  box-shadow: none;
-  border: 1px solid color-mix(in oklab, var(--line) 65%, transparent);
-  background: color-mix(in oklab, white 92%, var(--light));
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  background: color-mix(in oklab, white 94%, var(--light));
   border-radius: 999px;
   padding: 0.52rem 0.95rem;
   font-size: 0.8125rem;
@@ -1253,6 +1243,7 @@ textarea:not(:disabled) {
   max-width: 100%;
   overflow-wrap: anywhere;
   cursor: pointer;
+  box-shadow: 0 2px 8px rgba(14, 22, 32, 0.05), inset 0 1px 0 #ffffff;
   transition:
     border-color 0.18s ease,
     background-color 0.18s ease,
@@ -1263,8 +1254,7 @@ textarea:not(:disabled) {
 
 .chat-page .quick-chip--prompt {
   color: color-mix(in oklab, var(--navy) 78%, var(--ink-soft));
-  background: color-mix(in oklab, white 96%, var(--cyan));
-  border-color: color-mix(in oklab, var(--line) 55%, transparent);
+  background: color-mix(in oklab, white 97%, var(--cyan));
 }
 
 .chat-page .quick-chip--action {
@@ -1273,20 +1263,18 @@ textarea:not(:disabled) {
   font-weight: 500;
   letter-spacing: -0.005em;
   color: color-mix(in oklab, var(--navy) 62%, var(--ink-soft));
-  background: color-mix(in oklab, white 70%, var(--light));
-  border-color: color-mix(in oklab, var(--line) 55%, transparent);
+  background: color-mix(in oklab, white 88%, var(--light));
 }
 
 .chat-page .quick-chip:hover {
-  transform: none;
-  border-color: color-mix(in oklab, var(--sky) 40%, var(--line));
+  transform: translateY(-0.5px);
   background: color-mix(in oklab, var(--cyan) 14%, white);
   color: var(--navy);
+  box-shadow: 0 4px 12px rgba(14, 22, 32, 0.08), inset 0 1px 0 #ffffff;
 }
 
 .chat-page .quick-chip--action:hover {
   background: white;
-  border-color: color-mix(in oklab, var(--sky) 32%, var(--line));
   color: var(--navy);
 }
 
@@ -1329,17 +1317,7 @@ textarea:not(:disabled) {
   gap: 0.5rem;
   min-height: 3.25rem;
   padding: 0.4rem 0.4rem 0.4rem 0.95rem;
-  border: 1px solid color-mix(in oklab, var(--line) 72%, var(--navy));
-  border-radius: 0.85rem;
   background: var(--white);
-  box-shadow: var(--fo-shadow-composer, 0 2px 16px -6px rgba(14, 22, 32, 0.1));
-}
-
-.chat-page .composer-shell:focus-within {
-  border-color: color-mix(in oklab, var(--sky) 55%, var(--line));
-  box-shadow:
-    0 0 0 3px color-mix(in oklab, var(--cyan) 14%, transparent),
-    var(--fo-shadow-composer, 0 2px 16px -6px rgba(14, 22, 32, 0.1));
 }
 
 .composer-shell__input {
@@ -1600,10 +1578,6 @@ textarea:not(:disabled) {
 .thinking-bubble {
   width: min(100%, 22.5rem);
   padding: 0.9rem 1rem 0.95rem;
-  border-radius: 0.75rem;
-  border: 1px solid color-mix(in oklab, var(--line) 70%, transparent);
-  background: color-mix(in oklab, white 94%, var(--horizon-cool));
-  box-shadow: none;
 }
 
 .thinking-bubble__top {
@@ -2179,26 +2153,30 @@ html.fo-results-active .fo-stage--chat > .fo-chat-app {
 
 .results-tool-btn {
   border-radius: 999px;
-  border: 1px solid var(--line);
+  border: 1px solid transparent;
   background: var(--white);
   padding: 0.3rem 0.65rem;
   font-size: 11px;
   font-weight: 600;
   color: var(--navy);
   cursor: pointer;
+  box-shadow: 0 2px 8px rgba(14, 22, 32, 0.05), inset 0 1px 0 #ffffff;
+  transition: box-shadow 0.15s ease, transform 0.12s ease, color 0.15s ease;
 }
 
 .results-tool-btn:hover {
-  border-color: color-mix(in oklab, var(--cyan) 35%, var(--line));
   color: var(--navy);
+  transform: translateY(-0.5px);
+  box-shadow: 0 4px 12px rgba(14, 22, 32, 0.08), inset 0 1px 0 #ffffff;
 }
 
 .results-tool-panel {
   margin-top: 0.65rem;
   padding: 0.65rem 0.75rem;
-  border-radius: 0.5rem;
-  border: 1px solid color-mix(in oklab, var(--line) 80%, transparent);
+  border-radius: 0.75rem;
+  border: 1px solid transparent;
   background: color-mix(in oklab, var(--cyan) 6%, white);
+  box-shadow: 0 2px 8px rgba(14, 22, 32, 0.04), inset 0 1px 0 #ffffff;
 }
 
 .results-tool-panel__title {
@@ -2225,6 +2203,13 @@ html.fo-results-active .fo-stage--chat > .fo-chat-app {
   font-weight: 600;
   color: var(--white);
   cursor: pointer;
+  box-shadow: 0 3px 10px -2px rgba(14, 22, 32, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: box-shadow 0.15s ease, transform 0.12s ease;
+}
+
+.results-tool-panel__action:hover {
+  transform: translateY(-0.5px);
+  box-shadow: 0 5px 14px -2px rgba(14, 22, 32, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 .results-search-status {
@@ -2367,6 +2352,13 @@ html.fo-results-active .fo-stage--chat > .fo-chat-app {
   line-height: 1;
   color: var(--ink-soft);
   cursor: pointer;
+  box-shadow: inset 0 1px 0 #ffffff;
+  transition: color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.filter-popover-close:hover {
+  color: var(--navy);
+  box-shadow: 0 2px 8px rgba(14, 22, 32, 0.08), inset 0 1px 0 #ffffff;
 }
 
 .filter-popover-body {
@@ -2414,10 +2406,13 @@ html.fo-results-active .fo-stage--chat > .fo-chat-app {
   font-weight: 600;
   color: var(--white);
   cursor: pointer;
+  box-shadow: 0 4px 14px -3px rgba(14, 22, 32, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .filter-popover-done:hover {
   background: var(--sky);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px -3px rgba(14, 22, 32, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 .filter-leg--popover {
@@ -2452,28 +2447,6 @@ html.fo-results-active .fo-stage--chat > .fo-chat-app {
   gap: 0.5rem 0.85rem;
   min-width: 0;
   flex: 1 1 auto;
-}
-
-.results-tab {
-  border: none;
-  background: none;
-  padding: 0.2rem 0;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--ink-soft);
-  cursor: pointer;
-}
-
-.results-tab--active {
-  color: var(--white);
-  background: var(--cyan);
-}
-
-.results-tab__count {
-  margin-left: 0.25rem;
-  font-size: 10px;
-  font-weight: 500;
-  opacity: 0.75;
 }
 
 .results-count {
@@ -3038,19 +3011,8 @@ html.fo-results-active .fo-stage--chat > .fo-chat-app {
   align-items: center;
   gap: 0.2rem;
   border: none;
-  border-radius: 999px;
-  background: var(--navy);
-  padding: 0.35rem 0.7rem;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--white);
   cursor: pointer;
   white-space: nowrap;
-  transition: background-color 0.2s ease;
-}
-
-.flight-result-row__cta:hover {
-  background: var(--sky);
 }
 
 .flight-result-row__title {
@@ -3238,12 +3200,13 @@ html.fo-results-active .fo-stage--chat > .fo-chat-app {
 }
 
 .trip-card:hover {
-  border-color: color-mix(in oklab, var(--signal) 28%, var(--line));
+  box-shadow: 0 2px 4px rgba(14, 22, 32, 0.05), 0 16px 36px -16px rgba(14, 22, 32, 0.2),
+    inset 0 1px 0 #ffffff;
 }
 
 .offer-surface.trip-card {
   transition:
-    border-color 0.2s ease,
+    box-shadow 0.2s ease,
     background-color 0.2s ease;
 }
 
@@ -3298,8 +3261,9 @@ html.fo-results-active .fo-stage--chat > .fo-chat-app {
   margin-bottom: 1rem;
   padding: 0.75rem;
   border-radius: 0.875rem;
-  border: 1px solid color-mix(in oklab, var(--line) 90%, transparent);
+  border: 1px solid transparent;
   background: color-mix(in oklab, var(--surface) 70%, transparent);
+  box-shadow: 0 2px 8px rgba(14, 22, 32, 0.04), inset 0 1px 0 #ffffff;
 }
 
 .filter-panel__label,
@@ -3348,13 +3312,16 @@ html.fo-results-active .fo-stage--chat > .fo-chat-app {
   letter-spacing: -0.01em;
   color: var(--white);
   background: var(--sky);
+  box-shadow: 0 4px 14px -3px rgba(8, 150, 191, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15);
   transition:
     background-color 0.2s ease,
-    opacity 0.2s ease;
+    opacity 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .filter-smart-apply:hover:not(:disabled) {
   background: var(--electric);
+  box-shadow: 0 6px 18px -3px rgba(0, 122, 229, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 
 .filter-smart-apply:disabled {
@@ -3386,18 +3353,20 @@ html.fo-results-active .fo-stage--chat > .fo-chat-app {
 
 .filter-chip {
   border-radius: 999px;
-  border: 1px solid var(--line);
+  border: 1px solid transparent;
   background: color-mix(in oklab, var(--surface) 80%, transparent);
   padding: 0.3rem 0.625rem;
   font-size: 11px;
   font-weight: 500;
   color: var(--ink-soft);
   cursor: pointer;
+  box-shadow: 0 1px 4px rgba(14, 22, 32, 0.04);
   transition:
     border-color 0.2s ease,
     background-color 0.2s ease,
     color 0.2s ease,
-    box-shadow 0.2s ease;
+    box-shadow 0.2s ease,
+    transform 0.12s ease;
 }
 
 .filter-chip--mono {
@@ -3411,13 +3380,15 @@ html.fo-results-active .fo-stage--chat > .fo-chat-app {
 .filter-chip:hover {
   border-color: color-mix(in oklab, var(--signal) 35%, var(--line));
   color: var(--ink);
+  transform: translateY(-0.5px);
+  box-shadow: 0 2px 8px rgba(14, 22, 32, 0.06);
 }
 
 .filter-chip--on {
   border-color: color-mix(in oklab, var(--signal) 50%, var(--line));
   background: color-mix(in oklab, var(--signal) 14%, var(--surface));
   color: var(--signal-bright);
-  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--signal) 8%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--signal) 8%, transparent), 0 2px 8px rgba(14, 22, 32, 0.06);
 }
 
 .filter-leg {
@@ -3432,8 +3403,9 @@ html.fo-results-active .fo-stage--chat > .fo-chat-app {
   gap: 0.35rem;
   margin-bottom: 0.75rem;
   padding: 0.25rem 0.5rem;
-  border-radius: 0.5rem;
+  border-radius: 0.6rem;
   background: color-mix(in oklab, var(--mist) 55%, transparent);
+  box-shadow: inset 0 1px 0 #ffffff;
 }
 
 .filter-leg__code {

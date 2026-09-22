@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { CircleCheck, CircleAlert, Loader2 } from "lucide-react";
 import type { OfferCard } from "@/lib/consultant/types";
 import { useAuthStore } from "@/store/auth.store";
 import { useRecordRecommendationFeedbackMutation } from "@/lib/api/recommendations.api";
@@ -87,13 +88,23 @@ export function OfferFeedbackControls({
       </div>
       {status ? (
         <p
+          key={phase}
           className={
             phase === "error"
               ? "offer-feedback__status offer-feedback__status--error"
-              : "offer-feedback__status"
+              : phase === "submitting"
+                ? "offer-feedback__status offer-feedback__status--submitting"
+                : "offer-feedback__status offer-feedback__status--saved"
           }
           role={phase === "error" ? "alert" : "status"}
         >
+          {phase === "error" ? (
+            <CircleAlert className="offer-feedback__status-icon" strokeWidth={2.2} aria-hidden />
+          ) : phase === "submitting" ? (
+            <Loader2 className="offer-feedback__status-icon offer-feedback__status-icon--spin" strokeWidth={2.2} aria-hidden />
+          ) : (
+            <CircleCheck className="offer-feedback__status-icon" strokeWidth={2.2} aria-hidden />
+          )}
           {status}
         </p>
       ) : null}

@@ -11,7 +11,7 @@ export function GuestBanner() {
   if (!hasHydrated || isAuthenticated) return null;
 
   return (
-    <div className="inline-flex items-center gap-2 rounded-lg border border-[var(--line)] bg-white/95 px-3 py-1.5 text-xs text-[var(--ink-soft)]">
+    <div className="inline-flex items-center gap-2 rounded-full border border-white/90 bg-white/95 px-3.5 py-1.5 text-xs text-[var(--ink-soft)] shadow-[0_2px_8px_rgba(14,22,32,0.05),inset_0_1px_0_#ffffff]">
       <span
         className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--electric)]"
         aria-hidden

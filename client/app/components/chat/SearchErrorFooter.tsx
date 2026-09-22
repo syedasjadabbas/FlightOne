@@ -1,6 +1,6 @@
 "use client";
 
-import { RotateCcw } from "lucide-react";
+import { RotateCcw, WifiOff } from "lucide-react";
 
 /** Detect inventory / connection failures in assistant copy (fallback until structured flags). */
 export function isTravelSearchError(content: string): boolean {
@@ -18,6 +18,10 @@ export function SearchErrorFooter({
 }) {
   return (
     <div className="results-msg-cta search-error-footer" role="status">
+      <p className="search-error-footer__eyebrow">
+        <WifiOff className="search-error-footer__eyebrow-icon" aria-hidden />
+        Search interrupted
+      </p>
       <button
         type="button"
         onClick={onRetry}
@@ -25,8 +29,8 @@ export function SearchErrorFooter({
         className="results-msg-cta__btn search-error-footer__btn inline-flex w-full items-center justify-center gap-1.5 text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--electric)]/40 disabled:cursor-not-allowed disabled:opacity-55 sm:w-auto"
         aria-label="Retry live flight search"
       >
-        <RotateCcw className="h-3.5 w-3.5" strokeWidth={2.2} aria-hidden />
-        Try again
+        <RotateCcw className={`h-3.5 w-3.5${disabled ? " search-error-footer__spin" : ""}`} strokeWidth={2.2} aria-hidden />
+        {disabled ? "Retrying…" : "Try again"}
       </button>
     </div>
   );

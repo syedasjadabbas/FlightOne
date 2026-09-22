@@ -407,14 +407,14 @@ export function ChatLayout({
                     <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--ink-faint)]">
                       Start with a route
                     </p>
-                    <ul className="divide-y divide-[var(--line)] border-y border-[var(--line)]">
+                    <ul className="flex flex-col gap-2">
                       {inspire.map((item) => (
                         <li key={item.title}>
                           <button
                             type="button"
                             disabled={busy}
                             onClick={() => submit(item.prompt)}
-                            className="group flex w-full items-center justify-between gap-3 py-3 text-left transition-colors hover:bg-[color-mix(in_oklab,var(--electric)_4%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--electric)]/30 disabled:opacity-50"
+                            className="chat-route-card group flex w-full items-center justify-between gap-3 text-left disabled:opacity-50"
                           >
                             <span className="min-w-0">
                               <span className="block truncate text-sm font-semibold tracking-tight text-[var(--navy)]">
@@ -443,7 +443,7 @@ export function ChatLayout({
                       type="button"
                       disabled={busy}
                       onClick={() => submit(prompt(originCity))}
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--line)] bg-white/90 px-2.5 py-1.5 text-xs font-semibold text-[var(--navy)] transition-colors hover:border-[color-mix(in_oklab,var(--electric)_45%,var(--line))] hover:text-[var(--electric)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--electric)]/30 active:scale-[0.98] disabled:opacity-50"
+                      className="quick-chip quick-chip--action inline-flex items-center gap-1.5"
                     >
                       <Icon className="h-3.5 w-3.5 text-[var(--sky)]" strokeWidth={1.9} aria-hidden />
                       {label}

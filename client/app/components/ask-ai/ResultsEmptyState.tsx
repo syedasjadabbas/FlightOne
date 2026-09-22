@@ -20,7 +20,7 @@ export function ResultsEmptyState({
   return (
     <div className={`results-empty anim-state${filtered ? " results-empty--filtered" : ""}`}>
       <div
-        className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--line)] bg-[color-mix(in_oklab,var(--electric)_8%,white)]"
+        className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[color-mix(in_oklab,var(--electric)_8%,white)] shadow-[inset_0_1px_0_#ffffff]"
         aria-hidden
       >
         <Plane className="h-5 w-5 text-[var(--electric)]" />

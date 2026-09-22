@@ -36,9 +36,9 @@ function FarePanel({
 
   return (
     <aside
-      className={`rounded-2xl border border-[var(--line)] bg-white p-5 ${className}`}
+      className={`rounded-2xl border border-transparent bg-white p-5 ${className}`}
       style={{
-        boxShadow: "var(--shadow-soft)",
+        boxShadow: "var(--shadow-soft), inset 0 1px 0 #ffffff",
         backgroundImage:
           "radial-gradient(120% 80% at 100% 0%, color-mix(in oklab, var(--signal) 10%, transparent), transparent 55%)",
       }}
@@ -143,7 +143,7 @@ export function TripDetailModal({
             ref={closeRef}
             type="button"
             onClick={onClose}
-            className="inline-flex h-10 shrink-0 cursor-pointer items-center gap-1.5 rounded-full border border-[var(--line)] bg-[var(--surface)] px-3.5 text-[13px] font-semibold text-[var(--ink)] transition-colors hover:border-[var(--signal)]/40 hover:text-[var(--signal)]"
+            className="inline-flex h-10 shrink-0 cursor-pointer items-center gap-1.5 rounded-full border border-transparent bg-[var(--surface)] px-3.5 text-[13px] font-semibold text-[var(--ink)] shadow-[0_2px_8px_rgba(14,22,32,0.05),inset_0_1px_0_#ffffff] transition-all hover:-translate-y-px hover:text-[var(--signal)] hover:shadow-[0_4px_12px_rgba(14,22,32,0.08),inset_0_1px_0_#ffffff]"
             aria-label="Back to trips"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>

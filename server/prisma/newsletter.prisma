@@ -1,0 +1,10 @@
+// Homepage footer "Stay in Touch" email capture. Owned by modules/newsletter/.
+
+model NewsletterSubscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  source    String   @default("footer")
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}

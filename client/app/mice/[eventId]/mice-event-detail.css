@@ -139,9 +139,10 @@
   justify-content: center;
   width: 2rem;
   height: 2rem;
-  border-radius: 0.5rem;
+  border-radius: 0.7rem;
   background: color-mix(in oklab, var(--horizon-cool) 55%, white);
   color: color-mix(in oklab, var(--cyan) 50%, var(--navy));
+  box-shadow: inset 0 1px 0 #ffffff;
   margin-bottom: 0.15rem;
 }
 
@@ -152,9 +153,10 @@
   justify-content: space-between;
   gap: 0.75rem 1rem;
   padding: 0.85rem 1rem;
-  border-radius: 0.85rem;
+  border-radius: 0.95rem;
   border: 1px solid color-mix(in oklab, var(--cyan) 24%, var(--line));
   background: color-mix(in oklab, var(--horizon-cool) 50%, white);
+  box-shadow: 0 6px 18px -12px rgba(8, 150, 191, 0.28), inset 0 1px 0 #ffffff;
 }
 
 .fo-mice-event__register-copy {

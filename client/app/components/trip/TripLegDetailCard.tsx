@@ -140,8 +140,8 @@ function SegmentDetail({
 
   return (
     <div
-      className={`trip-segment rounded-xl border border-[var(--line)]/80 bg-[var(--surface)]/40 transition-colors ${
-        expanded ? "border-[var(--signal)]/25 bg-[var(--signal)]/5" : ""
+      className={`trip-segment rounded-xl border border-transparent bg-[var(--surface)]/40 shadow-[inset_0_1px_0_#ffffff] transition-colors ${
+        expanded ? "bg-[var(--signal)]/5 shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--signal)_18%,transparent),inset_0_1px_0_#ffffff]" : ""
       }`}
     >
       <div className="flex flex-wrap items-center justify-between gap-2 px-3.5 py-2.5">
@@ -233,7 +233,10 @@ export function TripLegDetailCard({
 
   return (
     <div className="space-y-0">
-      <article className="overflow-hidden rounded-2xl border border-[var(--line)] bg-white">
+      <article
+        className="overflow-hidden rounded-2xl border border-transparent bg-white"
+        style={{ boxShadow: "var(--shadow-soft), inset 0 1px 0 #ffffff" }}
+      >
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
@@ -289,10 +292,10 @@ export function TripLegDetailCard({
                   key={`${seg.flightNumber}-${i}`}
                   type="button"
                   onClick={() => setActiveSeg(i)}
-                  className={`rounded-lg border px-2.5 py-1 text-[11px] font-medium transition-colors ${
+                  className={`rounded-lg border px-2.5 py-1 text-[11px] font-medium transition-all ${
                     activeSeg === i
-                      ? "border-[var(--signal)]/40 bg-[var(--signal)]/12 text-[var(--signal-bright)]"
-                      : "border-[var(--line)] text-[var(--ink-soft)] hover:border-[var(--line-strong)]"
+                      ? "border-[var(--signal)]/40 bg-[var(--signal)]/12 text-[var(--signal-bright)] shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--signal)_10%,transparent)]"
+                      : "border-transparent bg-white text-[var(--ink-soft)] shadow-[0_1px_4px_rgba(14,22,32,0.04)] hover:text-[var(--navy)]"
                   }`}
                 >
                   {seg.originCode}→{seg.destinationCode}
@@ -308,7 +311,7 @@ export function TripLegDetailCard({
 
             <div className="grid gap-2 sm:grid-cols-3">
               {leg.cabin ? (
-                <div className="rounded-lg border border-[var(--line)]/70 bg-[var(--surface)]/50 px-3 py-2">
+                <div className="rounded-lg border border-transparent bg-[var(--surface)]/50 px-3 py-2 shadow-[inset_0_1px_0_#ffffff]">
                   <p className="text-[10px] font-medium uppercase tracking-wide text-[var(--ink-faint)]">
                     Cabin
                   </p>
@@ -317,7 +320,7 @@ export function TripLegDetailCard({
                   </p>
                 </div>
               ) : null}
-              <div className="rounded-lg border border-[var(--line)]/70 bg-[var(--surface)]/50 px-3 py-2">
+              <div className="rounded-lg border border-transparent bg-[var(--surface)]/50 px-3 py-2 shadow-[inset_0_1px_0_#ffffff]">
                 <p className="text-[10px] font-medium uppercase tracking-wide text-[var(--ink-faint)]">
                   Baggage
                 </p>
@@ -329,7 +332,7 @@ export function TripLegDetailCard({
                   {baggageAllowanceLabel(leg.baggageKg)}
                 </p>
               </div>
-              <div className="rounded-lg border border-[var(--line)]/70 bg-[var(--surface)]/50 px-3 py-2">
+              <div className="rounded-lg border border-transparent bg-[var(--surface)]/50 px-3 py-2 shadow-[inset_0_1px_0_#ffffff]">
                 <p className="text-[10px] font-medium uppercase tracking-wide text-[var(--ink-faint)]">
                   Fare rules
                 </p>

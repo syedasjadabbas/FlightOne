@@ -288,6 +288,10 @@ export default function VisionCarouselSection() {
             // while holding the next section stationary underneath for a true curtain-lift reveal
             const exitP = Math.max(0, Math.min(1, (scrolledPx - storytellingDistance) / exitDistance()));
             gsap.set(sheet, { y: -exitP * exitDistance() });
+            // Once fully lifted, stop intercepting clicks on the footer below —
+            // don't rely on the transform math alone (a stale/imprecise offset
+            // would otherwise leave this 100dvh, z-index:30 layer clickable).
+            sheet.style.pointerEvents = exitP >= 1 ? "none" : "auto";
 
             const footer = footerEl || (document.querySelector('#footer') as HTMLElement | null);
             if (footer) {
