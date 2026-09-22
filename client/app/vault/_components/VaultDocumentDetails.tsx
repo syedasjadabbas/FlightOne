@@ -33,10 +33,13 @@ function embassyLines(info: unknown): string[] {
     .map((v) => String(v));
 }
 
+type VaultDocAction = "download" | "share" | "replace" | "delete" | null;
+
 export function VaultDocumentDetails({
   documentId,
   fallback,
   busy,
+  busyAction = null,
   onClose,
   onDownload,
   onShare,
@@ -46,6 +49,7 @@ export function VaultDocumentDetails({
   documentId: string;
   fallback: VaultDocument;
   busy: boolean;
+  busyAction?: VaultDocAction;
   onClose: () => void;
   onDownload: (doc: VaultDocument) => void;
   onShare: (doc: VaultDocument) => void;
@@ -144,53 +148,52 @@ export function VaultDocumentDetails({
           </div>
         ) : (
           <div className="fo-vault__dialog-body">
-            <div className="fo-vault__status-line">
-              <span className="inline-flex items-center gap-1">
-                <ShieldCheck size={12} strokeWidth={2.2} className="text-emerald" />
-                Status: <strong>{doc.lifecycleStatus || (doc.isActive ? "ACTIVE" : "SUPERSEDED")}</strong>
-              </span>
-              {doc.expiryStatus ? (
-                <span>
-                  Expiry: <strong>{doc.expiryStatus.replaceAll("_", " ")}</strong>
+            <div className="fo-vault__summary-card">
+              <div className="fo-vault__status-pills">
+                <span className="fo-vault__status-pill fo-vault__status-pill--ok">
+                  <ShieldCheck size={11} strokeWidth={2.4} aria-hidden />
+                  {doc.lifecycleStatus || (doc.isActive ? "ACTIVE" : "SUPERSEDED")}
                 </span>
-              ) : null}
-              {doc.type === "VISA" && doc.visaMeta ? (
-                <span>
-                  Visa:{" "}
-                  <strong>
+                {doc.expiryStatus ? (
+                  <span className="fo-vault__status-pill">
+                    {doc.expiryStatus.replaceAll("_", " ")}
+                  </span>
+                ) : null}
+                {doc.type === "VISA" && doc.visaMeta ? (
+                  <span className="fo-vault__status-pill">
                     {visaStatusLabel(doc.visaMeta.visaStatus)}
                     {doc.visaMeta.destinationCode ? ` · ${doc.visaMeta.destinationCode}` : ""}
-                  </strong>
-                </span>
-              ) : null}
-              {doc.isPlatformIssued ? (
-                <span className="text-sky font-semibold">
-                  Platform Issued (Immutable)
-                </span>
-              ) : null}
-            </div>
+                  </span>
+                ) : null}
+                {doc.isPlatformIssued ? (
+                  <span className="fo-vault__status-pill fo-vault__status-pill--sky">
+                    Platform Issued · Immutable
+                  </span>
+                ) : null}
+              </div>
 
-            <dl className="fo-vault__facts">
-              <div className="fo-vault__fact">
-                <dt>Issue date</dt>
-                <dd>{formatVaultDateTime(doc.issueDate)}</dd>
-              </div>
-              <div className="fo-vault__fact">
-                <dt>Expiry date</dt>
-                <dd>{formatVaultDateTime(doc.expiresAt)}</dd>
-              </div>
-              <div className="fo-vault__fact">
-                <dt>Stored file</dt>
-                <dd>
-                  {doc.originalFilename || "Metadata only"}
-                  {size ? ` · ${size}` : ""}
-                </dd>
-              </div>
-              <div className="fo-vault__fact">
-                <dt>Vault version</dt>
-                <dd>v{doc.version}</dd>
-              </div>
-            </dl>
+              <dl className="fo-vault__facts">
+                <div className="fo-vault__fact">
+                  <dt>Issue date</dt>
+                  <dd>{formatVaultDateTime(doc.issueDate)}</dd>
+                </div>
+                <div className="fo-vault__fact">
+                  <dt>Expiry date</dt>
+                  <dd>{formatVaultDateTime(doc.expiresAt)}</dd>
+                </div>
+                <div className="fo-vault__fact">
+                  <dt>Stored file</dt>
+                  <dd>
+                    {doc.originalFilename || "Metadata only"}
+                    {size ? ` · ${size}` : ""}
+                  </dd>
+                </div>
+                <div className="fo-vault__fact">
+                  <dt>Vault version</dt>
+                  <dd>v{doc.version}</dd>
+                </div>
+              </dl>
+            </div>
 
             {doc.type === "VISA" && intelligence ? (
               <div className="fo-vault__guidance">
@@ -326,44 +329,67 @@ export function VaultDocumentDetails({
                     variant="secondary"
                     disabled={busy}
                     onClick={() => onDownload(doc)}
-                    icon={<Download size={13} strokeWidth={2} aria-hidden />}
+                    icon={
+                      busyAction === "download" ? (
+                        <Spinner size="sm" label={null} />
+                      ) : (
+                        <Download size={13} strokeWidth={2} aria-hidden />
+                      )
+                    }
                   >
-                    Download Scan
+                    {busyAction === "download" ? "Downloading…" : "Download Scan"}
                   </Button>
                 ) : null}
                 {doc.isActive ? (
                   <Button
                     size="sm"
-                    variant="ghost"
+                    variant="secondary"
                     disabled={busy}
                     onClick={() => onShare(doc)}
-                    icon={<Share2 size={13} strokeWidth={2} aria-hidden />}
+                    icon={
+                      busyAction === "share" ? (
+                        <Spinner size="sm" label={null} />
+                      ) : (
+                        <Share2 size={13} strokeWidth={2} aria-hidden />
+                      )
+                    }
                   >
-                    Share Token
+                    {busyAction === "share" ? "Generating…" : "Share Token"}
                   </Button>
                 ) : null}
                 {canEdit ? (
                   <Button
                     size="sm"
-                    variant="ghost"
+                    variant="secondary"
                     disabled={busy}
                     onClick={() => onReplace(doc)}
-                    icon={<RefreshCw size={13} strokeWidth={2} aria-hidden />}
+                    icon={
+                      busyAction === "replace" ? (
+                        <Spinner size="sm" label={null} />
+                      ) : (
+                        <RefreshCw size={13} strokeWidth={2} aria-hidden />
+                      )
+                    }
                   >
-                    Replace Scan
+                    {busyAction === "replace" ? "Uploading…" : "Replace Scan"}
                   </Button>
                 ) : null}
               </div>
               {canEdit ? (
                 <Button
                   size="sm"
-                  variant="ghost"
+                  variant="danger"
                   disabled={busy}
                   onClick={() => onDelete(doc)}
-                  className="text-danger hover:bg-danger/10"
-                  icon={<Trash2 size={13} strokeWidth={2} aria-hidden />}
+                  icon={
+                    busyAction === "delete" ? (
+                      <Spinner size="sm" label={null} />
+                    ) : (
+                      <Trash2 size={13} strokeWidth={2} aria-hidden />
+                    )
+                  }
                 >
-                  Delete
+                  {busyAction === "delete" ? "Deleting…" : "Delete"}
                 </Button>
               ) : null}
             </div>

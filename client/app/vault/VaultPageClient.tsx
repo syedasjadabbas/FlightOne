@@ -72,6 +72,10 @@ export function VaultPageClient() {
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  /** Which specific action is running on busyId's document — lets the
+   *  details modal show a spinner on the exact button in flight instead of
+   *  just disabling all four with no indication of which one is working. */
+  const [busyAction, setBusyAction] = useState<"download" | "share" | "replace" | "delete" | null>(null);
   /** Upload modal's own phase label — the GCS file PUT happens before the
    *  vault mutation even starts, so `uploading` (RTK's isLoading) alone
    *  leaves that whole phase with no visible feedback. */
@@ -303,6 +307,7 @@ export function VaultPageClient() {
   async function onDownload(doc: VaultDocument) {
     if (!accessToken || !doc.hasBinary) return;
     setBusyId(doc.id);
+    setBusyAction("download");
     setActionError(null);
     try {
       const blob = await downloadVaultDocumentBlob(doc.id, accessToken);
@@ -316,11 +321,13 @@ export function VaultPageClient() {
       setActionError("Download failed.");
     } finally {
       setBusyId(null);
+      setBusyAction(null);
     }
   }
 
   async function onShare(doc: VaultDocument) {
     setBusyId(doc.id);
+    setBusyAction("share");
     setActionError(null);
     setActionSuccess(null);
     try {
@@ -331,6 +338,7 @@ export function VaultPageClient() {
       setActionError("Could not generate share token.");
     } finally {
       setBusyId(null);
+      setBusyAction(null);
     }
   }
 
@@ -343,6 +351,7 @@ export function VaultPageClient() {
       const next = input.files?.[0];
       if (!next) return;
       setBusyId(doc.id);
+      setBusyAction("replace");
       setActionError(null);
       try {
         const gcs = await uploadFileToGcs(next, {
@@ -360,6 +369,7 @@ export function VaultPageClient() {
         setActionError("Replace failed.");
       } finally {
         setBusyId(null);
+        setBusyAction(null);
       }
     };
     input.click();
@@ -374,6 +384,7 @@ export function VaultPageClient() {
     const doc = pendingDelete;
     if (!doc) return;
     setBusyId(doc.id);
+    setBusyAction("delete");
     setActionError(null);
     try {
       await removeDoc(doc.id).unwrap();
@@ -384,6 +395,7 @@ export function VaultPageClient() {
       setActionError("Delete failed.");
     } finally {
       setBusyId(null);
+      setBusyAction(null);
     }
   }
 
@@ -801,6 +813,7 @@ export function VaultPageClient() {
             (rawItems.find((d) => d.id === selectedDocId) ?? selectedFallback) as VaultDocument
           }
           busy={busyId === selectedDocId}
+          busyAction={busyId === selectedDocId ? busyAction : null}
           onClose={() => {
             setSelectedDocId(null);
             setSelectedFallback(null);
