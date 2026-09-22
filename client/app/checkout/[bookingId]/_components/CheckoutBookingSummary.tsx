@@ -9,6 +9,7 @@ import {
   ArrowRight,
   Check,
 } from "lucide-react";
+import { buttonClassName } from "@/components/ui";
 import { formatMinor } from "@/lib/bookings/checkoutDisplay";
 
 type BookingLike = {
@@ -276,7 +277,7 @@ export function CheckoutBookingSummary({
         <div className="mt-3 flex items-baseline justify-between gap-3 border-t border-[var(--fo-desk-line)] pt-3">
           <div>
             <p className="m-0 text-[13px] font-semibold text-[var(--navy)]">Total</p>
-            <p className="mt-1 flex items-center gap-1 text-[11px] text-[var(--ink-faint)]">
+            <p className="mt-1 flex items-center gap-1 text-[12px] text-[var(--ink-soft)]">
               <Check className="h-3 w-3 text-[var(--cyan)]" aria-hidden />
               Taxes included where shown
             </p>
@@ -289,7 +290,7 @@ export function CheckoutBookingSummary({
 
       <section className="fo-desk__panel">
         <div className="mb-2.5 flex items-center gap-2">
-          <Info className="h-3.5 w-3.5 text-[var(--ink-faint)]" aria-hidden />
+          <Info className="h-3.5 w-3.5 text-[var(--ink-soft)]" aria-hidden />
           <h3 className="m-0 text-[13px] font-semibold text-[var(--navy)]">Before you pay</h3>
         </div>
         <ul className="m-0 space-y-2 pl-0 text-[12px] leading-relaxed text-[var(--ink-soft)]">
@@ -304,12 +305,12 @@ export function CheckoutBookingSummary({
           <MessageCircle className="h-4 w-4 shrink-0 text-[var(--cyan)]" aria-hidden />
           <div className="min-w-0">
             <p className="m-0 text-[13px] font-semibold text-[var(--navy)]">Need help?</p>
-            <p className="m-0 text-[12px] text-[var(--ink-faint)]">Chat with Ava</p>
+            <p className="m-0 text-[12px] text-[var(--ink-soft)]">Chat with Ava</p>
           </div>
         </div>
         <Link
           href="/chat?new=true"
-          className="inline-flex shrink-0 items-center gap-1 rounded-[var(--fo-desk-radius)] border border-[var(--fo-desk-line)] bg-[var(--fo-desk-wash)] px-3 py-1.5 text-[12px] font-semibold text-[var(--navy)] transition-colors hover:border-[var(--fo-desk-line-strong)]"
+          className={buttonClassName({ variant: "secondary", size: "sm", className: "shrink-0" })}
         >
           Open chat
           <ArrowRight className="h-3.5 w-3.5" aria-hidden />
@@ -350,7 +351,7 @@ function FlightLeg({
     <div className="rounded-[var(--fo-desk-radius)] border border-[var(--fo-desk-line)] bg-[var(--fo-desk-wash)] p-3">
       <div className="mb-2.5 flex items-center gap-2.5">
         {airlineCode ? (
-          <div className="flex h-7 w-7 items-center justify-center rounded bg-[var(--navy)] text-[10px] font-bold tracking-wide text-[var(--white)]">
+          <div className="flex h-7 w-7 items-center justify-center rounded bg-[var(--navy)] text-[11px] font-bold tracking-wide text-[var(--white)]">
             {airlineCode.slice(0, 2).toUpperCase()}
           </div>
         ) : null}
@@ -359,40 +360,40 @@ function FlightLeg({
             {getCityName(originCode)} → {getCityName(destCode)}
           </h3>
           {metaLine ? (
-            <p className="m-0 text-[11px] text-[var(--ink-soft)]">{metaLine}</p>
+            <p className="m-0 text-[12px] text-[var(--ink-soft)]">{metaLine}</p>
           ) : null}
         </div>
       </div>
 
       <div className="flex items-center justify-between gap-2">
         <div>
-          <p className="m-0 text-[10px] font-semibold uppercase tracking-wider text-[var(--ink-faint)]">
+          <p className="m-0 text-[12px] font-semibold uppercase tracking-wider text-[var(--ink-soft)]">
             {originCode}
           </p>
           <p className="m-0 text-[15px] font-semibold leading-tight text-[var(--navy)]">
             {departTime || "—"}
           </p>
           {dateLabel ? (
-            <p className="mt-0.5 text-[11px] text-[var(--ink-soft)]">{dateLabel}</p>
+            <p className="mt-0.5 text-[12px] text-[var(--ink-soft)]">{dateLabel}</p>
           ) : null}
         </div>
 
         <div className="flex max-w-[120px] flex-1 flex-col items-center px-1">
           {duration ? (
-            <span className="mb-1 text-[10px] text-[var(--ink-faint)]">{duration}</span>
+            <span className="mb-1 text-[12px] text-[var(--ink-soft)]">{duration}</span>
           ) : null}
           <div className="h-px w-full bg-[var(--fo-desk-line-strong)]" />
         </div>
 
         <div className="text-right">
-          <p className="m-0 text-[10px] font-semibold uppercase tracking-wider text-[var(--ink-faint)]">
+          <p className="m-0 text-[12px] font-semibold uppercase tracking-wider text-[var(--ink-soft)]">
             {destCode}
           </p>
           <p className="m-0 text-[15px] font-semibold leading-tight text-[var(--navy)]">
             {arriveTime || "—"}
           </p>
           {dateLabel ? (
-            <p className="mt-0.5 text-[11px] text-[var(--ink-soft)]">{dateLabel}</p>
+            <p className="mt-0.5 text-[12px] text-[var(--ink-soft)]">{dateLabel}</p>
           ) : null}
         </div>
       </div>

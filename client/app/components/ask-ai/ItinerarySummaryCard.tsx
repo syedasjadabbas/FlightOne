@@ -149,12 +149,12 @@ export function ItinerarySummaryCard({
             {angle}
           </span>
           {isMultiTicket ? (
-            <span className="rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium text-amber-200/90">
+            <span className="rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium text-amber-800">
               Self-transfer
             </span>
           ) : null}
           {hasMarketReference ? (
-            <span className="rounded-md border border-sky-500/30 bg-sky-500/10 px-2 py-0.5 text-[11px] font-medium text-sky-200/90">
+            <span className="rounded-md border border-sky-500/30 bg-sky-500/10 px-2 py-0.5 text-[11px] font-medium text-sky-800">
               Market reference
             </span>
           ) : null}
@@ -204,12 +204,12 @@ export function ItinerarySummaryCard({
           <button
             type="button"
             onClick={() => onSelect(itinerary)}
-            className="book-btn min-w-[9rem] flex-1 cursor-pointer rounded-full bg-[var(--sky)] px-4 py-2.5 text-[13px] font-semibold tracking-[-0.01em] text-white hover:bg-[var(--electric)] sm:flex-none sm:px-6"
+            className="book-btn min-w-[9rem] flex-1 cursor-pointer rounded-full bg-[var(--sky-solid)] px-4 py-2.5 text-[13px] font-semibold tracking-[-0.01em] text-white hover:bg-[color-mix(in_oklab,var(--electric)_90%,var(--navy))] sm:flex-none sm:px-6"
           >
             View deal
           </button>
         ) : (
-          <span className="inline-flex min-w-[9rem] flex-1 items-center justify-center rounded-full bg-[var(--sky)] px-4 py-2.5 text-[13px] font-semibold text-white sm:flex-none">
+          <span className="inline-flex min-w-[9rem] flex-1 items-center justify-center rounded-full bg-[var(--sky-solid)] px-4 py-2.5 text-[13px] font-semibold text-white sm:flex-none">
             View deal
           </span>
         )}

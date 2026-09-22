@@ -35,7 +35,7 @@ export function CheckoutVisaWarning({ visaWarning }: { visaWarning: VisaWarning 
         <div className="min-w-0 space-y-1.5">
           <p className="text-[13px] font-semibold text-[var(--navy)]">{visaWarning.title}</p>
           <p className="text-[13px] leading-relaxed text-[var(--ink-soft)]">{visaWarning.body}</p>
-          <p className="text-[11px] text-[var(--ink-faint)]">
+          <p className="text-[12px] text-[var(--ink-soft)]">
             {visaWarning.isFact
               ? "Catalog fact — not a booking block."
               : "Guidance only — not confirmed visa eligibility."}

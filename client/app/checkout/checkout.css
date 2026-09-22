@@ -1,0 +1,264 @@
+/**
+ * FlightOne checkout — design-system alignment.
+ *
+ * `flightone-desk.css` is shared by /checkout, /corporate, /dashboard, /ops,
+ * /groups and /mice. Every rule here is therefore scoped under `.fo-checkout`
+ * (rendered on the checkout page root) so the other five route groups are
+ * untouched — /ops in particular is internal tooling where the dense 11px
+ * treatment is deliberate.
+ *
+ * Every rule is two classes deep (0,2,0) against the single-class (0,1,0)
+ * rules it overrides, so it wins on specificity alone. That matters because
+ * Next.js merges CSS chunks by default (`cssChunking: true`) and its emitted
+ * order is not guaranteed — nothing here may depend on source order relative
+ * to flightone-desk.css.
+ */
+
+/* ── Tactile cards, not ghost cards ─────────────────────────────
+ * The shared `.fo-desk__panel` is a hairline border with no shadow. The rest
+ * of the app (`.filter-panel` in globals.css, `.fo-rewards__panel`) uses an
+ * elevation shadow with an inset highlight. Match `.filter-panel`.
+ */
+
+.fo-checkout .fo-desk__panel {
+  border-color: transparent;
+  border-radius: 1rem;
+  box-shadow:
+    0 2px 8px rgba(14, 22, 32, 0.05),
+    inset 0 1px 0 #ffffff;
+}
+
+/* Nested boxes keep the desk hairline but pick up the 16px family radius. */
+.fo-checkout .fo-checkout__alert,
+.fo-checkout .fo-checkout__notice {
+  border-radius: 1rem;
+}
+
+/* ── Progress stepper ───────────────────────────────────────────
+ * The shared rule is three flat hairlines over 11px labels: the only signal
+ * of progress is a border colour, so a finished step looks the same weight as
+ * an untouched one. Here the track is *filled* (done/active solid, upcoming
+ * faint) and each step carries a numbered marker that flips to a solid disc
+ * when reached — completion reads at a glance without growing taller.
+ *
+ * Type floor: 12px, not 11px. `--fo-desk-faint` (#7a8494) is 3.78:1 on white
+ * and fails WCAG AA, so upcoming labels use `--ink-soft` (#55606e, 6.39:1).
+ */
+
+.fo-checkout .fo-checkout__steps {
+  gap: 0.75rem;
+}
+
+/* The shared rule builds the track from `border-top` and re-declares
+ * `border-top-color` on --active/--done. This block replaces that with a
+ * ::before rail, so the colour must be neutralised on the state classes too —
+ * zeroing it on the base alone left the old border fighting the new rail, which
+ * is what made one step render without a track. */
+.fo-checkout .fo-checkout__step,
+.fo-checkout .fo-checkout__step--active,
+.fo-checkout .fo-checkout__step--done {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.fo-checkout .fo-checkout__step {
+  display: grid;
+  grid-template-rows: auto auto;
+  row-gap: 0.55rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+}
+
+/* The filled track. Upcoming steps keep a visible rail so the row still reads
+ * as one continuous indicator rather than two bars and a gap. */
+.fo-checkout .fo-checkout__step::before {
+  content: "";
+  display: block;
+  height: 3px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--navy) 10%, var(--white));
+}
+
+.fo-checkout .fo-checkout__step--done::before {
+  background: color-mix(in oklab, var(--navy) 55%, var(--sky-solid));
+}
+
+.fo-checkout .fo-checkout__step--active::before {
+  background: var(--sky-solid);
+}
+
+/* Marker + label share one baseline across all three columns. Without a fixed
+ * marker column the labels start at different x-offsets per column, which is
+ * what threw the row out of alignment. */
+.fo-checkout .fo-checkout__step-row {
+  display: grid;
+  grid-template-columns: 1.375rem 1fr;
+  align-items: center;
+  column-gap: 0.5rem;
+  min-width: 0;
+}
+
+.fo-checkout .fo-checkout__step-label {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Marker: a numeral while upcoming, the step's lucide icon once active, a
+ * check once done. */
+.fo-checkout .fo-checkout__step-marker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 1.375rem;
+  height: 1.375rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-soft);
+  background: color-mix(in oklab, var(--navy) 7%, var(--white));
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--navy) 12%, transparent);
+}
+
+.fo-checkout .fo-checkout__step--done .fo-checkout__step-marker {
+  color: var(--white);
+  background: color-mix(in oklab, var(--navy) 55%, var(--sky-solid));
+  box-shadow: none;
+}
+
+/* The halo is 2px, not 3px: at the previous marker size the ring read as the
+ * element's own outline, so the disc looked hollow rather than filled. */
+.fo-checkout .fo-checkout__step--active .fo-checkout__step-marker {
+  color: var(--white);
+  background: var(--sky-solid);
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--sky) 22%, transparent);
+}
+
+.fo-checkout .fo-checkout__step--active {
+  color: var(--navy);
+  font-weight: 700;
+}
+
+.fo-checkout .fo-checkout__step--done {
+  color: var(--ink-soft);
+}
+
+.fo-checkout .fo-checkout__note {
+  color: var(--ink-soft);
+}
+
+/* ── Status chips ───────────────────────────────────────────────
+ * `.fo-desk__status` is shared with /ops and /corporate, where the dense 10px
+ * boxy chip is deliberate — so these overrides are scoped to checkout rather
+ * than changing the shared rule. Here: the 12px type floor and the app's pill
+ * radius.
+ */
+
+.fo-checkout .fo-desk__status {
+  border-radius: 999px;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+}
+
+/* `--ok` in the shared file renders success in neutral `--navy` on a pale
+ * wash, which reads as a disabled chip. Every checkout consumer ("Ready",
+ * "Paid", "From Profile & Vault", points balance) is genuinely affirmative, so
+ * use the green pairing already established by `.fo-rewards__status--ok` and
+ * `.fo-vault__dialog-flash--ok` — #047857 on rgba(16,185,129,0.1), 4.99:1. */
+.fo-checkout .fo-desk__status--ok {
+  border-color: transparent;
+  color: #047857;
+  background: rgba(16, 185, 129, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(4, 120, 87, 0.16);
+}
+
+.fo-checkout .fo-desk__status--ok svg {
+  stroke-width: 3;
+}
+
+/* ── Traveller summary card ─────────────────────────────────────
+ * This is a completed step, but it rendered with the same neutral weight as
+ * the pending panels below it. A left accent rail in the same green as the
+ * "Ready" chip marks it as checked off, and the edit affordance becomes a real
+ * pill target instead of a low-contrast text link.
+ */
+
+.fo-checkout .fo-checkout__traveller {
+  position: relative;
+  overflow: hidden;
+  padding-left: 1.4rem;
+  /* Fades across the full width rather than stopping at 9rem — a fixed stop
+     put a hard vertical seam in the middle of the card. */
+  background:
+    linear-gradient(
+      to right,
+      rgba(16, 185, 129, 0.06),
+      rgba(16, 185, 129, 0) 70%
+    ),
+    var(--white);
+}
+
+.fo-checkout .fo-checkout__traveller::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: #059669;
+}
+
+.fo-checkout .fo-checkout__traveller-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 999px;
+  color: #047857;
+  background: rgba(16, 185, 129, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(4, 120, 87, 0.16);
+}
+
+/* `--cyan` (#0896bf) is 3.43:1 on white and fails AA at this size; `--navy`
+ * is 16.1:1, and the chip below it already carries the accent colour. */
+.fo-checkout .fo-checkout__traveller-edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: pointer;
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--navy);
+  background: color-mix(in oklab, var(--navy) 4%, var(--white));
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--navy) 12%, transparent);
+  transition:
+    transform 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.fo-checkout .fo-checkout__traveller-edit:hover {
+  transform: translateY(-1px);
+  background: color-mix(in oklab, var(--navy) 8%, var(--white));
+}
+
+.fo-checkout .fo-checkout__traveller-edit:active {
+  transform: scale(0.98);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fo-checkout .fo-checkout__traveller-edit {
+    transition: none;
+  }
+
+  .fo-checkout .fo-checkout__traveller-edit:hover,
+  .fo-checkout .fo-checkout__traveller-edit:active {
+    transform: none;
+  }
+}

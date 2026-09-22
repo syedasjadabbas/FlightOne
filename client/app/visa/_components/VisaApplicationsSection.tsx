@@ -8,6 +8,7 @@ import {
   TravellerSection,
   TravellerState,
 } from "@/app/components/traveller";
+import { apiErrorMessage } from "@/lib/api/apiErrorMessage";
 import {
   useCreateVisaApplicationMutation,
   useListVisaApplicationsQuery,
@@ -28,7 +29,7 @@ export function VisaApplicationsSection({
   const hasHydrated = useAuthStore((s) => s.hasHydrated);
   const accessToken = useAuthStore((s) => s.accessToken);
   const isAuthenticated = Boolean(accessToken);
-  const { data, isLoading, isError, refetch } = useListVisaApplicationsQuery(undefined, {
+  const { data, isLoading, isError, error, refetch } = useListVisaApplicationsQuery(undefined, {
     skip: !hasHydrated || !accessToken,
   });
   const [createApp, createState] = useCreateVisaApplicationMutation();
@@ -109,7 +110,7 @@ export function VisaApplicationsSection({
             </Button>
           }
         >
-          Could not load your visa tracking cases.
+          {apiErrorMessage(error, "Could not load your visa tracking cases.")}
         </TravellerState>
       ) : !items.length ? (
         <TravellerState title="No active applications">

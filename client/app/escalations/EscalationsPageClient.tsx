@@ -16,6 +16,8 @@ import {
   useRequestEscalationMutation,
   type EscalationTrigger,
 } from "@/lib/api/escalations.api";
+import { useCreateConversationMutation } from "@/lib/api/conversations.api";
+import { apiErrorMessage } from "@/lib/api/apiErrorMessage";
 import { useAuthStore } from "@/store/auth.store";
 import {
   EscalationCaseRow,
@@ -24,6 +26,7 @@ import {
   KnowledgeBase,
   SUPPORT_CATEGORIES,
   SupportQuickLinks,
+  TRIGGER_OPTIONS,
   type EscalationsTab,
 } from "./_components";
 import "./escalations.css";
@@ -48,6 +51,7 @@ export function EscalationsPageClient() {
 
   const { data, isLoading, isError, refetch } = useListMyEscalationsQuery(undefined, { skip });
   const [requestEscalation, { isLoading: submittingTicket }] = useRequestEscalationMutation();
+  const [createConversation, { isLoading: creatingConversation }] = useCreateConversationMutation();
 
   const items = data?.items ?? [];
   const pageItems = paginateItems(items, page, TRAVELLER_PAGE_SIZE);
@@ -77,8 +81,15 @@ export function EscalationsPageClient() {
     }
 
     try {
+      // The escalation API anchors every ticket to a real conversation the
+      // consultant can reply in — and verifies the caller owns it. A synthesised
+      // `support-ticket-<timestamp>` id matched no row, so every submit 404'd.
+      const conversation = await createConversation({
+        title: `Support · ${TRIGGER_OPTIONS.find((o) => o.value === ticketTrigger)?.label ?? "Case"}`,
+      }).unwrap();
+
       const res = await requestEscalation({
-        conversationId: `support-ticket-${Date.now()}`,
+        conversationId: conversation.id,
         trigger: ticketTrigger,
         bookingId: ticketBookingId.trim() || undefined,
         note: ticketNote.trim(),
@@ -88,8 +99,8 @@ export function EscalationsPageClient() {
       setTicketNote("");
       setTicketBookingId("");
       void refetch();
-    } catch {
-      setTicketError("Could not submit the case. Try again, or chat with Ava.");
+    } catch (err) {
+      setTicketError(apiErrorMessage(err, "Could not submit the case. Try again, or chat with Ava."));
     }
   }
 
@@ -186,7 +197,7 @@ export function EscalationsPageClient() {
               onBookingIdChange={setTicketBookingId}
               note={ticketNote}
               onNoteChange={setTicketNote}
-              submitting={submittingTicket}
+              submitting={submittingTicket || creatingConversation}
               error={ticketError}
               success={ticketSuccess}
               onSubmit={handleTicketSubmit}

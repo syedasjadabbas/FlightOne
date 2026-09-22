@@ -212,6 +212,45 @@
   box-shadow: 0 10px 28px -16px rgba(14, 22, 32, 0.08);
 }
 
+/* .fo-desk__stack is a flex column, so its default align-items:stretch made
+   these short-form submits span the whole card as heavy navy slabs. Size them
+   to their label instead. Scoped here rather than on .fo-desk__stack because
+   that class is shared by /checkout, /dashboard, /ops, /groups and /mice.
+   Buttons already inside a .fo-desk__toolbar row are laid out by the row. */
+.fo-corporate__master-stage .fo-desk__stack > button {
+  align-self: flex-start;
+}
+
+/* Action feedback. Success and error previously rendered in the same muted ink,
+   so the only signal was the icon — colour alone is not enough, and neither is
+   an icon alone. Same tinted-slab treatment as .fo-rewards__status. */
+.fo-corporate__status {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  margin: 0.15rem 0 0;
+  padding: 0.5rem 0.7rem;
+  border-radius: 0.625rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  font-weight: 500;
+}
+
+.fo-corporate__status svg {
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.fo-corporate__status--ok {
+  background: rgba(16, 185, 129, 0.1);
+  color: #047857;
+}
+
+.fo-corporate__status--error {
+  background: rgba(220, 38, 38, 0.1);
+  color: #b91c1c;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .fo-corporate__tab {
     transition: none;

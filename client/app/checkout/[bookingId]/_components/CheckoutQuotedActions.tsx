@@ -165,7 +165,7 @@ export function CheckoutQuotedActions({
               </span>
               <div>
                 <span className="text-[13px] font-semibold text-[var(--navy)]">Passenger 1</span>
-                <span className="ml-2 text-[11px] font-medium text-[var(--ink-faint)]">Adult</span>
+                <span className="ml-2 text-[12px] font-medium text-[var(--ink-soft)]">Adult</span>
               </div>
             </div>
             <ChevronDown
@@ -327,14 +327,14 @@ export function CheckoutQuotedActions({
 
   return (
     <div className="space-y-4">
-      <div className="fo-desk__panel flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-[var(--fo-desk-radius)] bg-[var(--fo-desk-wash)] text-[var(--cyan)]">
+      <div className="fo-checkout__traveller fo-desk__panel flex flex-wrap items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="fo-checkout__traveller-avatar">
             <User className="h-4 w-4" aria-hidden />
           </div>
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <p className="m-0 text-[13px] font-semibold text-[var(--navy)]">
+              <p className="m-0 text-[15px] font-semibold tracking-tight text-[var(--navy)]">
                 {formData.givenName} {formData.surname}
               </p>
               <span className="fo-desk__status fo-desk__status--ok inline-flex items-center gap-1">
@@ -342,7 +342,7 @@ export function CheckoutQuotedActions({
                 Ready
               </span>
             </div>
-            <p className="m-0 text-[11px] text-[var(--ink-faint)]">
+            <p className="m-0 text-[12px] text-[var(--ink-soft)]">
               {[
                 formData.nationality ? formData.nationality : null,
                 formData.passportNumber ? `Passport ${formData.passportNumber}` : null,
@@ -357,7 +357,7 @@ export function CheckoutQuotedActions({
           <button
             type="button"
             onClick={onBackToTraveller}
-            className="inline-flex cursor-pointer items-center gap-1 text-[12px] font-semibold text-[var(--cyan)] underline-offset-2 hover:underline"
+            className="fo-checkout__traveller-edit"
           >
             <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
             Edit traveller
@@ -390,7 +390,7 @@ export function CheckoutQuotedActions({
             >
               <CreditCard className="mb-1.5 h-4 w-4 text-[var(--cyan)]" aria-hidden />
               <span className="text-[13px] font-semibold text-[var(--navy)]">Card</span>
-              <span className="mt-0.5 text-[10px] text-[var(--ink-faint)]">Visa / Mastercard</span>
+              <span className="mt-0.5 text-[12px] text-[var(--ink-soft)]">Visa / Mastercard</span>
             </button>
             <button
               type="button"
@@ -400,7 +400,7 @@ export function CheckoutQuotedActions({
             >
               <Smartphone className="mb-1.5 h-4 w-4 text-[var(--cyan)]" aria-hidden />
               <span className="text-[13px] font-semibold text-[var(--navy)]">JazzCash</span>
-              <span className="mt-0.5 text-[10px] text-[var(--ink-faint)]">Mobile wallet</span>
+              <span className="mt-0.5 text-[12px] text-[var(--ink-soft)]">Mobile wallet</span>
             </button>
             <button
               type="button"
@@ -410,7 +410,7 @@ export function CheckoutQuotedActions({
             >
               <Smartphone className="mb-1.5 h-4 w-4 text-[var(--cyan)]" aria-hidden />
               <span className="text-[13px] font-semibold text-[var(--navy)]">Easypaisa</span>
-              <span className="mt-0.5 text-[10px] text-[var(--ink-faint)]">Mobile account</span>
+              <span className="mt-0.5 text-[12px] text-[var(--ink-soft)]">Mobile account</span>
             </button>
             <button
               type="button"
@@ -420,7 +420,7 @@ export function CheckoutQuotedActions({
             >
               <Landmark className="mb-1.5 h-4 w-4 text-[var(--cyan)]" aria-hidden />
               <span className="text-[13px] font-semibold text-[var(--navy)]">1Link IBFT</span>
-              <span className="mt-0.5 text-[10px] text-[var(--ink-faint)]">1Bill transfer</span>
+              <span className="mt-0.5 text-[12px] text-[var(--ink-soft)]">1Bill transfer</span>
             </button>
           </div>
         ) : null}
@@ -604,15 +604,15 @@ export function CheckoutReservedActions({
           </div>
           <div className="grid grid-cols-1 gap-2 border-t border-[var(--fo-desk-line)] pt-2 text-[12px] sm:grid-cols-2">
             <div>
-              <span className="text-[var(--ink-faint)]">Bank:</span>{" "}
+              <span className="text-[var(--ink-soft)]">Bank:</span>{" "}
               {pendingPaymentDetails?.bankName}
             </div>
             <div>
-              <span className="text-[var(--ink-faint)]">Account:</span>{" "}
+              <span className="text-[var(--ink-soft)]">Account:</span>{" "}
               {pendingPaymentDetails?.accountTitle}
             </div>
             <div className="sm:col-span-2">
-              <span className="text-[var(--ink-faint)]">IBAN:</span>{" "}
+              <span className="text-[var(--ink-soft)]">IBAN:</span>{" "}
               <span className="font-mono font-semibold text-[var(--navy)]">
                 {pendingPaymentDetails?.iban}
               </span>

@@ -378,14 +378,14 @@ export function OpsPlatformClient() {
             <OpsPanelEmpty title="Outbox empty" body="No pending or failed events in this queue." />
           ) : (
             <section className="fo-desk__panel fo-desk__panel--flush">
-              <div className="fo-desk__table-wrap">
+              <div className="fo-desk__table-wrap fo-desk__table-wrap--tall">
                 <table className="fo-desk__table">
                   <thead>
                     <tr>
                       <th>Type</th>
                       <th>Status</th>
                       <th>Aggregate</th>
-                      <th>Attempts</th>
+                      <th className="fo-desk__table-num">Attempts</th>
                       <th>Error</th>
                     </tr>
                   </thead>
@@ -399,7 +399,7 @@ export function OpsPlatformClient() {
                         <td className="fo-desk__mono">
                           {e.aggregateType}/{e.aggregateId}
                         </td>
-                        <td>{e.attempts}</td>
+                        <td className="fo-desk__table-num">{e.attempts}</td>
                         <td className="text-ink-faint">{e.lastError || "—"}</td>
                       </tr>
                     ))}
@@ -442,8 +442,8 @@ export function OpsPlatformClient() {
                       <tr>
                         <th>Type</th>
                         <th>Currency</th>
-                        <th>Sum</th>
-                        <th>Count</th>
+                        <th className="fo-desk__table-num">Sum</th>
+                        <th className="fo-desk__table-num">Count</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -451,8 +451,10 @@ export function OpsPlatformClient() {
                         <tr key={`${a.currency}-${a.entryType}`}>
                           <td>{a.entryType}</td>
                           <td>{a.currency}</td>
-                          <td>{(a.amountMinorSum / 100).toFixed(2)}</td>
-                          <td>{a.count}</td>
+                          <td className="fo-desk__table-num">
+                            {(a.amountMinorSum / 100).toFixed(2)}
+                          </td>
+                          <td className="fo-desk__table-num">{a.count}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -461,12 +463,12 @@ export function OpsPlatformClient() {
               </section>
             ) : null}
             <section className="fo-desk__panel fo-desk__panel--flush">
-              <div className="fo-desk__table-wrap">
+              <div className="fo-desk__table-wrap fo-desk__table-wrap--tall">
                 <table className="fo-desk__table">
                   <thead>
                     <tr>
                       <th>Type</th>
-                      <th>Amount</th>
+                      <th className="fo-desk__table-num">Amount</th>
                       <th>Booking</th>
                       <th>Memo</th>
                     </tr>
@@ -475,7 +477,7 @@ export function OpsPlatformClient() {
                     {paginateItems(accounting.items, page, pageSize).map((e) => (
                       <tr key={e.id}>
                         <td className="font-medium">{e.entryType}</td>
-                        <td>
+                        <td className="fo-desk__table-num">
                           {e.currency} {(e.amountMinor / 100).toFixed(2)}
                         </td>
                         <td className="fo-desk__mono">{e.bookingId || "—"}</td>
@@ -564,7 +566,7 @@ export function OpsPlatformClient() {
                         <tr>
                           <th>Type</th>
                           <th>Currency</th>
-                          <th>Sum</th>
+                          <th className="fo-desk__table-num">Sum</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -572,7 +574,9 @@ export function OpsPlatformClient() {
                           <tr key={`${a.currency}-${a.entryType}`}>
                             <td>{a.entryType}</td>
                             <td>{a.currency}</td>
-                            <td>{(a.amountMinorSum / 100).toFixed(2)}</td>
+                            <td className="fo-desk__table-num">
+                              {(a.amountMinorSum / 100).toFixed(2)}
+                            </td>
                           </tr>
                         ))}
                       </tbody>
@@ -583,12 +587,12 @@ export function OpsPlatformClient() {
                   <p className="fo-desk__empty">No payment rows for filter.</p>
                 ) : (
                   <>
-                    <div className="fo-desk__table-wrap">
+                    <div className="fo-desk__table-wrap fo-desk__table-wrap--tall">
                       <table className="fo-desk__table">
                         <thead>
                           <tr>
                             <th>Status</th>
-                            <th>Amount</th>
+                            <th className="fo-desk__table-num">Amount</th>
                             <th>Booking</th>
                           </tr>
                         </thead>
@@ -596,7 +600,7 @@ export function OpsPlatformClient() {
                           {paginateItems(finance.payments.items, page, pageSize).map((p) => (
                             <tr key={p.id}>
                               <td>{p.status}</td>
-                              <td>
+                              <td className="fo-desk__table-num">
                                 {p.currency} {(p.amountMinor / 100).toFixed(2)}
                               </td>
                               <td className="fo-desk__mono">{p.bookingId}</td>
@@ -656,13 +660,13 @@ export function OpsPlatformClient() {
               />
             ) : (
               <section className="fo-desk__panel fo-desk__panel--flush">
-                <div className="fo-desk__table-wrap">
+                <div className="fo-desk__table-wrap fo-desk__table-wrap--tall">
                   <table className="fo-desk__table">
                     <thead>
                       <tr>
                         <th>Booking</th>
-                        <th>BPS</th>
-                        <th>Amount</th>
+                        <th className="fo-desk__table-num">BPS</th>
+                        <th className="fo-desk__table-num">Amount</th>
                         <th>Supplier</th>
                       </tr>
                     </thead>
@@ -670,8 +674,8 @@ export function OpsPlatformClient() {
                       {paginateItems(commissions.items, page, pageSize).map((c) => (
                         <tr key={c.id}>
                           <td className="fo-desk__mono">{c.bookingId}</td>
-                          <td>{c.commissionBps}</td>
-                          <td>
+                          <td className="fo-desk__table-num">{c.commissionBps}</td>
+                          <td className="fo-desk__table-num">
                             {c.currency} {(c.commissionMinor / 100).toFixed(2)}
                           </td>
                           <td>
@@ -700,16 +704,18 @@ export function OpsPlatformClient() {
                       <thead>
                         <tr>
                           <th>Currency</th>
-                          <th>Total</th>
-                          <th>Count</th>
+                          <th className="fo-desk__table-num">Total</th>
+                          <th className="fo-desk__table-num">Count</th>
                         </tr>
                       </thead>
                       <tbody>
                         {commissions.aggregates.map((a) => (
                           <tr key={a.currency}>
                             <td>{a.currency}</td>
-                            <td>{(a.commissionMinorSum / 100).toFixed(2)}</td>
-                            <td>{a.count}</td>
+                            <td className="fo-desk__table-num">
+                              {(a.commissionMinorSum / 100).toFixed(2)}
+                            </td>
+                            <td className="fo-desk__table-num">{a.count}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -795,15 +801,15 @@ export function OpsPlatformClient() {
             />
           ) : (
             <section className="fo-desk__panel fo-desk__panel--flush">
-              <div className="fo-desk__table-wrap">
+              <div className="fo-desk__table-wrap fo-desk__table-wrap--tall">
                 <table className="fo-desk__table">
                   <thead>
                     <tr>
                       <th>Supplier</th>
                       <th>Status</th>
                       <th>Booking</th>
-                      <th>Expected</th>
-                      <th>Invoiced</th>
+                      <th className="fo-desk__table-num">Expected</th>
+                      <th className="fo-desk__table-num">Invoiced</th>
                       <th>Reason</th>
                     </tr>
                   </thead>
@@ -815,8 +821,11 @@ export function OpsPlatformClient() {
                           <OpsStatusPill state={r.status} />
                         </td>
                         <td className="fo-desk__mono">{r.bookingId || "—"}</td>
-                        <td>{r.expectedMinor}</td>
-                        <td>{r.invoicedMinor ?? "n/a"}</td>
+                        <td className="fo-desk__table-num">{r.expectedMinor}</td>
+                        {/* "n/a" is a short marker, not prose, so it still reads as a
+                            missing value at the digit edge — and keeping this column
+                            aligned with Expected is what makes the two comparable. */}
+                        <td className="fo-desk__table-num">{r.invoicedMinor ?? "n/a"}</td>
                         <td className="text-ink-faint">{r.mismatchReason || "—"}</td>
                       </tr>
                     ))}
@@ -845,13 +854,13 @@ export function OpsPlatformClient() {
           <OpsPanelEmpty title="No audit rows" body="Staff actions will appear here as they are recorded." />
         ) : (
           <section className="fo-desk__panel fo-desk__panel--flush">
-            <div className="fo-desk__table-wrap">
+            <div className="fo-desk__table-wrap fo-desk__table-wrap--tall">
               <table className="fo-desk__table">
                 <thead>
                   <tr>
                     <th>Action</th>
                     <th>Resource</th>
-                    <th>When</th>
+                    <th className="fo-desk__table-time">When</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -861,7 +870,9 @@ export function OpsPlatformClient() {
                       <td className="fo-desk__mono">
                         {a.resourceType}/{a.resourceId || "—"}
                       </td>
-                      <td>{new Date(a.createdAt).toLocaleString()}</td>
+                      <td className="fo-desk__table-time">
+                        {new Date(a.createdAt).toLocaleString()}
+                      </td>
                     </tr>
                   ))}
                 </tbody>

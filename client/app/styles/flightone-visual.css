@@ -981,21 +981,17 @@
   }
 }
 
+/* Shape and elevation come from `.chat-page .quick-chip` in globals.css —
+   the tactile pill used app-wide. This rule only tunes the action variant's
+   weight and fill; re-declaring a square radius with `box-shadow: none` made
+   these read as flat bordered boxes beside the pill composer and nav. */
 .chat-page .quick-chip--action {
-  border-radius: 0.5rem;
   font-size: 0.75rem;
   padding: 0.42rem 0.9rem;
-  border: 1px solid color-mix(in oklab, var(--line) 75%, transparent);
   background: color-mix(in oklab, white 70%, var(--horizon-cool));
   color: var(--navy);
   font-weight: 600;
   letter-spacing: -0.01em;
-  box-shadow: none;
-  transition:
-    border-color 0.15s ease,
-    background 0.15s ease,
-    color 0.15s ease,
-    transform 0.15s var(--ease-out-expo, ease);
 }
 
 .chat-hero--landing {
@@ -1099,10 +1095,9 @@
 }
 
 .chat-page .quick-chip--action:hover:not(:disabled) {
-  border-color: color-mix(in oklab, var(--sky) 35%, var(--line));
   background: color-mix(in oklab, var(--horizon-cool) 40%, white);
   color: var(--navy);
-  box-shadow: none;
+  box-shadow: 0 4px 12px rgba(14, 22, 32, 0.08), inset 0 1px 0 #ffffff;
 }
 
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
@@ -1121,7 +1116,9 @@
   background: var(--navy);
   border-color: var(--navy);
   color: white;
-  box-shadow: none;
+  box-shadow:
+    0 4px 14px rgba(14, 22, 32, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 /* ── Messages ─────────────────────────────────────────────── */
@@ -1145,29 +1142,32 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Primary CTA — matches the app-wide `--sky` resting / `--electric` hover pair
+   used by the composer send button, "New chat", and the vault book button. */
 .results-msg-cta__btn {
   border-radius: 9999px;
-  background: var(--electric);
+  background: var(--sky-solid);
   padding: 0.55rem 1.15rem;
   font-size: 0.8125rem;
   font-weight: 600;
   letter-spacing: -0.01em;
   box-shadow:
-    0 8px 18px -4px rgba(0, 122, 229, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    0 4px 14px rgba(8, 150, 191, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transition: all 0.15s ease;
 }
 
 .results-msg-cta__btn:hover {
-  background: color-mix(in oklab, var(--electric) 82%, var(--navy));
+  background: color-mix(in oklab, var(--electric) 90%, var(--navy));
   transform: translateY(-1px);
   box-shadow:
-    0 10px 22px -4px rgba(0, 122, 229, 0.48),
-    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    0 8px 22px rgba(0, 122, 229, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .results-msg-cta__btn:active {
   transform: translateY(0);
+  scale: 0.98;
 }
 
 /* ── Thinking / loading ───────────────────────────────────── */

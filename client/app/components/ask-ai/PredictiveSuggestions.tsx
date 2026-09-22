@@ -60,7 +60,7 @@ export function PredictiveSuggestions({
                 <div className="mt-2 flex items-center gap-2">
                   <button
                     type="button"
-                    className="inline-flex items-center gap-1 rounded-full bg-[var(--electric)] px-2.5 py-1 text-[11px] font-semibold text-white shadow-[0_2px_8px_-1px_rgba(0,122,229,0.4),inset_0_1px_0_rgba(255,255,255,0.2)] transition-all hover:bg-[color-mix(in_oklab,var(--electric)_88%,var(--navy))] hover:-translate-y-px"
+                    className="inline-flex h-8 items-center gap-1.5 rounded-full bg-[var(--sky-solid)] px-3.5 text-[12px] font-semibold text-white shadow-[0_4px_14px_rgba(8,150,191,0.35),inset_0_1px_0_rgba(255,255,255,0.3)] transition-all duration-150 hover:-translate-y-px hover:bg-[color-mix(in_oklab,var(--electric)_90%,var(--navy))] hover:shadow-[0_8px_22px_rgba(0,122,229,0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sky)]/40 active:translate-y-0 active:scale-[0.98]"
                     onClick={() => onSearch(item.searchPrompt)}
                   >
                     Search
@@ -68,7 +68,7 @@ export function PredictiveSuggestions({
                   </button>
                   <button
                     type="button"
-                    className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-medium text-[var(--ink-faint)] transition-colors hover:bg-[color-mix(in_oklab,var(--navy)_5%,transparent)] hover:text-[var(--ink-soft)]"
+                    className="inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-[12px] font-semibold text-[var(--ink-soft)] transition-colors hover:bg-[color-mix(in_oklab,var(--navy)_6%,transparent)] hover:text-[var(--navy)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sky)]/40"
                     onClick={() => void dismiss({ id: item.id })}
                     aria-label={`Dismiss ${item.title}`}
                   >

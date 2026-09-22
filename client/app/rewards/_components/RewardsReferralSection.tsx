@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Copy } from "lucide-react";
+import { AlertCircle, Check, CheckCircle2, Copy } from "lucide-react";
 import { Button, Input } from "@/components/ui";
 import { TravellerSection, TravellerState } from "@/app/components/traveller";
 
@@ -17,6 +17,7 @@ type RewardsReferralSectionProps = {
   onAttach: () => Promise<void>;
   attaching: boolean;
   localMsg: string | null;
+  localMsgTone?: "ok" | "error";
 };
 
 export function RewardsReferralSection({
@@ -29,6 +30,7 @@ export function RewardsReferralSection({
   onAttach,
   attaching,
   localMsg,
+  localMsgTone = "ok",
 }: RewardsReferralSectionProps) {
   const [copiedLink, setCopiedLink] = useState(false);
 
@@ -102,8 +104,18 @@ export function RewardsReferralSection({
           {attaching ? "Attaching…" : "Apply referral code"}
         </Button>
         {localMsg ? (
-          <p className="fo-rewards__status" role="status">
-            {localMsg}
+          <p
+            className={`fo-rewards__status${
+              localMsgTone === "error" ? " fo-rewards__status--error" : " fo-rewards__status--ok"
+            }`}
+            role={localMsgTone === "error" ? "alert" : "status"}
+          >
+            {localMsgTone === "error" ? (
+              <AlertCircle size={14} strokeWidth={2.2} aria-hidden />
+            ) : (
+              <CheckCircle2 size={14} strokeWidth={2.2} aria-hidden />
+            )}
+            <span>{localMsg}</span>
           </p>
         ) : null}
       </form>

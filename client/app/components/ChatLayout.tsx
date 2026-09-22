@@ -280,7 +280,7 @@ export function ChatLayout({
                       <button
                         type="button"
                         onClick={onOpenResults}
-                        className="ml-0.5 inline-flex items-center gap-1 rounded-md bg-[var(--electric)] px-2 py-1 text-[11px] font-semibold text-white transition-colors hover:bg-[color-mix(in_oklab,var(--electric)_88%,var(--navy))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--electric)]/40"
+                        className="ml-0.5 inline-flex items-center gap-1 rounded-full bg-[var(--sky-solid)] px-2.5 py-1 text-[11px] font-semibold tracking-[0.01em] text-white shadow-[0_2px_8px_rgba(8,150,191,0.3),inset_0_1px_0_rgba(255,255,255,0.3)] transition-all duration-150 hover:-translate-y-px hover:bg-[color-mix(in_oklab,var(--electric)_90%,var(--navy))] hover:shadow-[0_5px_14px_rgba(0,122,229,0.35)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sky)]/40 active:translate-y-0 active:scale-[0.98]"
                         title="View search results"
                       >
                         Results ({resultCount})
@@ -605,7 +605,7 @@ export function ChatLayout({
                   <button
                     type="submit"
                     disabled={busy || !input.trim()}
-                    className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--electric)] text-white transition-colors hover:bg-[color-mix(in_oklab,var(--electric)_88%,var(--navy))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--electric)]/40 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-35"
+                    className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--sky-solid)] text-white shadow-[0_4px_14px_rgba(8,150,191,0.35),inset_0_1px_0_rgba(255,255,255,0.3)] transition-all duration-150 hover:-translate-y-px hover:bg-[color-mix(in_oklab,var(--electric)_90%,var(--navy))] hover:shadow-[0_8px_22px_rgba(0,122,229,0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sky)]/40 active:translate-y-0 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40 disabled:shadow-none disabled:hover:translate-y-0"
                     aria-label="Send message"
                   >
                     {busy ? (

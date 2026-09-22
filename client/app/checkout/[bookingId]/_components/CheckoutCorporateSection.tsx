@@ -172,9 +172,9 @@ function ProjectCodePicker({
       ) : null}
       {canSelect ? (
         isLoading ? (
-          <p className="m-0 text-[12px] text-[var(--ink-faint)]">Loading project codes…</p>
+          <p className="m-0 text-[12px] text-[var(--ink-soft)]">Loading project codes…</p>
         ) : !codes.length ? (
-          <p className="m-0 text-[12px] text-[var(--ink-faint)]">
+          <p className="m-0 text-[12px] text-[var(--ink-soft)]">
             No active project codes. Ask a company admin to add one on /corporate.
           </p>
         ) : (

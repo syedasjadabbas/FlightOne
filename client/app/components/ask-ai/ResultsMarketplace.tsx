@@ -14,14 +14,14 @@ import {
   DriveAroundSection,
   ExploreNearSection,
   MarketplaceDisclaimer,
-  MarketplaceFooter,
   RelatedRoutesSection,
   StaysNearSection,
 } from "./MarketplaceSections";
 
 /**
  * Post-flight marketplace chrome for the full results workspace.
- * Kayak-style stays / drive / explore carousels + editorial footer.
+ * Kayak-style stays / drive / explore carousels. No site footer here — the
+ * chat workspace is a focused tool surface; marketing chrome lives on /.
  * Renders priced stays only when real hotel/package offers exist.
  */
 export function ResultsMarketplace({
@@ -56,7 +56,6 @@ export function ResultsMarketplace({
     return (
       <div className="results-market">
         <MarketplaceDisclaimer />
-        <MarketplaceFooter />
       </div>
     );
   }
@@ -97,11 +96,6 @@ export function ResultsMarketplace({
       <RelatedRoutesSection links={related} onSelect={ask} disabled={!canAsk} />
 
       <MarketplaceDisclaimer />
-
-      <MarketplaceFooter
-        city={ctx.city || undefined}
-        onAskStays={canAsk && ctx.city ? () => ask(`Add a hotel stay in ${ctx.city}`) : undefined}
-      />
     </div>
   );
 }

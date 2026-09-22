@@ -38,10 +38,15 @@ export function refreshCookieOptions(env = process.env) {
   // Development defaults: secure=false, sameSite=lax (works on http://localhost).
   if (sameSite === "none" && !secure) sameSite = "lax";
 
+  // Express's `res.cookie()` treats `maxAge` as MILLISECONDS (it does
+  // `Math.floor(maxAge / 1000)` internally to build the Max-Age attribute) —
+  // the opposite convention from the raw `cookie` package's `serialize()`,
+  // which takes seconds directly. Passing seconds here silently produces a
+  // cookie ~1000x shorter than intended (e.g. 7 days becomes ~10 minutes).
   const maxAgeMs = (() => {
     const days = Number(env.JWT_REFRESH_COOKIE_MAX_AGE_DAYS);
-    if (Number.isFinite(days) && days > 0) return Math.floor(days * 86400);
-    return 7 * 86400;
+    if (Number.isFinite(days) && days > 0) return Math.floor(days * 86400 * 1000);
+    return 7 * 86400 * 1000;
   })();
 
   return {

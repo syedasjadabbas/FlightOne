@@ -38,6 +38,7 @@ import {
   useUpdateInvoiceStatusMutation,
   useUpdateProjectCodeMutation,
 } from "@/lib/api/corporate.api";
+import { apiErrorMessage } from "@/lib/api/apiErrorMessage";
 import { useAuthStore } from "@/store/auth.store";
 import { useCorporateProfileStore } from "@/store/corporateProfile.store";
 import { CorporatePortalSection } from "./_components/CorporatePortalSection";
@@ -63,15 +64,17 @@ function MsgLine({ msg }: { msg: { text: string; error?: boolean } | null }) {
   if (!msg) return null;
   return (
     <p
-      className={`inline-flex items-center gap-1.5 text-[13px] ${
-        msg.error ? "text-danger" : "text-ink-soft"
+      className={`fo-corporate__status ${
+        msg.error ? "fo-corporate__status--error" : "fo-corporate__status--ok"
       }`}
-      role="status"
+      // `alert` interrupts the screen reader for failures the user must act on;
+      // `status` announces successes politely without cutting off other output.
+      role={msg.error ? "alert" : "status"}
     >
       {msg.error ? (
-        <AlertCircle className="h-3.5 w-3.5 shrink-0 text-danger" aria-hidden />
+        <AlertCircle className="h-3.5 w-3.5" aria-hidden />
       ) : (
-        <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-sky" aria-hidden />
+        <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
       )}
       {msg.text}
     </p>
@@ -341,8 +344,8 @@ export function CorporatePageClient() {
                 setCorporate(c.id);
                 setNewCompanyName("");
                 setMsg({ text: `Created ${c.name}` });
-              } catch {
-                setMsg({ text: "Could not create company.", error: true });
+              } catch (err) {
+                setMsg({ text: apiErrorMessage(err, "Could not create company."), error: true });
               }
             }}
           >
@@ -371,7 +374,7 @@ export function CorporatePageClient() {
                 <thead>
                   <tr>
                     <th>Booking</th>
-                    <th>Amount</th>
+                    <th className="fo-desk__table-num">Amount</th>
                     <th>Status</th>
                     <th>Action</th>
                   </tr>
@@ -380,7 +383,7 @@ export function CorporatePageClient() {
                   {approvals.items.map((a) => (
                     <tr key={a.id}>
                       <td className="fo-desk__mono">{a.bookingId.slice(0, 10)}…</td>
-                      <td>{money(a.amountMinor, a.currency)}</td>
+                      <td className="fo-desk__table-num">{money(a.amountMinor, a.currency)}</td>
                       <td>
                         <DeskStatus tone="warn">{a.status}</DeskStatus>
                       </td>
@@ -393,8 +396,8 @@ export function CorporatePageClient() {
                               try {
                                 await decide({ id: a.id, decision: "APPROVE" }).unwrap();
                                 setMsg({ text: "Approved" });
-                              } catch {
-                                setMsg({ text: "Approve failed", error: true });
+                              } catch (err) {
+                                setMsg({ text: apiErrorMessage(err, "Approve failed"), error: true });
                               }
                             }}
                           >
@@ -408,8 +411,8 @@ export function CorporatePageClient() {
                               try {
                                 await decide({ id: a.id, decision: "REJECT" }).unwrap();
                                 setMsg({ text: "Rejected" });
-                              } catch {
-                                setMsg({ text: "Reject failed", error: true });
+                              } catch (err) {
+                                setMsg({ text: apiErrorMessage(err, "Reject failed"), error: true });
                               }
                             }}
                           >
@@ -448,9 +451,12 @@ export function CorporatePageClient() {
                 }).unwrap();
                 setBookingIdForApproval("");
                 setMsg({ text: "Approval requested" });
-              } catch {
+              } catch (err) {
                 setMsg({
-                  text: "Could not create approval (check booking ownership / company).",
+                  text: apiErrorMessage(
+                    err,
+                    "Could not create approval (check booking ownership / company).",
+                  ),
                   error: true,
                 });
               }
@@ -474,7 +480,7 @@ export function CorporatePageClient() {
                     <tr>
                       <th>Booking</th>
                       <th>Status</th>
-                      <th>Amount</th>
+                      <th className="fo-desk__table-num">Amount</th>
                       <th>Project</th>
                     </tr>
                   </thead>
@@ -487,7 +493,7 @@ export function CorporatePageClient() {
                         <td>
                           <DeskStatus>{b.status}</DeskStatus>
                         </td>
-                        <td>{money(b.amountMinor, b.currency)}</td>
+                        <td className="fo-desk__table-num">{money(b.amountMinor, b.currency)}</td>
                         <td>{b.metadata?.projectCode || "—"}</td>
                       </tr>
                     ))}
@@ -500,6 +506,7 @@ export function CorporatePageClient() {
                 onPageChange={setBookingsPage}
                 totalItems={bookings.items.length}
                 label="Company bookings"
+                className="fo-desk__pager"
               />
             </>
           )}
@@ -519,7 +526,7 @@ export function CorporatePageClient() {
                     <tr>
                       <th>Invoice</th>
                       <th>Status</th>
-                      <th>Amount</th>
+                      <th className="fo-desk__table-num">Amount</th>
                       <th>Booking</th>
                       <th>Actions</th>
                     </tr>
@@ -539,7 +546,7 @@ export function CorporatePageClient() {
                         <td>
                           <DeskStatus tone={invoiceTone(inv.status)}>{inv.status}</DeskStatus>
                         </td>
-                        <td>{money(inv.amountMinor, inv.currency)}</td>
+                        <td className="fo-desk__table-num">{money(inv.amountMinor, inv.currency)}</td>
                         <td className="fo-desk__mono">{inv.bookingId.slice(0, 10)}…</td>
                         <td>
                           <div className="fo-desk__toolbar">
@@ -565,8 +572,12 @@ export function CorporatePageClient() {
                                   a.download = pdf.filename || `${inv.invoiceNumber}.pdf`;
                                   a.click();
                                   URL.revokeObjectURL(url);
-                                } catch {
-                                  setMsg({ text: "Could not download invoice PDF", error: true });
+                                  setMsg({ text: `Downloaded ${inv.invoiceNumber}.pdf` });
+                                } catch (err) {
+                                  setMsg({
+                                    text: apiErrorMessage(err, "Could not download invoice PDF"),
+                                    error: true,
+                                  });
                                 }
                               }}
                             >
@@ -584,8 +595,11 @@ export function CorporatePageClient() {
                                       status: "PAID",
                                     }).unwrap();
                                     setMsg({ text: "Invoice marked paid" });
-                                  } catch {
-                                    setMsg({ text: "Could not update invoice", error: true });
+                                  } catch (err) {
+                                    setMsg({
+                                      text: apiErrorMessage(err, "Could not update invoice"),
+                                      error: true,
+                                    });
                                   }
                                 }}
                               >
@@ -605,8 +619,11 @@ export function CorporatePageClient() {
                                       status: "VOID",
                                     }).unwrap();
                                     setMsg({ text: "Invoice voided" });
-                                  } catch {
-                                    setMsg({ text: "Could not void invoice", error: true });
+                                  } catch (err) {
+                                    setMsg({
+                                      text: apiErrorMessage(err, "Could not void invoice"),
+                                      error: true,
+                                    });
                                   }
                                 }}
                               >
@@ -626,6 +643,7 @@ export function CorporatePageClient() {
                 onPageChange={setInvoicesPage}
                 totalItems={invoices.items.length}
                 label="Invoices"
+                className="fo-desk__pager"
               />
             </>
           )}
@@ -653,9 +671,12 @@ export function CorporatePageClient() {
                     }).unwrap();
                     setBookingIdForInvoice("");
                     setMsg({ text: `Issued ${inv.invoiceNumber}` });
-                  } catch {
+                  } catch (err) {
                     setMsg({
-                      text: "Could not issue invoice (check booking status / company).",
+                      text: apiErrorMessage(
+                        err,
+                        "Could not issue invoice (check booking status / company).",
+                      ),
                       error: true,
                     });
                   }
@@ -683,7 +704,7 @@ export function CorporatePageClient() {
                 <thead>
                   <tr>
                     <th>Cabin</th>
-                    <th>Max amount</th>
+                    <th className="fo-desk__table-num">Max amount</th>
                     <th>State</th>
                   </tr>
                 </thead>
@@ -691,7 +712,7 @@ export function CorporatePageClient() {
                   {policyList.map((p) => (
                     <tr key={p.id}>
                       <td>{p.maxCabin || "—"}</td>
-                      <td>{money(p.maxAmountMinor ?? undefined, profile?.company?.currency)}</td>
+                      <td className="fo-desk__table-num">{money(p.maxAmountMinor ?? undefined, profile?.company?.currency)}</td>
                       <td>
                         <DeskStatus tone={p.isActive === false ? "neutral" : "ok"}>
                           {p.isActive === false ? "inactive" : "active"}
@@ -750,8 +771,11 @@ export function CorporatePageClient() {
                                     ? "Project code deactivated"
                                     : "Project code reactivated",
                                 });
-                              } catch {
-                                setMsg({ text: "Could not update project code", error: true });
+                              } catch (err) {
+                                setMsg({
+                                  text: apiErrorMessage(err, "Could not update project code"),
+                                  error: true,
+                                });
                               }
                             }}
                           >
@@ -797,9 +821,12 @@ export function CorporatePageClient() {
                     setNewProjectCode("");
                     setNewProjectName("");
                     setMsg({ text: "Project code created" });
-                  } catch {
+                  } catch (err) {
                     setMsg({
-                      text: "Could not create project code (check uniqueness / permissions).",
+                      text: apiErrorMessage(
+                        err,
+                        "Could not create project code (check uniqueness / permissions).",
+                      ),
                       error: true,
                     });
                   }
@@ -868,9 +895,12 @@ export function CorporatePageClient() {
                     creditLimitMinor: Math.round(n),
                   }).unwrap();
                   setMsg({ text: "Credit limit updated" });
-                } catch {
+                } catch (err) {
                   setMsg({
-                    text: "Credit update failed (permission or cannot go below used).",
+                    text: apiErrorMessage(
+                      err,
+                      "Credit update failed (permission or cannot go below used).",
+                    ),
                     error: true,
                   });
                 }
@@ -939,7 +969,7 @@ export function CorporatePageClient() {
                   <tbody>
                     {paginateItems(audit.items, auditPage, TABLE_PAGE_SIZE).map((a) => (
                       <tr key={a.id}>
-                        <td>{new Date(a.createdAt).toLocaleString()}</td>
+                        <td className="fo-desk__table-time">{new Date(a.createdAt).toLocaleString()}</td>
                         <td>{a.action}</td>
                         <td>{a.resourceType || "—"}</td>
                       </tr>
@@ -953,6 +983,7 @@ export function CorporatePageClient() {
                 onPageChange={setAuditPage}
                 totalItems={audit.items.length}
                 label="Company audit"
+                className="fo-desk__pager"
               />
             </>
           )}

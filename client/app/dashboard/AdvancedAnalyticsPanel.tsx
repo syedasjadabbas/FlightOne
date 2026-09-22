@@ -116,20 +116,20 @@ export function AdvancedAnalyticsPanel({
               <thead>
                 <tr>
                   <th>Signup month</th>
-                  <th>Size</th>
-                  <th>Active</th>
-                  <th>Bookings</th>
-                  <th>Spend (minor)</th>
+                  <th className="fo-desk__table-num">Size</th>
+                  <th className="fo-desk__table-num">Active</th>
+                  <th className="fo-desk__table-num">Bookings</th>
+                  <th className="fo-desk__table-num">Spend (minor)</th>
                 </tr>
               </thead>
               <tbody>
                 {data.cohorts.items.map((c) => (
                   <tr key={c.cohort}>
                     <td className="font-mono">{c.cohort}</td>
-                    <td className="font-mono">{c.size}</td>
-                    <td className="font-mono">{c.activeTravellers}</td>
-                    <td className="font-mono">{c.bookings}</td>
-                    <td className="font-mono">{c.spendMinor}</td>
+                    <td className="font-mono fo-desk__table-num">{c.size}</td>
+                    <td className="font-mono fo-desk__table-num">{c.activeTravellers}</td>
+                    <td className="font-mono fo-desk__table-num">{c.bookings}</td>
+                    <td className="font-mono fo-desk__table-num">{c.spendMinor}</td>
                   </tr>
                 ))}
               </tbody>

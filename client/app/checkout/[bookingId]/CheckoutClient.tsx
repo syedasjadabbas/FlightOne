@@ -11,7 +11,7 @@ import {
   Ticket,
   AlertCircle,
 } from "lucide-react";
-import { Button, Spinner } from "@/components/ui";
+import { Button, Spinner, buttonClassName } from "@/components/ui";
 import {
   parsePriceChangedError,
   ticketNumbersFromMetadata,
@@ -101,20 +101,25 @@ function CheckoutProgressBar({
 
   return (
     <ol className="fo-checkout__steps" aria-label="Checkout progress">
-      {steps.map(({ label, done, active, Icon }) => (
+      {steps.map(({ label, done, active, Icon }, index) => (
         <li
           key={label}
           className={`fo-checkout__step ${
             done ? "fo-checkout__step--done" : active ? "fo-checkout__step--active" : ""
           }`}
+          aria-current={active ? "step" : undefined}
         >
-          <span className="inline-flex items-center gap-1.5">
-            {done ? (
-              <Check className="h-3 w-3" aria-hidden />
-            ) : (
-              <Icon className="h-3 w-3" aria-hidden />
-            )}
-            {label}
+          <span className="fo-checkout__step-row">
+            <span className="fo-checkout__step-marker" aria-hidden>
+              {done ? (
+                <Check className="h-3.5 w-3.5" strokeWidth={2.6} />
+              ) : active ? (
+                <Icon className="h-3.5 w-3.5" strokeWidth={2.4} />
+              ) : (
+                index + 1
+              )}
+            </span>
+            <span className="fo-checkout__step-label">{label}</span>
           </span>
         </li>
       ))}
@@ -254,7 +259,7 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
         </p>
         <Link
           href={`/login?redirect=${encodeURIComponent(`/checkout/${bookingId}`)}`}
-          className="inline-flex items-center justify-center rounded-[var(--fo-desk-radius)] bg-[var(--navy)] px-5 py-2.5 text-[13px] font-semibold text-[var(--white)] transition-colors hover:bg-[color-mix(in_oklab,var(--navy)_88%,var(--cyan))]"
+          className={buttonClassName({ size: "md" })}
         >
           Log in
         </Link>
@@ -637,7 +642,7 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
               <div className="pt-1">
                 <Link
                   href="/journey"
-                  className="inline-flex items-center gap-1.5 rounded-[var(--fo-desk-radius)] bg-[var(--navy)] px-5 py-2.5 text-[13px] font-semibold text-[var(--white)] transition-colors hover:bg-[color-mix(in_oklab,var(--navy)_88%,var(--cyan))]"
+                  className={buttonClassName({ size: "md" })}
                 >
                   View in My Journey
                   <ArrowRight className="h-4 w-4" aria-hidden />

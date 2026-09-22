@@ -58,14 +58,14 @@ function FarePanel({
       </p>
 
       {isMultiTicket ? (
-        <p className="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[12px] leading-relaxed text-amber-100/90">
+        <p className="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[12px] leading-relaxed text-amber-800">
           You change planes or airports between tickets. Allow extra time for immigration,
           baggage reclaim, and check-in.
         </p>
       ) : null}
 
       {hasMarketReference ? (
-        <p className="mt-3 rounded-lg border border-sky-500/30 bg-sky-500/10 px-3 py-2 text-[12px] leading-relaxed text-sky-100/90">
+        <p className="mt-3 rounded-lg border border-sky-500/30 bg-sky-500/10 px-3 py-2 text-[12px] leading-relaxed text-sky-800">
           Some legs are Google Flights market estimates — not bookable through FlightOne. Use
           Continue booking only for GDS-priced segments.
         </p>
@@ -89,7 +89,7 @@ function FarePanel({
         type="button"
         onClick={onBook}
         disabled={hasMarketReference}
-        className="book-btn mt-6 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[var(--sky)] px-5 py-3.5 text-[15px] font-semibold tracking-[-0.01em] text-white hover:bg-[var(--electric)] disabled:cursor-not-allowed disabled:opacity-40"
+        className="book-btn mt-6 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[var(--sky-solid)] px-5 py-3.5 text-[15px] font-semibold tracking-[-0.01em] text-white shadow-[0_4px_14px_rgba(8,150,191,0.35),inset_0_1px_0_rgba(255,255,255,0.3)] transition-all duration-150 hover:-translate-y-px hover:bg-[color-mix(in_oklab,var(--electric)_90%,var(--navy))] hover:shadow-[0_8px_22px_rgba(0,122,229,0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sky)]/40 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none disabled:hover:translate-y-0"
       >
         {hasMarketReference ? "Market reference only" : "Continue booking"}
         {!hasMarketReference ? <span aria-hidden>→</span> : null}

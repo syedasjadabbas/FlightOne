@@ -433,7 +433,9 @@ export function OpsEscalationDetailClient({ id }: { id: string }) {
                     <td>
                       <OpsStatusPill state={a.status} />
                     </td>
-                    <td>{new Date(a.createdAt).toLocaleString()}</td>
+                    <td className="fo-desk__table-time">
+                      {new Date(a.createdAt).toLocaleString()}
+                    </td>
                   </tr>
                 ))}
               </tbody>

@@ -110,6 +110,7 @@ export function SearchableSelect({
   const searchRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -138,7 +139,14 @@ export function SearchableSelect({
   useEffect(() => {
     if (!open) return;
     const onDoc = (e: MouseEvent) => {
-      if (!rootRef.current?.contains(e.target as Node)) close();
+      // The menu is portaled to <body>, so it is NOT a DOM descendant of
+      // rootRef — testing rootRef alone treated every click on the trigger and
+      // on the options themselves as "outside", closing the menu in the same
+      // gesture that opened it.
+      const target = e.target as Node;
+      if (rootRef.current?.contains(target)) return;
+      if (menuRef.current?.contains(target)) return;
+      close();
     };
     document.addEventListener("mousedown", onDoc);
     return () => document.removeEventListener("mousedown", onDoc);
@@ -311,6 +319,7 @@ export function SearchableSelect({
       {open && menuRect && typeof document !== "undefined"
         ? createPortal(
             <div
+              ref={menuRef}
               className="fo-select-menu fixed z-50 overflow-hidden rounded-2xl border border-black/10 bg-white/95 backdrop-blur-xl shadow-[0_16px_36px_-8px_rgba(14,22,32,0.16)]"
               style={{ top: menuRect.top, left: menuRect.left, width: menuRect.width }}
             >

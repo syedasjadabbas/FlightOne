@@ -652,8 +652,37 @@
   gap: 0.55rem;
 }
 
+/* The column stretch made a short-code submit span the whole card, reading
+   far heavier than the action deserves. Size it to its label instead. */
+.fo-rewards__attach > button[type="submit"] {
+  align-self: flex-start;
+}
+
+/* A failure and a success rendered identically in grey — the user had no way
+   to tell "attached" from "rejected" except by reading carefully. */
 .fo-rewards__status {
-  margin: 0;
-  font-size: 0.75rem;
-  color: var(--ink-soft);
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  margin: 0.15rem 0 0;
+  padding: 0.5rem 0.7rem;
+  border-radius: 0.625rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  font-weight: 500;
+}
+
+.fo-rewards__status svg {
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.fo-rewards__status--ok {
+  background: rgba(16, 185, 129, 0.1);
+  color: #047857;
+}
+
+.fo-rewards__status--error {
+  background: rgba(220, 38, 38, 0.1);
+  color: #b91c1c;
 }

@@ -61,7 +61,7 @@ export function KnowledgeDocsTable({
               <th>Category</th>
               <th>Status</th>
               <th>Visibility</th>
-              <th>Chunks</th>
+              <th className="fo-desk__table-num">Chunks</th>
               {canWrite ? <th>Actions</th> : null}
             </tr>
           </thead>
@@ -80,7 +80,7 @@ export function KnowledgeDocsTable({
                   />
                 </td>
                 <td>{humanizeToken(d.visibility)}</td>
-                <td className="fo-desk__mono">{d.chunkCount ?? 0}</td>
+                <td className="fo-desk__mono fo-desk__table-num">{d.chunkCount ?? 0}</td>
                 {canWrite ? (
                   <td>
                     <div className="fo-desk__toolbar">

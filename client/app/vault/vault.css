@@ -1167,16 +1167,95 @@
   scrollbar-gutter: stable;
 }
 
+/* Action result shown inside the dialog. The page-level flash renders behind
+   the modal overlay, so a share-token confirmation was effectively invisible
+   for the one action most likely to be run from in here. */
+.fo-vault__dialog-flash {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin: 0 1.5rem 0.25rem;
+  padding: 0.65rem 0.8rem;
+  border-radius: 0.75rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  font-weight: 500;
+}
+
+.fo-vault__dialog-flash svg {
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+/* Share tokens are long opaque strings — wrap instead of overflowing. */
+.fo-vault__dialog-flash-text {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.fo-vault__dialog-flash-dismiss {
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  font-weight: 600;
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  opacity: 0.75;
+}
+
+.fo-vault__dialog-flash-dismiss:hover {
+  opacity: 1;
+}
+
+.fo-vault__dialog-flash--ok {
+  background: rgba(16, 185, 129, 0.1);
+  color: #047857;
+}
+
+.fo-vault__dialog-flash--err {
+  background: rgba(220, 38, 38, 0.1);
+  color: #b91c1c;
+}
+
 .fo-vault__dialog-foot {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
+  gap: 0.75rem 1.25rem;
   flex-shrink: 0;
   padding: 0.85rem 1.5rem 1.25rem;
   border-top: 1px solid rgba(14, 22, 32, 0.06);
   background: #ffffff;
+}
+
+/* On touch, the 36px `size="sm"` footer buttons fall under the 44px target
+   minimum — raise them only for coarse pointers so desktop keeps its density. */
+@media (pointer: coarse) {
+  .fo-vault__dialog-foot button {
+    min-height: 2.75rem;
+  }
+}
+
+/* Destructive action gets its own row once the footer wraps — `space-between`
+   alone can leave Delete sitting flush against Replace Scan, where a misclick
+   is one button's width away from deleting the document. */
+@media (max-width: 34rem) {
+  .fo-vault__dialog-foot {
+    justify-content: stretch;
+  }
+
+  .fo-vault__dialog-foot > *:last-child:not(.fo-vault__action-group) {
+    width: 100%;
+    margin-top: 0.15rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(14, 22, 32, 0.06);
+  }
 }
 
 .fo-vault__dropzone {
@@ -1318,6 +1397,18 @@
 .fo-vault__status-pill--sky {
   background: rgba(8, 150, 191, 0.12);
   color: var(--sky);
+}
+
+/* Expiry is the one status a traveller must not miss — carry it in hue, not
+   just text. Both colors are darkened past AA on their own tint. */
+.fo-vault__status-pill--warn {
+  background: rgba(180, 83, 9, 0.12);
+  color: #9a3412;
+}
+
+.fo-vault__status-pill--danger {
+  background: rgba(220, 38, 38, 0.12);
+  color: #b91c1c;
 }
 
 .fo-vault__facts {

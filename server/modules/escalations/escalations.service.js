@@ -283,7 +283,11 @@ export async function requestEscalationForCustomer(userId, body = {}) {
     : detectEscalationIntentFromMessage(body.note || body.reasonDetail || "") ||
       "CUSTOMER_REQUEST";
 
-  // Customers may only self-request these PRD triggers (not invent VIP etc.).
+  // Customers may self-request ordinary support categories, but not triggers
+  // that grant queue priority or assert supplier fault — VIP_BOOKING,
+  // SUPPLIER_FAILURE, AI_DISCOUNT_LIMIT and JOURNEY_DISRUPTION stay ops-only.
+  // These mirror the categories the support form actually offers; omitting
+  // VISA_UNCERTAIN / COMPLEX_ITINERARY / OTHER 400'd three of its seven options.
   const customerAllowed = new Set([
     "CUSTOMER_REQUEST",
     "MEDICAL_ASSISTANCE",
@@ -291,6 +295,9 @@ export async function requestEscalationForCustomer(userId, body = {}) {
     "SPECIAL_SERVICE_REQUEST",
     "SSR",
     "REFUND_DISPUTE",
+    "VISA_UNCERTAIN",
+    "COMPLEX_ITINERARY",
+    "OTHER",
   ]);
   if (!customerAllowed.has(trigger)) {
     throw new AppError(400, "Customers cannot self-assign this escalation trigger");

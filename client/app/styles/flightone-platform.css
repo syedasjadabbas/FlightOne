@@ -1063,19 +1063,24 @@
   margin-top: 0.7rem;
 }
 
+/* Inactive and active chips are siblings in the same row, so they share one
+   geometry — only weight and fill change. Collapsing the inactive state to
+   bare text made the active pill read as a different control entirely. */
 .results-summary-chip {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0;
-  border-radius: 0;
+  padding: 0.3rem 0.7rem;
+  border-radius: 9999px;
   font-size: 0.8125rem;
   font-weight: 500;
   letter-spacing: -0.01em;
   color: var(--ink-soft);
   background: transparent;
-  border: none;
-  transition: color 0.15s ease;
+  border: 1px solid transparent;
+  transition:
+    color 0.15s ease,
+    background 0.15s ease;
 }
 
 .results-summary-chip--active,
@@ -1113,28 +1118,19 @@
   margin-top: 0.7rem;
 }
 
+/* Base shape/elevation lives in globals.css `.results-tool-btn` — the tactile
+   pill shared with the rest of the app. Only the states it doesn't define
+   belong here; re-declaring shape produced a flat bordered "ghost card" that
+   clashed with the pill chips sitting right next to it. */
 .results-tool-btn {
-  border-radius: 0.4rem;
-  border: 1px solid color-mix(in oklab, var(--line) 80%, transparent);
-  background: transparent;
-  padding: 0.35rem 0.7rem;
-  font-size: 0.6875rem;
-  font-weight: 600;
+  min-height: 1.75rem;
   letter-spacing: -0.01em;
-  color: var(--navy);
-  cursor: pointer;
-  transition:
-    border-color 0.15s ease,
-    background 0.15s ease,
-    color 0.15s ease;
-  box-shadow: none;
 }
 
+/* Tint the surface, not the label: `--sky` on white is only 3.43:1, which
+   fails AA for 11px text. Navy stays; the lift comes from globals.css. */
 .results-tool-btn:hover {
-  border-color: color-mix(in oklab, var(--sky) 35%, var(--line));
-  color: var(--navy);
-  background: color-mix(in oklab, var(--horizon-cool) 40%, white);
-  box-shadow: none;
+  background: color-mix(in oklab, var(--cyan) 6%, white);
 }
 
 .results-tool-btn:focus-visible {
@@ -1143,20 +1139,24 @@
 }
 
 .results-tool-btn:active {
-  transform: none;
+  transform: scale(0.98);
+  box-shadow: 0 1px 4px rgba(14, 22, 32, 0.06), inset 0 1px 0 #ffffff;
 }
 
 .results-tool-btn--accent {
-  border-color: color-mix(in oklab, var(--line) 78%, transparent);
-  background: var(--white);
-  color: var(--navy);
+  background: var(--navy);
+  color: var(--white);
+  box-shadow:
+    0 4px 14px -3px rgba(14, 22, 32, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .results-tool-btn--accent:hover {
-  border-color: color-mix(in oklab, var(--cyan) 38%, var(--line));
-  background: var(--white);
-  color: var(--navy);
-  box-shadow: 0 1px 4px -2px color-mix(in oklab, var(--navy) 8%, transparent);
+  background: color-mix(in oklab, var(--navy) 78%, var(--cyan));
+  color: var(--white);
+  box-shadow:
+    0 6px 18px -3px rgba(14, 22, 32, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 .results-tool-panel {
@@ -1301,7 +1301,9 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  border: 1px solid transparent;
+  /* White-on-white with shadow alone left the row reading as floating labels;
+     a faint edge makes each pill a discrete, clickable-looking control. */
+  border: 1px solid color-mix(in oklab, var(--line) 60%, transparent);
   background: var(--white);
   color: var(--navy);
   box-shadow: 0 2px 8px rgba(14, 22, 32, 0.05), inset 0 1px 0 #ffffff;

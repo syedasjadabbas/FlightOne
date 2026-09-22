@@ -55,13 +55,16 @@ function PageButton({
     <button
       type="button"
       className={cn(
-        "inline-flex h-9 min-w-9 items-center justify-center rounded-xl border px-2.5 text-[13px] font-medium transition-colors duration-150",
+        "inline-flex h-9 min-w-9 items-center justify-center rounded-full border px-2.5 text-[13px] font-medium transition-colors duration-150",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sky)]/35 focus-visible:ring-offset-1",
-        "disabled:cursor-not-allowed disabled:opacity-40",
+        // Matches Button's DISABLED_ATTR_CLASS: a blanket opacity fades the
+        // label and the fill together and collapses contrast, so use a flat
+        // pale fill with a full-strength --ink-soft label instead.
+        "disabled:cursor-not-allowed disabled:border-black/[0.06] disabled:bg-[#ececed] disabled:text-[var(--ink-soft)]",
         "cursor-pointer motion-reduce:transition-none",
         active
-          ? "border-[var(--sky)] bg-[color-mix(in_oklab,var(--sky)_12%,white)] text-[var(--navy)]"
-          : "border-line bg-white text-ink hover:border-[color-mix(in_oklab,var(--sky)_40%,var(--line))] hover:bg-[var(--light)]",
+          ? "border-[var(--sky)] bg-[#e7f2f8] text-[var(--navy)]"
+          : "border-line bg-white text-ink hover:border-[#a0c7d9] hover:bg-[var(--light)]",
         className,
       )}
       {...rest}
@@ -71,7 +74,7 @@ function PageButton({
 
 /**
  * Custom pagination — prev/next, numbered pages with ellipsis, optional page size.
- * Matches Input/Button focus language (sky ring, rounded-xl, --line borders).
+ * Matches Button's language (sky focus ring, pill radius, --line borders).
  */
 export function Pagination({
   page,

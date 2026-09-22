@@ -9,6 +9,7 @@ import {
   Palette,
 } from "lucide-react";
 import { Button, Input } from "@/components/ui";
+import { apiErrorMessage } from "@/lib/api/apiErrorMessage";
 import { useAuthStore } from "@/store/auth.store";
 import {
   useConfigureCompanyDomainMutation,
@@ -181,8 +182,8 @@ export function CorporatePortalSection({
                   portalEnabled: true,
                 }).unwrap();
                 setMsg({ text: "Branding saved" });
-              } catch {
-                setMsg({ text: "Could not save branding.", error: true });
+              } catch (err) {
+                setMsg({ text: apiErrorMessage(err, "Could not save branding."), error: true });
               }
             }}
           >
@@ -204,8 +205,8 @@ export function CorporatePortalSection({
                 try {
                   await configureDomain({ companyId, hostname: hostname.trim() }).unwrap();
                   setMsg({ text: "Hostname saved — verification required" });
-                } catch {
-                  setMsg({ text: "Could not save hostname.", error: true });
+                } catch (err) {
+                  setMsg({ text: apiErrorMessage(err, "Could not save hostname."), error: true });
                 }
               }}
             >
@@ -224,8 +225,11 @@ export function CorporatePortalSection({
                   setMsg({
                     text: out?.domain?.reason || out?.domain?.status || "Verification checked",
                   });
-                } catch {
-                  setMsg({ text: "Domain verification did not succeed.", error: true });
+                } catch (err) {
+                  setMsg({
+                    text: apiErrorMessage(err, "Domain verification did not succeed."),
+                    error: true,
+                  });
                 }
               }}
             >
@@ -266,8 +270,8 @@ export function CorporatePortalSection({
                 setMsg({
                   text: "SSO settings stored. Live login stays unavailable until a real IdP is configured.",
                 });
-              } catch {
-                setMsg({ text: "Could not save SSO settings.", error: true });
+              } catch (err) {
+                setMsg({ text: apiErrorMessage(err, "Could not save SSO settings."), error: true });
               }
             }}
           >
@@ -280,11 +284,16 @@ export function CorporatePortalSection({
         </p>
       )}
       {msg ? (
-        <p className="inline-flex items-center gap-1.5 text-[13px] text-[var(--ink-soft)]" role="status">
+        <p
+          className={`fo-corporate__status ${
+            msg.error ? "fo-corporate__status--error" : "fo-corporate__status--ok"
+          }`}
+          role={msg.error ? "alert" : "status"}
+        >
           {msg.error ? (
-            <AlertCircle className="h-3.5 w-3.5 shrink-0 text-danger" aria-hidden />
+            <AlertCircle className="h-3.5 w-3.5" aria-hidden />
           ) : (
-            <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-[var(--cyan)]" aria-hidden />
+            <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
           )}
           {msg.text}
         </p>

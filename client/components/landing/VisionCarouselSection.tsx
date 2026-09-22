@@ -191,7 +191,6 @@ export default function VisionCarouselSection() {
     const io = new IntersectionObserver(
       ([entry]) => {
         if (!entry?.isIntersecting) return;
-        console.log('[DEBUG]', performance.now().toFixed(0), 'assetsReady=true (section within 800px)');
         setAssetsReady(true);
         io.disconnect();
       },
@@ -310,14 +309,9 @@ export default function VisionCarouselSection() {
 
         // Refresh once the background artwork has finished loading
         const bgEl = bgImgRef.current;
-        console.log('[DEBUG]', performance.now().toFixed(0), 'GSAP mounted, bgEl.complete=', bgEl?.complete);
-        const handleImageLoad = () => {
-          console.log('[DEBUG]', performance.now().toFixed(0), 'bg image load event fired, refreshing ScrollTrigger');
-          ScrollTrigger.refresh();
-        };
+        const handleImageLoad = () => ScrollTrigger.refresh();
         if (bgEl) {
           if (bgEl.complete) {
-            console.log('[DEBUG]', performance.now().toFixed(0), 'bg image already complete, refreshing immediately');
             ScrollTrigger.refresh();
           } else {
             bgEl.addEventListener('load', handleImageLoad);

@@ -21,10 +21,15 @@ router.post("/lookup", optionalAuth, validateBody(lookupVisaSchema), visaControl
 router.post("/assess", optionalAuth, validateBody(assessVisaSchema), visaController.assess);
 router.post("/escalate", requireAuth, validateBody(escalateVisaSchema), visaController.escalate);
 
-router.post("/applications", validateBody(createVisaApplicationSchema), visaController.createApplication);
-router.get("/applications", validateQuery(listVisaApplicationsQuerySchema), visaController.listApplications);
+// These routes read and write a user's own visa applications, so they are
+// authenticated: the service derives ownership from `req.user.id`, and without
+// requireAuth `req.user` was undefined — a 500 on every call, and unauthenticated
+// access to the handlers underneath it.
+router.post("/applications", requireAuth, validateBody(createVisaApplicationSchema), visaController.createApplication);
+router.get("/applications", requireAuth, validateQuery(listVisaApplicationsQuerySchema), visaController.listApplications);
 router.patch(
   "/applications/:id",
+  requireAuth,
   validateParams(visaApplicationIdParamsSchema),
   validateBody(updateVisaApplicationSchema),
   visaController.updateApplication,

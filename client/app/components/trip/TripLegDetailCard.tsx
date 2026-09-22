@@ -352,7 +352,7 @@ export function TripLegDetailCard({
       {showTransferAfter ? (
         <div className="flex items-center gap-3 py-3 pl-5">
           <span className="h-px flex-1 bg-[var(--line)]" aria-hidden />
-          <span className="rounded-full border border-amber-500/35 bg-amber-500/10 px-3 py-1 text-[11px] font-medium text-amber-200/90">
+          <span className="rounded-full border border-amber-500/35 bg-amber-500/10 px-3 py-1 text-[11px] font-medium text-amber-800">
             Self-transfer — allow time between tickets
           </span>
           <span className="h-px flex-1 bg-[var(--line)]" aria-hidden />

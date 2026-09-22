@@ -701,11 +701,13 @@ export function ManagementDashboardClient() {
                     <thead>
                       <tr>
                         <th>Currency</th>
-                        <th>Gross revenue</th>
-                        <th>Operating margin</th>
+                        <th className="fo-desk__table-num">Gross revenue</th>
+                        <th className="fo-desk__table-num">Operating margin</th>
+                        {/* Margin rate renders inside a pill, so right-aligning would
+                            detach the pill from its header rather than line up digits. */}
                         <th>Margin rate</th>
-                        <th>Orders</th>
-                        <th>Avg basket</th>
+                        <th className="fo-desk__table-num">Orders</th>
+                        <th className="fo-desk__table-num">Avg basket</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -724,10 +726,10 @@ export function ManagementDashboardClient() {
                                 {c.currency}
                               </span>
                             </td>
-                            <td className="font-mono font-semibold text-[var(--navy)]">
+                            <td className="font-mono fo-desk__table-num font-semibold text-[var(--navy)]">
                               {money(c.revenueMinor, c.currency)}
                             </td>
-                            <td className="font-mono">
+                            <td className="font-mono fo-desk__table-num">
                               {m ? money(m.marginMinor, m.currency) : "—"}
                             </td>
                             <td>
@@ -735,10 +737,10 @@ export function ManagementDashboardClient() {
                                 {pct(rate)}
                               </span>
                             </td>
-                            <td className="font-mono text-xs text-[var(--ink-soft)]">
+                            <td className="font-mono fo-desk__table-num text-xs text-[var(--ink-soft)]">
                               {c.bookingCount}
                             </td>
-                            <td className="font-mono text-xs text-[var(--ink-soft)]">
+                            <td className="font-mono fo-desk__table-num text-xs text-[var(--ink-soft)]">
                               {money(avgBasket, c.currency)}
                             </td>
                           </tr>
@@ -866,8 +868,9 @@ export function ManagementDashboardClient() {
                           <thead>
                             <tr>
                               <th>Company</th>
-                              <th>Used</th>
-                              <th>Limit</th>
+                              <th className="fo-desk__table-num">Used</th>
+                              <th className="fo-desk__table-num">Limit</th>
+                              {/* Util is a progress bar, not a number. */}
                               <th>Util</th>
                             </tr>
                           </thead>
@@ -881,10 +884,10 @@ export function ManagementDashboardClient() {
                               return (
                                 <tr key={c.id}>
                                   <td className="font-semibold text-[var(--navy)]">{c.name}</td>
-                                  <td className="font-mono">
+                                  <td className="font-mono fo-desk__table-num">
                                     {money(c.creditUsedMinor, c.currency)}
                                   </td>
-                                  <td className="font-mono text-[var(--ink-soft)]">
+                                  <td className="font-mono fo-desk__table-num text-[var(--ink-soft)]">
                                     {money(c.creditLimitMinor, c.currency)}
                                   </td>
                                   <td>
@@ -976,10 +979,11 @@ export function ManagementDashboardClient() {
                         <thead>
                           <tr>
                             <th>Supplier</th>
-                            <th>Attempts</th>
-                            <th>Confirmed</th>
+                            <th className="fo-desk__table-num">Attempts</th>
+                            <th className="fo-desk__table-num">Confirmed</th>
+                            {/* Fulfillment is a progress bar, not a number. */}
                             <th>Fulfillment</th>
-                            <th>Cancel</th>
+                            <th className="fo-desk__table-num">Cancel</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -994,10 +998,10 @@ export function ManagementDashboardClient() {
                                     {s.supplierCode}
                                   </span>
                                 </td>
-                                <td className="font-mono text-xs">
+                                <td className="font-mono fo-desk__table-num text-xs">
                                   {s.bookings.toLocaleString()}
                                 </td>
-                                <td className="font-mono text-xs font-semibold text-[var(--cyan)]">
+                                <td className="font-mono fo-desk__table-num text-xs font-semibold text-[var(--cyan)]">
                                   {s.ticketedOrActive.toLocaleString()}
                                 </td>
                                 <td>
@@ -1024,7 +1028,7 @@ export function ManagementDashboardClient() {
                                     </span>
                                   </div>
                                 </td>
-                                <td className="font-mono text-xs text-[var(--ink-soft)]">
+                                <td className="font-mono fo-desk__table-num text-xs text-[var(--ink-soft)]">
                                   {pct(s.cancelRefundRate)}
                                 </td>
                               </tr>
@@ -1076,8 +1080,8 @@ export function ManagementDashboardClient() {
                     <thead>
                       <tr>
                         <th>Currency</th>
-                        <th>AOV</th>
-                        <th>Orders</th>
+                        <th className="fo-desk__table-num">AOV</th>
+                        <th className="fo-desk__table-num">Orders</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1088,10 +1092,10 @@ export function ManagementDashboardClient() {
                               {a.currency}
                             </span>
                           </td>
-                          <td className="font-mono font-semibold text-[var(--navy)]">
+                          <td className="font-mono fo-desk__table-num font-semibold text-[var(--navy)]">
                             {money(a.avgAmountMinor, a.currency)}
                           </td>
-                          <td className="font-mono text-xs text-[var(--ink-soft)]">
+                          <td className="font-mono fo-desk__table-num text-xs text-[var(--ink-soft)]">
                             {a.bookingCount.toLocaleString()}
                           </td>
                         </tr>

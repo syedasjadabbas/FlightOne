@@ -14,6 +14,7 @@ import {
   useGetRewardsSummaryQuery,
 } from "@/lib/api/rewards.api";
 import { useListCompaniesQuery } from "@/lib/api/corporate.api";
+import { apiErrorMessage } from "@/lib/api/apiErrorMessage";
 import { useAuthStore } from "@/store/auth.store";
 import {
   CorporateRewardsList,
@@ -31,6 +32,7 @@ export function RewardsPageClient() {
   const accessToken = useAuthStore((s) => s.accessToken);
   const [referralInput, setReferralInput] = useState("");
   const [localMsg, setLocalMsg] = useState<string | null>(null);
+  const [localMsgTone, setLocalMsgTone] = useState<"ok" | "error">("ok");
   const [ledgerPage, setLedgerPage] = useState(1);
   const [selectedEntryId, setSelectedEntryId] = useState<string | null>(null);
 
@@ -67,12 +69,17 @@ export function RewardsPageClient() {
 
   async function handleAttachReferral() {
     setLocalMsg(null);
+    setLocalMsgTone("ok");
     try {
       await attach({ code: referralInput.trim() }).unwrap();
       setLocalMsg("Referral code attached successfully.");
       setReferralInput("");
-    } catch {
-      setLocalMsg("Could not attach referral code (may be invalid or already attached).");
+    } catch (err) {
+      // The API already explains *why* it failed ("Cannot refer yourself",
+      // "Referral code not found"). Surfacing our own guess instead hid the
+      // one detail that tells the user what to do next.
+      setLocalMsgTone("error");
+      setLocalMsg(apiErrorMessage(err, "Could not attach referral code."));
     }
   }
 
@@ -243,6 +250,7 @@ export function RewardsPageClient() {
         onAttach={handleAttachReferral}
         attaching={attachState.isLoading}
         localMsg={localMsg}
+        localMsgTone={localMsgTone}
       />
 
       <CorporateRewardsList companies={companies || []} />

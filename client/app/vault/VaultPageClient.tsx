@@ -32,6 +32,7 @@ import {
   type VaultDocType,
   type VaultDocument,
 } from "@/lib/api/vault.api";
+import { apiErrorMessage } from "@/lib/api/apiErrorMessage";
 import { uploadFileToGcs } from "@/lib/upload/gcsUpload";
 import { isIdentityVaultType } from "@/lib/profile/ocrReview";
 import { VAULT_TYPE_LABELS, VAULT_TYPE_ORDER } from "@/lib/vault/visaStatus";
@@ -334,8 +335,8 @@ export function VaultPageClient() {
       const r = await shareDoc({ id: doc.id, ttlHours: 24 }).unwrap();
       await navigator.clipboard.writeText(r.token);
       setActionSuccess(`Share token copied to clipboard (valid 24h): ${r.token}`);
-    } catch {
-      setActionError("Could not generate share token.");
+    } catch (err) {
+      setActionError(apiErrorMessage(err, "Could not generate share token."));
     } finally {
       setBusyId(null);
       setBusyAction(null);
@@ -646,7 +647,7 @@ export function VaultPageClient() {
       />
 
       {/* ── Flash Notifications ──────────────────────────────────────── */}
-      {actionSuccess ? (
+      {actionSuccess && !showUploadModal && !selectedDocId ? (
         <div className="fo-vault__flash fo-vault__flash--ok" role="status">
           <span className="flex items-center gap-2">
             <Check size={15} strokeWidth={2.5} className="text-emerald" />
@@ -662,7 +663,7 @@ export function VaultPageClient() {
         </div>
       ) : null}
 
-      {actionError && !showUploadModal ? (
+      {actionError && !showUploadModal && !selectedDocId ? (
         <div className="fo-vault__flash fo-vault__flash--err" role="alert">
           <span className="flex items-center gap-2">
             <AlertCircle size={15} strokeWidth={2.5} className="text-danger" />
@@ -817,6 +818,12 @@ export function VaultPageClient() {
           onClose={() => {
             setSelectedDocId(null);
             setSelectedFallback(null);
+          }}
+          actionError={actionError}
+          actionSuccess={actionSuccess}
+          onDismissAction={() => {
+            setActionError(null);
+            setActionSuccess(null);
           }}
           onDownload={(doc) => void onDownload(doc)}
           onShare={(doc) => void onShare(doc)}

@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, FileDown, Receipt } from "lucide-react";
+import { AlertCircle, CheckCircle2, FileDown, Receipt } from "lucide-react";
 import { Button, Input } from "@/components/ui";
+import { apiErrorMessage } from "@/lib/api/apiErrorMessage";
 import {
   useAttachExpenseReceiptMutation,
   useCreateExpenseMutation,
@@ -54,7 +55,26 @@ export function CorporateExpensesSection({
   const [category, setCategory] = useState("MEALS");
   const [bookingId, setBookingId] = useState("");
   const [daily, setDaily] = useState("");
-  const [msg, setMsg] = useState<string | null>(null);
+  const [msg, setMsg] = useState<{ text: string; error?: boolean } | null>(null);
+
+  /**
+   * Row actions were fire-and-forget `void mutation()`: a click produced no
+   * feedback and a rejected request vanished silently. One runner gives every
+   * row action the same success/failure reporting as the forms above.
+   */
+  const runRowAction = async (
+    action: Promise<unknown> | { unwrap: () => Promise<unknown> },
+    okText: string,
+    failText: string,
+  ) => {
+    setMsg(null);
+    try {
+      await ("unwrap" in action ? action.unwrap() : action);
+      setMsg({ text: okText });
+    } catch (err) {
+      setMsg({ text: apiErrorMessage(err, failText), error: true });
+    }
+  };
 
   return (
     <section className="fo-desk__panel fo-desk__stack">
@@ -120,7 +140,7 @@ export function CorporateExpensesSection({
           setMsg(null);
           const n = Number(amount);
           if (!Number.isInteger(n) || n < 0) {
-            setMsg("Amount must be a non-negative integer (minor units).");
+            setMsg({ text: "Amount must be a non-negative integer (minor units).", error: true });
             return;
           }
           try {
@@ -134,9 +154,15 @@ export function CorporateExpensesSection({
             }).unwrap();
             setAmount("");
             setMerchant("");
-            setMsg("Expense saved as draft");
-          } catch {
-            setMsg("Could not create expense (check per-diem policy / trip ownership).");
+            setMsg({ text: "Expense saved as draft" });
+          } catch (err) {
+            setMsg({
+              text: apiErrorMessage(
+                err,
+                "Could not create expense (check per-diem policy / trip ownership).",
+              ),
+              error: true,
+            });
           }
         }}
       >
@@ -153,7 +179,7 @@ export function CorporateExpensesSection({
             <thead>
               <tr>
                 <th>Merchant</th>
-                <th>Amount</th>
+                <th className="fo-desk__table-num">Amount</th>
                 <th>Status</th>
                 <th>OCR</th>
                 <th>Actions</th>
@@ -172,7 +198,7 @@ export function CorporateExpensesSection({
                       </span>
                     ) : null}
                   </td>
-                  <td>{money(e.amountMinor, e.currency)}</td>
+                  <td className="fo-desk__table-num">{money(e.amountMinor, e.currency)}</td>
                   <td>
                     <DeskStatus tone={expenseTone(e.status)}>{e.status}</DeskStatus>
                   </td>
@@ -184,7 +210,13 @@ export function CorporateExpensesSection({
                           size="sm"
                           variant="secondary"
                           type="button"
-                          onClick={() => void submitExpense({ companyId, expenseId: e.id })}
+                          onClick={() =>
+                            void runRowAction(
+                              submitExpense({ companyId, expenseId: e.id }),
+                              "Expense submitted for approval",
+                              "Could not submit expense.",
+                            )
+                          }
                         >
                           Submit
                         </Button>
@@ -195,11 +227,15 @@ export function CorporateExpensesSection({
                             size="sm"
                             type="button"
                             onClick={() =>
-                              void decideExpense({
-                                companyId,
-                                expenseId: e.id,
-                                decision: "APPROVE",
-                              })
+                              void runRowAction(
+                                decideExpense({
+                                  companyId,
+                                  expenseId: e.id,
+                                  decision: "APPROVE",
+                                }),
+                                "Expense approved",
+                                "Could not approve expense.",
+                              )
                             }
                           >
                             Approve
@@ -209,11 +245,15 @@ export function CorporateExpensesSection({
                             variant="secondary"
                             type="button"
                             onClick={() =>
-                              void decideExpense({
-                                companyId,
-                                expenseId: e.id,
-                                decision: "REJECT",
-                              })
+                              void runRowAction(
+                                decideExpense({
+                                  companyId,
+                                  expenseId: e.id,
+                                  decision: "REJECT",
+                                }),
+                                "Expense rejected",
+                                "Could not reject expense.",
+                              )
                             }
                           >
                             Reject
@@ -225,7 +265,13 @@ export function CorporateExpensesSection({
                         <Button
                           size="sm"
                           type="button"
-                          onClick={() => void reimburse({ companyId, expenseId: e.id })}
+                          onClick={() =>
+                            void runRowAction(
+                              reimburse({ companyId, expenseId: e.id }),
+                              "Expense marked reimbursed",
+                              "Could not mark expense reimbursed.",
+                            )
+                          }
                         >
                           Mark reimbursed
                         </Button>
@@ -258,9 +304,15 @@ export function CorporateExpensesSection({
                                 contentType: file.type || "application/pdf",
                                 originalFilename: file.name,
                               }).unwrap();
-                              setMsg("Receipt recorded");
-                            } catch {
-                              setMsg("Receipt was not stored (check file type / storage).");
+                              setMsg({ text: "Receipt recorded" });
+                            } catch (err) {
+                              setMsg({
+                                text: apiErrorMessage(
+                                  err,
+                                  "Receipt was not stored (check file type / storage).",
+                                ),
+                                error: true,
+                              });
                             }
                           }}
                         />
@@ -295,9 +347,12 @@ export function CorporateExpensesSection({
                     dailyAmountMinor: n,
                     name: "Standard per diem",
                   }).unwrap();
-                  setMsg("Per-diem policy saved");
-                } catch {
-                  setMsg("Could not save per-diem policy.");
+                  setMsg({ text: "Per-diem policy saved" });
+                } catch (err) {
+                  setMsg({
+                    text: apiErrorMessage(err, "Could not save per-diem policy."),
+                    error: true,
+                  });
                 }
               }}
             >
@@ -318,14 +373,14 @@ export function CorporateExpensesSection({
                   a.download = out.filename;
                   a.click();
                   URL.revokeObjectURL(url);
-                  setMsg(
-                    out.submittedExternally
+                  setMsg({
+                    text: out.submittedExternally
                       ? "Export downloaded"
                       : out.integration.reason ||
-                          "Local CSV downloaded — not sent to payroll.",
-                  );
-                } catch {
-                  setMsg("Export failed.");
+                        "Local CSV downloaded — not sent to payroll.",
+                  });
+                } catch (err) {
+                  setMsg({ text: apiErrorMessage(err, "Export failed."), error: true });
                 }
               }}
             >
@@ -335,9 +390,18 @@ export function CorporateExpensesSection({
         </>
       ) : null}
       {msg ? (
-        <p className="inline-flex items-center gap-1.5 text-[13px] text-[var(--ink-soft)]">
-          <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-[var(--cyan)]" aria-hidden />
-          {msg}
+        <p
+          className={`fo-corporate__status ${
+            msg.error ? "fo-corporate__status--error" : "fo-corporate__status--ok"
+          }`}
+          role={msg.error ? "alert" : "status"}
+        >
+          {msg.error ? (
+            <AlertCircle className="h-3.5 w-3.5" aria-hidden />
+          ) : (
+            <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
+          )}
+          {msg.text}
         </p>
       ) : null}
     </section>

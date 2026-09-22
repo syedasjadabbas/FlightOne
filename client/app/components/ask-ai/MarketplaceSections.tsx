@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef, useState } from "react";
-import Link from "next/link";
 import type { OfferCard } from "@/lib/consultant/types";
 import type {
   DriveDiscoveryCard,
@@ -10,7 +9,6 @@ import type {
   StayDiscoveryCard,
 } from "@/lib/ask-ai/resultsMarketplace";
 import { hotelOfferImage } from "@/lib/ask-ai/marketplaceImages";
-import { FLIGHTONE_BRAND, whatsappHref } from "@/lib/content/flightone";
 import {
   DoodleGlobe,
   DoodleLuggage,
@@ -462,121 +460,5 @@ export function MarketplaceDisclaimer() {
         with a price from your results.
       </p>
     </div>
-  );
-}
-
-function WhatsAppGlyph({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      width="18"
-      height="18"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <path
-        fill="currentColor"
-        d="M19.05 4.91A9.82 9.82 0 0 0 12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.91-7.01zm-7.01 15.24h-.01a8.2 8.2 0 0 1-4.18-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.23 8.23 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.25-8.24 2.2 0 4.27.86 5.82 2.42a8.18 8.18 0 0 1 2.41 5.83c0 4.55-3.7 8.23-8.24 8.23zm4.52-6.16c-.25-.12-1.47-.72-1.7-.81-.23-.08-.39-.12-.56.12-.17.25-.64.81-.79.97-.15.17-.29.19-.54.06-.25-.12-1.05-.39-2-1.23-.74-.66-1.23-1.47-1.38-1.72-.15-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.12-.15.17-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.4-.42-.56-.42h-.48c-.17 0-.43.06-.66.31-.23.25-.87.85-.87 2.07 0 1.22.89 2.4 1.01 2.56.12.17 1.75 2.67 4.23 3.74 1.48.64 2.07.7 2.81.59.43-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.15-1.18-.06-.1-.23-.17-.48-.29z"
-      />
-    </svg>
-  );
-}
-
-export function MarketplaceFooter({
-  city,
-  onAskStays,
-}: {
-  city?: string;
-  onAskStays?: () => void;
-}) {
-  const year = new Date().getFullYear();
-
-  return (
-    <footer className="results-market__footer">
-      <div className="results-market__footer-glow" aria-hidden="true" />
-
-      <div className="results-market__footer-shell">
-        <div className="results-market__footer-brand">
-          <div className="results-market__footer-brand-copy">
-            <p className="results-market__footer-wordmark">
-              Flight<span>One</span>
-            </p>
-            <p className="results-market__footer-tagline">{FLIGHTONE_BRAND.tagline}</p>
-            <p className="results-market__footer-promise">{FLIGHTONE_BRAND.promise}</p>
-          </div>
-          <div className="results-market__footer-cta">
-            <a
-              href={whatsappHref()}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="results-market__footer-whatsapp"
-            >
-              <WhatsAppGlyph className="results-market__footer-whatsapp-icon" />
-              Chat on WhatsApp
-            </a>
-            <p className="results-market__footer-cta-note">Usually replies within a few minutes</p>
-          </div>
-        </div>
-
-        <div className="results-market__footer-grid">
-          <div className="results-market__footer-col">
-            <p className="results-market__footer-heading">Company</p>
-            <Link href="/chat">About FlightOne</Link>
-            <Link href="/chat">How Ava works</Link>
-            <Link href="/chat">Custom packages</Link>
-          </div>
-          <div className="results-market__footer-col">
-            <p className="results-market__footer-heading">Travel</p>
-            <Link href="/chat">Flights</Link>
-            {onAskStays && city ? (
-              <button type="button" onClick={onAskStays}>
-                Stays in {city}
-              </button>
-            ) : (
-              <Link href="/chat">Stays</Link>
-            )}
-            <Link href="/chat">Chat with Ava</Link>
-            <Link href="/login?redirect=/chat">Sign in</Link>
-          </div>
-          <div className="results-market__footer-col">
-            <p className="results-market__footer-heading">Contact</p>
-            <a href={whatsappHref()} target="_blank" rel="noopener noreferrer">
-              WhatsApp
-            </a>
-            <a href={`mailto:${FLIGHTONE_BRAND.email}`}>{FLIGHTONE_BRAND.email}</a>
-            <a href={`tel:${FLIGHTONE_BRAND.phoneE164}`}>{FLIGHTONE_BRAND.phoneDisplay}</a>
-          </div>
-          <div className="results-market__footer-col results-market__footer-col--meta">
-            <p className="results-market__footer-heading">Visit</p>
-            <div className="results-market__footer-meta">
-              <span className="results-market__footer-meta-label">Hours</span>
-              <span className="results-market__footer-static">{FLIGHTONE_BRAND.hours}</span>
-            </div>
-            <div className="results-market__footer-meta">
-              <span className="results-market__footer-meta-label">Office</span>
-              <span className="results-market__footer-static">{FLIGHTONE_BRAND.address}</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="results-market__footer-legal">
-          <p className="results-market__footer-copy">
-            © {year} {FLIGHTONE_BRAND.name}. Flight prices from Travelport.
-          </p>
-          <div className="results-market__footer-legal-links">
-            <Link href="/chat">Privacy</Link>
-            <span className="results-market__footer-sep" aria-hidden>
-              ·
-            </span>
-            <Link href="/chat">Terms</Link>
-            <span className="results-market__footer-sep" aria-hidden>
-              ·
-            </span>
-            <Link href="/escalations">Support</Link>
-          </div>
-        </div>
-      </div>
-    </footer>
   );
 }
