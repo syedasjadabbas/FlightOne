@@ -1,0 +1,31 @@
+#!/bin/sh
+# Vercel Hobby (team serene3) only deploys commits whose Git author is linked to
+# the project owner. Commits as muneeb71 get "Deployment Blocked".
+#
+# Enforce the stosereneheights-71 identity for this repo only.
+
+REQUIRED_NAME="stosereneheights-71"
+REQUIRED_EMAIL="stosereneheights-71@users.noreply.github.com"
+
+NAME=$(git config --local user.name 2>/dev/null)
+EMAIL=$(git config --local user.email 2>/dev/null)
+
+# Prefer explicit author env (used by some tooling) when present.
+if [ -n "$GIT_AUTHOR_NAME" ]; then NAME="$GIT_AUTHOR_NAME"; fi
+if [ -n "$GIT_AUTHOR_EMAIL" ]; then EMAIL="$GIT_AUTHOR_EMAIL"; fi
+
+if [ "$NAME" != "$REQUIRED_NAME" ] || [ "$EMAIL" != "$REQUIRED_EMAIL" ]; then
+  cat >&2 <<EOF
+pre-commit: refusing commit — Vercel Hobby requires author:
+  $REQUIRED_NAME <$REQUIRED_EMAIL>
+got:
+  ${NAME:-(unset)} <${EMAIL:-(unset)}>
+
+Fix (repo-local only):
+  git config --local user.name "$REQUIRED_NAME"
+  git config --local user.email "$REQUIRED_EMAIL"
+EOF
+  exit 1
+fi
+
+exit 0

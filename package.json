@@ -8,6 +8,7 @@
     "server"
   ],
   "scripts": {
+    "prepare": "git config core.hooksPath .githooks && git config user.name stosereneheights-71 && git config user.email stosereneheights-71@users.noreply.github.com",
     "dev:client": "npm --prefix client run dev",
     "dev:server": "npm --prefix server start",
     "build:client": "npm --prefix client run build",
