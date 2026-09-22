@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   useLoginMutation,
+  useResendVerificationMutation,
   useTwoFactorSetupMutation,
   useTwoFactorConfirmMutation,
   useTwoFactorVerifyMutation,
@@ -60,6 +61,7 @@ export function useLoginForm() {
   const [setup2fa, { isLoading: isSettingUp }] = useTwoFactorSetupMutation();
   const [confirm2fa, { isLoading: isConfirming }] = useTwoFactorConfirmMutation();
   const [verify2fa, { isLoading: isVerifying }] = useTwoFactorVerifyMutation();
+  const [resendVerification, { isLoading: isResending }] = useResendVerificationMutation();
 
   const redirectUrl = searchParams.get("redirect");
 
@@ -200,6 +202,32 @@ export function useLoginForm() {
     setCustomError(null);
   }
 
+  /** Shown when login 403s with requiresVerification — the account exists but
+   *  never finished verifying (e.g. its original email never arrived).
+   *  Sends a fresh code, then hands off to /signup's verify-code step (same
+   *  UI the original signup flow uses) so the user can actually enter it. */
+  async function handleResendVerification() {
+    setCustomError(null);
+
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail) return;
+
+    try {
+      await resendVerification({ email: trimmedEmail }).unwrap();
+      const target = `/signup?step=verify&email=${encodeURIComponent(trimmedEmail)}${
+        redirectUrl ? `&redirect=${encodeURIComponent(redirectUrl)}` : ""
+      }`;
+      router.push(target);
+    } catch (err: any) {
+      const status = err?.status;
+      setCustomError(
+        status === 429
+          ? "Please wait a minute before requesting another code."
+          : formatApiError(err, "Failed to resend code. Please try again."),
+      );
+    }
+  }
+
   function handleCopySecret() {
     if (!setupData?.secret) return;
     navigator.clipboard.writeText(setupData.secret);
@@ -251,6 +279,7 @@ export function useLoginForm() {
     copiedSecret,
     copiedBackupCodes,
     isLoading,
+    isResending,
     errorMessage,
     errorKind,
     handleCredentialsSubmit,
@@ -260,5 +289,6 @@ export function useLoginForm() {
     handleCancelToCredentials,
     handleCopySecret,
     handleCopyBackupCodes,
+    handleResendVerification,
   };
 }

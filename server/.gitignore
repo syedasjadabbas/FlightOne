@@ -8,3 +8,5 @@ data
 .vault-local*
 .prisma-engines/
 .prisma-cache/
+flight-one-key.json
+gcs-cors.json

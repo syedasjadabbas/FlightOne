@@ -72,6 +72,10 @@ export function VaultPageClient() {
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  /** Upload modal's own phase label — the GCS file PUT happens before the
+   *  vault mutation even starts, so `uploading` (RTK's isLoading) alone
+   *  leaves that whole phase with no visible feedback. */
+  const [uploadPhase, setUploadPhase] = useState<"idle" | "transferring" | "saving">("idle");
 
   const skipAuth = !hasHydrated || !accessToken;
   const { data: capability, isLoading: capLoading } = useGetVaultCapabilityQuery(
@@ -253,9 +257,12 @@ export function VaultPageClient() {
     }
 
     try {
+      setUploadPhase("transferring");
       const gcs = await uploadFileToGcs(uploadFile, {
         folder: `vault/${userId || "anon"}`,
       });
+
+      setUploadPhase("saving");
       const uploaded = await upload({
         type: uploadType,
         title: uploadTitle.trim() || uploadFile.name,
@@ -288,6 +295,8 @@ export function VaultPageClient() {
           ? String((err as { data?: { message?: string } }).data?.message || "Upload failed")
           : "Upload failed",
       );
+    } finally {
+      setUploadPhase("idle");
     }
   }
 
@@ -770,7 +779,8 @@ export function VaultPageClient() {
           uploadExpiry={uploadExpiry}
           uploadFile={uploadFile}
           uploadVisa={uploadVisa}
-          uploading={uploading}
+          uploading={uploadPhase !== "idle" || uploading}
+          uploadPhase={uploadPhase}
           actionError={actionError}
           onTitleChange={setUploadTitle}
           onTypeChange={setUploadType}

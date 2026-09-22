@@ -35,6 +35,11 @@ export function useSignupForm() {
 
   const [localError, setLocalError] = useState<string | null>(null);
   const [infoMessage, setInfoMessage] = useState<string | null>(null);
+  /** True when signup failed with 409 (email already registered) — offers a
+   *  resend-verification action inline, since the likely cause is an earlier
+   *  signup whose verification email never arrived (delivery hiccup), not
+   *  necessarily that the user already has a working account. */
+  const [showResendOnConflict, setShowResendOnConflict] = useState(false);
 
   const [register, { isLoading: isRegistering, error: registerError }] = useRegisterMutation();
   const [verifyEmail, { isLoading: isVerifying, error: verifyError }] = useVerifyEmailMutation();
@@ -47,6 +52,7 @@ export function useSignupForm() {
     event.preventDefault();
     setLocalError(null);
     setInfoMessage(null);
+    setShowResendOnConflict(false);
 
     const trimmedName = name.trim();
     const trimmedEmail = email.trim();
@@ -80,12 +86,22 @@ export function useSignupForm() {
         setInfoMessage(`A 6-digit verification code was sent to ${trimmedEmail}.`);
       }
     } catch (err: unknown) {
-      setLocalError(
-        formatApiError(
-          err,
-          "Something went wrong — please try again.",
-        ),
-      );
+      const status =
+        err && typeof err === "object" && "status" in err
+          ? (err as { status?: number }).status
+          : undefined;
+
+      if (status === 409) {
+        setLocalError("An account with this email already exists.");
+        setShowResendOnConflict(true);
+      } else {
+        setLocalError(
+          formatApiError(
+            err,
+            "Something went wrong — please try again.",
+          ),
+        );
+      }
     }
   }
 
@@ -167,6 +183,40 @@ export function useSignupForm() {
     }
   }
 
+  /** From the "email already registered" conflict on signup — the account may
+   *  simply never have finished verifying (e.g. its email never arrived).
+   *  Reuses the same enumeration-safe endpoint; always moves to the verify
+   *  step on success so a genuinely-stuck user can enter the new code. */
+  async function handleResendFromConflict() {
+    setLocalError(null);
+    setInfoMessage(null);
+
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail) {
+      setLocalError("Email address is required.");
+      return;
+    }
+
+    try {
+      await resendVerification({ email: trimmedEmail }).unwrap();
+      setShowResendOnConflict(false);
+      setStep("verify");
+      setInfoMessage(`If an unverified account exists for ${trimmedEmail}, a new 6-digit code was sent.`);
+    } catch (err: unknown) {
+      const status =
+        err && typeof err === "object" && "status" in err
+          ? (err as { status?: number }).status
+          : undefined;
+      if (status === 429) {
+        setLocalError("Please wait a minute before requesting another code.");
+      } else {
+        setLocalError(
+          formatApiError(err, "Failed to resend code. Please try again."),
+        );
+      }
+    }
+  }
+
   const errorMessage = localError;
 
   return {
@@ -185,6 +235,8 @@ export function useSignupForm() {
     handleSubmit,
     handleVerifySubmit,
     handleResendCode,
+    handleResendFromConflict,
+    showResendOnConflict,
     isLoading,
     isResending,
     errorMessage,

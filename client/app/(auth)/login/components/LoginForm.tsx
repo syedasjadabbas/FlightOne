@@ -35,6 +35,7 @@ export function LoginForm() {
     copiedSecret,
     copiedBackupCodes,
     isLoading,
+    isResending,
     errorMessage,
     errorKind,
     handleCredentialsSubmit,
@@ -44,6 +45,7 @@ export function LoginForm() {
     handleCancelToCredentials,
     handleCopySecret,
     handleCopyBackupCodes,
+    handleResendVerification,
   } = useLoginForm();
 
   const passwordRef = useRef<HTMLInputElement>(null);
@@ -435,12 +437,14 @@ export function LoginForm() {
               </p>
               {errorKind === "unverified" ? (
                 <p className="text-right text-xs">
-                  <Link
-                    href={`/signup?email=${encodeURIComponent(email)}&step=verify`}
+                  <button
+                    type="button"
+                    onClick={handleResendVerification}
+                    disabled={isLoading || isResending}
                     className="fo-auth__link"
                   >
-                    Enter verification code
-                  </Link>
+                    {isResending ? "Sending a new code…" : "Send a new verification code"}
+                  </button>
                 </p>
               ) : null}
             </div>

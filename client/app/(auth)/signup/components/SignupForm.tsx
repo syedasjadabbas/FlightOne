@@ -52,6 +52,8 @@ export function SignupForm() {
     handleSubmit,
     handleVerifySubmit,
     handleResendCode,
+    handleResendFromConflict,
+    showResendOnConflict,
     isLoading,
     isResending,
     errorMessage,
@@ -267,6 +269,23 @@ export function SignupForm() {
             <p className="fo-auth__alert fo-signup__alert anim-alert" role="alert">
               <AlertCircle size={15} strokeWidth={2.25} aria-hidden />
               <span>{errorMessage}</span>
+            </p>
+          ) : null}
+
+          {showResendOnConflict ? (
+            <p className="fo-signup__status" role="status">
+              <Mail size={15} strokeWidth={2.25} aria-hidden />
+              <span>
+                If that account never finished verifying, its email may not have arrived.{" "}
+                <button
+                  type="button"
+                  onClick={handleResendFromConflict}
+                  disabled={isLoading}
+                  className="fo-signup__footer-btn"
+                >
+                  {isResending ? "Sending…" : "Resend verification code"}
+                </button>
+              </span>
             </p>
           ) : null}
 

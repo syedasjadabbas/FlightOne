@@ -22,6 +22,12 @@ const UPLOAD_TYPES: Array<{ value: VaultDocType; label: string }> = [
   { value: "OTHER", label: "Other Travel Credential" },
 ];
 
+const UPLOAD_PHASE_LABEL: Record<"idle" | "transferring" | "saving", string> = {
+  idle: "Save to Vault",
+  transferring: "Uploading file…",
+  saving: "Encrypting & saving…",
+};
+
 export function VaultUploadModal({
   uploadTitle,
   uploadType,
@@ -30,6 +36,7 @@ export function VaultUploadModal({
   uploadFile,
   uploadVisa,
   uploading,
+  uploadPhase = "idle",
   actionError,
   onTitleChange,
   onTypeChange,
@@ -47,6 +54,7 @@ export function VaultUploadModal({
   uploadFile: File | null;
   uploadVisa: VisaMetaFormValue;
   uploading: boolean;
+  uploadPhase?: "idle" | "transferring" | "saving";
   actionError: string | null;
   onTitleChange: (v: string) => void;
   onTypeChange: (v: VaultDocType) => void;
@@ -135,16 +143,30 @@ export function VaultUploadModal({
               <p className="mb-1.5 text-[12px] font-semibold uppercase tracking-wide text-ink-soft">
                 Document Scan (PDF, JPG, PNG, WebP)
               </p>
-              <label className="fo-vault__dropzone">
+              <label className={`fo-vault__dropzone${uploading ? " fo-vault__dropzone--busy" : ""}`}>
                 <input
                   type="file"
                   accept="application/pdf,image/jpeg,image/png,image/webp"
                   onChange={(e) => onFileChange(e.target.files?.[0] ?? null)}
+                  disabled={uploading}
                 />
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky/10 text-sky">
-                  <UploadCloud size={20} strokeWidth={2} />
+                  {uploadPhase === "transferring" ? (
+                    <Spinner size="sm" className="border-sky/30 border-t-sky" label={null} />
+                  ) : (
+                    <UploadCloud size={20} strokeWidth={2} />
+                  )}
                 </div>
-                {uploadFile ? (
+                {uploadPhase === "transferring" ? (
+                  <div className="text-center">
+                    <span className="fo-vault__dropzone-file flex items-center justify-center gap-1">
+                      {uploadFile?.name}
+                    </span>
+                    <span className="text-[11.5px] text-sky font-semibold">
+                      Uploading to encrypted storage…
+                    </span>
+                  </div>
+                ) : uploadFile ? (
                   <div className="text-center">
                     <span className="fo-vault__dropzone-file flex items-center justify-center gap-1">
                       <Check size={14} strokeWidth={2.5} className="text-emerald" />
@@ -182,10 +204,10 @@ export function VaultUploadModal({
               {uploading ? (
                 <>
                   <Spinner size="sm" className="border-white/30 border-t-white" label={null} />
-                  <span>Encrypting &amp; Uploading…</span>
+                  <span>{UPLOAD_PHASE_LABEL[uploadPhase]}</span>
                 </>
               ) : (
-                "Save to Vault"
+                UPLOAD_PHASE_LABEL.idle
               )}
             </Button>
           </div>
