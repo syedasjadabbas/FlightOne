@@ -28,10 +28,6 @@ tmp-zoom-audit/
 **/.verify-browser/
 .vault-local*
 **/.vault-local*
-uploads/
-**/uploads/
-vault-storage/
-**/vault-storage/
 _*.txt
 
 # Logs

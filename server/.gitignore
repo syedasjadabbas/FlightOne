@@ -6,6 +6,5 @@ node_modules/
 *.key.json
 data
 .vault-local*
-uploads/
 .prisma-engines/
 .prisma-cache/
