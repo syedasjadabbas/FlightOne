@@ -1,5 +1,6 @@
 "use client";
 
+import { createPortal } from "react-dom";
 import { AlertTriangle, Trash2, X } from "lucide-react";
 import { Button, Spinner } from "@/components/ui";
 
@@ -14,7 +15,7 @@ export function DeleteDocumentConfirm({
   onCancel: () => void;
   onConfirm: () => void;
 }) {
-  return (
+  const dialog = (
     <div className="fo-vault__overlay" role="presentation" onClick={onCancel}>
       <div
         role="dialog"
@@ -76,4 +77,7 @@ export function DeleteDocumentConfirm({
       </div>
     </div>
   );
+
+  if (typeof document === "undefined") return null;
+  return createPortal(dialog, document.body);
 }

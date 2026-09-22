@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
-import { Check, Download, FileText, Lock, RefreshCw, Share2, ShieldCheck, Trash2, X } from "lucide-react";
+import { Check, Download, Lock, RefreshCw, Share2, ShieldCheck, Trash2, X } from "lucide-react";
 import { Button, Input, Spinner } from "@/components/ui";
 import {
   useGetVaultDocumentQuery,
@@ -104,7 +105,7 @@ export function VaultDocumentDetails({
   const embassy = embassyLines(intelligence?.embassyInfo);
   const size = formatByteSize(doc.byteSize);
 
-  return (
+  const dialog = (
     <div className="fo-vault__overlay" role="presentation" onClick={onClose}>
       <div
         role="dialog"
@@ -398,4 +399,7 @@ export function VaultDocumentDetails({
       </div>
     </div>
   );
+
+  if (typeof document === "undefined") return null;
+  return createPortal(dialog, document.body);
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import {
   ArrowRight,
@@ -542,7 +543,8 @@ export function ProfilePageClient() {
       </div>
 
       {/* ── Avatar Edit Modal (Luxury Frosted Dialog) ────────────────── */}
-      {isAvatarModalOpen ? (
+      {isAvatarModalOpen && typeof document !== "undefined"
+        ? createPortal(
         <div
           className="fo-profile__modal-backdrop"
           onClick={() => setIsAvatarModalOpen(false)}
@@ -657,8 +659,10 @@ export function ProfilePageClient() {
               </Button>
             </div>
           </div>
-        </div>
-      ) : null}
+        </div>,
+            document.body,
+          )
+        : null}
     </div>
   );
 }

@@ -2,7 +2,7 @@ import { fetchWithTimeout } from "./helpers.js";
 
 /**
  * Google Gemini provider (REST — no SDK dependency).
- * Config via env: GEMINI_API_KEY, GEMINI_MODEL (default gemini-2.0-flash).
+ * Config via env: GEMINI_API_KEY, GEMINI_MODEL (default gemini-3.6-flash).
  */
 export class GeminiProvider {
   name = "gemini";
@@ -12,7 +12,7 @@ export class GeminiProvider {
   }
 
   get model() {
-    return process.env.GEMINI_MODEL || "gemini-2.0-flash";
+    return process.env.GEMINI_MODEL || "gemini-3.6-flash";
   }
 
   isConfigured() {
@@ -104,17 +104,21 @@ export class GeminiProvider {
       let buffer = "";
       let full = "";
 
+      // Google's SSE stream separates events with "\r\n\r\n", not "\n\n" —
+      // match either so a literal-string indexOf can't silently miss every block.
+      const blockSep = /\r?\n\r?\n/;
+
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
         buffer += decoder.decode(value, { stream: true });
 
-        let sep;
-        while ((sep = buffer.indexOf("\n\n")) >= 0) {
-          const block = buffer.slice(0, sep);
-          buffer = buffer.slice(sep + 2);
+        let match;
+        while ((match = blockSep.exec(buffer))) {
+          const block = buffer.slice(0, match.index);
+          buffer = buffer.slice(match.index + match[0].length);
 
-          for (const rawLine of block.split("\n")) {
+          for (const rawLine of block.split(/\r?\n/)) {
             const line = rawLine.trim();
             if (!line.startsWith("data:")) continue;
             const payload = line.slice(5).trim();

@@ -1,5 +1,6 @@
 "use client";
 
+import { createPortal } from "react-dom";
 import { Check, Lock, UploadCloud, X } from "lucide-react";
 import { Button, Input, SearchableSelect, Spinner } from "@/components/ui";
 import type { VaultDocType } from "@/lib/api/vault.api";
@@ -65,7 +66,7 @@ export function VaultUploadModal({
   onClose: () => void;
   onSubmit: (e: React.FormEvent) => void;
 }) {
-  return (
+  const dialog = (
     <div className="fo-vault__overlay" role="presentation" onClick={onClose}>
       <div
         role="dialog"
@@ -215,4 +216,7 @@ export function VaultUploadModal({
       </div>
     </div>
   );
+
+  if (typeof document === "undefined") return null;
+  return createPortal(dialog, document.body);
 }
