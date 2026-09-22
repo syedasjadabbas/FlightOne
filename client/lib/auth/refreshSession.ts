@@ -132,6 +132,12 @@ export function refreshSessionOnce(options?: RefreshSessionOptions): Promise<boo
   return refreshInFlight;
 }
 
+function logRefreshOutcome(outcome: string, detail?: unknown) {
+  if (process.env.NODE_ENV === "production") return;
+  // eslint-disable-next-line no-console
+  console.warn(`[auth/refresh] ${outcome}`, detail ?? "");
+}
+
 async function runRefresh(): Promise<boolean> {
   const { setSession, clearSession } = useAuthStore.getState();
 
@@ -163,14 +169,17 @@ async function runRefresh(): Promise<boolean> {
 
     // Definitive auth failure only — keep session on transient/network/5xx.
     if (res.status === 401 || res.status === 403) {
+      logRefreshOutcome(`session cleared — server rejected refresh (${res.status})`, envelope);
       clearSession();
       publishLogout();
       return false;
     }
 
+    logRefreshOutcome(`refresh failed, session kept (status ${res.status})`, envelope);
     return false;
-  } catch {
+  } catch (err) {
     // Network blip — do not log the user out.
+    logRefreshOutcome("refresh request errored, session kept", err);
     return false;
   }
 }

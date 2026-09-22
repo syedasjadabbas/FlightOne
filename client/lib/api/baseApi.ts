@@ -54,12 +54,15 @@ const baseQueryWithReauth: BaseQueryFn<
   let result = await rawBaseQuery(args, api, extraOptions);
 
   if (result.error?.status === 401) {
+    // `refreshSessionOnce` already clears the session itself when the server
+    // definitively rejects the refresh (401/403). On a transient failure
+    // (network blip, 5xx) it deliberately leaves the session intact — do not
+    // second-guess that here, or a flaky refresh call logs the user out even
+    // though their session was still valid.
     const refreshed = await refreshSessionOnce({ force: true });
 
     if (refreshed) {
       result = await rawBaseQuery(args, api, extraOptions);
-    } else {
-      useAuthStore.getState().clearSession();
     }
   }
 

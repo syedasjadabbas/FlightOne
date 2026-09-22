@@ -537,24 +537,33 @@ export function SiteNav({
                   aria-label="Account menu"
                   aria-expanded={openDropdown === "account"}
                   onClick={() => toggle("account")}
-                  className={`inline-flex h-9 shrink-0 items-center gap-2 rounded-full p-1 pr-3.5 transition-all duration-150 cursor-pointer border whitespace-nowrap ${
-                    openDropdown === "account"
-                      ? "border-black/20 bg-black/6 shadow-xs"
-                      : "border-black/10 bg-white/80 hover:border-black/20 hover:bg-white shadow-xs"
-                  }`}
+                  className="inline-flex h-9 shrink-0 items-center gap-2 rounded-full p-1 pr-3.5 transition-all duration-150 cursor-pointer border whitespace-nowrap"
+                  style={
+                    transparentOverHero && isOverHero
+                      ? {
+                          borderColor:
+                            openDropdown === "account" ? "rgba(245,244,223,0.35)" : "rgba(245,244,223,0.2)",
+                          backgroundColor: openDropdown === "account" ? "rgba(245,244,223,0.12)" : "rgba(245,244,223,0.06)",
+                        }
+                      : {
+                          borderColor: openDropdown === "account" ? "rgba(14,22,32,0.2)" : "rgba(14,22,32,0.1)",
+                          backgroundColor: openDropdown === "account" ? "rgba(14,22,32,0.06)" : "rgba(255,255,255,0.8)",
+                        }
+                  }
                 >
                   <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-navy text-[11.5px] font-bold text-white shadow-xs">
                     {userInitials}
                   </div>
-                  <span className="text-[13px] font-bold text-navy truncate max-w-28">
+                  <span className="text-[13px] font-bold truncate max-w-28" style={{ color: "var(--navy)" }}>
                     {user?.name || userLabel?.split("@")[0] || "Traveler"}
                   </span>
                   <ChevronDown
                     size={12}
                     strokeWidth={2.2}
-                    className={`text-ink-soft transition-transform duration-200 ${
+                    className={`transition-transform duration-200 ${
                       openDropdown === "account" ? "rotate-180" : ""
                     }`}
+                    style={{ color: "var(--ink-soft)" }}
                     aria-hidden
                   />
                 </button>
