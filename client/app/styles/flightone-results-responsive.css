@@ -464,6 +464,34 @@
     flex-wrap: nowrap;
     min-width: min(100%, 9.5rem);
   }
+
+  /* The fare column (price + CTA + feedback buttons) is ~170px tall against a
+     ~48px scan row. With `align-items: center` on the row the short column was
+     centred against the tall one, leaving ~76px of dead space under the flight
+     details. Align both to the top so the itinerary reads level with the fare. */
+  .flight-result-row {
+    align-items: start;
+  }
+
+  .flight-result-row__aside {
+    justify-content: flex-start;
+  }
+
+  /* Keep the scan's own columns centred on each other — only the outer
+     row/aside relationship changes. */
+  .flight-result-row__scan {
+    align-items: center;
+  }
+
+  /* The fare block is the tallest thing in the row, so its internal spacing
+     sets the row height. Tighten it on wide rows where there is no wrapping. */
+  .flight-result-row__aside {
+    gap: 0.25rem;
+  }
+
+  .flight-result-row__aside .offer-feedback {
+    margin-top: 0.25rem;
+  }
 }
 
 /* Narrow row — stack price row under scan (zoom / tablet) */

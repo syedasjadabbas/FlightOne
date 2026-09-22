@@ -858,20 +858,44 @@ textarea:not(:disabled) {
   align-items: center;
   gap: 0.4rem;
   padding: 0.45rem 0.85rem;
-  border-radius: 0.5rem;
-  border: 1px solid color-mix(in oklab, var(--line) 70%, transparent);
+  /* Pill + tactile shadow to match the app's `secondary` Button variant —
+     this was a flat 8px-radius chip with a border-only hover. */
+  border-radius: 9999px;
+  border: 1px solid transparent;
   background: var(--fo-surface);
   font-size: 0.75rem;
   font-weight: 600;
   color: var(--navy);
-  box-shadow: none;
-  transition: border-color 0.15s ease, color 0.15s ease;
+  box-shadow:
+    0 2px 8px rgba(14, 22, 32, 0.05),
+    inset 0 1px 0 #ffffff;
+  transition: all 0.15s ease;
   animation: chat-jump-in 0.25s var(--ease-out-expo) both;
 }
 
+/* `--sky` is 3.43:1 on this surface and failed AA as a label colour. Keep the
+   navy label and express hover through elevation, as every other app button does. */
 .chat-jump-latest:hover {
-  border-color: color-mix(in oklab, var(--sky) 40%, var(--line));
-  color: var(--sky);
+  color: var(--navy);
+  transform: translateY(-1px);
+  box-shadow:
+    0 6px 16px rgba(14, 22, 32, 0.08),
+    inset 0 1px 0 #ffffff;
+}
+
+.chat-jump-latest:active {
+  transform: translateY(0) scale(0.98);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chat-jump-latest {
+    animation: none;
+  }
+
+  .chat-jump-latest:hover,
+  .chat-jump-latest:active {
+    transform: none;
+  }
 }
 
 .chat-jump-latest:focus-visible {

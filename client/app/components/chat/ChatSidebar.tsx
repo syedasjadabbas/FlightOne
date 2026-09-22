@@ -6,9 +6,11 @@ import {
   Archive,
   BedDouble,
   Briefcase,
+  Clock,
   FileText,
   Loader2,
   Lock,
+  MoreHorizontal,
   Mountain,
   Plus,
   Search,
@@ -33,6 +35,9 @@ export interface ChatSidebarProps {
 }
 
 type TimeframeGroup = "Today" | "Yesterday" | "Previous 7 Days" | "Older";
+
+/** Ragged title widths — uniform bars read as a loading grid, not as chat titles. */
+const SKELETON_ROW_WIDTHS = ["68%", "52%", "74%", "45%", "61%"] as const;
 
 function getTimeframeGroup(dateString: string): TimeframeGroup {
   const date = new Date(dateString);
@@ -76,7 +81,7 @@ function formatConversationTime(dateString: string): string {
 
 function ConversationIcon({ title }: { title: string }) {
   const t = title.toLowerCase();
-  const cls = "h-4 w-4";
+  const cls = "h-3.5 w-3.5";
   if (t.includes("hotel") || t.includes("stay") || t.includes("resort")) {
     return <BedDouble className={cls} strokeWidth={1.8} aria-hidden />;
   }
@@ -93,18 +98,6 @@ function ConversationIcon({ title }: { title: string }) {
     return <Mountain className={cls} strokeWidth={1.8} aria-hidden />;
   }
   return <Plane className={`${cls} -rotate-45`} strokeWidth={1.8} aria-hidden />;
-}
-
-function getConversationSubtitle(title: string, summary?: string): string {
-  if (summary && summary.trim().length > 0) return summary;
-  const t = title.toLowerCase();
-  if (t.includes("→") || t.includes("to ")) return "Flights & hotel options";
-  if (t.includes("weekend") || t.includes("break")) return "City break recommendations";
-  if (t.includes("family")) return "Flights, hotels & activities";
-  if (t.includes("visa")) return "Requirements and timeline";
-  if (t.includes("business") || t.includes("class")) return "Flight options & comparison";
-  if (t.includes("hotel") || t.includes("luxury")) return "Luxury hotels near Downtown";
-  return "Flights and attractions";
 }
 
 export function ChatSidebar({
@@ -245,7 +238,7 @@ export function ChatSidebar({
 
       {/* Main Sidebar Panel */}
       <aside
-        className={`fo-chat-sidebar z-50 flex h-full shrink-0 select-none flex-col border-r border-[color-mix(in_oklab,var(--electric)_12%,#0e2740)] bg-[var(--fo-nav-bg)] text-slate-200 transition-all duration-300 ease-in-out ${
+        className={`fo-chat-sidebar z-50 flex h-full shrink-0 select-none flex-col border-r border-[color-mix(in_oklab,var(--electric)_12%,#0e2740)] bg-[var(--fo-nav-bg)] text-slate-200 transition-transform duration-300 ease-in-out ${
           isOpen
             ? "fixed inset-y-0 left-0 w-72 max-w-[85vw] translate-x-0 shadow-2xl lg:static lg:w-[260px] lg:shadow-none xl:w-[270px]"
             : "fixed inset-y-0 left-0 -translate-x-full lg:w-0 lg:translate-x-0 lg:overflow-hidden"
@@ -258,11 +251,13 @@ export function ChatSidebar({
           <button
             type="button"
             onClick={onNewChat}
-            className="group flex h-9 w-full items-center justify-center gap-2 rounded-xl bg-[var(--sky-solid)] px-4 text-[13px] font-semibold tracking-[0.01em] text-white shadow-[0_4px_14px_rgba(8,150,191,0.35),inset_0_1px_0_rgba(255,255,255,0.3)] transition-all duration-150 hover:-translate-y-px hover:bg-[color-mix(in_oklab,var(--electric)_90%,var(--navy))] hover:shadow-[0_8px_22px_rgba(0,122,229,0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sky)]/40 active:translate-y-0 active:scale-[0.98]"
-            aria-label="Start a new chat"
+            className="fo-conv-newchat group flex h-9 w-full items-center gap-2.5 rounded-xl px-2.5 text-left text-[13px] font-semibold tracking-[0.01em] text-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sky)]/40"
+            aria-label="Start a new trip search"
           >
-            <Plus className="h-3.5 w-3.5" strokeWidth={2.2} aria-hidden />
-            <span>New chat</span>
+            <span className="fo-conv-newchat__glyph flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
+              <Plus className="h-3.5 w-3.5" strokeWidth={2.4} aria-hidden />
+            </span>
+            <span>Where to next?</span>
           </button>
 
           <div className="relative">
@@ -302,45 +297,58 @@ export function ChatSidebar({
                 <Lock className="h-4 w-4" strokeWidth={1.8} aria-hidden />
               </div>
               <p className="text-[13px] font-semibold text-slate-100">Save your travel chats</p>
-              <p className="mt-1.5 text-[11.5px] leading-relaxed text-slate-400">
+              <p className="mt-1.5 text-[12px] leading-relaxed text-slate-400">
                 Sign in to save trip searches, restore quotes, and access conversations across devices.
               </p>
               <Link
                 href="/login?redirect=/chat"
-                className="mt-3 inline-flex h-9 w-full items-center justify-center rounded-xl border border-white/15 bg-white/[0.06] px-4 text-[13px] font-semibold tracking-[0.01em] text-white transition-all duration-150 hover:-translate-y-px hover:border-white/25 hover:bg-white/[0.12] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sky)]/40 active:translate-y-0 active:scale-[0.98]"
+                className="mt-3 inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-full border border-transparent bg-[var(--sky-solid)] px-4 text-[13px] font-semibold tracking-[0.01em] text-white shadow-[0_4px_14px_rgba(8,150,191,0.35),inset_0_1px_0_rgba(255,255,255,0.3)] transition-all duration-150 hover:-translate-y-px hover:bg-[#096fcf] hover:shadow-[0_8px_22px_rgba(0,122,229,0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sky)]/40 active:translate-y-0 active:scale-[0.98]"
               >
                 Log in to FlightOne
               </Link>
             </div>
           ) : isLoading ? (
-            <div className="space-y-3 px-1" role="status" aria-label="Loading conversations">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div
-                  key={i}
-                  className="h-12 animate-pulse rounded-xl bg-white/[0.04]"
-                  style={{ animationDelay: `${i * 80}ms` }}
-                />
-              ))}
+            /* Mirrors the real row box model (h-7 chip + 13px title line at the
+               same paddings) so the swap to real content doesn't shift layout. */
+            <div role="status" aria-label="Loading conversations">
+              {/* Matches the real group header's 16px line box, not just its glyph height. */}
+              <div className="flex h-4 items-center px-2.5 pb-1.5 pt-1 box-content">
+                <div className="fo-conv-skeleton__bar h-[10px] w-14 rounded-full" />
+              </div>
+              <div className="space-y-0.5">
+                {SKELETON_ROW_WIDTHS.map((width, i) => (
+                  <div key={i} className="flex items-center gap-2.5 rounded-xl py-2 pl-2.5 pr-2">
+                    <div
+                      className="fo-conv-skeleton__bar h-7 w-7 shrink-0 rounded-full"
+                      style={{ animationDelay: `${i * 90}ms` }}
+                    />
+                    <div
+                      className="fo-conv-skeleton__bar h-[13px] rounded-full"
+                      style={{ width, animationDelay: `${i * 90}ms` }}
+                    />
+                  </div>
+                ))}
+              </div>
               <span className="sr-only">Loading conversations…</span>
             </div>
           ) : filteredConversations.length === 0 ? (
-            <div className="px-3 py-12 text-center">
-              <div className="mx-auto mb-2 flex h-8 w-8 items-center justify-center rounded-lg bg-white/[0.05] text-slate-500">
+            <div className="fo-conv-reveal px-3 py-12 text-center">
+              <div className="mx-auto mb-2.5 flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.06] text-slate-400">
                 <Archive className="h-4 w-4" strokeWidth={1.9} aria-hidden />
               </div>
-              <p className="text-xs font-medium text-slate-400">
+              <p className="text-[13px] font-semibold text-slate-200">
                 {searchQuery ? `No chats matching "${searchQuery}"` : "No conversations yet"}
               </p>
               {searchQuery ? (
                 <button
                   type="button"
                   onClick={() => setSearchQuery("")}
-                  className="mt-2 text-[11px] font-semibold text-[var(--electric)] hover:underline"
+                  className="mt-2.5 rounded-full px-3 py-1 text-[12px] font-semibold text-[#409bec] transition-colors duration-150 hover:bg-white/[0.06] hover:text-[#6fb4f1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sky)]/40"
                 >
                   Clear search
                 </button>
               ) : (
-                <p className="mt-1 text-[11px] text-slate-500">
+                <p className="mx-auto mt-1.5 max-w-[210px] text-[12px] leading-relaxed text-slate-400">
                   Your trip searches and itineraries will appear here.
                 </p>
               )}
@@ -348,8 +356,8 @@ export function ChatSidebar({
           ) : (
             /* Grouped Conversation Rows */
             groupedConversations.map((group) => (
-              <div key={group.name} className="space-y-1.5">
-                <div className="px-2.5 py-0.5 text-[11px] font-medium text-slate-400 tracking-tight">
+              <div key={group.name} className="fo-conv-reveal space-y-0.5">
+                <div className="px-2.5 pb-1.5 pt-1 text-[12px] font-semibold uppercase tracking-[0.06em] text-slate-400">
                   {group.name}
                 </div>
                 {group.items.map((conv) => {
@@ -357,15 +365,12 @@ export function ChatSidebar({
                   const isResuming = conv.id === resumingId;
                   const isMenuOpen = conv.id === menuOpenId;
                   const title = conv.title || "FlightOne Chat";
-                  const subtitle = getConversationSubtitle(title);
 
                   return (
                     <div
                       key={conv.id}
-                      className={`group relative flex items-center justify-between rounded-xl transition-all ${
-                        isActive
-                          ? "bg-[#0d2a45] text-white shadow-xs ring-1 ring-[color-mix(in_oklab,var(--electric)_35%,transparent)]"
-                          : "text-slate-300 hover:bg-white/[0.05] hover:text-slate-100"
+                      className={`fo-conv-row group flex items-center justify-between rounded-xl ${
+                        isActive ? "fo-conv-row--active text-white" : "text-slate-300"
                       }`}
                     >
                       <button
@@ -373,37 +378,35 @@ export function ChatSidebar({
                         onClick={() => handleSelect(conv.id)}
                         disabled={isResuming}
                         aria-current={isActive ? "true" : undefined}
-                        className="flex min-w-0 flex-1 items-center gap-3 p-2.5 text-left text-xs focus:outline-none"
+                        className="flex min-w-0 flex-1 items-center gap-2.5 rounded-xl py-2 pl-2.5 pr-1 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sky)]/40"
                         title={title}
                       >
                         <div
-                          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors ${
+                          className={`fo-conv-row__icon flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${
                             isActive
-                              ? "bg-[var(--electric)] font-bold text-[var(--navy)] shadow-xs"
-                              : "bg-white/[0.07] text-[color-mix(in_oklab,var(--electric)_75%,white)] group-hover:bg-[color-mix(in_oklab,var(--electric)_20%,transparent)] group-hover:text-[color-mix(in_oklab,var(--electric)_85%,white)]"
+                              ? "bg-[var(--electric)] text-white"
+                              : "bg-white/[0.07] text-[#409bec] group-hover:bg-white/[0.12] group-hover:text-[#6fb4f1]"
                           }`}
                         >
                           {isResuming ? (
-                            <Loader2 className="h-4 w-4 animate-spin text-[var(--electric)]" strokeWidth={2} aria-hidden />
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={2} aria-hidden />
                           ) : (
                             <ConversationIcon title={title} />
                           )}
                         </div>
 
-                        {/* Title & Subtitle */}
-                        <div className="flex-1 min-w-0">
-                          <p className={`truncate font-semibold tracking-tight text-[13px] leading-snug ${isActive ? "text-white" : "text-slate-200 group-hover:text-white"}`}>
-                            {title}
-                          </p>
-                          <p className="truncate text-[11px] text-slate-400 mt-0.5 leading-tight">
-                            {subtitle}
-                          </p>
-                        </div>
+                        <p
+                          className={`min-w-0 flex-1 truncate text-[13px] leading-snug tracking-tight ${
+                            isActive ? "font-semibold text-white" : "font-medium text-slate-200 group-hover:text-white"
+                          }`}
+                        >
+                          {title}
+                        </p>
                       </button>
 
                       {/* Timestamp & '...' Action Menu */}
-                      <div className="shrink-0 pr-2.5 flex items-center justify-end relative fo-chat-sidebar__menu-container">
-                        <span className={`text-[10px] text-slate-400 font-medium whitespace-nowrap ${isMenuOpen ? "hidden" : "group-hover:hidden"}`}>
+                      <div className="shrink-0 pr-2 flex items-center justify-end relative fo-chat-sidebar__menu-container">
+                        <span className={`text-[12px] text-slate-400 font-medium tabular-nums whitespace-nowrap ${isMenuOpen ? "hidden" : "group-hover:hidden group-focus-within:hidden"}`}>
                           {formatConversationTime(conv.updatedAt)}
                         </span>
 
@@ -421,21 +424,19 @@ export function ChatSidebar({
                           }}
                           aria-label={`Options for ${title}`}
                           aria-expanded={isMenuOpen}
-                          className={`rounded-lg p-1 text-slate-400 hover:bg-slate-700 hover:text-slate-200 transition-all ${
+                          className={`rounded-lg p-1.5 text-slate-400 transition-colors duration-150 hover:bg-white/[0.1] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sky)]/40 ${
                             isMenuOpen
-                              ? "block bg-slate-700 text-slate-200"
+                              ? "block bg-white/[0.1] text-white"
                               : "hidden group-hover:block group-focus-within:block focus:block"
                           }`}
                         >
-                          <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
-                          </svg>
+                          <MoreHorizontal className="h-4 w-4" strokeWidth={2} aria-hidden />
                         </button>
 
                         {/* Popover Action Menu */}
                         {isMenuOpen && (
                           <div
-                            className="pointer-events-auto absolute right-0 top-full mt-1 w-48 rounded-xl border border-slate-700/80 bg-[#091e33] p-1.5 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100"
+                            className="fo-conv-reveal pointer-events-auto absolute right-0 top-full z-50 mt-1 w-48 rounded-xl border border-slate-700/80 bg-[#091e33] p-1.5 shadow-2xl"
                             role="menu"
                             aria-orientation="vertical"
                           >
@@ -443,7 +444,7 @@ export function ChatSidebar({
                               type="button"
                               role="menuitem"
                               onClick={() => handleSelect(conv.id)}
-                              className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 hover:bg-slate-800 transition-colors"
+                              className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 transition-colors duration-150 hover:bg-slate-800 hover:text-white"
                             >
                               <svg className="h-3.5 w-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -455,7 +456,7 @@ export function ChatSidebar({
                               type="button"
                               role="menuitem"
                               onClick={(e) => void handleCopyId(conv.id, e)}
-                              className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 hover:bg-slate-800 transition-colors"
+                              className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 transition-colors duration-150 hover:bg-slate-800 hover:text-white"
                             >
                               <svg className="h-3.5 w-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path
@@ -471,7 +472,7 @@ export function ChatSidebar({
                               type="button"
                               role="menuitem"
                               onClick={(e) => void handleEscalate(conv.id, e)}
-                              className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs text-[color-mix(in_oklab,var(--electric)_70%,white)] transition-colors hover:bg-slate-800"
+                              className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs text-[#409bec] transition-colors duration-150 hover:bg-slate-800 hover:text-[#6fb4f1]"
                             >
                               <svg className="h-3.5 w-3.5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path
@@ -558,59 +559,45 @@ export function ChatSidebar({
         </div>
 
         {/* User Account Footer */}
-        <div className="p-2.5 px-3 border-t border-[#0f2842] shrink-0 bg-[#06121d]">
+        <div className="shrink-0 border-t border-[#0f2842] bg-[#06121d] px-3 pb-3.5 pt-3">
           {accessToken && user ? (
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-2">
               <Link
                 href="/profile"
-                className="flex items-center gap-2.5 min-w-0 rounded-lg p-1 hover:bg-slate-800/80 transition-colors"
+                className="flex min-w-0 items-center gap-2.5 rounded-xl p-1.5 transition-colors duration-150 hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sky)]/40"
                 title="View Profile"
               >
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--electric)] text-xs font-bold text-white">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--sky-solid)] text-[12px] font-bold text-white">
                   {userInitials}
                 </div>
                 <div className="min-w-0">
-                  <p className="truncate text-xs font-semibold text-slate-200">
+                  <p className="truncate text-[13px] font-semibold leading-tight text-slate-200">
                     {user.name || "Traveller"}
                   </p>
-                  <p className="truncate text-[10px] text-slate-400">{user.email}</p>
+                  <p className="truncate text-[12px] leading-tight text-slate-400">{user.email}</p>
                 </div>
               </Link>
-              <div className="flex items-center shrink-0">
+              <div className="flex shrink-0 items-center gap-0.5">
               <Link
                 href="/vault"
-                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-cyan-400 transition-colors"
+                className="rounded-lg p-2 text-slate-400 transition-colors duration-150 hover:bg-white/[0.08] hover:text-[#6fb4f1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sky)]/40"
                 title="Traveller Vault"
                 aria-label="Open Traveller Vault"
               >
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                  />
-                </svg>
+                <Lock className="h-4 w-4" strokeWidth={1.9} aria-hidden />
               </Link>
               <Link
                 href="/concierge"
-                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-cyan-400 transition-colors"
+                className="rounded-lg p-2 text-slate-400 transition-colors duration-150 hover:bg-white/[0.08] hover:text-[#6fb4f1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sky)]/40"
                 title="Autonomous Concierge"
                 aria-label="Open Autonomous Concierge"
               >
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
+                <Clock className="h-4 w-4" strokeWidth={1.9} aria-hidden />
               </Link>
               </div>
             </div>
           ) : (
-            <div className="flex items-center justify-between text-xs text-slate-400 px-1">
+            <div className="flex items-center justify-between px-1 text-[12px] text-slate-400">
               <span>Guest Session</span>
               <Link href="/login" className="text-cyan-400 font-medium hover:underline">
                 Sign in →

@@ -157,6 +157,10 @@ html.fo-chat-landing body {
 }
 
 .chat-page__inner {
+  /* Containing block for `.chat-jump-latest-wrap`. Without a position here the
+     absolutely-positioned button resolved against a distant ancestor and rode
+     the page instead of staying pinned above the composer. */
+  position: relative;
   flex: 1 1 0%;
   min-height: 0;
   height: 100%;
@@ -430,4 +434,135 @@ html.fo-chat-landing body {
 
 .fo-scrollbar-subtle::-webkit-scrollbar-thumb:hover {
   background: rgba(148, 163, 184, 0.35);
+}
+
+/* ── Conversation rows ──────────────────────────────────────
+   Row state lives here rather than in Tailwind arbitrary values because
+   `bg-[color-mix(...)]` compiles a non-color-mix fallback first that silently
+   drops the mix. In a plain stylesheet color-mix() resolves correctly. */
+/* New-chat entry. A saturated full-width pill fought the conversation list for
+   attention; ChatGPT-style sidebars keep this as a quiet row that reads as the
+   first item in the list. Hover/press language is identical to `.fo-conv-row`
+   below, so every interactive row in the sidebar behaves the same way. */
+.fo-conv-newchat {
+  background-color: rgba(255, 255, 255, 0.04);
+  transition:
+    background-color 150ms ease,
+    transform 150ms ease;
+}
+
+.fo-conv-newchat:hover {
+  background-color: rgba(255, 255, 255, 0.09);
+  transform: translateY(-1px);
+}
+
+.fo-conv-newchat:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* The accent lives on the glyph, not the whole row — keeps the brand colour
+   present without the button shouting over the conversations beneath it. */
+.fo-conv-newchat__glyph {
+  background-color: var(--sky-solid);
+  color: #ffffff;
+  transition: background-color 150ms ease;
+}
+
+.fo-conv-newchat:hover .fo-conv-newchat__glyph {
+  background-color: color-mix(in oklab, var(--electric) 90%, var(--navy));
+}
+
+.fo-conv-row {
+  position: relative;
+  transition:
+    background-color 150ms ease,
+    transform 150ms ease;
+}
+
+.fo-conv-row:hover {
+  background-color: rgba(255, 255, 255, 0.055);
+  transform: translateY(-1px);
+}
+
+.fo-conv-row:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.fo-conv-row--active {
+  /* Selected state must survive a greyscale screenshot, so it carries a fill
+     AND a rail AND heavier title weight — hue is reinforcement, not the signal. */
+  background-color: color-mix(in oklab, var(--electric) 16%, var(--fo-nav-bg));
+}
+
+.fo-conv-row--active:hover {
+  background-color: color-mix(in oklab, var(--electric) 22%, var(--fo-nav-bg));
+}
+
+/* Accent rail on the selected row. */
+.fo-conv-row--active::before {
+  content: "";
+  position: absolute;
+  inset-block: 0.5rem;
+  left: 0;
+  width: 3px;
+  border-radius: 0 9999px 9999px 0;
+  background: var(--electric);
+}
+
+.fo-conv-row__icon {
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
+}
+
+/* ── Skeleton + reveal ──────────────────────────────────────
+   Skeleton mirrors the real row's box model so the swap doesn't shift layout. */
+.fo-conv-skeleton__bar {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 25%,
+    rgba(255, 255, 255, 0.1) 37%,
+    rgba(255, 255, 255, 0.05) 63%
+  );
+  background-size: 400% 100%;
+  animation: fo-conv-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes fo-conv-shimmer {
+  from {
+    background-position: 100% 50%;
+  }
+  to {
+    background-position: 0 50%;
+  }
+}
+
+.fo-conv-reveal {
+  animation: fo-conv-reveal 150ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes fo-conv-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fo-conv-row:hover,
+  .fo-conv-row:active {
+    transform: none;
+  }
+
+  .fo-conv-skeleton__bar {
+    animation: none;
+  }
+
+  .fo-conv-reveal {
+    animation: none;
+  }
 }

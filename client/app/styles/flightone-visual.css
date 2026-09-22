@@ -1100,6 +1100,10 @@
   box-shadow: 0 4px 12px rgba(14, 22, 32, 0.08), inset 0 1px 0 #ffffff;
 }
 
+.chat-page .quick-chip--action:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+}
+
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
   .chat-page .quick-chip--action:hover:not(:disabled) {
     transform: translateY(-1px);

@@ -12,6 +12,8 @@
     "db:migrate:deploy": "prisma migrate deploy",
     "db:generate": "prisma generate",
     "db:seed": "node prisma/seed.js",
+    "db:seed:demo": "DEMO_SEED=true node prisma/seed-demo.js",
+    "db:seed:demo:reset": "DEMO_SEED=true DEMO_RESET=true node prisma/seed-demo.js",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
     "db:setup": "npm run db:generate && npm run db:create && prisma migrate deploy && npm run db:seed",
