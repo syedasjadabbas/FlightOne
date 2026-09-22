@@ -34,7 +34,10 @@ export function formatCorporateConstraintsForPrompt(
 /** Merge soft cabin preference under corporate maxCabin without inventing policy. */
 export function applyCorporateConstraintsToPrefs<
   T extends { preferredCabin?: string | null; preferredAirlines?: string[] },
->(prefs: T | null, constraints: CorporateAvaConstraints | null | undefined): T | null {
+>(
+  prefs: T | null,
+  constraints: CorporateAvaConstraints | null | undefined,
+): (T & { preferredCabin?: string | null; preferredAirlines?: string[] }) | null {
   if (!prefs && !constraints) return null;
   const base = { ...(prefs || ({} as T)) };
   if (!constraints) return Object.keys(base).length ? base : null;

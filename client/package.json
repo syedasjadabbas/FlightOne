@@ -25,6 +25,7 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@rolldown/binding-darwin-arm64": "^1.2.2",
     "@tailwindcss/postcss": "4.3.2",
     "@types/node": "^20",
     "@types/react": "^19",

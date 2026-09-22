@@ -86,7 +86,7 @@ describe("searchFlightsPreferredThenOpen", () => {
 
   it("probes major carriers when open market is one-airline (Etihad-only LHE→PEK)", async () => {
     searchMock.mockImplementation(async (body) => {
-      const preferred = body.query?.preferredCarriers as string[] | undefined;
+      const preferred = (body.query as unknown as Record<string, unknown>)?.preferredCarriers as string[] | undefined;
       if (!preferred?.length) return [flight("ey-1", "Etihad")];
       if (preferred[0] === "TG") return [flight("tg-1", "Thai Airways")];
       return [];
@@ -101,9 +101,9 @@ describe("searchFlightsPreferredThenOpen", () => {
 
     expect(searchMock.mock.calls.length).toBeGreaterThan(1);
     const permittedCalls = searchMock.mock.calls.filter(
-      (c) => c[0].query?.carrierPreferenceType === "Permitted",
+      (c) => (c[0].query as unknown as Record<string, unknown>)?.carrierPreferenceType === "Permitted",
     );
-    expect(permittedCalls.some((c) => c[0].query?.preferredCarriers?.[0] === "TG")).toBe(
+    expect(permittedCalls.some((c) => ((c[0].query as unknown as Record<string, unknown>)?.preferredCarriers as string[])?.[0] === "TG")).toBe(
       true,
     );
     expect(out?.some((o) => o.id === "tg-1")).toBe(true);
@@ -129,7 +129,7 @@ describe("searchFlightsPreferredThenOpen", () => {
 
   it("always probes PIA for Pakistan-origin routes, even when open market already has 3+ carriers (regression: LHE-DXB agent bug report)", async () => {
     searchMock.mockImplementation(async (body) => {
-      const preferred = body.query?.preferredCarriers as string[] | undefined;
+      const preferred = (body.query as unknown as Record<string, unknown>)?.preferredCarriers as string[] | undefined;
       if (!preferred?.length) {
         return [
           flight("ey-1", "Etihad"),
@@ -148,9 +148,9 @@ describe("searchFlightsPreferredThenOpen", () => {
     });
 
     const permittedCalls = searchMock.mock.calls.filter(
-      (c) => c[0].query?.carrierPreferenceType === "Permitted",
+      (c) => (c[0].query as unknown as Record<string, unknown>)?.carrierPreferenceType === "Permitted",
     );
-    expect(permittedCalls.some((c) => c[0].query?.preferredCarriers?.[0] === "PK")).toBe(
+    expect(permittedCalls.some((c) => ((c[0].query as unknown as Record<string, unknown>)?.preferredCarriers as string[])?.[0] === "PK")).toBe(
       true,
     );
     expect(out?.some((o) => o.id === "pk-1")).toBe(true);
@@ -158,7 +158,7 @@ describe("searchFlightsPreferredThenOpen", () => {
 
   it("LHE→DXB with only EY+QR open market probes UL (regression: SriLankan IDs must come from discovery raw)", async () => {
     searchMock.mockImplementation(async (body) => {
-      const preferred = body.query?.preferredCarriers as string[] | undefined;
+      const preferred = (body.query as unknown as Record<string, unknown>)?.preferredCarriers as string[] | undefined;
       if (!preferred?.length) {
         return [flight("TP-o1_j1_p0_s3-s4", "Etihad"), flight("TP-o2_j4_p9_s1-s2", "Qatar Airways")];
       }

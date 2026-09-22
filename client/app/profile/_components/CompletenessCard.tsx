@@ -102,13 +102,13 @@ export function CompletenessCard({
     .filter((k) => REQUIRED_KEYS.has(k) && REQUIRED_ITEMS[k])
     .map((k) => ({ key: k, required: true, ...REQUIRED_ITEMS[k] }));
 
-  const optionalGaps: GapItem[] = [
+  const rawOptionalGaps: (GapItem | null)[] = [
     !profile.nationality
       ? {
           key: "nationality",
           label: "Nationality",
           hint: "ISO 2-letter country code",
-          tab: "PREFERENCES" as const,
+          tab: "PREFERENCES",
           fieldId: "profile-field-nationality",
           icon: UserRound,
           required: false,
@@ -119,7 +119,7 @@ export function CompletenessCard({
           key: "preferredCabin",
           label: "Preferred Cabin",
           hint: "Default search cabin tier",
-          tab: "PREFERENCES" as const,
+          tab: "PREFERENCES",
           fieldId: "profile-field-cabin",
           icon: Sofa,
           required: false,
@@ -130,13 +130,17 @@ export function CompletenessCard({
           key: "maxLayover",
           label: "Max Layover Time",
           hint: "Maximum acceptable transit duration",
-          tab: "PREFERENCES" as const,
+          tab: "PREFERENCES",
           fieldId: "profile-field-maxLayover",
           icon: Plane,
           required: false,
         }
       : null,
-  ].filter((item): item is GapItem => Boolean(item));
+  ];
+
+  const optionalGaps: GapItem[] = rawOptionalGaps.filter(
+    (item): item is GapItem => item !== null
+  );
 
   const ready = c.readyForHandsFreeBooking || missingRequired.length === 0;
   const score = Math.max(0, Math.min(100, c.score));

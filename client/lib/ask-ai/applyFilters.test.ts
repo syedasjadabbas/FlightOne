@@ -6,7 +6,9 @@ import { sortOffers } from "./sortOffers";
 
 function flightOffer(
   id: string,
-  overrides: Partial<OfferCard> & { flight?: Partial<NonNullable<OfferCard["flight"]>> } = {},
+  overrides: Omit<Partial<OfferCard>, "flight"> & {
+    flight?: Partial<NonNullable<OfferCard["flight"]>>;
+  } = {},
 ): OfferCard {
   const { flight: flightOverrides, ...rest } = overrides;
   return {

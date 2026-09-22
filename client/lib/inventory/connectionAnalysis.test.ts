@@ -10,13 +10,11 @@ function seg(partial: Partial<FlightSegment> & Pick<FlightSegment, "originCode" 
   return {
     carrier: "EY",
     flightNumber: "EY1",
-    originCode: partial.originCode,
-    destinationCode: partial.destinationCode,
-    departureDate: partial.departureDate ?? "2026-09-10",
-    departTimeLocal: partial.departTimeLocal ?? "10:00",
-    arrivalDate: partial.arrivalDate ?? "2026-09-10",
-    arriveTimeLocal: partial.arriveTimeLocal ?? "12:00",
-    durationMinutes: partial.durationMinutes ?? 120,
+    departureDate: "2026-09-10",
+    departTimeLocal: "10:00",
+    arrivalDate: "2026-09-10",
+    arriveTimeLocal: "12:00",
+    durationMinutes: 120,
     ...partial,
   };
 }

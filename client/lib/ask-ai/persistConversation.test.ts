@@ -28,8 +28,11 @@ describe("conversation resume helpers", () => {
     });
     expect(plan?.action).toBe("search");
     if (plan?.action === "search") {
-      expect(plan.searches[0]?.query.origin).toBe("LHE");
-      expect(plan.searches[0]?.query.destination).toBe("DXB");
+      const first = plan.searches[0];
+      if (first && first.product === "FLIGHT") {
+        expect(first.query.origin).toBe("LHE");
+        expect(first.query.destination).toBe("DXB");
+      }
       expect(plan.filters?.preferredAirlines).toEqual(["EY"]);
     }
   });

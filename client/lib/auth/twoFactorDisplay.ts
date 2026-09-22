@@ -89,8 +89,8 @@ export function formatTwoFactorError(error: any): string {
   const status = error.status ?? error?.originalStatus;
   const data = error.data;
   const serverMsg =
-    typeof data === "object" && data && typeof data.message === "string"
-      ? data.message
+    typeof data === "object" && data
+      ? (typeof data.message === "string" ? data.message : typeof data.error === "string" ? data.error : null)
       : null;
   const safeServer =
     serverMsg && !/\b(prisma|invocation|column)\b/i.test(serverMsg)

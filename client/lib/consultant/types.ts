@@ -67,6 +67,7 @@ export interface OfferCard {
   angle: OfferAngle;
   title: string;
   subtitle: string;
+  score?: number;
   price: string; // formatted, edge-only
   priceMinor: number;
   currency: string;

@@ -68,19 +68,21 @@ const baseQueryWithReauth: BaseQueryFn<
   }
 
   // Normalize error.message so every UI path gets non-technical copy by default.
-  if (result.error && typeof result.error === "object") {
+  if (result.error) {
     const friendly = formatApiError(result.error);
-    const data =
-      result.error.data && typeof result.error.data === "object"
-        ? { ...(result.error.data as object), message: friendly }
-        : { message: friendly };
-    return {
-      ...result,
-      error: {
-        ...result.error,
-        data,
-      },
-    };
+    if (typeof result.error.status === "number") {
+      const existingData =
+        result.error.data && typeof result.error.data === "object"
+          ? (result.error.data as object)
+          : {};
+      return {
+        ...result,
+        error: {
+          ...result.error,
+          data: { ...existingData, message: friendly },
+        },
+      };
+    }
   }
 
   return result;
