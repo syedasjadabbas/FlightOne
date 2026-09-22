@@ -1321,10 +1321,27 @@
   opacity: 0.75;
 }
 
-.results-filter-btn:hover:not(:disabled) {
-  border-color: color-mix(in oklab, var(--cyan) 42%, var(--line));
+/* The resting border is `--line` (already #0e16201a, ~10% alpha) mixed 60%
+   toward transparent — effective alpha ~0.06. The old hover mixed cyan into
+   that faint token and landed at ~0.48 alpha: an 8x opacity jump that read as
+   a border glitch and sat almost as strong as `--active`. Step up from the
+   SAME navy hue instead, staying clearly below the selected state. */
+.results-filter-btn:hover:not(:disabled):not(.results-filter-btn--active) {
+  border-color: color-mix(in oklab, var(--navy) 18%, transparent);
   color: var(--navy);
-  background: color-mix(in oklab, var(--cyan) 5%, white);
+  background: color-mix(in oklab, var(--cyan) 4%, white);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(14, 22, 32, 0.08), inset 0 1px 0 #ffffff;
+}
+
+/* Selected pills keep their cyan edge on hover — only the elevation responds. */
+.results-filter-btn--active:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(8, 150, 191, 0.16), inset 0 1px 0 #ffffff;
+}
+
+.results-filter-btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
 }
 
 .results-filter-btn:focus-visible {
@@ -1388,9 +1405,24 @@
   box-shadow: 0 4px 14px rgba(14, 22, 32, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 
+/* Was a no-op repeat of the resting state, so the active segment gave no
+   feedback at all on hover. Lighten slightly, keeping the white label. */
 .results-sort-segmented__btn--active:hover {
-  background: #0e1620;
+  background: color-mix(in oklab, var(--navy) 88%, var(--white));
   color: #ffffff;
+  box-shadow: 0 6px 18px rgba(14, 22, 32, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.results-sort-segmented__btn:active {
+  transform: scale(0.97);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .results-sort-segmented__btn:active,
+  .results-filter-btn:hover:not(:disabled),
+  .results-filter-btn:active:not(:disabled) {
+    transform: none;
+  }
 }
 
 .results-sort-segmented__btn:focus-visible {

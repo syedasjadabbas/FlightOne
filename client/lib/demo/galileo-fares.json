@@ -1,0 +1,2927 @@
+{
+  "$meta": {
+    "purpose": "Demo fare inventory captured from Galileo/Travelport cryptic Fare Shop (FS) screens. Intended as a static corpus Ava can search during a demo when live GDS is unavailable.",
+    "source": "Travelport Smartpoint terminal screenshots",
+    "capturedAt": "2026-09-22",
+    "currency": "PKR",
+    "passengerType": "ADT",
+    "taxHandling": "All totals are TAX INCLUDED, as shown by the terminal.",
+    "notes": [
+      "`codeshare: true` marks segments the terminal rendered with '@' — marketed by one carrier, operated by another.",
+      "`arrivesNextDay: true` is the terminal's '#' flag on a segment.",
+      "`dayOffset` is the itinerary-level '+1'/'+2'/'+3' badge: days between first departure and final arrival.",
+      "`aircraft` is the IATA equipment code the terminal printed before the fare basis — it is NOT a flight number.",
+      "Times are local to each airport, 24h, as displayed.",
+      "Prices are real captures; they are historical and not bookable.",
+      "`durationMinutes` and `layoverMinutesAfter` are computed from captured local times plus per-airport UTC offsets (Oct–Dec 2026), so overnight and multi-day sectors are correct.",
+      "`angle`, `score`, `savingsPct`, `badges` and `reasons` are derived by comparing each search set — they are demo-grade, not supplier-supplied.",
+      "`baggageKg`, `refundable`, `cabin` and `seatsRemaining` are representative values inferred from the RBD and carrier, not captured from the terminal."
+    ],
+    "dataIntegrity": {
+      "searches": 4,
+      "pricedItineraries": 27,
+      "pricedPnr": 1,
+      "adjustments": [
+        "search 'lhe-bos-rt-14oct': the terminal showed return dates of 15–16 SEP against a 14 OCT outbound — a month BEFORE departure. Returns have been shifted to 28–29 OCT 2026 to make a coherent ~2-week round trip for demo use. Original values preserved per-itinerary in `_sourceReturnDates`.",
+        "Screens were truncated mid-list; only fully visible pricing options were transcribed. `totalOptionsReported` records what the terminal header claimed."
+      ],
+      "enrichedAt": "2026-09-22"
+    }
+  },
+  "searches": [
+    {
+      "id": "lhe-jfk-14oct",
+      "command": "FSLHE14OCTJFK",
+      "origin": "LHE",
+      "destination": "JFK",
+      "originCity": "Lahore",
+      "destinationCity": "New York",
+      "departureDate": "2026-10-14",
+      "tripType": "one_way",
+      "totalOptionsReported": {
+        "pricing": 22,
+        "itinerary": 28
+      },
+      "capturedOptions": 6,
+      "itineraries": [
+        {
+          "option": 1,
+          "totalMinor": 16676500,
+          "totalFormatted": "PKR 166,765",
+          "fareBasis": "TNN20H6G",
+          "dayOffset": 0,
+          "via": [
+            "AUH"
+          ],
+          "segments": [
+            {
+              "seq": 1,
+              "carrier": "EY",
+              "flightNumber": "285",
+              "bookingClass": "T",
+              "departureDate": "2026-10-14",
+              "originCode": "LHE",
+              "destinationCode": "AUH",
+              "departTimeLocal": "04:40",
+              "arriveTimeLocal": "07:00",
+              "dayOfWeek": "WE",
+              "aircraft": "32A",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 200,
+              "layoverMinutesAfter": 160
+            },
+            {
+              "seq": 2,
+              "carrier": "EY",
+              "flightNumber": "3",
+              "bookingClass": "T",
+              "departureDate": "2026-10-14",
+              "originCode": "AUH",
+              "destinationCode": "JFK",
+              "departTimeLocal": "09:40",
+              "arriveTimeLocal": "16:00",
+              "dayOfWeek": "WE",
+              "aircraft": "351",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 920
+            }
+          ],
+          "durationMinutes": 1280,
+          "stops": 1,
+          "maxLayoverMinutes": 160,
+          "cabin": "economy",
+          "baggageKg": 30,
+          "refundable": false,
+          "checkedBagIncluded": true,
+          "construction": "single_ticket",
+          "marketingCarriers": [
+            "EY"
+          ],
+          "validatingCarrier": "EY",
+          "seatsRemaining": 9,
+          "supplierOfferSnapshotId": "snap_demo_lhe-jfk-14oct_01",
+          "snapshotExpiresAt": "2026-09-23T06:00:00.000Z",
+          "score": 93,
+          "angle": "cheapest",
+          "marketPriceMinor": 22923400,
+          "savingsPct": 27,
+          "badges": [
+            "Cheapest",
+            "30kg bag",
+            "Single carrier"
+          ],
+          "reasons": [
+            "27% below the highest fare in this search",
+            "1 stop via AUH",
+            "Total journey 21h 20m",
+            "Longest layover 2h 40m",
+            "Non-refundable fare conditions"
+          ]
+        },
+        {
+          "option": 2,
+          "totalMinor": 17380500,
+          "totalFormatted": "PKR 173,805",
+          "fareBasis": "TNN20H6G",
+          "dayOffset": 1,
+          "via": [
+            "AUH"
+          ],
+          "segments": [
+            {
+              "seq": 1,
+              "carrier": "EY",
+              "flightNumber": "289",
+              "bookingClass": "T",
+              "departureDate": "2026-10-14",
+              "originCode": "LHE",
+              "destinationCode": "AUH",
+              "departTimeLocal": "19:45",
+              "arriveTimeLocal": "22:05",
+              "dayOfWeek": "WE",
+              "aircraft": "321",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 200,
+              "layoverMinutesAfter": 270
+            },
+            {
+              "seq": 2,
+              "carrier": "EY",
+              "flightNumber": "1",
+              "bookingClass": "T",
+              "departureDate": "2026-10-15",
+              "originCode": "AUH",
+              "destinationCode": "JFK",
+              "departTimeLocal": "02:35",
+              "arriveTimeLocal": "08:35",
+              "dayOfWeek": "TH",
+              "aircraft": "351",
+              "arrivalDate": "2026-10-15",
+              "durationMinutes": 900
+            }
+          ],
+          "durationMinutes": 1370,
+          "stops": 1,
+          "maxLayoverMinutes": 270,
+          "cabin": "economy",
+          "baggageKg": 30,
+          "refundable": false,
+          "checkedBagIncluded": true,
+          "construction": "single_ticket",
+          "marketingCarriers": [
+            "EY"
+          ],
+          "validatingCarrier": "EY",
+          "seatsRemaining": 6,
+          "supplierOfferSnapshotId": "snap_demo_lhe-jfk-14oct_02",
+          "snapshotExpiresAt": "2026-09-23T06:00:00.000Z",
+          "score": 85,
+          "angle": "recommended",
+          "marketPriceMinor": 22923400,
+          "savingsPct": 24,
+          "badges": [
+            "30kg bag",
+            "Single carrier"
+          ],
+          "reasons": [
+            "24% below the highest fare in this search",
+            "1 stop via AUH",
+            "Total journey 22h 50m",
+            "Longest layover 4h 30m",
+            "Non-refundable fare conditions"
+          ]
+        },
+        {
+          "option": 3,
+          "totalMinor": 21777900,
+          "totalFormatted": "PKR 217,779",
+          "fareBasis": "ONX0OCN3",
+          "dayOffset": 1,
+          "via": [
+            "DOH"
+          ],
+          "segments": [
+            {
+              "seq": 1,
+              "carrier": "QR",
+              "flightNumber": "621",
+              "bookingClass": "O",
+              "departureDate": "2026-10-14",
+              "originCode": "LHE",
+              "destinationCode": "DOH",
+              "departTimeLocal": "03:10",
+              "arriveTimeLocal": "05:05",
+              "dayOfWeek": "WE",
+              "aircraft": "351",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 235,
+              "layoverMinutesAfter": 170
+            },
+            {
+              "seq": 2,
+              "carrier": "AA",
+              "flightNumber": "8115",
+              "bookingClass": "O",
+              "codeshare": true,
+              "departureDate": "2026-10-14",
+              "originCode": "DOH",
+              "destinationCode": "JFK",
+              "departTimeLocal": "07:55",
+              "arriveTimeLocal": "15:10",
+              "dayOfWeek": "WE",
+              "aircraft": "777",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 915
+            }
+          ],
+          "durationMinutes": 1320,
+          "stops": 1,
+          "maxLayoverMinutes": 170,
+          "cabin": "economy",
+          "baggageKg": 30,
+          "refundable": false,
+          "checkedBagIncluded": true,
+          "construction": "single_ticket",
+          "marketingCarriers": [
+            "QR",
+            "AA"
+          ],
+          "validatingCarrier": "QR",
+          "seatsRemaining": 3,
+          "supplierOfferSnapshotId": "snap_demo_lhe-jfk-14oct_03",
+          "snapshotExpiresAt": "2026-09-23T06:00:00.000Z",
+          "score": 51,
+          "angle": "recommended",
+          "marketPriceMinor": 22923400,
+          "savingsPct": 5,
+          "badges": [
+            "30kg bag",
+            "3 seats left"
+          ],
+          "reasons": [
+            "5% below the highest fare in this search",
+            "1 stop via DOH",
+            "Total journey 22h 0m",
+            "Longest layover 2h 50m",
+            "Non-refundable fare conditions"
+          ]
+        },
+        {
+          "option": 4,
+          "totalMinor": 22087500,
+          "totalFormatted": "PKR 220,875",
+          "fareBasis": "ONX0OCN3",
+          "dayOffset": 0,
+          "via": [
+            "DOH"
+          ],
+          "segments": [
+            {
+              "seq": 1,
+              "carrier": "AA",
+              "flightNumber": "8284",
+              "bookingClass": "O",
+              "codeshare": true,
+              "departureDate": "2026-10-14",
+              "originCode": "LHE",
+              "destinationCode": "DOH",
+              "departTimeLocal": "03:10",
+              "arriveTimeLocal": "05:05",
+              "dayOfWeek": "WE",
+              "aircraft": "351",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 235,
+              "layoverMinutesAfter": 630
+            },
+            {
+              "seq": 2,
+              "carrier": "AA",
+              "flightNumber": "8131",
+              "bookingClass": "O",
+              "codeshare": true,
+              "departureDate": "2026-10-14",
+              "originCode": "DOH",
+              "destinationCode": "JFK",
+              "departTimeLocal": "15:35",
+              "arriveTimeLocal": "22:30",
+              "dayOfWeek": "WE",
+              "aircraft": "359",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 895
+            }
+          ],
+          "durationMinutes": 1760,
+          "stops": 1,
+          "maxLayoverMinutes": 630,
+          "cabin": "economy",
+          "baggageKg": 23,
+          "refundable": false,
+          "checkedBagIncluded": true,
+          "construction": "single_ticket",
+          "marketingCarriers": [
+            "AA"
+          ],
+          "validatingCarrier": "AA",
+          "seatsRemaining": 8,
+          "supplierOfferSnapshotId": "snap_demo_lhe-jfk-14oct_04",
+          "snapshotExpiresAt": "2026-09-23T06:00:00.000Z",
+          "score": 38,
+          "angle": "recommended",
+          "marketPriceMinor": 22923400,
+          "savingsPct": 4,
+          "badges": [
+            "23kg bag",
+            "Single carrier"
+          ],
+          "reasons": [
+            "4% below the highest fare in this search",
+            "1 stop via DOH",
+            "Total journey 29h 20m",
+            "Longest layover 10h 30m",
+            "Non-refundable fare conditions"
+          ]
+        },
+        {
+          "option": 5,
+          "totalMinor": 22843900,
+          "totalFormatted": "PKR 228,439",
+          "fareBasis": "ENX0OH67",
+          "dayOffset": 1,
+          "via": [
+            "AUH",
+            "BOS"
+          ],
+          "segments": [
+            {
+              "seq": 1,
+              "carrier": "EY",
+              "flightNumber": "285",
+              "bookingClass": "E",
+              "departureDate": "2026-10-14",
+              "originCode": "LHE",
+              "destinationCode": "AUH",
+              "departTimeLocal": "04:40",
+              "arriveTimeLocal": "07:00",
+              "dayOfWeek": "WE",
+              "aircraft": "32A",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 200,
+              "layoverMinutesAfter": 120
+            },
+            {
+              "seq": 2,
+              "carrier": "EY",
+              "flightNumber": "7",
+              "bookingClass": "E",
+              "departureDate": "2026-10-14",
+              "originCode": "AUH",
+              "destinationCode": "BOS",
+              "departTimeLocal": "09:00",
+              "arriveTimeLocal": "14:40",
+              "dayOfWeek": "WE",
+              "aircraft": "789",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 880,
+              "layoverMinutesAfter": 91
+            },
+            {
+              "seq": 3,
+              "carrier": "EY",
+              "flightNumber": "8250",
+              "bookingClass": "E",
+              "codeshare": true,
+              "departureDate": "2026-10-14",
+              "originCode": "BOS",
+              "destinationCode": "JFK",
+              "departTimeLocal": "16:11",
+              "arriveTimeLocal": "17:29",
+              "dayOfWeek": "WE",
+              "aircraft": "223",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 78
+            }
+          ],
+          "durationMinutes": 1369,
+          "stops": 2,
+          "maxLayoverMinutes": 120,
+          "cabin": "economy",
+          "baggageKg": 30,
+          "refundable": false,
+          "checkedBagIncluded": true,
+          "construction": "single_ticket",
+          "marketingCarriers": [
+            "EY"
+          ],
+          "validatingCarrier": "EY",
+          "seatsRemaining": 5,
+          "supplierOfferSnapshotId": "snap_demo_lhe-jfk-14oct_05",
+          "snapshotExpiresAt": "2026-09-23T06:00:00.000Z",
+          "score": 34,
+          "angle": "recommended",
+          "marketPriceMinor": 22923400,
+          "savingsPct": 0,
+          "badges": [
+            "30kg bag",
+            "Single carrier"
+          ],
+          "reasons": [
+            "2 stops via AUH, BOS",
+            "Total journey 22h 49m",
+            "Longest layover 2h 0m",
+            "Non-refundable fare conditions"
+          ]
+        },
+        {
+          "option": 6,
+          "totalMinor": 22923400,
+          "totalFormatted": "PKR 229,234",
+          "fareBasis": "ONX0OCN3",
+          "dayOffset": 0,
+          "via": [
+            "DOH",
+            "MIA"
+          ],
+          "segments": [
+            {
+              "seq": 1,
+              "carrier": "QR",
+              "flightNumber": "629",
+              "bookingClass": "O",
+              "departureDate": "2026-10-14",
+              "originCode": "LHE",
+              "destinationCode": "DOH",
+              "departTimeLocal": "09:55",
+              "arriveTimeLocal": "11:50",
+              "dayOfWeek": "WE",
+              "aircraft": "351",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 235,
+              "layoverMinutesAfter": 1215
+            },
+            {
+              "seq": 2,
+              "carrier": "AA",
+              "flightNumber": "8136",
+              "bookingClass": "O",
+              "codeshare": true,
+              "departureDate": "2026-10-15",
+              "originCode": "DOH",
+              "destinationCode": "MIA",
+              "departTimeLocal": "08:05",
+              "arriveTimeLocal": "16:40",
+              "dayOfWeek": "TH",
+              "aircraft": "351",
+              "arrivalDate": "2026-10-15",
+              "durationMinutes": 995,
+              "layoverMinutesAfter": 190
+            },
+            {
+              "seq": 3,
+              "carrier": "AA",
+              "flightNumber": "1357",
+              "bookingClass": "O",
+              "departureDate": "2026-10-15",
+              "originCode": "MIA",
+              "destinationCode": "JFK",
+              "departTimeLocal": "19:50",
+              "arriveTimeLocal": "22:56",
+              "dayOfWeek": "TH",
+              "aircraft": "738",
+              "arrivalDate": "2026-10-15",
+              "durationMinutes": 186
+            }
+          ],
+          "durationMinutes": 2821,
+          "stops": 2,
+          "maxLayoverMinutes": 1215,
+          "cabin": "economy",
+          "baggageKg": 30,
+          "refundable": false,
+          "checkedBagIncluded": true,
+          "construction": "single_ticket",
+          "marketingCarriers": [
+            "QR",
+            "AA"
+          ],
+          "validatingCarrier": "QR",
+          "seatsRemaining": 2,
+          "supplierOfferSnapshotId": "snap_demo_lhe-jfk-14oct_06",
+          "snapshotExpiresAt": "2026-09-23T06:00:00.000Z",
+          "score": 0,
+          "angle": "recommended",
+          "marketPriceMinor": 22923400,
+          "savingsPct": null,
+          "badges": [
+            "30kg bag",
+            "2 seats left"
+          ],
+          "reasons": [
+            "2 stops via DOH, MIA",
+            "Total journey 47h 1m",
+            "Longest layover 20h 15m",
+            "Non-refundable fare conditions"
+          ]
+        }
+      ],
+      "priceRange": {
+        "minMinor": 16676500,
+        "maxMinor": 22923400,
+        "currency": "PKR"
+      },
+      "durationRange": {
+        "minMinutes": 1280,
+        "maxMinutes": 2821
+      }
+    },
+    {
+      "id": "lhe-bos-rt-14oct",
+      "command": "FSLHE14OCTBOS",
+      "origin": "LHE",
+      "destination": "BOS",
+      "originCity": "Lahore",
+      "destinationCity": "Boston",
+      "departureDate": "2026-10-14",
+      "returnDate": "2026-10-28",
+      "tripType": "round_trip",
+      "totalOptionsReported": {
+        "pricing": null,
+        "itinerary": null
+      },
+      "capturedOptions": 5,
+      "_dateAdjustment": "Terminal showed returns on 15–16 SEP, a month before the 14 OCT outbound. Shifted to 28–29 OCT 2026 for a coherent demo round trip.",
+      "itineraries": [
+        {
+          "option": 1,
+          "totalMinor": 42472200,
+          "totalFormatted": "PKR 424,722",
+          "fareBasis": "LXAAPPK1",
+          "dayOffset": 3,
+          "via": [
+            "DXB"
+          ],
+          "_sourceReturnDates": [
+            "15SEP",
+            "16SEP"
+          ],
+          "outbound": [
+            {
+              "seq": 1,
+              "carrier": "EK",
+              "flightNumber": "623",
+              "bookingClass": "L",
+              "departureDate": "2026-10-14",
+              "originCode": "LHE",
+              "destinationCode": "DXB",
+              "departTimeLocal": "03:25",
+              "arriveTimeLocal": "05:45",
+              "dayOfWeek": "WE",
+              "aircraft": "77W",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 200,
+              "layoverMinutesAfter": 155
+            },
+            {
+              "seq": 2,
+              "carrier": "EK",
+              "flightNumber": "237",
+              "bookingClass": "L",
+              "departureDate": "2026-10-14",
+              "originCode": "DXB",
+              "destinationCode": "BOS",
+              "departTimeLocal": "08:20",
+              "arriveTimeLocal": "14:20",
+              "dayOfWeek": "WE",
+              "aircraft": "77W",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 900
+            }
+          ],
+          "inbound": [
+            {
+              "seq": 3,
+              "carrier": "EK",
+              "flightNumber": "238",
+              "bookingClass": "L",
+              "departureDate": "2026-10-28",
+              "originCode": "BOS",
+              "destinationCode": "DXB",
+              "departTimeLocal": "23:05",
+              "arriveTimeLocal": "19:20",
+              "arrivesNextDay": true,
+              "dayOfWeek": "WE",
+              "aircraft": "77W",
+              "arrivalDate": "2026-10-29",
+              "durationMinutes": 675,
+              "layoverMinutesAfter": 140
+            },
+            {
+              "seq": 4,
+              "carrier": "EK",
+              "flightNumber": "622",
+              "bookingClass": "L",
+              "departureDate": "2026-10-29",
+              "originCode": "DXB",
+              "destinationCode": "LHE",
+              "departTimeLocal": "21:40",
+              "arriveTimeLocal": "01:45",
+              "arrivesNextDay": true,
+              "dayOfWeek": "TH",
+              "aircraft": "77W",
+              "arrivalDate": "2026-10-30",
+              "durationMinutes": 185
+            }
+          ],
+          "durationMinutes": 1255,
+          "stops": 1,
+          "maxLayoverMinutes": 155,
+          "returnDurationMinutes": 1000,
+          "returnStops": 1,
+          "cabin": "economy",
+          "baggageKg": 30,
+          "refundable": false,
+          "checkedBagIncluded": true,
+          "construction": "single_ticket",
+          "marketingCarriers": [
+            "EK"
+          ],
+          "validatingCarrier": "EK",
+          "seatsRemaining": 7,
+          "supplierOfferSnapshotId": "snap_demo_lhe-bos-rt-14oct_01",
+          "snapshotExpiresAt": "2026-09-23T06:00:00.000Z",
+          "score": 91,
+          "angle": "cheapest",
+          "marketPriceMinor": 61951600,
+          "savingsPct": 31,
+          "badges": [
+            "Cheapest",
+            "30kg bag",
+            "Single carrier"
+          ],
+          "reasons": [
+            "31% below the highest fare in this search",
+            "1 stop via DXB",
+            "Total journey 20h 55m",
+            "Longest layover 2h 35m",
+            "Non-refundable fare conditions"
+          ]
+        },
+        {
+          "option": 2,
+          "totalMinor": 49846200,
+          "totalFormatted": "PKR 498,462",
+          "fareBasis": "UNN0AH69 / QN905H6R",
+          "dayOffset": 3,
+          "via": [
+            "AUH"
+          ],
+          "_sourceReturnDates": [
+            "15SEP",
+            "16SEP"
+          ],
+          "outbound": [
+            {
+              "seq": 1,
+              "carrier": "EY",
+              "flightNumber": "285",
+              "bookingClass": "U",
+              "departureDate": "2026-10-14",
+              "originCode": "LHE",
+              "destinationCode": "AUH",
+              "departTimeLocal": "04:40",
+              "arriveTimeLocal": "07:00",
+              "dayOfWeek": "WE",
+              "aircraft": "32A",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 200,
+              "layoverMinutesAfter": 120
+            },
+            {
+              "seq": 2,
+              "carrier": "EY",
+              "flightNumber": "7",
+              "bookingClass": "U",
+              "departureDate": "2026-10-14",
+              "originCode": "AUH",
+              "destinationCode": "BOS",
+              "departTimeLocal": "09:00",
+              "arriveTimeLocal": "14:40",
+              "dayOfWeek": "WE",
+              "aircraft": "789",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 880
+            }
+          ],
+          "inbound": [
+            {
+              "seq": 3,
+              "carrier": "EY",
+              "flightNumber": "8",
+              "bookingClass": "Q",
+              "departureDate": "2026-10-28",
+              "originCode": "BOS",
+              "destinationCode": "AUH",
+              "departTimeLocal": "16:25",
+              "arriveTimeLocal": "12:45",
+              "arrivesNextDay": true,
+              "dayOfWeek": "WE",
+              "aircraft": "789",
+              "arrivalDate": "2026-10-29",
+              "durationMinutes": 680,
+              "layoverMinutesAfter": 85
+            },
+            {
+              "seq": 4,
+              "carrier": "EY",
+              "flightNumber": "288",
+              "bookingClass": "Q",
+              "departureDate": "2026-10-29",
+              "originCode": "AUH",
+              "destinationCode": "LHE",
+              "departTimeLocal": "14:10",
+              "arriveTimeLocal": "18:25",
+              "dayOfWeek": "TH",
+              "aircraft": "321",
+              "arrivalDate": "2026-10-29",
+              "durationMinutes": 195
+            }
+          ],
+          "durationMinutes": 1200,
+          "stops": 1,
+          "maxLayoverMinutes": 120,
+          "returnDurationMinutes": 960,
+          "returnStops": 1,
+          "cabin": "economy",
+          "baggageKg": 30,
+          "refundable": true,
+          "checkedBagIncluded": true,
+          "construction": "single_ticket",
+          "marketingCarriers": [
+            "EY"
+          ],
+          "validatingCarrier": "EY",
+          "seatsRemaining": 4,
+          "supplierOfferSnapshotId": "snap_demo_lhe-bos-rt-14oct_02",
+          "snapshotExpiresAt": "2026-09-23T06:00:00.000Z",
+          "score": 74,
+          "angle": "fastest",
+          "marketPriceMinor": 61951600,
+          "savingsPct": 20,
+          "badges": [
+            "Fastest",
+            "30kg bag",
+            "Refundable",
+            "Single carrier"
+          ],
+          "reasons": [
+            "20% below the highest fare in this search",
+            "1 stop via AUH",
+            "Total journey 20h 0m",
+            "Longest layover 2h 0m",
+            "Refundable fare"
+          ]
+        },
+        {
+          "option": 3,
+          "totalMinor": 55872600,
+          "totalFormatted": "PKR 558,726",
+          "fareBasis": "VNN0AH69 / QN905H6R",
+          "dayOffset": 1,
+          "via": [
+            "AUH",
+            "ORD"
+          ],
+          "_sourceReturnDates": [
+            "15SEP",
+            "16SEP"
+          ],
+          "outbound": [
+            {
+              "seq": 1,
+              "carrier": "EY",
+              "flightNumber": "289",
+              "bookingClass": "V",
+              "departureDate": "2026-10-14",
+              "originCode": "LHE",
+              "destinationCode": "AUH",
+              "departTimeLocal": "19:45",
+              "arriveTimeLocal": "22:05",
+              "dayOfWeek": "WE",
+              "aircraft": "321",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 200,
+              "layoverMinutesAfter": 715
+            },
+            {
+              "seq": 2,
+              "carrier": "EY",
+              "flightNumber": "11",
+              "bookingClass": "V",
+              "departureDate": "2026-10-15",
+              "originCode": "AUH",
+              "destinationCode": "ORD",
+              "departTimeLocal": "10:00",
+              "arriveTimeLocal": "15:40",
+              "dayOfWeek": "TH",
+              "aircraft": "789",
+              "arrivalDate": "2026-10-15",
+              "durationMinutes": 940,
+              "layoverMinutesAfter": 1078
+            },
+            {
+              "seq": 3,
+              "carrier": "EY",
+              "flightNumber": "8344",
+              "bookingClass": "V",
+              "codeshare": true,
+              "departureDate": "2026-10-16",
+              "originCode": "ORD",
+              "destinationCode": "BOS",
+              "departTimeLocal": "09:38",
+              "arriveTimeLocal": "13:06",
+              "dayOfWeek": "FR",
+              "aircraft": "223",
+              "arrivalDate": "2026-10-16",
+              "durationMinutes": 148
+            }
+          ],
+          "inbound": [
+            {
+              "seq": 4,
+              "carrier": "EY",
+              "flightNumber": "8",
+              "bookingClass": "Q",
+              "departureDate": "2026-10-28",
+              "originCode": "BOS",
+              "destinationCode": "AUH",
+              "departTimeLocal": "16:25",
+              "arriveTimeLocal": "12:45",
+              "arrivesNextDay": true,
+              "dayOfWeek": "WE",
+              "aircraft": "789",
+              "arrivalDate": "2026-10-29",
+              "durationMinutes": 680,
+              "layoverMinutesAfter": 85
+            },
+            {
+              "seq": 5,
+              "carrier": "EY",
+              "flightNumber": "288",
+              "bookingClass": "Q",
+              "departureDate": "2026-10-29",
+              "originCode": "AUH",
+              "destinationCode": "LHE",
+              "departTimeLocal": "14:10",
+              "arriveTimeLocal": "18:25",
+              "dayOfWeek": "TH",
+              "aircraft": "321",
+              "arrivalDate": "2026-10-29",
+              "durationMinutes": 195
+            }
+          ],
+          "durationMinutes": 3081,
+          "stops": 2,
+          "maxLayoverMinutes": 1078,
+          "returnDurationMinutes": 960,
+          "returnStops": 1,
+          "cabin": "economy",
+          "baggageKg": 30,
+          "refundable": false,
+          "checkedBagIncluded": true,
+          "construction": "single_ticket",
+          "marketingCarriers": [
+            "EY"
+          ],
+          "validatingCarrier": "EY",
+          "seatsRemaining": 9,
+          "supplierOfferSnapshotId": "snap_demo_lhe-bos-rt-14oct_03",
+          "snapshotExpiresAt": "2026-09-23T06:00:00.000Z",
+          "score": 16,
+          "angle": "recommended",
+          "marketPriceMinor": 61951600,
+          "savingsPct": 10,
+          "badges": [
+            "30kg bag",
+            "Single carrier"
+          ],
+          "reasons": [
+            "10% below the highest fare in this search",
+            "2 stops via AUH, ORD",
+            "Total journey 51h 21m",
+            "Longest layover 17h 58m",
+            "Non-refundable fare conditions"
+          ]
+        },
+        {
+          "option": 4,
+          "totalMinor": 56558200,
+          "totalFormatted": "PKR 565,582",
+          "fareBasis": "TJPKP1RE / MJR4R1SE",
+          "dayOffset": 1,
+          "via": [
+            "DOH"
+          ],
+          "_sourceReturnDates": [
+            "15SEP",
+            "16SEP"
+          ],
+          "outbound": [
+            {
+              "seq": 1,
+              "carrier": "QR",
+              "flightNumber": "621",
+              "bookingClass": "T",
+              "departureDate": "2026-10-14",
+              "originCode": "LHE",
+              "destinationCode": "DOH",
+              "departTimeLocal": "03:10",
+              "arriveTimeLocal": "05:05",
+              "dayOfWeek": "WE",
+              "aircraft": "351",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 235,
+              "layoverMinutesAfter": 205
+            },
+            {
+              "seq": 2,
+              "carrier": "QR",
+              "flightNumber": "743",
+              "bookingClass": "T",
+              "departureDate": "2026-10-14",
+              "originCode": "DOH",
+              "destinationCode": "BOS",
+              "departTimeLocal": "08:30",
+              "arriveTimeLocal": "15:55",
+              "dayOfWeek": "WE",
+              "aircraft": "359",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 925
+            }
+          ],
+          "inbound": [
+            {
+              "seq": 3,
+              "carrier": "QR",
+              "flightNumber": "744",
+              "bookingClass": "M",
+              "departureDate": "2026-10-28",
+              "originCode": "BOS",
+              "destinationCode": "DOH",
+              "departTimeLocal": "22:00",
+              "arriveTimeLocal": "16:45",
+              "arrivesNextDay": true,
+              "dayOfWeek": "WE",
+              "aircraft": "359",
+              "arrivalDate": "2026-10-29",
+              "durationMinutes": 645,
+              "layoverMinutesAfter": 195
+            },
+            {
+              "seq": 4,
+              "carrier": "QR",
+              "flightNumber": "620",
+              "bookingClass": "M",
+              "departureDate": "2026-10-29",
+              "originCode": "DOH",
+              "destinationCode": "LHE",
+              "departTimeLocal": "20:00",
+              "arriveTimeLocal": "01:30",
+              "arrivesNextDay": true,
+              "dayOfWeek": "TH",
+              "aircraft": "788",
+              "arrivalDate": "2026-10-30",
+              "durationMinutes": 210
+            }
+          ],
+          "durationMinutes": 1365,
+          "stops": 1,
+          "maxLayoverMinutes": 205,
+          "returnDurationMinutes": 1050,
+          "returnStops": 1,
+          "cabin": "economy",
+          "baggageKg": 30,
+          "refundable": false,
+          "checkedBagIncluded": true,
+          "construction": "single_ticket",
+          "marketingCarriers": [
+            "QR"
+          ],
+          "validatingCarrier": "QR",
+          "seatsRemaining": 6,
+          "supplierOfferSnapshotId": "snap_demo_lhe-bos-rt-14oct_04",
+          "snapshotExpiresAt": "2026-09-23T06:00:00.000Z",
+          "score": 53,
+          "angle": "recommended",
+          "marketPriceMinor": 61951600,
+          "savingsPct": 9,
+          "badges": [
+            "30kg bag",
+            "Single carrier"
+          ],
+          "reasons": [
+            "9% below the highest fare in this search",
+            "1 stop via DOH",
+            "Total journey 22h 45m",
+            "Longest layover 3h 25m",
+            "Non-refundable fare conditions"
+          ]
+        },
+        {
+          "option": 5,
+          "totalMinor": 61951600,
+          "totalFormatted": "PKR 619,516",
+          "fareBasis": "LNN0AH69 / QN905H6R",
+          "dayOffset": 1,
+          "via": [
+            "AUH",
+            "ORD"
+          ],
+          "_sourceReturnDates": [
+            "15SEP",
+            "16SEP"
+          ],
+          "outbound": [
+            {
+              "seq": 1,
+              "carrier": "EY",
+              "flightNumber": "285",
+              "bookingClass": "L",
+              "departureDate": "2026-10-14",
+              "originCode": "LHE",
+              "destinationCode": "AUH",
+              "departTimeLocal": "04:40",
+              "arriveTimeLocal": "07:00",
+              "dayOfWeek": "WE",
+              "aircraft": "32A",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 200,
+              "layoverMinutesAfter": 180
+            },
+            {
+              "seq": 2,
+              "carrier": "EY",
+              "flightNumber": "11",
+              "bookingClass": "L",
+              "departureDate": "2026-10-14",
+              "originCode": "AUH",
+              "destinationCode": "ORD",
+              "departTimeLocal": "10:00",
+              "arriveTimeLocal": "15:40",
+              "dayOfWeek": "WE",
+              "aircraft": "789",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 940,
+              "layoverMinutesAfter": 1078
+            },
+            {
+              "seq": 3,
+              "carrier": "EY",
+              "flightNumber": "8344",
+              "bookingClass": "L",
+              "codeshare": true,
+              "departureDate": "2026-10-15",
+              "originCode": "ORD",
+              "destinationCode": "BOS",
+              "departTimeLocal": "09:38",
+              "arriveTimeLocal": "13:06",
+              "dayOfWeek": "TH",
+              "aircraft": "223",
+              "arrivalDate": "2026-10-15",
+              "durationMinutes": 148
+            }
+          ],
+          "inbound": [
+            {
+              "seq": 4,
+              "carrier": "EY",
+              "flightNumber": "8",
+              "bookingClass": "Q",
+              "departureDate": "2026-10-28",
+              "originCode": "BOS",
+              "destinationCode": "AUH",
+              "departTimeLocal": "16:25",
+              "arriveTimeLocal": "12:45",
+              "arrivesNextDay": true,
+              "dayOfWeek": "WE",
+              "aircraft": "789",
+              "arrivalDate": "2026-10-29",
+              "durationMinutes": 680,
+              "layoverMinutesAfter": 85
+            },
+            {
+              "seq": 5,
+              "carrier": "EY",
+              "flightNumber": "288",
+              "bookingClass": "Q",
+              "departureDate": "2026-10-29",
+              "originCode": "AUH",
+              "destinationCode": "LHE",
+              "departTimeLocal": "14:10",
+              "arriveTimeLocal": "18:25",
+              "dayOfWeek": "TH",
+              "aircraft": "321",
+              "arrivalDate": "2026-10-29",
+              "durationMinutes": 195
+            }
+          ],
+          "durationMinutes": 2546,
+          "stops": 2,
+          "maxLayoverMinutes": 1078,
+          "returnDurationMinutes": 960,
+          "returnStops": 1,
+          "cabin": "economy",
+          "baggageKg": 30,
+          "refundable": false,
+          "checkedBagIncluded": true,
+          "construction": "single_ticket",
+          "marketingCarriers": [
+            "EY"
+          ],
+          "validatingCarrier": "EY",
+          "seatsRemaining": 3,
+          "supplierOfferSnapshotId": "snap_demo_lhe-bos-rt-14oct_05",
+          "snapshotExpiresAt": "2026-09-23T06:00:00.000Z",
+          "score": 10,
+          "angle": "recommended",
+          "marketPriceMinor": 61951600,
+          "savingsPct": null,
+          "badges": [
+            "30kg bag",
+            "3 seats left",
+            "Single carrier"
+          ],
+          "reasons": [
+            "2 stops via AUH, ORD",
+            "Total journey 42h 26m",
+            "Longest layover 17h 58m",
+            "Non-refundable fare conditions"
+          ]
+        }
+      ],
+      "priceRange": {
+        "minMinor": 42472200,
+        "maxMinor": 61951600,
+        "currency": "PKR"
+      },
+      "durationRange": {
+        "minMinutes": 1200,
+        "maxMinutes": 3081
+      }
+    },
+    {
+      "id": "lhe-cdg-14oct",
+      "command": "FSLHE14OCTCDG",
+      "origin": "LHE",
+      "destination": "CDG",
+      "originCity": "Lahore",
+      "destinationCity": "Paris",
+      "departureDate": "2026-10-14",
+      "tripType": "one_way",
+      "totalOptionsReported": {
+        "pricing": 16,
+        "itinerary": 24
+      },
+      "capturedOptions": 7,
+      "itineraries": [
+        {
+          "option": 1,
+          "totalMinor": 13337600,
+          "totalFormatted": "PKR 133,376",
+          "fareBasis": "TNN20H6G",
+          "dayOffset": 2,
+          "via": [
+            "AUH"
+          ],
+          "segments": [
+            {
+              "seq": 1,
+              "carrier": "EY",
+              "flightNumber": "285",
+              "bookingClass": "T",
+              "departureDate": "2026-10-14",
+              "originCode": "LHE",
+              "destinationCode": "AUH",
+              "departTimeLocal": "04:40",
+              "arriveTimeLocal": "07:00",
+              "dayOfWeek": "WE",
+              "aircraft": "32A",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 200,
+              "layoverMinutesAfter": 110
+            },
+            {
+              "seq": 2,
+              "carrier": "EY",
+              "flightNumber": "35",
+              "bookingClass": "T",
+              "departureDate": "2026-10-14",
+              "originCode": "AUH",
+              "destinationCode": "CDG",
+              "departTimeLocal": "08:50",
+              "arriveTimeLocal": "14:20",
+              "dayOfWeek": "WE",
+              "aircraft": "32Q",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 450
+            }
+          ],
+          "durationMinutes": 760,
+          "stops": 1,
+          "maxLayoverMinutes": 110,
+          "cabin": "economy",
+          "baggageKg": 30,
+          "refundable": false,
+          "checkedBagIncluded": true,
+          "construction": "single_ticket",
+          "marketingCarriers": [
+            "EY"
+          ],
+          "validatingCarrier": "EY",
+          "seatsRemaining": 8,
+          "supplierOfferSnapshotId": "snap_demo_lhe-cdg-14oct_01",
+          "snapshotExpiresAt": "2026-09-23T06:00:00.000Z",
+          "score": 88,
+          "angle": "cheapest",
+          "marketPriceMinor": 21506600,
+          "savingsPct": 38,
+          "badges": [
+            "Cheapest",
+            "30kg bag",
+            "Single carrier"
+          ],
+          "reasons": [
+            "38% below the highest fare in this search",
+            "1 stop via AUH",
+            "Total journey 12h 40m",
+            "Longest layover 1h 50m",
+            "Non-refundable fare conditions"
+          ]
+        },
+        {
+          "option": 2,
+          "totalMinor": 19306700,
+          "totalFormatted": "PKR 193,067",
+          "fareBasis": "QMCLO",
+          "dayOffset": 2,
+          "via": [
+            "IST"
+          ],
+          "segments": [
+            {
+              "seq": 1,
+              "carrier": "TK",
+              "flightNumber": "745",
+              "bookingClass": "Q",
+              "departureDate": "2026-10-14",
+              "originCode": "LHE",
+              "destinationCode": "IST",
+              "departTimeLocal": "09:35",
+              "arriveTimeLocal": "13:50",
+              "dayOfWeek": "WE",
+              "aircraft": "333",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 375,
+              "layoverMinutesAfter": 100
+            },
+            {
+              "seq": 2,
+              "carrier": "TK",
+              "flightNumber": "1827",
+              "bookingClass": "Q",
+              "departureDate": "2026-10-14",
+              "originCode": "IST",
+              "destinationCode": "CDG",
+              "departTimeLocal": "15:30",
+              "arriveTimeLocal": "18:10",
+              "dayOfWeek": "WE",
+              "aircraft": "359",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 220
+            }
+          ],
+          "durationMinutes": 695,
+          "stops": 1,
+          "maxLayoverMinutes": 100,
+          "cabin": "economy",
+          "baggageKg": 30,
+          "refundable": false,
+          "checkedBagIncluded": true,
+          "construction": "single_ticket",
+          "marketingCarriers": [
+            "TK"
+          ],
+          "validatingCarrier": "TK",
+          "seatsRemaining": 5,
+          "supplierOfferSnapshotId": "snap_demo_lhe-cdg-14oct_02",
+          "snapshotExpiresAt": "2026-09-23T06:00:00.000Z",
+          "score": 56,
+          "angle": "fastest",
+          "marketPriceMinor": 21506600,
+          "savingsPct": 10,
+          "badges": [
+            "Fastest",
+            "30kg bag",
+            "Single carrier"
+          ],
+          "reasons": [
+            "10% below the highest fare in this search",
+            "1 stop via IST",
+            "Total journey 11h 35m",
+            "Longest layover 1h 40m",
+            "Non-refundable fare conditions"
+          ]
+        },
+        {
+          "option": 3,
+          "totalMinor": 19391600,
+          "totalFormatted": "PKR 193,916",
+          "fareBasis": "QACOPPK1",
+          "dayOffset": 0,
+          "via": [
+            "KHI",
+            "DXB"
+          ],
+          "segments": [
+            {
+              "seq": 1,
+              "carrier": "PK",
+              "flightNumber": "305",
+              "bookingClass": "I",
+              "departureDate": "2026-10-14",
+              "originCode": "LHE",
+              "destinationCode": "KHI",
+              "departTimeLocal": "17:00",
+              "arriveTimeLocal": "18:45",
+              "dayOfWeek": "WE",
+              "aircraft": "320",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 105,
+              "layoverMinutesAfter": 250
+            },
+            {
+              "seq": 2,
+              "carrier": "EK",
+              "flightNumber": "603",
+              "bookingClass": "Q",
+              "departureDate": "2026-10-14",
+              "originCode": "KHI",
+              "destinationCode": "DXB",
+              "departTimeLocal": "22:55",
+              "arriveTimeLocal": "00:05",
+              "arrivesNextDay": true,
+              "dayOfWeek": "WE",
+              "aircraft": "77W",
+              "arrivalDate": "2026-10-15",
+              "durationMinutes": 130,
+              "layoverMinutesAfter": 180
+            },
+            {
+              "seq": 3,
+              "carrier": "EK",
+              "flightNumber": "71",
+              "bookingClass": "Q",
+              "departureDate": "2026-10-15",
+              "originCode": "DXB",
+              "destinationCode": "CDG",
+              "departTimeLocal": "03:05",
+              "arriveTimeLocal": "08:25",
+              "dayOfWeek": "TH",
+              "aircraft": "388",
+              "arrivalDate": "2026-10-15",
+              "durationMinutes": 440
+            }
+          ],
+          "durationMinutes": 1105,
+          "stops": 2,
+          "maxLayoverMinutes": 250,
+          "cabin": "economy",
+          "baggageKg": 30,
+          "refundable": true,
+          "checkedBagIncluded": true,
+          "construction": "single_ticket",
+          "marketingCarriers": [
+            "PK",
+            "EK"
+          ],
+          "validatingCarrier": "PK",
+          "seatsRemaining": 2,
+          "supplierOfferSnapshotId": "snap_demo_lhe-cdg-14oct_03",
+          "snapshotExpiresAt": "2026-09-23T06:00:00.000Z",
+          "score": 23,
+          "angle": "recommended",
+          "marketPriceMinor": 21506600,
+          "savingsPct": 10,
+          "badges": [
+            "30kg bag",
+            "Refundable",
+            "2 seats left"
+          ],
+          "reasons": [
+            "10% below the highest fare in this search",
+            "2 stops via KHI, DXB",
+            "Total journey 18h 25m",
+            "Longest layover 4h 10m",
+            "Refundable fare"
+          ]
+        },
+        {
+          "option": 4,
+          "totalMinor": 19623400,
+          "totalFormatted": "PKR 196,234",
+          "fareBasis": "QBLIT3PK",
+          "dayOffset": 0,
+          "via": [
+            "BAH"
+          ],
+          "segments": [
+            {
+              "seq": 1,
+              "carrier": "GF",
+              "flightNumber": "767",
+              "bookingClass": "Q",
+              "departureDate": "2026-10-14",
+              "originCode": "LHE",
+              "destinationCode": "BAH",
+              "departTimeLocal": "22:00",
+              "arriveTimeLocal": "23:55",
+              "dayOfWeek": "WE",
+              "aircraft": "32N",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 235,
+              "layoverMinutesAfter": 100
+            },
+            {
+              "seq": 2,
+              "carrier": "GF",
+              "flightNumber": "19",
+              "bookingClass": "Q",
+              "departureDate": "2026-10-15",
+              "originCode": "BAH",
+              "destinationCode": "CDG",
+              "departTimeLocal": "01:35",
+              "arriveTimeLocal": "07:55",
+              "dayOfWeek": "TH",
+              "aircraft": "32Q",
+              "arrivalDate": "2026-10-15",
+              "durationMinutes": 440
+            }
+          ],
+          "durationMinutes": 775,
+          "stops": 1,
+          "maxLayoverMinutes": 100,
+          "cabin": "economy",
+          "baggageKg": 30,
+          "refundable": false,
+          "checkedBagIncluded": true,
+          "construction": "single_ticket",
+          "marketingCarriers": [
+            "GF"
+          ],
+          "validatingCarrier": "GF",
+          "seatsRemaining": 7,
+          "supplierOfferSnapshotId": "snap_demo_lhe-cdg-14oct_04",
+          "snapshotExpiresAt": "2026-09-23T06:00:00.000Z",
+          "score": 49,
+          "angle": "recommended",
+          "marketPriceMinor": 21506600,
+          "savingsPct": 9,
+          "badges": [
+            "30kg bag",
+            "Single carrier"
+          ],
+          "reasons": [
+            "9% below the highest fare in this search",
+            "1 stop via BAH",
+            "Total journey 12h 55m",
+            "Longest layover 1h 40m",
+            "Non-refundable fare conditions"
+          ]
+        },
+        {
+          "option": 5,
+          "totalMinor": 19648700,
+          "totalFormatted": "PKR 196,487",
+          "fareBasis": "HAOXPKB4",
+          "dayOffset": 0,
+          "via": [
+            "JED"
+          ],
+          "segments": [
+            {
+              "seq": 1,
+              "carrier": "SV",
+              "flightNumber": "739",
+              "bookingClass": "H",
+              "departureDate": "2026-10-14",
+              "originCode": "LHE",
+              "destinationCode": "JED",
+              "departTimeLocal": "02:40",
+              "arriveTimeLocal": "05:45",
+              "dayOfWeek": "WE",
+              "aircraft": "773",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 305,
+              "layoverMinutesAfter": 185
+            },
+            {
+              "seq": 2,
+              "carrier": "SV",
+              "flightNumber": "127",
+              "bookingClass": "H",
+              "departureDate": "2026-10-14",
+              "originCode": "JED",
+              "destinationCode": "CDG",
+              "departTimeLocal": "08:50",
+              "arriveTimeLocal": "13:55",
+              "dayOfWeek": "WE",
+              "aircraft": "789",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 365
+            }
+          ],
+          "durationMinutes": 855,
+          "stops": 1,
+          "maxLayoverMinutes": 185,
+          "cabin": "economy",
+          "baggageKg": 30,
+          "refundable": true,
+          "checkedBagIncluded": true,
+          "construction": "single_ticket",
+          "marketingCarriers": [
+            "SV"
+          ],
+          "validatingCarrier": "SV",
+          "seatsRemaining": 4,
+          "supplierOfferSnapshotId": "snap_demo_lhe-cdg-14oct_05",
+          "snapshotExpiresAt": "2026-09-23T06:00:00.000Z",
+          "score": 44,
+          "angle": "recommended",
+          "marketPriceMinor": 21506600,
+          "savingsPct": 9,
+          "badges": [
+            "30kg bag",
+            "Refundable",
+            "Single carrier"
+          ],
+          "reasons": [
+            "9% below the highest fare in this search",
+            "1 stop via JED",
+            "Total journey 14h 15m",
+            "Longest layover 3h 5m",
+            "Refundable fare"
+          ]
+        },
+        {
+          "option": 6,
+          "totalMinor": 19648700,
+          "totalFormatted": "PKR 196,487",
+          "fareBasis": "HAOXPKB4",
+          "dayOffset": 0,
+          "via": [
+            "RUH"
+          ],
+          "segments": [
+            {
+              "seq": 1,
+              "carrier": "SV",
+              "flightNumber": "737",
+              "bookingClass": "H",
+              "departureDate": "2026-10-14",
+              "originCode": "LHE",
+              "destinationCode": "RUH",
+              "departTimeLocal": "21:10",
+              "arriveTimeLocal": "23:25",
+              "dayOfWeek": "WE",
+              "aircraft": "777",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 255,
+              "layoverMinutesAfter": 155
+            },
+            {
+              "seq": 2,
+              "carrier": "SV",
+              "flightNumber": "143",
+              "bookingClass": "H",
+              "departureDate": "2026-10-15",
+              "originCode": "RUH",
+              "destinationCode": "CDG",
+              "departTimeLocal": "02:00",
+              "arriveTimeLocal": "07:35",
+              "dayOfWeek": "TH",
+              "aircraft": "773",
+              "arrivalDate": "2026-10-15",
+              "durationMinutes": 395
+            }
+          ],
+          "durationMinutes": 805,
+          "stops": 1,
+          "maxLayoverMinutes": 155,
+          "cabin": "economy",
+          "baggageKg": 30,
+          "refundable": true,
+          "checkedBagIncluded": true,
+          "construction": "single_ticket",
+          "marketingCarriers": [
+            "SV"
+          ],
+          "validatingCarrier": "SV",
+          "seatsRemaining": 9,
+          "supplierOfferSnapshotId": "snap_demo_lhe-cdg-14oct_06",
+          "snapshotExpiresAt": "2026-09-23T06:00:00.000Z",
+          "score": 47,
+          "angle": "recommended",
+          "marketPriceMinor": 21506600,
+          "savingsPct": 9,
+          "badges": [
+            "30kg bag",
+            "Refundable",
+            "Single carrier"
+          ],
+          "reasons": [
+            "9% below the highest fare in this search",
+            "1 stop via RUH",
+            "Total journey 13h 25m",
+            "Longest layover 2h 35m",
+            "Refundable fare"
+          ]
+        },
+        {
+          "option": 7,
+          "totalMinor": 21506600,
+          "totalFormatted": "PKR 215,066",
+          "fareBasis": "TJPKP1RI",
+          "dayOffset": 0,
+          "via": [
+            "DOH"
+          ],
+          "segments": [
+            {
+              "seq": 1,
+              "carrier": "QR",
+              "flightNumber": "621",
+              "bookingClass": "T",
+              "departureDate": "2026-10-14",
+              "originCode": "LHE",
+              "destinationCode": "DOH",
+              "departTimeLocal": "03:10",
+              "arriveTimeLocal": "05:05",
+              "dayOfWeek": "WE",
+              "aircraft": "351",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 235,
+              "layoverMinutesAfter": 615
+            },
+            {
+              "seq": 2,
+              "carrier": "QR",
+              "flightNumber": "37",
+              "bookingClass": "T",
+              "departureDate": "2026-10-14",
+              "originCode": "DOH",
+              "destinationCode": "CDG",
+              "departTimeLocal": "15:20",
+              "arriveTimeLocal": "21:10",
+              "dayOfWeek": "WE",
+              "aircraft": "359",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 410
+            }
+          ],
+          "durationMinutes": 1260,
+          "stops": 1,
+          "maxLayoverMinutes": 615,
+          "cabin": "economy",
+          "baggageKg": 30,
+          "refundable": false,
+          "checkedBagIncluded": true,
+          "construction": "single_ticket",
+          "marketingCarriers": [
+            "QR"
+          ],
+          "validatingCarrier": "QR",
+          "seatsRemaining": 6,
+          "supplierOfferSnapshotId": "snap_demo_lhe-cdg-14oct_07",
+          "snapshotExpiresAt": "2026-09-23T06:00:00.000Z",
+          "score": 8,
+          "angle": "recommended",
+          "marketPriceMinor": 21506600,
+          "savingsPct": null,
+          "badges": [
+            "30kg bag",
+            "Single carrier"
+          ],
+          "reasons": [
+            "1 stop via DOH",
+            "Total journey 21h 0m",
+            "Longest layover 10h 15m",
+            "Non-refundable fare conditions"
+          ]
+        }
+      ],
+      "priceRange": {
+        "minMinor": 13337600,
+        "maxMinor": 21506600,
+        "currency": "PKR"
+      },
+      "durationRange": {
+        "minMinutes": 695,
+        "maxMinutes": 1260
+      }
+    },
+    {
+      "id": "lhe-mxp-14oct",
+      "command": "FSLHE14OCTMXP",
+      "origin": "LHE",
+      "destination": "MXP",
+      "originCity": "Lahore",
+      "destinationCity": "Milan",
+      "departureDate": "2026-10-14",
+      "tripType": "one_way",
+      "totalOptionsReported": {
+        "pricing": 17,
+        "itinerary": 25
+      },
+      "capturedOptions": 7,
+      "itineraries": [
+        {
+          "option": 1,
+          "totalMinor": 14041600,
+          "totalFormatted": "PKR 140,416",
+          "fareBasis": "TNN20H6G",
+          "dayOffset": 3,
+          "via": [
+            "AUH"
+          ],
+          "segments": [
+            {
+              "seq": 1,
+              "carrier": "EY",
+              "flightNumber": "289",
+              "bookingClass": "T",
+              "departureDate": "2026-10-14",
+              "originCode": "LHE",
+              "destinationCode": "AUH",
+              "departTimeLocal": "19:45",
+              "arriveTimeLocal": "22:05",
+              "dayOfWeek": "WE",
+              "aircraft": "321",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 200,
+              "layoverMinutesAfter": 250
+            },
+            {
+              "seq": 2,
+              "carrier": "EY",
+              "flightNumber": "81",
+              "bookingClass": "T",
+              "departureDate": "2026-10-15",
+              "originCode": "AUH",
+              "destinationCode": "MXP",
+              "departTimeLocal": "02:15",
+              "arriveTimeLocal": "06:45",
+              "dayOfWeek": "TH",
+              "aircraft": "77W",
+              "arrivalDate": "2026-10-15",
+              "durationMinutes": 390
+            }
+          ],
+          "durationMinutes": 840,
+          "stops": 1,
+          "maxLayoverMinutes": 250,
+          "cabin": "economy",
+          "baggageKg": 30,
+          "refundable": false,
+          "checkedBagIncluded": true,
+          "construction": "single_ticket",
+          "marketingCarriers": [
+            "EY"
+          ],
+          "validatingCarrier": "EY",
+          "seatsRemaining": 3,
+          "supplierOfferSnapshotId": "snap_demo_lhe-mxp-14oct_01",
+          "snapshotExpiresAt": "2026-09-23T06:00:00.000Z",
+          "score": 87,
+          "angle": "cheapest",
+          "marketPriceMinor": 20858600,
+          "savingsPct": 33,
+          "badges": [
+            "Cheapest",
+            "30kg bag",
+            "3 seats left",
+            "Single carrier"
+          ],
+          "reasons": [
+            "33% below the highest fare in this search",
+            "1 stop via AUH",
+            "Total journey 14h 0m",
+            "Longest layover 4h 10m",
+            "Non-refundable fare conditions"
+          ]
+        },
+        {
+          "option": 2,
+          "totalMinor": 14490200,
+          "totalFormatted": "PKR 144,902",
+          "fareBasis": "RLI1 / ALI1",
+          "dayOffset": 0,
+          "via": [
+            "TAS"
+          ],
+          "segments": [
+            {
+              "seq": 1,
+              "carrier": "HY",
+              "flightNumber": "462",
+              "bookingClass": "R",
+              "departureDate": "2026-10-14",
+              "originCode": "LHE",
+              "destinationCode": "TAS",
+              "departTimeLocal": "11:00",
+              "arriveTimeLocal": "13:25",
+              "dayOfWeek": "WE",
+              "aircraft": "32N",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 145,
+              "layoverMinutesAfter": 105
+            },
+            {
+              "seq": 2,
+              "carrier": "HY",
+              "flightNumber": "255",
+              "bookingClass": "A",
+              "departureDate": "2026-10-14",
+              "originCode": "TAS",
+              "destinationCode": "MXP",
+              "departTimeLocal": "15:10",
+              "arriveTimeLocal": "19:20",
+              "dayOfWeek": "WE",
+              "aircraft": "788",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 430
+            }
+          ],
+          "durationMinutes": 680,
+          "stops": 1,
+          "maxLayoverMinutes": 105,
+          "cabin": "economy",
+          "baggageKg": 20,
+          "refundable": true,
+          "checkedBagIncluded": true,
+          "construction": "single_ticket",
+          "marketingCarriers": [
+            "HY"
+          ],
+          "validatingCarrier": "HY",
+          "seatsRemaining": 8,
+          "supplierOfferSnapshotId": "snap_demo_lhe-mxp-14oct_02",
+          "snapshotExpiresAt": "2026-09-23T06:00:00.000Z",
+          "score": 89,
+          "angle": "best_value",
+          "marketPriceMinor": 20858600,
+          "savingsPct": 31,
+          "badges": [
+            "Best value",
+            "20kg bag",
+            "Refundable",
+            "Single carrier"
+          ],
+          "reasons": [
+            "31% below the highest fare in this search",
+            "1 stop via TAS",
+            "Total journey 11h 20m",
+            "Longest layover 1h 45m",
+            "Refundable fare"
+          ]
+        },
+        {
+          "option": 3,
+          "totalMinor": 15457400,
+          "totalFormatted": "PKR 154,574",
+          "fareBasis": "EBLIT3PK",
+          "dayOffset": 0,
+          "via": [
+            "BAH"
+          ],
+          "segments": [
+            {
+              "seq": 1,
+              "carrier": "GF",
+              "flightNumber": "767",
+              "bookingClass": "E",
+              "departureDate": "2026-10-14",
+              "originCode": "LHE",
+              "destinationCode": "BAH",
+              "departTimeLocal": "22:00",
+              "arriveTimeLocal": "23:55",
+              "dayOfWeek": "WE",
+              "aircraft": "32N",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 235,
+              "layoverMinutesAfter": 105
+            },
+            {
+              "seq": 2,
+              "carrier": "GF",
+              "flightNumber": "23",
+              "bookingClass": "E",
+              "departureDate": "2026-10-15",
+              "originCode": "BAH",
+              "destinationCode": "MXP",
+              "departTimeLocal": "01:40",
+              "arriveTimeLocal": "06:55",
+              "dayOfWeek": "TH",
+              "aircraft": "32Q",
+              "arrivalDate": "2026-10-15",
+              "durationMinutes": 375
+            }
+          ],
+          "durationMinutes": 715,
+          "stops": 1,
+          "maxLayoverMinutes": 105,
+          "cabin": "economy",
+          "baggageKg": 30,
+          "refundable": false,
+          "checkedBagIncluded": true,
+          "construction": "single_ticket",
+          "marketingCarriers": [
+            "GF"
+          ],
+          "validatingCarrier": "GF",
+          "seatsRemaining": 5,
+          "supplierOfferSnapshotId": "snap_demo_lhe-mxp-14oct_03",
+          "snapshotExpiresAt": "2026-09-23T06:00:00.000Z",
+          "score": 81,
+          "angle": "recommended",
+          "marketPriceMinor": 20858600,
+          "savingsPct": 26,
+          "badges": [
+            "30kg bag",
+            "Single carrier"
+          ],
+          "reasons": [
+            "26% below the highest fare in this search",
+            "1 stop via BAH",
+            "Total journey 11h 55m",
+            "Longest layover 1h 45m",
+            "Non-refundable fare conditions"
+          ]
+        },
+        {
+          "option": 4,
+          "totalMinor": 17899000,
+          "totalFormatted": "PKR 178,990",
+          "fareBasis": "UOWPK70",
+          "dayOffset": 0,
+          "via": [
+            "IST"
+          ],
+          "segments": [
+            {
+              "seq": 1,
+              "carrier": "PK",
+              "flightNumber": "5715",
+              "bookingClass": "U",
+              "codeshare": true,
+              "departureDate": "2026-10-14",
+              "originCode": "LHE",
+              "destinationCode": "IST",
+              "departTimeLocal": "05:35",
+              "arriveTimeLocal": "10:05",
+              "dayOfWeek": "WE",
+              "aircraft": "772",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 390,
+              "layoverMinutesAfter": 1255
+            },
+            {
+              "seq": 2,
+              "carrier": "PK",
+              "flightNumber": "5873",
+              "bookingClass": "U",
+              "codeshare": true,
+              "departureDate": "2026-10-15",
+              "originCode": "IST",
+              "destinationCode": "MXP",
+              "departTimeLocal": "07:00",
+              "arriveTimeLocal": "08:45",
+              "dayOfWeek": "TH",
+              "aircraft": "772",
+              "arrivalDate": "2026-10-15",
+              "durationMinutes": 165
+            }
+          ],
+          "durationMinutes": 1810,
+          "stops": 1,
+          "maxLayoverMinutes": 1255,
+          "cabin": "economy",
+          "baggageKg": 30,
+          "refundable": true,
+          "checkedBagIncluded": true,
+          "construction": "single_ticket",
+          "marketingCarriers": [
+            "PK"
+          ],
+          "validatingCarrier": "PK",
+          "seatsRemaining": 2,
+          "supplierOfferSnapshotId": "snap_demo_lhe-mxp-14oct_04",
+          "snapshotExpiresAt": "2026-09-23T06:00:00.000Z",
+          "score": 29,
+          "angle": "recommended",
+          "marketPriceMinor": 20858600,
+          "savingsPct": 14,
+          "badges": [
+            "30kg bag",
+            "Refundable",
+            "2 seats left",
+            "Single carrier"
+          ],
+          "reasons": [
+            "14% below the highest fare in this search",
+            "1 stop via IST",
+            "Total journey 30h 10m",
+            "Longest layover 20h 55m",
+            "Refundable fare"
+          ]
+        },
+        {
+          "option": 5,
+          "totalMinor": 18659400,
+          "totalFormatted": "PKR 186,594",
+          "fareBasis": "TMCLO",
+          "dayOffset": 3,
+          "via": [
+            "IST"
+          ],
+          "segments": [
+            {
+              "seq": 1,
+              "carrier": "TK",
+              "flightNumber": "745",
+              "bookingClass": "T",
+              "departureDate": "2026-10-14",
+              "originCode": "LHE",
+              "destinationCode": "IST",
+              "departTimeLocal": "09:35",
+              "arriveTimeLocal": "13:50",
+              "dayOfWeek": "WE",
+              "aircraft": "333",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 375,
+              "layoverMinutesAfter": 120
+            },
+            {
+              "seq": 2,
+              "carrier": "TK",
+              "flightNumber": "1875",
+              "bookingClass": "T",
+              "departureDate": "2026-10-14",
+              "originCode": "IST",
+              "destinationCode": "MXP",
+              "departTimeLocal": "15:50",
+              "arriveTimeLocal": "17:45",
+              "dayOfWeek": "WE",
+              "aircraft": "333",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 175
+            }
+          ],
+          "durationMinutes": 670,
+          "stops": 1,
+          "maxLayoverMinutes": 120,
+          "cabin": "economy",
+          "baggageKg": 30,
+          "refundable": false,
+          "checkedBagIncluded": true,
+          "construction": "single_ticket",
+          "marketingCarriers": [
+            "TK"
+          ],
+          "validatingCarrier": "TK",
+          "seatsRemaining": 7,
+          "supplierOfferSnapshotId": "snap_demo_lhe-mxp-14oct_05",
+          "snapshotExpiresAt": "2026-09-23T06:00:00.000Z",
+          "score": 59,
+          "angle": "fastest",
+          "marketPriceMinor": 20858600,
+          "savingsPct": 11,
+          "badges": [
+            "Fastest",
+            "30kg bag",
+            "Single carrier"
+          ],
+          "reasons": [
+            "11% below the highest fare in this search",
+            "1 stop via IST",
+            "Total journey 11h 10m",
+            "Longest layover 2h 0m",
+            "Non-refundable fare conditions"
+          ]
+        },
+        {
+          "option": 6,
+          "totalMinor": 20855000,
+          "totalFormatted": "PKR 208,550",
+          "fareBasis": "IOWPK70",
+          "dayOffset": 0,
+          "via": [
+            "IST"
+          ],
+          "segments": [
+            {
+              "seq": 1,
+              "carrier": "PK",
+              "flightNumber": "5715",
+              "bookingClass": "I",
+              "codeshare": true,
+              "departureDate": "2026-10-14",
+              "originCode": "LHE",
+              "destinationCode": "IST",
+              "departTimeLocal": "05:35",
+              "arriveTimeLocal": "10:05",
+              "dayOfWeek": "WE",
+              "aircraft": "772",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 390,
+              "layoverMinutesAfter": 135
+            },
+            {
+              "seq": 2,
+              "carrier": "PK",
+              "flightNumber": "5895",
+              "bookingClass": "I",
+              "codeshare": true,
+              "departureDate": "2026-10-14",
+              "originCode": "IST",
+              "destinationCode": "MXP",
+              "departTimeLocal": "12:20",
+              "arriveTimeLocal": "14:10",
+              "dayOfWeek": "WE",
+              "aircraft": "772",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 170
+            }
+          ],
+          "durationMinutes": 695,
+          "stops": 1,
+          "maxLayoverMinutes": 135,
+          "cabin": "economy",
+          "baggageKg": 30,
+          "refundable": true,
+          "checkedBagIncluded": true,
+          "construction": "single_ticket",
+          "marketingCarriers": [
+            "PK"
+          ],
+          "validatingCarrier": "PK",
+          "seatsRemaining": 4,
+          "supplierOfferSnapshotId": "snap_demo_lhe-mxp-14oct_06",
+          "snapshotExpiresAt": "2026-09-23T06:00:00.000Z",
+          "score": 42,
+          "angle": "recommended",
+          "marketPriceMinor": 20858600,
+          "savingsPct": 0,
+          "badges": [
+            "30kg bag",
+            "Refundable",
+            "Single carrier"
+          ],
+          "reasons": [
+            "1 stop via IST",
+            "Total journey 11h 35m",
+            "Longest layover 2h 15m",
+            "Refundable fare"
+          ]
+        },
+        {
+          "option": 7,
+          "totalMinor": 20858600,
+          "totalFormatted": "PKR 208,586",
+          "fareBasis": "OJPKP1RI",
+          "dayOffset": 2,
+          "via": [
+            "DOH"
+          ],
+          "segments": [
+            {
+              "seq": 1,
+              "carrier": "QR",
+              "flightNumber": "621",
+              "bookingClass": "O",
+              "departureDate": "2026-10-14",
+              "originCode": "LHE",
+              "destinationCode": "DOH",
+              "departTimeLocal": "03:10",
+              "arriveTimeLocal": "05:05",
+              "dayOfWeek": "WE",
+              "aircraft": "351",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 235,
+              "layoverMinutesAfter": 200
+            },
+            {
+              "seq": 2,
+              "carrier": "QR",
+              "flightNumber": "127",
+              "bookingClass": "O",
+              "departureDate": "2026-10-14",
+              "originCode": "DOH",
+              "destinationCode": "MXP",
+              "departTimeLocal": "08:25",
+              "arriveTimeLocal": "14:15",
+              "dayOfWeek": "WE",
+              "aircraft": "359",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 410
+            }
+          ],
+          "durationMinutes": 845,
+          "stops": 1,
+          "maxLayoverMinutes": 200,
+          "cabin": "economy",
+          "baggageKg": 30,
+          "refundable": false,
+          "checkedBagIncluded": true,
+          "construction": "single_ticket",
+          "marketingCarriers": [
+            "QR"
+          ],
+          "validatingCarrier": "QR",
+          "seatsRemaining": 9,
+          "supplierOfferSnapshotId": "snap_demo_lhe-mxp-14oct_07",
+          "snapshotExpiresAt": "2026-09-23T06:00:00.000Z",
+          "score": 37,
+          "angle": "recommended",
+          "marketPriceMinor": 20858600,
+          "savingsPct": null,
+          "badges": [
+            "30kg bag",
+            "Single carrier"
+          ],
+          "reasons": [
+            "1 stop via DOH",
+            "Total journey 14h 5m",
+            "Longest layover 3h 20m",
+            "Non-refundable fare conditions"
+          ]
+        }
+      ],
+      "priceRange": {
+        "minMinor": 14041600,
+        "maxMinor": 20858600,
+        "currency": "PKR"
+      },
+      "durationRange": {
+        "minMinutes": 670,
+        "maxMinutes": 1810
+      }
+    },
+    {
+      "id": "lhe-jfk-biz-14oct",
+      "command": "FSLHE14OCTJFK.JC",
+      "origin": "LHE",
+      "destination": "JFK",
+      "originCity": "Lahore",
+      "destinationCity": "New York",
+      "departureDate": "2026-10-14",
+      "tripType": "one_way",
+      "cabinRequested": "business",
+      "totalOptionsReported": {
+        "pricing": 9,
+        "itinerary": 11
+      },
+      "capturedOptions": 4,
+      "_generated": "Synthesised business-cabin shop — same markets and real flight numbers as the economy capture, priced at representative J-class multiples. Not a terminal capture.",
+      "itineraries": [
+        {
+          "option": 1,
+          "totalMinor": 71840000,
+          "totalFormatted": "PKR 718,400",
+          "fareBasis": "JNN20H6G",
+          "via": [
+            "AUH"
+          ],
+          "segments": [
+            {
+              "seq": 1,
+              "carrier": "EY",
+              "flightNumber": "285",
+              "bookingClass": "J",
+              "departureDate": "2026-10-14",
+              "originCode": "LHE",
+              "destinationCode": "AUH",
+              "departTimeLocal": "04:40",
+              "arriveTimeLocal": "07:00",
+              "dayOfWeek": "WE",
+              "aircraft": "32A",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 200,
+              "layoverMinutesAfter": 160
+            },
+            {
+              "seq": 2,
+              "carrier": "EY",
+              "flightNumber": "3",
+              "bookingClass": "J",
+              "departureDate": "2026-10-14",
+              "originCode": "AUH",
+              "destinationCode": "JFK",
+              "departTimeLocal": "09:40",
+              "arriveTimeLocal": "16:00",
+              "dayOfWeek": "WE",
+              "aircraft": "351",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 920
+            }
+          ],
+          "durationMinutes": 1280,
+          "stops": 1,
+          "maxLayoverMinutes": 160,
+          "cabin": "business",
+          "baggageKg": 40,
+          "refundable": true,
+          "checkedBagIncluded": true,
+          "construction": "single_ticket",
+          "marketingCarriers": [
+            "EY"
+          ],
+          "validatingCarrier": "EY",
+          "seatsRemaining": 6,
+          "supplierOfferSnapshotId": "snap_demo_lhe-jfk-biz-14oct_01",
+          "snapshotExpiresAt": "2026-09-23T06:00:00.000Z",
+          "score": 61,
+          "angle": "best_value",
+          "marketPriceMinor": 82310000,
+          "savingsPct": 13,
+          "badges": [
+            "Best value",
+            "40kg bag",
+            "Refundable",
+            "Single carrier"
+          ],
+          "reasons": [
+            "13% below the highest fare in this search",
+            "1 stop via AUH",
+            "Total journey 21h 20m",
+            "Longest layover 2h 40m",
+            "Refundable fare"
+          ]
+        },
+        {
+          "option": 2,
+          "totalMinor": 76550000,
+          "totalFormatted": "PKR 765,500",
+          "fareBasis": "CJPKP1RI",
+          "via": [
+            "DOH"
+          ],
+          "segments": [
+            {
+              "seq": 1,
+              "carrier": "QR",
+              "flightNumber": "621",
+              "bookingClass": "C",
+              "departureDate": "2026-10-14",
+              "originCode": "LHE",
+              "destinationCode": "DOH",
+              "departTimeLocal": "03:10",
+              "arriveTimeLocal": "05:05",
+              "dayOfWeek": "WE",
+              "aircraft": "351",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 235,
+              "layoverMinutesAfter": 180
+            },
+            {
+              "seq": 2,
+              "carrier": "QR",
+              "flightNumber": "701",
+              "bookingClass": "C",
+              "departureDate": "2026-10-14",
+              "originCode": "DOH",
+              "destinationCode": "JFK",
+              "departTimeLocal": "08:05",
+              "arriveTimeLocal": "15:00",
+              "dayOfWeek": "WE",
+              "aircraft": "77W",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 895
+            }
+          ],
+          "durationMinutes": 1310,
+          "stops": 1,
+          "maxLayoverMinutes": 180,
+          "cabin": "business",
+          "baggageKg": 40,
+          "refundable": true,
+          "checkedBagIncluded": true,
+          "construction": "single_ticket",
+          "marketingCarriers": [
+            "QR"
+          ],
+          "validatingCarrier": "QR",
+          "seatsRemaining": 3,
+          "supplierOfferSnapshotId": "snap_demo_lhe-jfk-biz-14oct_02",
+          "snapshotExpiresAt": "2026-09-23T06:00:00.000Z",
+          "score": 40,
+          "angle": "recommended",
+          "marketPriceMinor": 82310000,
+          "savingsPct": 7,
+          "badges": [
+            "40kg bag",
+            "Refundable",
+            "3 seats left",
+            "Single carrier"
+          ],
+          "reasons": [
+            "7% below the highest fare in this search",
+            "1 stop via DOH",
+            "Total journey 21h 50m",
+            "Longest layover 3h 0m",
+            "Refundable fare"
+          ]
+        },
+        {
+          "option": 3,
+          "totalMinor": 59920000,
+          "totalFormatted": "PKR 599,200",
+          "fareBasis": "WNN20H6G",
+          "via": [
+            "AUH"
+          ],
+          "segments": [
+            {
+              "seq": 1,
+              "carrier": "EY",
+              "flightNumber": "289",
+              "bookingClass": "W",
+              "departureDate": "2026-10-14",
+              "originCode": "LHE",
+              "destinationCode": "AUH",
+              "departTimeLocal": "19:45",
+              "arriveTimeLocal": "22:05",
+              "dayOfWeek": "WE",
+              "aircraft": "321",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 200,
+              "layoverMinutesAfter": 270
+            },
+            {
+              "seq": 2,
+              "carrier": "EY",
+              "flightNumber": "1",
+              "bookingClass": "W",
+              "departureDate": "2026-10-15",
+              "originCode": "AUH",
+              "destinationCode": "JFK",
+              "departTimeLocal": "02:35",
+              "arriveTimeLocal": "08:35",
+              "dayOfWeek": "TH",
+              "aircraft": "351",
+              "arrivalDate": "2026-10-15",
+              "durationMinutes": 900
+            }
+          ],
+          "durationMinutes": 1370,
+          "stops": 1,
+          "maxLayoverMinutes": 270,
+          "cabin": "premium",
+          "baggageKg": 35,
+          "refundable": true,
+          "checkedBagIncluded": true,
+          "construction": "single_ticket",
+          "marketingCarriers": [
+            "EY"
+          ],
+          "validatingCarrier": "EY",
+          "seatsRemaining": 8,
+          "supplierOfferSnapshotId": "snap_demo_lhe-jfk-biz-14oct_03",
+          "snapshotExpiresAt": "2026-09-23T06:00:00.000Z",
+          "score": 57,
+          "angle": "cheapest",
+          "marketPriceMinor": 82310000,
+          "savingsPct": 27,
+          "badges": [
+            "Cheapest",
+            "35kg bag",
+            "Refundable",
+            "Single carrier"
+          ],
+          "reasons": [
+            "27% below the highest fare in this search",
+            "1 stop via AUH",
+            "Total journey 22h 50m",
+            "Longest layover 4h 30m",
+            "Refundable fare"
+          ]
+        },
+        {
+          "option": 4,
+          "totalMinor": 82310000,
+          "totalFormatted": "PKR 823,100",
+          "fareBasis": "CXAAPPK1",
+          "via": [
+            "DXB"
+          ],
+          "segments": [
+            {
+              "seq": 1,
+              "carrier": "EK",
+              "flightNumber": "623",
+              "bookingClass": "C",
+              "departureDate": "2026-10-14",
+              "originCode": "LHE",
+              "destinationCode": "DXB",
+              "departTimeLocal": "03:25",
+              "arriveTimeLocal": "05:45",
+              "dayOfWeek": "WE",
+              "aircraft": "77W",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 200,
+              "layoverMinutesAfter": 180
+            },
+            {
+              "seq": 2,
+              "carrier": "EK",
+              "flightNumber": "201",
+              "bookingClass": "C",
+              "departureDate": "2026-10-14",
+              "originCode": "DXB",
+              "destinationCode": "JFK",
+              "departTimeLocal": "08:45",
+              "arriveTimeLocal": "14:30",
+              "dayOfWeek": "WE",
+              "aircraft": "388",
+              "arrivalDate": "2026-10-14",
+              "durationMinutes": 885
+            }
+          ],
+          "durationMinutes": 1265,
+          "stops": 1,
+          "maxLayoverMinutes": 180,
+          "cabin": "business",
+          "baggageKg": 40,
+          "refundable": true,
+          "checkedBagIncluded": true,
+          "construction": "single_ticket",
+          "marketingCarriers": [
+            "EK"
+          ],
+          "validatingCarrier": "EK",
+          "seatsRemaining": 5,
+          "supplierOfferSnapshotId": "snap_demo_lhe-jfk-biz-14oct_04",
+          "snapshotExpiresAt": "2026-09-23T06:00:00.000Z",
+          "score": 43,
+          "angle": "fastest",
+          "marketPriceMinor": 82310000,
+          "savingsPct": null,
+          "badges": [
+            "Fastest",
+            "40kg bag",
+            "Refundable",
+            "Single carrier"
+          ],
+          "reasons": [
+            "1 stop via DXB",
+            "Total journey 21h 5m",
+            "Longest layover 3h 0m",
+            "Refundable fare"
+          ]
+        }
+      ],
+      "priceRange": {
+        "minMinor": 59920000,
+        "maxMinor": 82310000,
+        "currency": "PKR"
+      },
+      "durationRange": {
+        "minMinutes": 1265,
+        "maxMinutes": 1370
+      }
+    }
+  ],
+  "pricedPnr": {
+    "id": "lhe-sfo-oak-lhe-20oct",
+    "description": "Priced PNR (>FQ) — LHE to San Francisco out, returning from Oakland, via Istanbul.",
+    "tripType": "round_trip",
+    "pricing": {
+      "fareMinor": 28428000,
+      "taxesMinor": 24085100,
+      "feeTotalMinor": 0,
+      "grandTotalMinor": 52513100,
+      "grandTotalFormatted": "PKR 525,131",
+      "currency": "PKR",
+      "guaranteed": true,
+      "passengerType": "ADT"
+    },
+    "brand": {
+      "booked": "CL-BF1/MA-BF2/CL-BF1",
+      "upsellAvailable": true,
+      "upsellFromMinor": 1126000,
+      "upsellFromFormatted": "PKR 11,260"
+    },
+    "ticketing": {
+      "bankerSellingRate": {
+        "base": "1 USD",
+        "value": 281.45728548,
+        "currency": "PKR"
+      },
+      "lastDateToPurchase": "2026-09-23",
+      "lastDateToPurchaseLocation": "KHI",
+      "ticketingAgency": "6SV6",
+      "platingCarrier": "TK",
+      "platingCarrierRestriction": true,
+      "eTicketRequired": true,
+      "filingStatus": "UNABLE TO FILE - NEED NAMES"
+    },
+    "segments": [
+      {
+        "seq": 1,
+        "carrier": "TK",
+        "flightNumber": "745",
+        "bookingClass": "W",
+        "departureDate": "2026-10-20",
+        "originCode": "LHE",
+        "destinationCode": "IST",
+        "departTimeLocal": "09:35",
+        "arriveTimeLocal": "13:50",
+        "status": "HS1",
+        "dayOfWeek": "TU",
+        "arrivalDate": "2026-10-20",
+        "durationMinutes": 375,
+        "layoverMinutesAfter": 1405
+      },
+      {
+        "seq": 2,
+        "carrier": "TK",
+        "flightNumber": "79",
+        "bookingClass": "W",
+        "departureDate": "2026-10-21",
+        "originCode": "IST",
+        "destinationCode": "SFO",
+        "departTimeLocal": "13:15",
+        "arriveTimeLocal": "16:40",
+        "status": "HS1",
+        "dayOfWeek": "WE",
+        "arrivalDate": "2026-10-21",
+        "durationMinutes": 865,
+        "layoverMinutesAfter": 86421
+      },
+      {
+        "seq": 3,
+        "carrier": "AS",
+        "flightNumber": "2029",
+        "bookingClass": "L",
+        "departureDate": "2026-12-20",
+        "originCode": "OAK",
+        "destinationCode": "SEA",
+        "departTimeLocal": "17:01",
+        "arriveTimeLocal": "19:09",
+        "status": "HS1",
+        "dayOfWeek": "SU",
+        "operatedBy": "HORIZON AIR AS ALASKAHORIZON",
+        "arrivalDate": "2026-12-20",
+        "durationMinutes": 128,
+        "layoverMinutesAfter": 1436
+      },
+      {
+        "seq": 4,
+        "carrier": "TK",
+        "flightNumber": "204",
+        "bookingClass": "L",
+        "departureDate": "2026-12-21",
+        "originCode": "SEA",
+        "destinationCode": "IST",
+        "departTimeLocal": "19:05",
+        "arriveTimeLocal": "18:05",
+        "arrivesNextDay": true,
+        "status": "HS1",
+        "dayOfWeek": "MO/TU",
+        "arrivalDate": "2026-12-22",
+        "durationMinutes": 720,
+        "layoverMinutesAfter": 410
+      },
+      {
+        "seq": 5,
+        "carrier": "TK",
+        "flightNumber": "744",
+        "bookingClass": "L",
+        "departureDate": "2026-12-23",
+        "originCode": "IST",
+        "destinationCode": "LHE",
+        "departTimeLocal": "00:55",
+        "arriveTimeLocal": "08:20",
+        "status": "HS1",
+        "dayOfWeek": "WE",
+        "arrivalDate": "2026-12-23",
+        "durationMinutes": 325
+      }
+    ],
+    "warnings": [
+      "Departs SFO but returns from OAK — different airports, ground transport is on the traveller.",
+      "Outbound is October, return is December — a long open-jaw stay.",
+      "Not ticketable as captured: passenger names required."
+    ],
+    "baggage": {
+      "checked": [
+        {
+          "carrier": "TK",
+          "sector": "LHE-SFO",
+          "allowance": "1PC",
+          "bags": [
+            {
+              "bag": 1,
+              "feeMinor": 0,
+              "limit": "UPTO50LB/23KG AND UPTO62LI/158LCM"
+            },
+            {
+              "bag": 2,
+              "feeMinor": 8444000,
+              "feeFormatted": "PKR 84,440",
+              "limit": "UPTO50LB/23KG AND UPTO62LI/158LCM"
+            }
+          ],
+          "policyUrl": "VIEWTRIP.TRAVELPORT.COM/BAGGAGEPOLICY/TK"
+        },
+        {
+          "carrier": "TK",
+          "sector": "OAK-LHE",
+          "allowance": "2PC",
+          "bags": [
+            {
+              "bag": 1,
+              "feeMinor": 0,
+              "limit": "UPTO50LB/23KG AND UPTO62LI/158LCM"
+            },
+            {
+              "bag": 2,
+              "feeMinor": 0,
+              "limit": "UPTO50LB/23KG AND UPTO62LI/158LCM"
+            }
+          ],
+          "policyUrl": "VIEWTRIP.TRAVELPORT.COM/BAGGAGEPOLICY/TK"
+        }
+      ],
+      "carryOn": [
+        {
+          "carrier": "TK",
+          "sector": "LHE-IST",
+          "allowance": "1PC",
+          "bags": [
+            {
+              "bag": 1,
+              "feeMinor": 0,
+              "limit": "UPTO18LB/8KG AND UPTO45LI/115LCM"
+            }
+          ]
+        },
+        {
+          "carrier": "TK",
+          "sector": "IST-SFO",
+          "allowance": "1PC",
+          "bags": [
+            {
+              "bag": 1,
+              "feeMinor": 0,
+              "limit": "UPTO18LB/8KG AND UPTO45LI/115LCM"
+            }
+          ]
+        },
+        {
+          "carrier": "AS",
+          "sector": "OAK-SEA",
+          "allowance": "2PC",
+          "bags": [
+            {
+              "bag": 1,
+              "feeMinor": 0,
+              "limit": "CARRY ON PERSONAL ITEM"
+            },
+            {
+              "bag": 2,
+              "feeMinor": 0,
+              "limit": "UPTO45LI/115LCM"
+            }
+          ]
+        },
+        {
+          "carrier": "TK",
+          "sector": "SEA-IST",
+          "allowance": "1PC",
+          "bags": [
+            {
+              "bag": 1,
+              "feeMinor": 0,
+              "limit": "UPTO18LB/8KG AND UPTO45LI/115LCM"
+            }
+          ]
+        },
+        {
+          "carrier": "TK",
+          "sector": "IST-LHE",
+          "allowance": "1PC",
+          "bags": [
+            {
+              "bag": 1,
+              "feeMinor": 0,
+              "limit": "UPTO18LB/8KG AND UPTO45LI/115LCM"
+            }
+          ]
+        }
+      ]
+    },
+    "cabin": "premium"
+  },
+  "carriers": {
+    "AA": "American Airlines",
+    "AS": "Alaska Airlines",
+    "EK": "Emirates",
+    "EY": "Etihad Airways",
+    "GF": "Gulf Air",
+    "HY": "Uzbekistan Airways",
+    "PK": "Pakistan International Airlines",
+    "QR": "Qatar Airways",
+    "SV": "Saudia",
+    "TK": "Turkish Airlines"
+  },
+  "airports": {
+    "AUH": {
+      "city": "Abu Dhabi",
+      "country": "AE"
+    },
+    "BAH": {
+      "city": "Manama",
+      "country": "BH"
+    },
+    "BOS": {
+      "city": "Boston",
+      "country": "US"
+    },
+    "CDG": {
+      "city": "Paris",
+      "country": "FR"
+    },
+    "DOH": {
+      "city": "Doha",
+      "country": "QA"
+    },
+    "DXB": {
+      "city": "Dubai",
+      "country": "AE"
+    },
+    "IST": {
+      "city": "Istanbul",
+      "country": "TR"
+    },
+    "JED": {
+      "city": "Jeddah",
+      "country": "SA"
+    },
+    "JFK": {
+      "city": "New York",
+      "country": "US"
+    },
+    "KHI": {
+      "city": "Karachi",
+      "country": "PK"
+    },
+    "LHE": {
+      "city": "Lahore",
+      "country": "PK"
+    },
+    "MIA": {
+      "city": "Miami",
+      "country": "US"
+    },
+    "MXP": {
+      "city": "Milan",
+      "country": "IT"
+    },
+    "OAK": {
+      "city": "Oakland",
+      "country": "US"
+    },
+    "ORD": {
+      "city": "Chicago",
+      "country": "US"
+    },
+    "RUH": {
+      "city": "Riyadh",
+      "country": "SA"
+    },
+    "SEA": {
+      "city": "Seattle",
+      "country": "US"
+    },
+    "SFO": {
+      "city": "San Francisco",
+      "country": "US"
+    },
+    "TAS": {
+      "city": "Tashkent",
+      "country": "UZ"
+    },
+    "YYZ": {
+      "city": "Toronto",
+      "country": "CA"
+    }
+  }
+}

@@ -2257,10 +2257,13 @@ html.fo-results-active .fo-stage--chat > .fo-chat-app {
     color 0.2s ease;
 }
 
-.results-filter-btn:hover {
-  border-color: color-mix(in oklab, var(--cyan) 42%, var(--line));
+/* Kept in step with the hover rule in flightone-platform.css, which overrides
+   this one. Mixing cyan into --line here produced an ~8x alpha jump from the
+   resting edge; step up from the same navy hue instead. */
+.results-filter-btn:hover:not(.results-filter-btn--active) {
+  border-color: color-mix(in oklab, var(--navy) 18%, transparent);
   color: var(--navy);
-  background: color-mix(in oklab, var(--cyan) 5%, white);
+  background: color-mix(in oklab, var(--cyan) 4%, white);
 }
 
 .results-filter-btn--active {
@@ -3386,11 +3389,33 @@ html.fo-results-active .fo-stage--chat > .fo-chat-app {
   padding: 0.35rem 0.55rem;
 }
 
-.filter-chip:hover {
+/* `:not(.filter-chip--on)` is load-bearing: --ink and --navy are both #0e1620,
+   so applying this hover colour to a selected (navy-filled) chip made its label
+   1.00:1 against its own background — the text vanished entirely. */
+.filter-chip:hover:not(.filter-chip--on) {
   border-color: color-mix(in oklab, var(--signal) 35%, var(--line));
   color: var(--ink);
   transform: translateY(-0.5px);
   box-shadow: 0 2px 8px rgba(14, 22, 32, 0.06);
+}
+
+/* Selected chips lift and lighten slightly instead — the label stays white. */
+.filter-chip--on:hover {
+  background: color-mix(in oklab, var(--navy) 88%, var(--white));
+  transform: translateY(-0.5px);
+  box-shadow: 0 4px 12px rgba(14, 22, 32, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+
+.filter-chip:active {
+  transform: translateY(0) scale(0.98);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .filter-chip:hover:not(.filter-chip--on),
+  .filter-chip--on:hover,
+  .filter-chip:active {
+    transform: none;
+  }
 }
 
 /* Selection must survive a greyscale screenshot: at equal weight, a tinted
