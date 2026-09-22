@@ -101,13 +101,13 @@ export function CheckoutQuotedActions({
   if (quotedStep === "TRAVELLER") {
     return (
       <div className="fo-desk__panel space-y-4">
-        <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[var(--fo-desk-line)] pb-4">
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-b border-[var(--fo-desk-line)] pb-4">
           <div className="flex items-start gap-3">
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--fo-desk-radius)] bg-[var(--fo-desk-wash)] text-[var(--cyan)]">
               <User className="h-4 w-4" aria-hidden />
             </div>
-            <div>
-              <h2 className="m-0 text-[16px] font-semibold tracking-tight text-[var(--navy)]">
+            <div className="min-w-0">
+              <h2 className="m-0 text-[16px] font-semibold leading-9 tracking-tight text-[var(--navy)]">
                 Traveller details
               </h2>
               <p className="mt-0.5 text-[12px] leading-relaxed text-[var(--ink-soft)]">
@@ -328,11 +328,11 @@ export function CheckoutQuotedActions({
   return (
     <div className="space-y-4">
       <div className="fo-checkout__traveller fo-desk__panel flex flex-wrap items-center justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-3">
+        <div className="flex min-w-0 items-start gap-3">
           <div className="fo-checkout__traveller-avatar">
             <User className="h-4 w-4" aria-hidden />
           </div>
-          <div>
+          <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <p className="m-0 text-[15px] font-semibold tracking-tight text-[var(--navy)]">
                 {formData.givenName} {formData.surname}

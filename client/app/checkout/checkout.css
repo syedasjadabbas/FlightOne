@@ -181,6 +181,18 @@
   stroke-width: 3;
 }
 
+/* The base rule is `display: inline-block`, so the check glyph sat on the text
+   baseline instead of centring against the uppercase label, and a long label
+   ("From Primary Profile & Vault") wrapped mid-phrase. Centre the contents and
+   keep the pill on one line. */
+.fo-checkout .fo-desk__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  white-space: nowrap;
+  line-height: 1.35;
+}
+
 /* ── Traveller summary card ─────────────────────────────────────
  * This is a completed step, but it rendered with the same neutral weight as
  * the pending panels below it. A left accent rail in the same green as the
@@ -211,11 +223,17 @@
   background: #059669;
 }
 
+/* The parent is `items-start` so the avatar tracks the name row rather than the
+   midpoint of the whole two-line block — centring against the block left it
+   sitting visibly low against the name. The 40px disc is taller than the ~22px
+   name line, so it is pulled up by half the difference to share that centre
+   (measured: without this the disc sits 7.7px low). */
 .fo-checkout .fo-checkout__traveller-avatar {
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  margin-top: -0.5rem;
   width: 2.5rem;
   height: 2.5rem;
   border-radius: 999px;
