@@ -1115,7 +1115,7 @@ export default function HeroExperienceSequence() {
 
               <div>
                 <Link
-                  href="/travel-styles"
+                  href="/chat?q=What travel styles and trip types does FlightOne offer?"
                   style={{
                     fontFamily: 'var(--font-display)',
                     fontSize: '0.9375rem',

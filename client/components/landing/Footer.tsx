@@ -347,15 +347,15 @@ export default function Footer() {
               }}
             >
               {[
-                { label: 'Maldives', desc: 'Overwater villas', href: '/destinations/maldives' },
-                { label: 'Dubai', desc: 'Luxury city & desert', href: '/destinations/dubai' },
-                { label: 'Turkey', desc: 'Istanbul & Cappadocia', href: '/destinations/turkey' },
-                { label: 'Thailand', desc: 'Phuket & Krabi', href: '/destinations/thailand' },
-                { label: 'Sri Lanka', desc: 'Nature & culture', href: '/destinations/sri-lanka' },
+                { label: 'Maldives', desc: 'Overwater villas', query: 'Tell me about honeymoon packages to the Maldives' },
+                { label: 'Dubai', desc: 'Luxury city & desert', query: 'Tell me about tour packages to Dubai' },
+                { label: 'Turkey', desc: 'Istanbul & Cappadocia', query: 'Tell me about tour packages to Turkey, including Cappadocia' },
+                { label: 'Thailand', desc: 'Phuket & Krabi', query: 'Tell me about tour packages to Thailand, including Phuket and Krabi' },
+                { label: 'Sri Lanka', desc: 'Nature & culture', query: 'Tell me about tour packages to Sri Lanka' },
               ].map((link) => (
                 <li key={link.label}>
                   <Link
-                    href={link.href}
+                    href={`/chat?q=${encodeURIComponent(link.query)}`}
                     style={{
                       fontFamily: 'var(--font-sans)',
                       fontSize: '0.9375rem',
@@ -404,12 +404,12 @@ export default function Footer() {
               }}
             >
               {[
-                { label: 'Honeymoon Packages', href: '/honeymoon-packages' },
-                { label: 'Family Holidays', href: '/family-holidays' },
+                { label: 'Honeymoon Packages', href: '/chat?q=' + encodeURIComponent('Tell me about honeymoon packages') },
+                { label: 'Family Holidays', href: '/chat?q=' + encodeURIComponent('Tell me about family holiday packages') },
                 { label: 'Group & MICE Tours', href: '/groups' },
                 { label: 'Corporate Travel', href: '/corporate' },
                 { label: 'Visa Assistance', href: '/visa' },
-                { label: 'Travel E-SIMs', href: '/e-sim' },
+                { label: 'Travel E-SIMs', href: '/chat?q=' + encodeURIComponent('Tell me about travel e-SIM add-ons') },
               ].map((link) => (
                 <li key={link.label}>
                   <Link
@@ -457,10 +457,9 @@ export default function Footer() {
               }}
             >
               {[
-                { label: 'About FlightOne', href: '/about' },
                 { label: 'Why Choose Us', href: '/#why-choose-us' },
                 { label: 'Transparent Pricing', href: '/#itinerary' },
-                { label: 'Frequently Asked Questions', href: '/faq' },
+                { label: 'Frequently Asked Questions', href: '/support' },
                 { label: 'Customer Support', href: '/escalations' },
                 { label: 'Refund Policies', href: '/refunds' },
               ].map((link) => (
@@ -696,7 +695,7 @@ export default function Footer() {
             zIndex: 10,
             width: '100%',
             maxWidth: '1380px',
-            padding: '0 clamp(1.75rem, 4.5vw, 4.5rem) clamp(1rem, 2vh, 2rem)',
+            padding: '0 clamp(1.75rem, 4.5vw, 4.5rem) clamp(3.5rem, 6vh, 5rem)',
             margin: '0 auto',
             transformOrigin: 'bottom left',
             willChange: 'transform',
@@ -706,7 +705,7 @@ export default function Footer() {
           <div
             style={{
               fontFamily: 'var(--font-display)',
-              fontSize: 'clamp(4.2rem, 13.5vw, 10.5rem)',
+              fontSize: 'clamp(4.2rem, 11vw, 8.5rem)',
               fontWeight: 700,
               letterSpacing: '-0.04em',
               color: '#F5F4DF',
@@ -759,13 +758,13 @@ export default function Footer() {
               fontSize: '0.78rem',
             }}
           >
-            <Link href="/faq" style={{ color: 'rgba(245, 244, 223, 0.75)', textDecoration: 'none' }} className="hover:text-white">
+            <Link href="/support" style={{ color: 'rgba(245, 244, 223, 0.75)', textDecoration: 'none' }} className="hover:text-white">
               FAQ
             </Link>
             <Link href="/refunds" style={{ color: 'rgba(245, 244, 223, 0.75)', textDecoration: 'none' }} className="hover:text-white">
               Refunds
             </Link>
-            <Link href="/contact-us" style={{ color: 'rgba(245, 244, 223, 0.75)', textDecoration: 'none' }} className="hover:text-white">
+            <Link href="/escalations" style={{ color: 'rgba(245, 244, 223, 0.75)', textDecoration: 'none' }} className="hover:text-white">
               Contact
             </Link>
             <span style={{ color: 'rgba(245, 244, 223, 0.45)' }}>·</span>

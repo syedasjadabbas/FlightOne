@@ -64,36 +64,6 @@ const SERVICE_ITEMS: { label: string; href: string; icon: NavIcon; desc: string 
 ];
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   Infinity Ribbon SVG Mark
-───────────────────────────────────────────────────────────────────────────── */
-function InfinityMark({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      width="30"
-      height="22"
-      viewBox="0 0 44 32"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-    >
-      <path
-        d="M12.5 7.5C7.253 7.5 3 11.753 3 17C3 22.247 7.253 26.5 12.5 26.5C18.5 26.5 24 16.5 31.5 16.5C36.747 16.5 41 20.753 41 26"
-        stroke="currentColor"
-        strokeWidth="2.6"
-        strokeLinecap="round"
-      />
-      <path
-        d="M31.5 26.5C36.747 26.5 41 22.247 41 17C41 11.753 36.747 7.5 31.5 7.5C25.5 7.5 20 17.5 12.5 17.5C7.253 17.5 3 13.247 3 8"
-        stroke="currentColor"
-        strokeWidth="2.6"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-/* ─────────────────────────────────────────────────────────────────────────────
    Shared SiteNav Component
 ───────────────────────────────────────────────────────────────────────────── */
 export function SiteNav({
@@ -396,15 +366,13 @@ export function SiteNav({
         <div className="flex items-center gap-3 sm:gap-6">
           <Link
             href="/"
-            className="flex items-center gap-2.5 text-navy transition-transform duration-150 hover:scale-[1.02] active:scale-98"
+            className="flex items-center gap-2.5 transition-transform duration-150 hover:scale-[1.02] active:scale-98"
           >
-            <span className="text-navy flex items-center">
-              <InfinityMark />
-            </span>
-            <span className="font-hero text-[1.125rem] font-extrabold tracking-tight text-navy">
-              Flight<span className="text-sky">One</span>
-            </span>
-            <span className="hidden sm:inline-block h-1.5 w-1.5 rounded-full bg-sky animate-pulse" />
+            <img
+              src={transparentOverHero && isOverHero ? "/images/logo-light.png" : "/images/logo-dark.png"}
+              alt="FlightOne"
+              className="h-9 w-auto sm:h-10"
+            />
           </Link>
 
           {/* Desktop Left Nav Links */}

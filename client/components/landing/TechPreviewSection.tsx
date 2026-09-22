@@ -213,7 +213,7 @@ export default function TechPreviewSection() {
 
                 <div style={{ marginTop: '2.5rem' }}>
                   <Link
-                    href="/destinations"
+                    href="/flights"
                     style={{
                       display: 'inline-flex',
                       alignItems: 'center',

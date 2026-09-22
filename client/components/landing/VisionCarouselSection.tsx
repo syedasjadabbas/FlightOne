@@ -454,7 +454,17 @@ export default function VisionCarouselSection() {
 
         {/* ── 3. TEXT LAYER — branded panels over the illustration ── */}
         <div className="vision-text-layer">
-          <div ref={textStackRef} className="vision-text-stack" style={{ willChange: 'transform' }}>
+          <div
+            ref={textStackRef}
+            className="vision-text-stack"
+            style={
+              {
+                willChange: 'transform',
+                '--bg-aspect-d': BG_ASPECT.desktop,
+                '--bg-aspect-m': BG_ASPECT.mobile,
+              } as React.CSSProperties
+            }
+          >
             <div className="vision-header-container">
               <div className="vision-header-plate">
                 <div className="vision-headline-wrap">
@@ -550,11 +560,11 @@ export default function VisionCarouselSection() {
           background:
             linear-gradient(
               180deg,
-              rgba(7, 22, 44, 0.55) 0%,
-              rgba(7, 22, 44, 0.18) 18%,
-              rgba(7, 22, 44, 0.12) 42%,
-              rgba(7, 22, 44, 0.28) 68%,
-              rgba(7, 22, 44, 0.62) 100%
+              rgba(7, 22, 44, 0.58) 0%,
+              rgba(7, 22, 44, 0.3) 18%,
+              rgba(7, 22, 44, 0.24) 42%,
+              rgba(7, 22, 44, 0.34) 68%,
+              rgba(7, 22, 44, 0.64) 100%
             ),
             radial-gradient(
               ellipse 90% 55% at 50% 8%,
@@ -573,6 +583,18 @@ export default function VisionCarouselSection() {
         .vision-text-stack {
           position: relative;
           width: 100%;
+          /* Sized from the same intrinsic ratio as the background artwork so
+             --top-d/--top-m percentages resolve correctly on first paint —
+             syncTextStackHeight() (JS) then overwrites this with the exact
+             pixel height once the real image has laid out, but the page must
+             never depend on that JS running before the browser paints. */
+          height: auto;
+          aspect-ratio: var(--bg-aspect-d);
+        }
+        @media (max-width: 768px) {
+          .vision-text-stack {
+            aspect-ratio: var(--bg-aspect-m);
+          }
         }
         .vision-header-container {
           position: absolute;
@@ -588,14 +610,7 @@ export default function VisionCarouselSection() {
         .vision-header-plate {
           width: min(100%, 46rem);
           padding: clamp(1.1rem, 2.2vh, 1.65rem) clamp(1.15rem, 2.5vw, 1.85rem);
-          border-radius: 0.65rem;
-          background: color-mix(in oklab, #07162C 78%, transparent);
-          border: 1px solid color-mix(in oklab, #F5F4DF 16%, transparent);
-          box-shadow:
-            0 18px 48px -16px rgba(2, 8, 20, 0.65),
-            inset 0 1px 0 color-mix(in oklab, #F5F4DF 10%, transparent);
-          backdrop-filter: blur(14px) saturate(1.15);
-          -webkit-backdrop-filter: blur(14px) saturate(1.15);
+          box-sizing: border-box;
           text-align: center;
         }
         .vision-headline-wrap {
@@ -610,6 +625,7 @@ export default function VisionCarouselSection() {
           line-height: 0.98;
           color: #F5F4DF;
           white-space: nowrap;
+          text-shadow: 0 4px 24px rgba(2, 8, 20, 0.55);
         }
         .vision-headline-mobile {
           display: none;
@@ -620,6 +636,7 @@ export default function VisionCarouselSection() {
           letter-spacing: -0.035em;
           line-height: 0.98;
           color: #F5F4DF;
+          text-shadow: 0 4px 24px rgba(2, 8, 20, 0.55);
         }
         .vision-subhead {
           margin: 0.75rem auto 0;
@@ -629,7 +646,9 @@ export default function VisionCarouselSection() {
           font-weight: 500;
           line-height: 1.4;
           letter-spacing: -0.01em;
+          color: #dce3e8;
           color: color-mix(in oklab, #F5F4DF 82%, #8FA0B2);
+          text-shadow: 0 2px 12px rgba(2, 8, 20, 0.45);
         }
         .vision-stats {
           display: flex;
@@ -637,7 +656,7 @@ export default function VisionCarouselSection() {
           gap: clamp(1.1rem, 3vw, 2.25rem);
           margin-top: 1.1rem;
           padding-top: 0.95rem;
-          border-top: 1px solid color-mix(in oklab, #F5F4DF 12%, transparent);
+          border-top: 1px solid rgba(245, 244, 223, 0.28);
         }
         .vision-stat {
           display: flex;
@@ -653,6 +672,7 @@ export default function VisionCarouselSection() {
           letter-spacing: -0.03em;
           line-height: 1;
           color: #F5F4DF;
+          text-shadow: 0 2px 12px rgba(2, 8, 20, 0.45);
         }
         .vision-stat-label {
           font-family: var(--font-sans);
@@ -660,7 +680,8 @@ export default function VisionCarouselSection() {
           font-weight: 600;
           letter-spacing: 0.08em;
           text-transform: uppercase;
-          color: color-mix(in oklab, #F5F4DF 62%, transparent);
+          color: rgba(245, 244, 223, 0.65);
+          text-shadow: 0 1px 8px rgba(2, 8, 20, 0.45);
         }
 
         .vision-text-block {
@@ -679,29 +700,19 @@ export default function VisionCarouselSection() {
 
         .vision-plate {
           box-sizing: border-box;
-          padding: 1rem 1.15rem 1.1rem;
-          border-radius: 0.55rem;
-          background: color-mix(in oklab, #0E1620 86%, transparent);
-          border: 1px solid color-mix(in oklab, #F5F4DF 14%, transparent);
-          box-shadow:
-            0 16px 40px -14px rgba(2, 8, 20, 0.7),
-            inset 0 1px 0 color-mix(in oklab, #F5F4DF 8%, transparent);
-          backdrop-filter: blur(12px) saturate(1.1);
-          -webkit-backdrop-filter: blur(12px) saturate(1.1);
         }
 
         .vision-callout {
           width: clamp(13.5rem, 22vw, 17.5rem);
-          border-left: 3px solid var(--joby-blue, #007AE5);
         }
         .vision-callout-label {
           display: block;
           font-family: var(--font-sans);
           font-size: 0.6875rem;
-          font-weight: 700;
-          letter-spacing: 0.08em;
-          text-transform: uppercase;
-          color: color-mix(in oklab, #F5F4DF 72%, var(--cyan, #2EC4B6));
+          font-weight: 600;
+          letter-spacing: 0.04em;
+          color: rgba(245, 244, 223, 0.65);
+          text-shadow: 0 1px 8px rgba(2, 8, 20, 0.45);
           margin-bottom: 0.4rem;
         }
         .vision-callout-detail {
@@ -712,48 +723,45 @@ export default function VisionCarouselSection() {
           letter-spacing: -0.015em;
           line-height: 1.35;
           color: #F5F4DF;
+          text-shadow: 0 2px 10px rgba(2, 8, 20, 0.45);
         }
 
         .vision-dest-chip {
           display: inline-flex;
           flex-direction: column;
-          gap: 0.12rem;
-          padding: 0.55rem 0.8rem 0.6rem;
-          border-radius: 0.4rem;
-          background: #F5F4DF;
-          border: 1px solid color-mix(in oklab, #0E1620 10%, transparent);
-          box-shadow: 0 10px 28px -10px rgba(2, 8, 20, 0.55);
+          gap: 0.15rem;
           white-space: nowrap;
         }
         .vision-dest-name {
           font-family: var(--font-sans);
-          font-size: 0.8125rem;
+          font-size: 1.05rem;
           font-weight: 700;
           letter-spacing: -0.015em;
-          color: #0E1620;
+          color: #F5F4DF;
+          text-shadow: 0 2px 10px rgba(2, 8, 20, 0.45);
         }
         .vision-dest-meta {
           font-family: var(--font-sans);
-          font-size: 0.6875rem;
+          font-size: 0.75rem;
           font-weight: 500;
           letter-spacing: 0.01em;
-          color: color-mix(in oklab, #0E1620 62%, #55606e);
+          color: rgba(245, 244, 223, 0.65);
+          text-shadow: 0 1px 8px rgba(2, 8, 20, 0.45);
         }
 
         .vision-narrative {
           width: clamp(15rem, 34vw, 28rem);
           max-width: min(28rem, calc(100vw - 2.5rem));
-          border-left: 3px solid var(--cyan, #2EC4B6);
         }
         .vision-caption {
           display: block;
           font-family: var(--font-sans);
           font-size: 0.6875rem;
-          font-weight: 700;
-          letter-spacing: 0.08em;
-          text-transform: uppercase;
-          color: color-mix(in oklab, #F5F4DF 68%, var(--cyan, #2EC4B6));
-          margin-bottom: 0.55rem;
+          font-weight: 600;
+          letter-spacing: 0.04em;
+          color: rgba(245, 244, 223, 0.65);
+          text-shadow: 0 1px 8px rgba(2, 8, 20, 0.45);
+          margin-bottom: 0.5rem;
         }
         .vision-narrative-body {
           margin: 0;
@@ -763,6 +771,7 @@ export default function VisionCarouselSection() {
           letter-spacing: -0.025em;
           line-height: 1.15;
           color: #F5F4DF;
+          text-shadow: 0 2px 12px rgba(2, 8, 20, 0.5);
         }
 
         @media (max-width: 768px) {

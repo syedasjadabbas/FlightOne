@@ -14,33 +14,6 @@ type SiteChromeFooterProps = {
   variant?: "app" | "auth";
 };
 
-function InfinityMark({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      width="22"
-      height="16"
-      viewBox="0 0 44 32"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-    >
-      <path
-        d="M12.5 7.5C7.253 7.5 3 11.753 3 17C3 22.247 7.253 26.5 12.5 26.5C18.5 26.5 24 16.5 31.5 16.5C36.747 16.5 41 20.753 41 26"
-        stroke="currentColor"
-        strokeWidth="2.6"
-        strokeLinecap="round"
-      />
-      <path
-        d="M31.5 26.5C36.747 26.5 41 22.247 41 17C41 11.753 36.747 7.5 31.5 7.5C25.5 7.5 20 17.5 12.5 17.5C7.253 17.5 3 13.247 3 8"
-        stroke="currentColor"
-        strokeWidth="2.6"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
 /**
  * Standard production-grade footer for traveller / desk / auth chrome.
  */
@@ -52,13 +25,7 @@ export function SiteChromeFooter({ variant = "app" }: SiteChromeFooterProps) {
       <footer className="fo-chrome-footer fo-chrome-footer--auth">
         <div className="fo-chrome-footer__inner">
           <div className="flex items-center gap-2">
-            <span className="text-navy flex items-center">
-              <InfinityMark />
-            </span>
-            <p className="fo-chrome-footer__brand">
-              <span className="fo-chrome-footer__flight">Flight</span>
-              <span className="fo-chrome-footer__accent">One</span>
-            </p>
+            <img src="/images/logo-dark.png" alt="FlightOne" className="h-4 w-auto" />
           </div>
           <p className="fo-chrome-footer__copy">
             © {year} {FLIGHTONE_BRAND.shortName} · All rights reserved.
@@ -88,13 +55,7 @@ export function SiteChromeFooter({ variant = "app" }: SiteChromeFooterProps) {
         {/* Brand & System Status Left */}
         <div className="flex items-center gap-4 sm:gap-6">
           <div className="flex items-center gap-2.5">
-            <span className="text-navy flex items-center">
-              <InfinityMark />
-            </span>
-            <p className="fo-chrome-footer__brand">
-              <span className="fo-chrome-footer__flight">Flight</span>
-              <span className="fo-chrome-footer__accent">One</span>
-            </p>
+            <img src="/images/logo-dark.png" alt="FlightOne" className="h-4 w-auto" />
           </div>
 
           <p className="fo-chrome-footer__copy hidden sm:inline-block">

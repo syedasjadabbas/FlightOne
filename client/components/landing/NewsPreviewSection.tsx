@@ -9,7 +9,7 @@ const NEWS_ARTICLES = [
     date: 'From PKR 385,000',
     title: 'Maldives — Honeymoons, overwater villas, beach rest',
     image: '/images/destinations/maldives.jpg',
-    href: '/destinations/maldives',
+    query: 'Tell me about honeymoon packages to the Maldives',
     aspectRatio: '16 / 10.5',
   },
   {
@@ -17,7 +17,7 @@ const NEWS_ARTICLES = [
     date: 'From PKR 450,000',
     title: 'Turkey — Culture, history, Cappadocia hot air balloons',
     image: '/images/destinations/turkey.jpg',
-    href: '/destinations/turkey',
+    query: 'Tell me about tour packages to Turkey, including Cappadocia',
     aspectRatio: '4 / 4.8',
   },
   {
@@ -25,7 +25,7 @@ const NEWS_ARTICLES = [
     date: 'From PKR 245,000',
     title: 'Dubai — First international trip, city luxury, desert safari',
     image: '/images/destinations/dubai.jpg',
-    href: '/destinations/dubai',
+    query: 'Tell me about tour packages to Dubai',
     aspectRatio: '16 / 9.8',
   },
 ];
@@ -86,7 +86,7 @@ export default function NewsPreviewSection() {
           </h2>
 
           <Link
-            href="/destinations"
+            href="/flights"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -122,7 +122,7 @@ export default function NewsPreviewSection() {
           {NEWS_ARTICLES.map((article) => (
             <Link
               key={article.id}
-              href={article.href}
+              href={`/chat?q=${encodeURIComponent(article.query)}`}
               className="group"
               style={{
                 display: 'flex',
