@@ -13,8 +13,9 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
 
   useEffect(() => {
     let cancelled = false;
-    let rafId = 0;
     let lenis: Lenis | null = null;
+    let tick: ((time: number) => void) | null = null;
+    let gsapInstance: typeof import('gsap').default | null = null;
 
     // Disable automatic browser scroll restoration so refresh always starts at top
     if ('scrollRestoration' in window.history) {
@@ -38,7 +39,9 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
 
       if (cancelled) return;
 
-      gsapMod.default.registerPlugin(ScrollTrigger);
+      const gsap = gsapMod.default;
+      gsapInstance = gsap;
+      gsap.registerPlugin(ScrollTrigger);
 
       lenis = new LenisCtor({
         duration: 0.9,
@@ -59,18 +62,19 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
       // Immediately jump to top on load
       lenis.scrollTo(0, { immediate: true });
 
-      function raf(time: number) {
-        lenis?.raf(time);
-        rafId = requestAnimationFrame(raf);
-      }
-
-      rafId = requestAnimationFrame(raf);
+      // Drive Lenis from GSAP's own ticker (not a separate rAF loop) so pinned/scrubbed
+      // ScrollTrigger animations (e.g. VisionCarouselSection's curtain-lift) share one
+      // frame authority with Lenis — two independent rAF loops can fall out of sync
+      // and silently break `pin: true` mid-scroll.
+      tick = (time: number) => lenis?.raf(time * 1000);
+      gsap.ticker.add(tick);
+      gsap.ticker.lagSmoothing(0);
     })();
 
     return () => {
       cancelled = true;
       window.removeEventListener('beforeunload', handleReset);
-      cancelAnimationFrame(rafId);
+      if (tick && gsapInstance) gsapInstance.ticker.remove(tick);
       lenis?.destroy();
       lenisRef.current = null;
       const win = window as unknown as { __lenis?: Lenis };

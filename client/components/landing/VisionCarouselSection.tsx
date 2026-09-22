@@ -284,14 +284,17 @@ export default function VisionCarouselSection() {
               gsap.set(el, { y: extra });
             });
 
-            // Phase 2: animated curtain lift — Section 8 moves upward as ONE rigid sheet
-            // while holding the next section stationary underneath for a true curtain-lift reveal
             const exitP = Math.max(0, Math.min(1, (scrolledPx - storytellingDistance) / exitDistance()));
             gsap.set(sheet, { y: -exitP * exitDistance() });
-            // Once fully lifted, stop intercepting clicks on the footer below —
-            // don't rely on the transform math alone (a stale/imprecise offset
-            // would otherwise leave this 100dvh, z-index:30 layer clickable).
-            sheet.style.pointerEvents = exitP >= 1 ? "none" : "auto";
+            
+
+            const lifted = exitP >= 1;
+            sheet.style.pointerEvents = lifted ? "none" : "auto";
+            section.style.pointerEvents = lifted ? "none" : "auto";
+            const pinSpacer = section.parentElement;
+            if (pinSpacer?.classList.contains("pin-spacer")) {
+              pinSpacer.style.pointerEvents = lifted ? "none" : "auto";
+            }
 
             const footer = footerEl || (document.querySelector('#footer') as HTMLElement | null);
             if (footer) {
