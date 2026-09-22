@@ -95,7 +95,7 @@ export function OpsRefundsClient() {
 
   return (
     <PermissionGate anyOf={["refunds:read"]} mode="fallback" fallback={<OpsRefundsPermissionGate />}>
-      <div className="fo-ops fo-ops-refunds">
+      <div className="fo-ops fo-ops__master-stage fo-ops-refunds">
         <OpsRefundsHeader />
 
         {!isLoading && items.length > 0 ? <OpsRefundsSummary summary={summary} /> : null}
@@ -106,7 +106,7 @@ export function OpsRefundsClient() {
           </p>
         ) : null}
 
-        <div className="fo-desk__toolbar" role="group" aria-label="Status filter">
+        <nav className="fo-ops__tabs" aria-label="Status filter">
           {STATUS_FILTERS.map((f) => (
             <button
               key={f}
@@ -115,12 +115,12 @@ export function OpsRefundsClient() {
                 setFilter(f);
                 setPage(1);
               }}
-              className={`fo-desk__chip${filter === f ? " fo-desk__chip--active" : ""}`}
+              className={`fo-ops__tab${filter === f ? " fo-ops__tab--active" : ""}`}
             >
               {statusFilterLabel(f)}
             </button>
           ))}
-        </div>
+        </nav>
 
         {isLoading ? (
           <div className="flex justify-center py-12" role="status" aria-live="polite">

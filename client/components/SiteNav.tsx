@@ -47,9 +47,9 @@ type DropdownId = "explore" | "services" | "account" | "notifications" | null;
 type NavIcon = LucideIcon;
 
 const EXPLORE_ITEMS: { label: string; href: string; icon: NavIcon; desc: string }[] = [
-  { label: "Flights", href: "/#search", icon: Plane, desc: "Search & compare live fares" },
-  { label: "Stays",   href: "/#search", icon: Hotel, desc: "Hotels, luxury villas & resorts" },
-  { label: "Cars",    href: "/#search", icon: Car, desc: "Hire at 1,000+ destinations" },
+  { label: "Flights", href: "/flights", icon: Plane, desc: "Search & compare live fares" },
+  { label: "Stays",   href: "/stays",   icon: Hotel, desc: "Hotels, luxury villas & resorts" },
+  { label: "Cars",    href: "/cars",    icon: Car,   desc: "Hire at 1,000+ destinations" },
 ];
 
 const SERVICE_ITEMS: { label: string; href: string; icon: NavIcon; desc: string }[] = [
@@ -99,9 +99,12 @@ function InfinityMark({ className }: { className?: string }) {
 export function SiteNav({
   variant = "bar",
   theme = "light",
+  transparentOverHero = false,
 }: {
   variant?: "bar" | "compact" | "marketplace";
   theme?: "light" | "dark";
+  /** Homepage-only: starts transparent over the hero video, morphs to the standard opaque bar past it. */
+  transparentOverHero?: boolean;
 }) {
   const pathname = usePathname();
   const hasHydrated = useAuthStore((s) => s.hasHydrated);
@@ -114,6 +117,29 @@ export function SiteNav({
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileAccordion, setMobileAccordion] = useState<string | null>(null);
   const navRef = useRef<HTMLElement>(null);
+
+  /* ── hero scroll-morph (homepage only): transparent-over-video → opaque bar ── */
+  const [isOverHero, setIsOverHero] = useState(transparentOverHero);
+  useEffect(() => {
+    if (!transparentOverHero) return;
+    const heroHeight = 9600;
+    let rafId: number | null = null;
+    const update = () => {
+      const vh = window.innerHeight;
+      const morphThreshold = (heroHeight - vh) * 0.58;
+      setIsOverHero(window.scrollY < morphThreshold);
+      rafId = null;
+    };
+    const handleScroll = () => {
+      if (rafId === null) rafId = requestAnimationFrame(update);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    update();
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (rafId !== null) cancelAnimationFrame(rafId);
+    };
+  }, [transparentOverHero]);
 
   const onLogout = () => {
     setOpenDropdown(null);
@@ -347,7 +373,24 @@ export function SiteNav({
       <header
         ref={navRef}
         id="site-navigation"
-        className="sticky top-0 right-0 left-0 z-50 flex h-16 w-full items-center justify-between border-b border-black/6 bg-white/85 px-4 sm:px-6 lg:px-8 backdrop-blur-xl saturate-150 shadow-[0_2px_16px_rgba(14,22,32,0.02)] transition-all duration-200"
+        className={
+          transparentOverHero
+            ? `fixed top-0 right-0 left-0 z-50 flex h-16 w-full items-center justify-between px-4 sm:px-6 lg:px-8 transition-all duration-300 ${
+                isOverHero
+                  ? "border-b border-transparent bg-transparent"
+                  : "border-b border-black/6 bg-white/85 backdrop-blur-xl saturate-150 shadow-[0_2px_16px_rgba(14,22,32,0.02)]"
+              }`
+            : "sticky top-0 right-0 left-0 z-50 flex h-16 w-full items-center justify-between border-b border-black/6 bg-white/85 px-4 sm:px-6 lg:px-8 backdrop-blur-xl saturate-150 shadow-[0_2px_16px_rgba(14,22,32,0.02)] transition-all duration-200"
+        }
+        style={
+          transparentOverHero && isOverHero
+            ? ({
+                "--navy": "#f5f4df",
+                "--ink-soft": "rgba(245,244,223,0.75)",
+                "--ink-faint": "rgba(245,244,223,0.55)",
+              } as React.CSSProperties)
+            : undefined
+        }
       >
         {/* ── LEFT: Logo & Primary Exploration Links ── */}
         <div className="flex items-center gap-3 sm:gap-6">
@@ -378,6 +421,11 @@ export function SiteNav({
                 <div
                   role="menu"
                   aria-label="Explore menu"
+                  style={{
+                    "--navy": "#0e1620",
+                    "--ink-soft": "#55606e",
+                    "--ink-faint": "#7a8494",
+                  } as React.CSSProperties}
                   className="absolute top-[calc(100%+10px)] left-0 z-50 w-72 rounded-3xl border border-black/10 bg-white p-2 shadow-[0_24px_54px_-12px_rgba(14,22,32,0.22),0_4px_16px_rgba(14,22,32,0.06)] backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-150"
                 >
                   <div className="px-3 py-1.5 mb-1 border-b border-black/4">
@@ -405,6 +453,11 @@ export function SiteNav({
                 <div
                   role="menu"
                   aria-label="Services menu"
+                  style={{
+                    "--navy": "#0e1620",
+                    "--ink-soft": "#55606e",
+                    "--ink-faint": "#7a8494",
+                  } as React.CSSProperties}
                   className="absolute top-[calc(100%+10px)] left-0 z-50 w-84 rounded-3xl border border-black/10 bg-white p-2 shadow-[0_24px_54px_-12px_rgba(14,22,32,0.22),0_4px_16px_rgba(14,22,32,0.06)] backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-150"
                 >
                   <div className="px-3 py-1.5 mb-1 border-b border-black/4">
@@ -458,6 +511,11 @@ export function SiteNav({
                   <div
                     role="menu"
                     aria-label="Notifications"
+                    style={{
+                      "--navy": "#0e1620",
+                      "--ink-soft": "#55606e",
+                      "--ink-faint": "#7a8494",
+                    } as React.CSSProperties}
                     className="absolute top-[calc(100%+10px)] right-0 z-50 w-80 rounded-3xl border border-black/10 bg-white p-3 shadow-[0_24px_54px_-12px_rgba(14,22,32,0.22),0_4px_16px_rgba(14,22,32,0.06)] backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-150"
                   >
                     <div className="flex items-center justify-between pb-2 mb-2 border-b border-black/6">
@@ -537,6 +595,11 @@ export function SiteNav({
                   <div
                     role="menu"
                     aria-label="Account menu"
+                    style={{
+                      "--navy": "#0e1620",
+                      "--ink-soft": "#55606e",
+                      "--ink-faint": "#7a8494",
+                    } as React.CSSProperties}
                     className="absolute top-[calc(100%+10px)] right-0 z-50 w-72 rounded-3xl border border-black/10 bg-white p-2.5 shadow-[0_24px_54px_-12px_rgba(14,22,32,0.22),0_4px_16px_rgba(14,22,32,0.06)] backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-150"
                   >
                     {/* User Identity Card Header */}
@@ -616,7 +679,11 @@ export function SiteNav({
               <div className="flex items-center gap-2">
                 <Link
                   href="/login"
-                  className="inline-flex h-9 shrink-0 items-center justify-center rounded-full border border-black/10 bg-white/80 px-4 text-[13px] font-bold text-navy shadow-xs whitespace-nowrap transition-all hover:border-black/20 hover:bg-white active:scale-95"
+                  className="inline-flex h-9 shrink-0 items-center justify-center rounded-full border px-4 text-[13px] font-bold whitespace-nowrap transition-all hover:bg-black/5 active:scale-95"
+                  style={{
+                    borderColor: transparentOverHero && isOverHero ? "rgba(245,244,223,0.3)" : "rgba(14,22,32,0.14)",
+                    color: "var(--navy)",
+                  }}
                 >
                   Log in
                 </Link>

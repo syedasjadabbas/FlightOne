@@ -52,6 +52,7 @@ import {
   GroupLoading,
   GroupSignInPrompt,
 } from "./_components/GroupStatusShell";
+import "../groups.css";
 
 function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -72,16 +73,16 @@ export function GroupDetailClient({ groupId }: { groupId: string }) {
   const skip = !hasHydrated || !accessToken;
 
   const { data: group, isLoading, isError, error, refetch } = useGetGroupQuery(groupId, { skip });
-  const { data: members } = useListMembersQuery(groupId, { skip });
-  const { data: announcements } = useListAnnouncementsQuery(groupId, { skip });
-  const { data: polls } = useListPollsQuery(groupId, { skip });
-  const { data: itinerary } = useGetItineraryQuery(groupId, { skip });
-  const { data: flightStatus } = useGetFlightStatusQuery(groupId, { skip });
+  const { data: members, isLoading: membersLoading } = useListMembersQuery(groupId, { skip });
+  const { data: announcements, isLoading: announcementsLoading } = useListAnnouncementsQuery(groupId, { skip });
+  const { data: polls, isLoading: pollsLoading } = useListPollsQuery(groupId, { skip });
+  const { data: itinerary, isLoading: itineraryLoading } = useGetItineraryQuery(groupId, { skip });
+  const { data: flightStatus, isLoading: flightStatusLoading } = useGetFlightStatusQuery(groupId, { skip });
   const { data: liveUpdates } = useGetLiveUpdatesQuery(groupId, { skip });
-  const { data: documents } = useListGroupDocumentsQuery(groupId, { skip });
-  const { data: attendance } = useListAttendanceQuery(groupId, { skip });
-  const { data: photos } = useListPhotosQuery(groupId, { skip });
-  const { data: memories } = useListMemoriesQuery(groupId, { skip });
+  const { data: documents, isLoading: documentsLoading } = useListGroupDocumentsQuery(groupId, { skip });
+  const { data: attendance, isLoading: attendanceLoading } = useListAttendanceQuery(groupId, { skip });
+  const { data: photos, isLoading: photosLoading } = useListPhotosQuery(groupId, { skip });
+  const { data: memories, isLoading: memoriesLoading } = useListMemoriesQuery(groupId, { skip });
 
   const [inviteEmail, setInviteEmail] = useState("");
   const [annBody, setAnnBody] = useState("");
@@ -113,7 +114,7 @@ export function GroupDetailClient({ groupId }: { groupId: string }) {
   }, [group]);
 
   if (!hasHydrated) return <GroupLoading />;
-  if (!accessToken) return <GroupSignInPrompt />;
+  if (!accessToken) return <GroupSignInPrompt redirectPath={`/groups/${groupId}`} />;
   if (isLoading) return <GroupLoading />;
   if (isError || !group) {
     const status =
@@ -157,7 +158,7 @@ export function GroupDetailClient({ groupId }: { groupId: string }) {
       </header>
 
       <div className="fo-gm-ledger">
-        <GroupSection icon={Users} title="Members">
+        <GroupSection icon={Users} title="Members" loading={membersLoading}>
           {(members || []).length === 0 ? (
             <GroupEmpty
               icon={Users}
@@ -206,6 +207,7 @@ export function GroupDetailClient({ groupId }: { groupId: string }) {
           icon={Plane}
           title="Shared itinerary"
           hint="Share a ticketed booking you own so the group sees the same flight plan."
+          loading={itineraryLoading}
         >
           {(itinerary?.items || []).length === 0 ? (
             <GroupEmpty
@@ -258,7 +260,7 @@ export function GroupDetailClient({ groupId }: { groupId: string }) {
           </div>
         </GroupSection>
 
-        <GroupSection icon={Radio} title="Flight status">
+        <GroupSection icon={Radio} title="Flight status" loading={flightStatusLoading}>
           {!flightStatus?.capability?.canPollLive ? (
             <p className="fo-gm-section__hint">
               Live status unavailable:{" "}
@@ -308,6 +310,7 @@ export function GroupDetailClient({ groupId }: { groupId: string }) {
           icon={FileText}
           title="Shared documents"
           hint="Vault files stay private until you share them with this group."
+          loading={documentsLoading}
         >
           {(documents?.items || []).length === 0 ? (
             <GroupEmpty
@@ -352,7 +355,7 @@ export function GroupDetailClient({ groupId }: { groupId: string }) {
           </Link>
         </GroupSection>
 
-        <GroupSection icon={Megaphone} title="Announcements">
+        <GroupSection icon={Megaphone} title="Announcements" loading={announcementsLoading}>
           {(announcements || []).length === 0 ? (
             <GroupEmpty
               icon={Megaphone}
@@ -388,8 +391,13 @@ export function GroupDetailClient({ groupId }: { groupId: string }) {
                 type="button"
                 size="sm"
                 onClick={async () => {
-                  await announce({ groupId, body: annBody }).unwrap();
-                  setAnnBody("");
+                  try {
+                    await announce({ groupId, body: annBody }).unwrap();
+                    setAnnBody("");
+                    setLocalMsg("Announcement posted.");
+                  } catch {
+                    setLocalMsg("Could not post announcement.");
+                  }
                 }}
               >
                 Post
@@ -411,9 +419,13 @@ export function GroupDetailClient({ groupId }: { groupId: string }) {
                   ) {
                     return;
                   }
-                  await emergency({ groupId, body: emBody }).unwrap();
-                  setEmBody("");
-                  setLocalMsg("Emergency broadcast sent.");
+                  try {
+                    await emergency({ groupId, body: emBody }).unwrap();
+                    setEmBody("");
+                    setLocalMsg("Emergency broadcast sent.");
+                  } catch {
+                    setLocalMsg("Could not send emergency broadcast.");
+                  }
                 }}
               >
                 Send emergency
@@ -422,7 +434,7 @@ export function GroupDetailClient({ groupId }: { groupId: string }) {
           ) : null}
         </GroupSection>
 
-        <GroupSection icon={Vote} title="Polls">
+        <GroupSection icon={Vote} title="Polls" loading={pollsLoading}>
           {(polls || []).length === 0 ? (
             <GroupEmpty
               icon={Vote}
@@ -440,7 +452,14 @@ export function GroupDetailClient({ groupId }: { groupId: string }) {
                       type="button"
                       size="sm"
                       variant={p.myOptionIndex === idx ? "primary" : "secondary"}
-                      onClick={() => void vote({ groupId, pollId: p.id, optionIndex: idx })}
+                      onClick={async () => {
+                        try {
+                          await vote({ groupId, pollId: p.id, optionIndex: idx }).unwrap();
+                          setLocalMsg("Vote recorded.");
+                        } catch {
+                          setLocalMsg("Could not record vote.");
+                        }
+                      }}
                     >
                       {opt} ({p.voteCounts?.[String(idx)] || 0})
                     </Button>
@@ -465,8 +484,13 @@ export function GroupDetailClient({ groupId }: { groupId: string }) {
                     .split(",")
                     .map((s) => s.trim())
                     .filter(Boolean);
-                  await createPoll({ groupId, question: pollQ, options }).unwrap();
-                  setPollQ("");
+                  try {
+                    await createPoll({ groupId, question: pollQ, options }).unwrap();
+                    setPollQ("");
+                    setLocalMsg("Poll created.");
+                  } catch {
+                    setLocalMsg("Could not create poll.");
+                  }
                 }}
               >
                 Create poll
@@ -475,7 +499,7 @@ export function GroupDetailClient({ groupId }: { groupId: string }) {
           ) : null}
         </GroupSection>
 
-        <GroupSection icon={MapPinned} title="Attendance">
+        <GroupSection icon={MapPinned} title="Attendance" loading={attendanceLoading}>
           {(attendance?.waypoints || []).length === 0 ? (
             <GroupEmpty
               icon={MapPinned}
@@ -490,7 +514,14 @@ export function GroupDetailClient({ groupId }: { groupId: string }) {
                   <Button
                     type="button"
                     size="sm"
-                    onClick={() => void markAtt({ groupId, waypointId: w.id, status: "PRESENT" })}
+                    onClick={async () => {
+                      try {
+                        await markAtt({ groupId, waypointId: w.id, status: "PRESENT" }).unwrap();
+                        setLocalMsg(`Checked in at ${w.label}.`);
+                      } catch {
+                        setLocalMsg("Could not check in.");
+                      }
+                    }}
                   >
                     Check in
                   </Button>
@@ -509,8 +540,13 @@ export function GroupDetailClient({ groupId }: { groupId: string }) {
                 type="button"
                 size="sm"
                 onClick={async () => {
-                  await createWp({ groupId, label: waypointLabel }).unwrap();
-                  setWaypointLabel("");
+                  try {
+                    await createWp({ groupId, label: waypointLabel }).unwrap();
+                    setWaypointLabel("");
+                    setLocalMsg("Waypoint added.");
+                  } catch {
+                    setLocalMsg("Could not add waypoint.");
+                  }
                 }}
               >
                 Add waypoint
@@ -624,8 +660,12 @@ export function GroupDetailClient({ groupId }: { groupId: string }) {
             if (!window.confirm("Leave this group? Shared content access ends going forward.")) {
               return;
             }
-            await leave(groupId);
-            window.location.href = "/groups";
+            try {
+              await leave(groupId).unwrap();
+              window.location.href = "/groups";
+            } catch {
+              setLocalMsg("Could not leave the group. Try again.");
+            }
           }}
         >
           Leave group

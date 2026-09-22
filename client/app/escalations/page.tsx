@@ -19,7 +19,7 @@ export default function EscalationsPage() {
   return (
     <main className="fo-stage relative flex min-h-[100dvh] flex-col">
       <SiteNav />
-      <TravellerShell>
+      <TravellerShell width="wide">
         <EscalationsPageClient />
       </TravellerShell>
     </main>

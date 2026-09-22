@@ -13,7 +13,7 @@ export function StatusBadge({ status }: { status?: string }) {
   return (
     <span className={badgeClass}>
       <span
-        className="h-1.5 w-1.5 shrink-0 rounded-sm"
+        className="h-1.5 w-1.5 shrink-0 rounded-full"
         style={{
           background: isOk ? "var(--cyan)" : isWarn ? "var(--electric)" : "var(--fo-desk-muted)",
         }}

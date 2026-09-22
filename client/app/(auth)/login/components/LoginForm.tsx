@@ -68,7 +68,6 @@ export function LoginForm() {
       <div className="fo-auth-form fo-login">
         <AuthPanel
           title="Set up two-factor authentication"
-          eyebrow="Staff security"
           lead="Staff accounts require an authenticator app before accessing traveler and operational data."
           footer={
             <p>
@@ -88,8 +87,8 @@ export function LoginForm() {
             className="fo-auth__form"
             aria-busy={isLoading || undefined}
           >
-            <div className="space-y-4 rounded-[0.55rem] border border-line bg-[color-mix(in_oklab,var(--horizon-cool)_55%,white)] p-4">
-              <div className="flex flex-col items-center justify-center rounded-[0.55rem] border border-line bg-white px-3 py-4 text-center">
+            <div className="fo-auth-form__tile">
+              <div className="fo-auth-form__qr-box">
                 <QrCode value={qrUri} size={160} alt="Staff 2FA enrollment QR code" />
                 <p className="mt-3 max-w-[16rem] text-[0.75rem] leading-snug text-ink-soft">
                   Scan with Google Authenticator, 1Password, or Authy
@@ -102,16 +101,14 @@ export function LoginForm() {
                   Or enter this setup key
                 </span>
                 <div className="mt-1.5 flex items-center gap-2">
-                  <code className="block min-w-0 flex-1 select-all rounded-[0.55rem] border border-line bg-white px-2.5 py-1.5 font-mono text-xs font-semibold tracking-wide text-navy">
-                    {setupData.secret}
-                  </code>
+                  <code className="fo-auth-form__code-value">{setupData.secret}</code>
                   <Button
                     type="button"
                     variant="secondary"
                     size="sm"
                     onClick={handleCopySecret}
                     aria-label={copiedSecret ? "Setup key copied" : "Copy setup key"}
-                    className="!rounded-[0.55rem] shrink-0 gap-1.5 px-2.5 text-xs"
+                    className="!rounded-full shrink-0 gap-1.5 px-2.5 text-xs"
                     icon={
                       copiedSecret ? (
                         <Check className="size-3.5" aria-hidden />
@@ -179,38 +176,30 @@ export function LoginForm() {
       <div className="fo-auth-form fo-login">
         <AuthPanel
           title="Save your recovery codes"
-          eyebrow="Staff security"
           lead="Store these single-use codes somewhere safe. They are the only fallback if you lose your authenticator."
         >
           <div className="fo-auth-form__fields">
-            <div
-              className="flex gap-3 rounded-[0.55rem] border border-[color-mix(in_oklab,var(--danger)_28%,var(--line))] bg-[color-mix(in_oklab,var(--danger)_6%,white)] px-3.5 py-3"
-              role="status"
-            >
+            <div className="fo-auth-form__notice" role="status">
               <AlertTriangle
                 className="mt-0.5 size-4 shrink-0 text-[var(--danger)]"
                 aria-hidden
               />
-              <p className="text-xs leading-relaxed text-[color-mix(in_oklab,var(--danger)_82%,var(--navy))]">
-                <span className="font-semibold text-[var(--danger)]">Shown once.</span>{" "}
-                If your device is lost, these ten codes are the only way back into your staff
-                account.
+              <p>
+                <strong>Shown once.</strong> If your device is lost, these ten codes are the only
+                way back into your staff account.
               </p>
             </div>
 
-            <div className="rounded-[0.55rem] border border-line bg-[var(--joby-surface)] p-3.5">
+            <div className="fo-auth-form__tile">
               <div className="grid grid-cols-2 gap-2 font-mono text-xs font-semibold text-navy">
                 {setupData.backupCodes.map((code) => (
-                  <div
-                    key={code}
-                    className="select-all rounded-[0.4rem] border border-line bg-white px-2 py-1.5 text-center tracking-wide"
-                  >
+                  <div key={code} className="fo-auth-form__backup-code">
                     {code}
                   </div>
                 ))}
               </div>
 
-              <div className="mt-3 flex items-center justify-between gap-3 border-t border-line pt-2.5">
+              <div className="fo-auth-form__backup-footer">
                 <Button
                   type="button"
                   variant="secondary"
@@ -219,7 +208,7 @@ export function LoginForm() {
                   aria-label={
                     copiedBackupCodes ? "Recovery codes copied" : "Copy all recovery codes"
                   }
-                  className="!rounded-[0.55rem] gap-1.5 text-xs"
+                  className="!rounded-full gap-1.5 text-xs"
                   icon={
                     copiedBackupCodes ? (
                       <Check className="size-3.5" aria-hidden />
@@ -253,7 +242,6 @@ export function LoginForm() {
       <div className="fo-auth-form fo-login">
         <AuthPanel
           title="Verify it's you"
-          eyebrow="Two-factor"
           lead={
             challengeMode === "totp"
               ? "Enter the 6-digit code from your authenticator app."
@@ -387,7 +375,6 @@ export function LoginForm() {
     <div className="fo-auth-form fo-login">
       <AuthPanel
         title="Log in"
-        eyebrow="Welcome back"
         lead="Sign in to continue to your trips and bookings."
         footer={
           <p>

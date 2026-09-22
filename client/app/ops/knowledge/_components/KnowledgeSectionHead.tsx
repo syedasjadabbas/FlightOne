@@ -18,7 +18,7 @@ export function KnowledgeSectionHead({
       style={flush ? { padding: "0.75rem 1rem 0" } : undefined}
     >
       <h2 className="fo-desk__section-label inline-flex items-center gap-2">
-        <Icon className="h-3.5 w-3.5 shrink-0 text-[var(--cyan)]" aria-hidden />
+        <Icon className="h-3.5 w-3.5 shrink-0 text-sky" aria-hidden />
         {title}
       </h2>
       {trailing ?? null}

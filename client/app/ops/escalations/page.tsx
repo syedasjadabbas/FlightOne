@@ -2,6 +2,7 @@ import dynamic from "next/dynamic";
 import { RouteChunkFallback } from "@/components/RouteChunkFallback";
 import { DeskShell } from "@/components/DeskShell";
 import { SiteNav } from "@/components/SiteNav";
+import "../ops-hub.css";
 import "./ops-escalations.css";
 
 const OpsEscalationsClient = dynamic(

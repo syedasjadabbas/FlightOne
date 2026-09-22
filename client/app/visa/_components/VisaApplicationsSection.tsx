@@ -26,9 +26,10 @@ export function VisaApplicationsSection({
   category?: VisaCategory;
 }) {
   const hasHydrated = useAuthStore((s) => s.hasHydrated);
-  const isAuthenticated = useAuthStore((s) => Boolean(s.accessToken));
-  const { data, isLoading, refetch } = useListVisaApplicationsQuery(undefined, {
-    skip: !hasHydrated || !isAuthenticated,
+  const accessToken = useAuthStore((s) => s.accessToken);
+  const isAuthenticated = Boolean(accessToken);
+  const { data, isLoading, isError, refetch } = useListVisaApplicationsQuery(undefined, {
+    skip: !hasHydrated || !accessToken,
   });
   const [createApp, createState] = useCreateVisaApplicationMutation();
   const [updateApp, updateState] = useUpdateVisaApplicationMutation();
@@ -98,7 +99,19 @@ export function VisaApplicationsSection({
 
       {isLoading ? <Spinner /> : null}
 
-      {!items.length ? (
+      {isError ? (
+        <TravellerState
+          variant="error"
+          title="Applications unavailable"
+          action={
+            <Button type="button" size="sm" onClick={() => void refetch()}>
+              Retry
+            </Button>
+          }
+        >
+          Could not load your visa tracking cases.
+        </TravellerState>
+      ) : !items.length ? (
         <TravellerState title="No active applications">
           Open a tracking case above to record your VAC / consulate appointment and tracking
           number.

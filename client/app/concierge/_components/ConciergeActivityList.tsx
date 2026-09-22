@@ -20,8 +20,9 @@ export function ConciergeActivityList({ items, loading }: ConciergeActivityListP
       note="Quotes and notifications only — never silent tickets."
     >
       {loading ? (
-        <div className="flex justify-center py-8">
+        <div className="flex flex-col items-center gap-2 py-8">
           <Spinner />
+          <p className="m-0 text-sm text-ink-soft">Loading activity…</p>
         </div>
       ) : !items?.length ? (
         <TravellerState title="No activity yet">

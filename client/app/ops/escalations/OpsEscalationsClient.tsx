@@ -43,8 +43,9 @@ export function OpsEscalationsClient() {
 
   if (!hasHydrated || permsLoading) {
     return (
-      <div className="flex justify-center py-16">
+      <div className="flex flex-col items-center gap-2 py-16" role="status">
         <Spinner />
+        <p className="m-0 text-sm text-ink-soft">Checking permissions…</p>
       </div>
     );
   }
@@ -58,7 +59,7 @@ export function OpsEscalationsClient() {
 
   return (
     <PermissionGate anyOf={["ops:escalations:read"]} mode="fallback" fallback={<QueuePermissionGate />}>
-      <div className="fo-ops-eq">
+      <div className="fo-ops fo-ops__master-stage fo-ops-eq">
         <QueueHeader />
 
         <QueueFilters
@@ -75,8 +76,9 @@ export function OpsEscalationsClient() {
         />
 
         {isLoading ? (
-          <div className="flex justify-center py-12">
+          <div className="flex flex-col items-center gap-2 py-12" role="status">
             <Spinner />
+            <p className="m-0 text-sm text-ink-soft">Loading escalations…</p>
           </div>
         ) : isError ? (
           <QueueError unauthorized={unauthorized} onRetry={() => refetch()} />

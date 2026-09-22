@@ -10,8 +10,9 @@ import { Button, Spinner } from "@/components/ui";
 
 export function CaseLoading({ label = "Loading case" }: { label?: string }) {
   return (
-    <div className="flex justify-center py-16" role="status" aria-label={label}>
+    <div className="flex flex-col items-center gap-2 py-16" role="status">
       <Spinner />
+      <p className="m-0 text-sm text-ink-soft">{label}…</p>
     </div>
   );
 }

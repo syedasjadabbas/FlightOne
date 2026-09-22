@@ -9,6 +9,27 @@
   gap: 1.25rem;
 }
 
+/* Tactile card treatment for non-flush section panels (funnel, concierge,
+   credit summary, empty states) — matches the KPI/queue card family. Flush
+   (table) sections stay flat, same as the dense tables across ops/desk pages. */
+.fo-dash .fo-desk__panel:not(.fo-desk__panel--flush) {
+  border-radius: 1.15rem;
+  border: 0;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 8px 28px rgba(14, 22, 32, 0.06);
+  backdrop-filter: blur(12px);
+  padding: 1.25rem 1.35rem;
+}
+
+.fo-dash .fo-desk__panel--flush {
+  border-radius: 1.15rem;
+  border: 0;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 8px 28px rgba(14, 22, 32, 0.06);
+  backdrop-filter: blur(12px);
+  overflow: hidden;
+}
+
 .fo-dash__master-stage {
   position: relative;
   width: 100%;
@@ -120,15 +141,6 @@
   max-width: 40rem;
 }
 
-.fo-dash__eyebrow {
-  margin: 0 0 0.35rem;
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-}
-
 .fo-dash__title {
   margin: 0;
   font-family: var(--font-hero);
@@ -224,8 +236,8 @@
   padding: 2rem 1.75rem;
   border-radius: 1.5rem;
   background: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.95);
-  box-shadow: 0 20px 50px -15px rgba(14, 22, 32, 0.1);
+  border: 0;
+  box-shadow: 0 20px 50px -15px rgba(14, 22, 32, 0.14);
   text-align: center;
   display: flex;
   flex-direction: column;

@@ -39,7 +39,7 @@ function MsgBanner({ msg }: { msg: string | null }) {
         {warn ? (
           <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
         ) : (
-          <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--cyan)]" aria-hidden />
+          <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-sky" aria-hidden />
         )}
         <span>{msg}</span>
       </span>
@@ -107,7 +107,7 @@ export function OpsKnowledgeClient() {
       mode="fallback"
       fallback={<KnowledgePermissionFallback />}
     >
-      <div className="fo-ops">
+      <div className="fo-ops fo-ops__master-stage">
         <KnowledgeHeader />
         <MsgBanner msg={msg} />
 

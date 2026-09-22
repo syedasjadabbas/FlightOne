@@ -37,8 +37,8 @@ export function QueueFilters({
         <p className="fo-ops-eq__filter-label" id="ops-eq-status-label">
           Status
         </p>
-        <div
-          className="fo-ops-eq__chips"
+        <nav
+          className="fo-ops__tabs"
           role="group"
           aria-labelledby="ops-eq-status-label"
         >
@@ -48,30 +48,30 @@ export function QueueFilters({
               type="button"
               onClick={() => onStatusChange(f.value)}
               aria-pressed={status === f.value}
-              className={`fo-ops-eq__chip${status === f.value ? " fo-ops-eq__chip--active" : ""}`}
+              className={`fo-ops__tab${status === f.value ? " fo-ops__tab--active" : ""}`}
             >
               {f.label}
             </button>
           ))}
-        </div>
+        </nav>
       </div>
       <div>
         <p className="fo-ops-eq__filter-label" id="ops-eq-pool-label">
           Pool
         </p>
-        <div className="fo-ops-eq__chips" role="group" aria-labelledby="ops-eq-pool-label">
+        <nav className="fo-ops__tabs" role="group" aria-labelledby="ops-eq-pool-label">
           {POOL_FILTERS.map((p) => (
             <button
               key={p.value}
               type="button"
               onClick={() => onPoolChange(p.value)}
               aria-pressed={pool === p.value}
-              className={`fo-ops-eq__chip${pool === p.value ? " fo-ops-eq__chip--active" : ""}`}
+              className={`fo-ops__tab${pool === p.value ? " fo-ops__tab--active" : ""}`}
             >
               {p.label}
             </button>
           ))}
-        </div>
+        </nav>
       </div>
     </div>
   );

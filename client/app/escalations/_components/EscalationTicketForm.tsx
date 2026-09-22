@@ -44,7 +44,7 @@ export function EscalationTicketForm({
     >
       {!signedIn ? (
         <div className="space-y-3">
-          <p className="text-[13px] text-[var(--ink-soft)]">
+          <p className="text-[13px] text-ink-soft">
             Sign in so we can link this to your bookings and send status updates to your account.
           </p>
           <div className="flex flex-wrap gap-2">
@@ -61,12 +61,12 @@ export function EscalationTicketForm({
       ) : success ? (
         <div className="space-y-3">
           <div className="flex items-start gap-2.5">
-            <span className="mt-0.5 shrink-0 text-[var(--sky)]">
+            <span className="mt-0.5 shrink-0 text-sky">
               <CheckCircle2 size={16} aria-hidden />
             </span>
             <div className="min-w-0 space-y-1">
-              <p className="text-[13px] font-semibold text-[var(--navy)]">{success}</p>
-              <p className="text-[12px] text-[var(--ink-soft)]">
+              <p className="text-[13px] font-semibold text-navy">{success}</p>
+              <p className="text-[12px] text-ink-soft">
                 Track status under My cases, or continue in chat.
               </p>
             </div>

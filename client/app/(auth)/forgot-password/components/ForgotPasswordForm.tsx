@@ -27,7 +27,6 @@ export function ForgotPasswordForm() {
     return (
       <div className="fo-auth-form fo-forgot">
         <AuthPanel
-          eyebrow="Account recovery"
           title="Check your email"
           footer={<BackToLogin />}
         >
@@ -56,7 +55,6 @@ export function ForgotPasswordForm() {
     return (
       <div className="fo-auth-form fo-forgot">
         <AuthPanel
-          eyebrow="Account recovery"
           title="Reset prepared"
           footer={<BackToLogin />}
         >
@@ -78,7 +76,6 @@ export function ForgotPasswordForm() {
   return (
     <div className="fo-auth-form fo-forgot">
       <AuthPanel
-        eyebrow="Account recovery"
         title="Reset password"
         lead="Enter the email on your FlightOne account. We'll send a one-time 6-digit code."
         footer={<BackToLogin />}

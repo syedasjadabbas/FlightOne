@@ -55,7 +55,7 @@ export function OpsRefundsPermissionGate() {
 
 export function OpsRefundsEmpty({ filtered }: { filtered: boolean }) {
   return (
-    <div className="fo-desk__panel fo-ops-refunds__empty">
+    <div className="fo-ops__panel-state fo-ops-refunds__empty">
       <div className="fo-ops-refunds__empty-icon" aria-hidden>
         <Inbox className="h-4 w-4" strokeWidth={2} />
       </div>

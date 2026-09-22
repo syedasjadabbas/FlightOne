@@ -13,8 +13,10 @@ import {
   ScrollText,
   ShieldCheck,
   Users,
+  AlertCircle,
 } from "lucide-react";
-import { Button, Input, Pagination, Spinner, pageCountFor, paginateItems } from "@/components/ui";
+import { Button, Input, Pagination, Spinner, pageCountFor, paginateItems, buttonClassName } from "@/components/ui";
+import "./corporate.css";
 import { PermissionGate } from "@/components/PermissionGate";
 import {
   useCreateApprovalMutation,
@@ -57,15 +59,21 @@ function invoiceTone(status: string): "neutral" | "ok" | "warn" {
   return "neutral";
 }
 
-function MsgLine({ msg }: { msg: string | null }) {
+function MsgLine({ msg }: { msg: { text: string; error?: boolean } | null }) {
   if (!msg) return null;
   return (
     <p
-      className="inline-flex items-center gap-1.5 text-[13px] text-[var(--ink-soft)]"
+      className={`inline-flex items-center gap-1.5 text-[13px] ${
+        msg.error ? "text-danger" : "text-ink-soft"
+      }`}
       role="status"
     >
-      <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-[var(--cyan)]" aria-hidden />
-      {msg}
+      {msg.error ? (
+        <AlertCircle className="h-3.5 w-3.5 shrink-0 text-danger" aria-hidden />
+      ) : (
+        <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-sky" aria-hidden />
+      )}
+      {msg.text}
     </p>
   );
 }
@@ -79,7 +87,12 @@ export function CorporatePageClient() {
   const setCorporate = useCorporateProfileStore((s) => s.setCorporate);
 
   const skip = !hasHydrated || !accessToken;
-  const { data: companies = [], isLoading: companiesLoading } = useListCompaniesQuery(undefined, {
+  const {
+    data: companies = [],
+    isLoading: companiesLoading,
+    isError: companiesError,
+    refetch: refetchCompanies,
+  } = useListCompaniesQuery(undefined, {
     skip,
   });
   const activeCompanyId = mode === "CORPORATE" ? companyId || companies[0]?.id || null : null;
@@ -139,7 +152,7 @@ export function CorporatePageClient() {
   const [creditLimitInput, setCreditLimitInput] = useState("");
   const [newProjectCode, setNewProjectCode] = useState("");
   const [newProjectName, setNewProjectName] = useState("");
-  const [msg, setMsg] = useState<string | null>(null);
+  const [msg, setMsg] = useState<{ text: string; error?: boolean } | null>(null);
   const [bookingsPage, setBookingsPage] = useState(1);
   const [invoicesPage, setInvoicesPage] = useState(1);
   const [auditPage, setAuditPage] = useState(1);
@@ -149,122 +162,75 @@ export function CorporatePageClient() {
 
   if (!hasHydrated || companiesLoading) {
     return (
-      <div className="flex justify-center py-16">
-        <Spinner />
+      <div className="fo-corporate__boot" role="status" aria-live="polite">
+        <Spinner label="Loading corporate…" />
+        <p className="fo-corporate__boot-label">Loading corporate travel</p>
       </div>
     );
   }
 
   if (!accessToken) {
     return (
-      <div className="fo-desk__stack" style={{ gap: "1.25rem" }}>
-        <header className="fo-desk__header">
-          <div className="flex items-center gap-2.5">
-            <span className="inline-flex h-9 w-9 items-center justify-center rounded-[var(--fo-desk-radius)] border border-[var(--fo-desk-line)] bg-[var(--fo-desk-wash)] text-[var(--cyan)]">
-              <Building2 className="h-4 w-4" aria-hidden />
-            </span>
-            <h1 className="fo-desk__title">Corporate travel</h1>
+      <div className="fo-corporate__gate">
+        <div className="fo-corporate__gate-box">
+          <div className="fo-corporate__gate-icon" aria-hidden>
+            <Lock size={22} strokeWidth={2} />
           </div>
-          <p className="fo-desk__lede">
-            Company credit, booking approvals, invoices, and travel policy. Sign in to open your
-            company desk — server policy stays authoritative.
+          <h2 className="fo-corporate__gate-title">Authentication Required</h2>
+          <p className="fo-corporate__gate-desc">
+            Sign in to open your company desk — credit, approvals, invoices, and travel policy.
+            Server policy stays authoritative.
           </p>
-          <div className="fo-desk__toolbar" style={{ marginTop: "0.25rem" }}>
-            <Link href="/login?redirect=/corporate">
-              <Button size="sm">Sign in</Button>
-            </Link>
-            <Link href="/signup">
-              <Button size="sm" variant="secondary">
-                Create account
-              </Button>
-            </Link>
-            <Link href="/chat">
-              <Button size="sm" variant="ghost">
-                Book with Ava
-              </Button>
-            </Link>
-          </div>
-        </header>
+          <Link href="/login?redirect=%2Fcorporate" className={buttonClassName({ size: "md" })}>
+            Sign In to FlightOne
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
-        <section className="fo-desk__panel" style={{ padding: 0 }}>
-          <div className="fo-desk__row" style={{ padding: "0.85rem 1rem" }}>
-            <div className="flex items-start gap-3">
-              <CreditCard className="mt-0.5 h-4 w-4 shrink-0 text-[var(--cyan)]" aria-hidden />
-              <div>
-                <p className="text-sm font-semibold text-[var(--navy)]">Credit & invoicing</p>
-                <p className="mt-0.5 text-xs text-[var(--ink-soft)]">
-                  Corporate credit limits, consolidated statements, and invoice PDFs.
-                </p>
-              </div>
-            </div>
+  if (companiesError) {
+    return (
+      <div className="fo-corporate__gate">
+        <div className="fo-corporate__gate-box">
+          <div className="fo-corporate__gate-icon fo-corporate__gate-icon--warn" aria-hidden>
+            <AlertCircle size={22} strokeWidth={2} />
           </div>
-          <div className="fo-desk__row" style={{ padding: "0.85rem 1rem" }}>
-            <div className="flex items-start gap-3">
-              <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[var(--cyan)]" aria-hidden />
-              <div>
-                <p className="text-sm font-semibold text-[var(--navy)]">Policy & approvals</p>
-                <p className="mt-0.5 text-xs text-[var(--ink-soft)]">
-                  Cabin and spend rules with manager approval queues before ticket.
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="fo-desk__row" style={{ padding: "0.85rem 1rem" }}>
-            <div className="flex items-start gap-3">
-              <ClipboardList className="mt-0.5 h-4 w-4 shrink-0 text-[var(--cyan)]" aria-hidden />
-              <div>
-                <p className="text-sm font-semibold text-[var(--navy)]">Duty of care</p>
-                <p className="mt-0.5 text-xs text-[var(--ink-soft)]">
-                  Traveller visibility and disruption handling through FlightOne ops.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="fo-desk__panel fo-desk__stack">
-          <DeskSectionHead icon={Lock} title="Company desk access" />
-          <p className="text-sm text-[var(--ink-soft)]" style={{ margin: 0 }}>
-            Switch company profiles, approve bookings, review ledgers, and download invoices after
-            sign-in.
+          <h2 className="fo-corporate__gate-title">Corporate Unavailable</h2>
+          <p className="fo-corporate__gate-desc">
+            Could not load your company memberships from the secure store.
           </p>
-          <div className="fo-desk__toolbar">
-            <Link href="/login?redirect=/corporate">
-              <Button size="sm">Log in to company account</Button>
-            </Link>
-            <Link href="/signup">
-              <Button size="sm" variant="ghost">
-                Register company
-              </Button>
-            </Link>
-          </div>
-        </section>
+          <Button size="md" variant="secondary" onClick={() => void refetchCompanies()}>
+            Retry Connection
+          </Button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="fo-desk__stack" style={{ gap: "1.25rem" }}>
-      <header className="fo-desk__header">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="min-w-0">
-            <div className="mb-1.5 flex items-center gap-2">
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded-[var(--fo-desk-radius)] border border-[var(--fo-desk-line)] bg-[var(--fo-desk-wash)] text-[var(--cyan)]">
-                <Building2 className="h-4 w-4" aria-hidden />
-              </span>
-              <h1 className="fo-desk__title">Corporate travel</h1>
-            </div>
-            <p className="fo-desk__lede">
-              Switch profile, review credit, approve bookings, and manage company settings. Server
-              policy remains authoritative.
-            </p>
-          </div>
+    <div className="fo-corporate__master-stage">
+      <div className="fo-corporate__nav-rail">
+        <span className="fo-corporate__brand-badge">
+          <span className="fo-corporate__brand-dot" aria-hidden />
+          Corporate
+        </span>
+        <div className="fo-corporate__rail-actions">
           {profile?.membership?.role ? (
             <DeskStatus tone={isAdmin ? "ok" : "neutral"}>{profile.membership.role}</DeskStatus>
           ) : null}
         </div>
+      </div>
+
+      <header className="fo-corporate__hero">
+        <h1 className="fo-corporate__title">Corporate travel</h1>
+        <p className="fo-corporate__lede">
+          Switch profile, review credit, approve bookings, and manage company settings. Server
+          policy remains authoritative.
+        </p>
       </header>
 
+      <div className="fo-desk__stack" style={{ gap: "1.25rem" }}>
       <section className="fo-desk__profile">
         <p className="fo-desk__section-label">Active profile</p>
         <div className="fo-desk__toolbar">
@@ -294,7 +260,12 @@ export function CorporatePageClient() {
             </button>
           ))}
         </div>
-        {profileLoading ? <Spinner /> : null}
+        {profileLoading ? (
+          <span className="inline-flex items-center gap-1.5 text-[13px] text-ink-soft">
+            <Spinner size="sm" />
+            Switching company…
+          </span>
+        ) : null}
         {profile ? (
           <div className="fo-desk__profile-facts">
             <p>
@@ -369,9 +340,9 @@ export function CorporatePageClient() {
                 const c = await createCompany({ name: newCompanyName.trim() }).unwrap();
                 setCorporate(c.id);
                 setNewCompanyName("");
-                setMsg(`Created ${c.name}`);
+                setMsg({ text: `Created ${c.name}` });
               } catch {
-                setMsg("Could not create company.");
+                setMsg({ text: "Could not create company.", error: true });
               }
             }}
           >
@@ -421,9 +392,9 @@ export function CorporatePageClient() {
                             onClick={async () => {
                               try {
                                 await decide({ id: a.id, decision: "APPROVE" }).unwrap();
-                                setMsg("Approved");
+                                setMsg({ text: "Approved" });
                               } catch {
-                                setMsg("Approve failed");
+                                setMsg({ text: "Approve failed", error: true });
                               }
                             }}
                           >
@@ -436,9 +407,9 @@ export function CorporatePageClient() {
                             onClick={async () => {
                               try {
                                 await decide({ id: a.id, decision: "REJECT" }).unwrap();
-                                setMsg("Rejected");
+                                setMsg({ text: "Rejected" });
                               } catch {
-                                setMsg("Reject failed");
+                                setMsg({ text: "Reject failed", error: true });
                               }
                             }}
                           >
@@ -476,9 +447,12 @@ export function CorporatePageClient() {
                   companyId: activeCompanyId,
                 }).unwrap();
                 setBookingIdForApproval("");
-                setMsg("Approval requested");
+                setMsg({ text: "Approval requested" });
               } catch {
-                setMsg("Could not create approval (check booking ownership / company).");
+                setMsg({
+                  text: "Could not create approval (check booking ownership / company).",
+                  error: true,
+                });
               }
             }}
           >
@@ -554,11 +528,11 @@ export function CorporatePageClient() {
                     {paginateItems(invoices.items, invoicesPage, TABLE_PAGE_SIZE).map((inv) => (
                       <tr key={inv.id}>
                         <td>
-                          <span className="font-medium text-[var(--navy)]">{inv.invoiceNumber}</span>
+                          <span className="font-medium text-navy">{inv.invoiceNumber}</span>
                           {inv.projectCode ? (
-                            <span className="text-[var(--ink-faint)]"> · {inv.projectCode}</span>
+                            <span className="text-ink-faint"> · {inv.projectCode}</span>
                           ) : null}
-                          <div className="text-[11px] text-[var(--ink-faint)]">
+                          <div className="text-[11px] text-ink-faint">
                             {inv.issuedAt ? String(inv.issuedAt).slice(0, 10) : "—"}
                           </div>
                         </td>
@@ -592,7 +566,7 @@ export function CorporatePageClient() {
                                   a.click();
                                   URL.revokeObjectURL(url);
                                 } catch {
-                                  setMsg("Could not download invoice PDF");
+                                  setMsg({ text: "Could not download invoice PDF", error: true });
                                 }
                               }}
                             >
@@ -609,9 +583,9 @@ export function CorporatePageClient() {
                                       invoiceId: inv.id,
                                       status: "PAID",
                                     }).unwrap();
-                                    setMsg("Invoice marked paid");
+                                    setMsg({ text: "Invoice marked paid" });
                                   } catch {
-                                    setMsg("Could not update invoice");
+                                    setMsg({ text: "Could not update invoice", error: true });
                                   }
                                 }}
                               >
@@ -630,9 +604,9 @@ export function CorporatePageClient() {
                                       invoiceId: inv.id,
                                       status: "VOID",
                                     }).unwrap();
-                                    setMsg("Invoice voided");
+                                    setMsg({ text: "Invoice voided" });
                                   } catch {
-                                    setMsg("Could not void invoice");
+                                    setMsg({ text: "Could not void invoice", error: true });
                                   }
                                 }}
                               >
@@ -678,9 +652,12 @@ export function CorporatePageClient() {
                       bookingId: bookingIdForInvoice.trim(),
                     }).unwrap();
                     setBookingIdForInvoice("");
-                    setMsg(`Issued ${inv.invoiceNumber}`);
+                    setMsg({ text: `Issued ${inv.invoiceNumber}` });
                   } catch {
-                    setMsg("Could not issue invoice (check booking status / company).");
+                    setMsg({
+                      text: "Could not issue invoice (check booking status / company).",
+                      error: true,
+                    });
                   }
                 }}
               >
@@ -748,7 +725,7 @@ export function CorporatePageClient() {
                 <tbody>
                   {projectCodes.map((pc) => (
                     <tr key={pc.id}>
-                      <td className="font-medium text-[var(--navy)]">{pc.code}</td>
+                      <td className="font-medium text-navy">{pc.code}</td>
                       <td>{pc.name}</td>
                       <td>
                         <DeskStatus tone={pc.isActive ? "ok" : "neutral"}>
@@ -768,13 +745,13 @@ export function CorporatePageClient() {
                                   projectCodeId: pc.id,
                                   isActive: !pc.isActive,
                                 }).unwrap();
-                                setMsg(
-                                  pc.isActive
+                                setMsg({
+                                  text: pc.isActive
                                     ? "Project code deactivated"
                                     : "Project code reactivated",
-                                );
+                                });
                               } catch {
-                                setMsg("Could not update project code");
+                                setMsg({ text: "Could not update project code", error: true });
                               }
                             }}
                           >
@@ -819,9 +796,12 @@ export function CorporatePageClient() {
                     }).unwrap();
                     setNewProjectCode("");
                     setNewProjectName("");
-                    setMsg("Project code created");
+                    setMsg({ text: "Project code created" });
                   } catch {
-                    setMsg("Could not create project code (check uniqueness / permissions).");
+                    setMsg({
+                      text: "Could not create project code (check uniqueness / permissions).",
+                      error: true,
+                    });
                   }
                 }}
               >
@@ -860,7 +840,7 @@ export function CorporatePageClient() {
             companyId={activeCompanyId}
             mode="fallback"
             fallback={
-              <p className="text-[13px] text-[var(--ink-soft)]" style={{ margin: 0 }}>
+              <p className="text-[13px] text-ink-soft" style={{ margin: 0 }}>
                 Credit limit changes require `corporate:company:write`. Company ADMIN can still
                 manage members below.
               </p>
@@ -879,7 +859,7 @@ export function CorporatePageClient() {
               onClick={async () => {
                 const n = Number(creditLimitInput);
                 if (!Number.isFinite(n) || n < 0) {
-                  setMsg("Invalid credit limit");
+                  setMsg({ text: "Invalid credit limit", error: true });
                   return;
                 }
                 try {
@@ -887,9 +867,12 @@ export function CorporatePageClient() {
                     id: activeCompanyId,
                     creditLimitMinor: Math.round(n),
                   }).unwrap();
-                  setMsg("Credit limit updated");
+                  setMsg({ text: "Credit limit updated" });
                 } catch {
-                  setMsg("Credit update failed (permission or cannot go below used).");
+                  setMsg({
+                    text: "Credit update failed (permission or cannot go below used).",
+                    error: true,
+                  });
                 }
               }}
             >
@@ -977,6 +960,7 @@ export function CorporatePageClient() {
       ) : null}
 
       <MsgLine msg={msg} />
+    </div>
     </div>
   );
 }

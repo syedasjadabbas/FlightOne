@@ -1148,6 +1148,108 @@
   }
 }
 
+/* ── Shared Stat Strip (summary cards row) ───────────────────── */
+.fo-traveller__stat-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 10.5rem), 1fr));
+  gap: 0.85rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.fo-traveller__stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+  padding: 1.5rem;
+  border-radius: 1.5rem;
+  background: #ffffff;
+  border: 0;
+  outline: none;
+  box-shadow: 0 8px 28px rgba(14, 22, 32, 0.06);
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fo-traveller__stat:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 32px rgba(14, 22, 32, 0.09);
+}
+
+.fo-traveller__stat-label {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+  max-width: 100%;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.fo-traveller__stat-label > svg {
+  flex-shrink: 0;
+}
+
+.fo-traveller__stat-label > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fo-traveller__stat-label--sky {
+  color: var(--sky);
+}
+
+.fo-traveller__stat-label--emerald {
+  color: #0f9f55;
+}
+
+.fo-traveller__stat-label--amber {
+  color: #d97706;
+}
+
+.fo-traveller__stat-label--danger {
+  color: var(--danger);
+}
+
+.fo-traveller__stat-value {
+  margin: 0.2rem 0 0;
+  font-family: var(--font-hero);
+  font-size: clamp(1.5rem, 2.8vw, 1.85rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: #0e1620;
+  overflow-wrap: anywhere;
+}
+
+.fo-traveller__stat-value--sm {
+  font-size: clamp(1.05rem, 2vw, 1.25rem);
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.fo-traveller__stat-note {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--ink-soft);
+  overflow-wrap: anywhere;
+}
+
+.fo-traveller__stat--warn .fo-traveller__stat-value {
+  color: #d97706;
+}
+
+.fo-traveller__stat--danger .fo-traveller__stat-value {
+  color: var(--danger);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .fo-traveller__progress > span,
   .fo-traveller__row-link,
@@ -1155,6 +1257,7 @@
   .fo-traveller__toggle,
   .fo-traveller__pager-btn,
   .fo-traveller__select,
+  .fo-traveller__stat,
   .fo-traveller select {
     transition: none;
   }

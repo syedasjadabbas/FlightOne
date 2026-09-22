@@ -2,9 +2,14 @@
 
 import { TravellerSection } from "@/app/components/traveller";
 import { useGetCorporateRewardProgramQuery } from "@/lib/api/rewards.api";
+import { useAuthStore } from "@/store/auth.store";
 
 function CorporateRewardsBlock({ companyId, companyName }: { companyId: string; companyName: string }) {
-  const { data, isError } = useGetCorporateRewardProgramQuery(companyId);
+  const hasHydrated = useAuthStore((s) => s.hasHydrated);
+  const accessToken = useAuthStore((s) => s.accessToken);
+  const { data, isError } = useGetCorporateRewardProgramQuery(companyId, {
+    skip: !hasHydrated || !accessToken,
+  });
   if (isError) return null;
   return (
     <li className="fo-traveller__row">

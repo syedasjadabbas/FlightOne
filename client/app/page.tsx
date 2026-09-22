@@ -5,7 +5,7 @@ import HeroExperienceSequence from '@/components/landing/HeroExperienceSequence'
 /* First-paint: hero stays eager. Nav + Lenis wrapper hydrate as separate
  * chunks so GSAP/Lenis and the lucide-heavy nav stay off the critical path. */
 const SmoothScroll = dynamic(() => import('@/components/landing/SmoothScroll'));
-const Navigation = dynamic(() => import('@/components/landing/Navigation'));
+const SiteNav = dynamic(() => import('@/components/SiteNav').then((m) => ({ default: m.SiteNav })));
 
 /* Below-fold sections: keep SSR for content/SEO, split JS out of the
  * first-paint client bundle so hero + nav hydrate without dragging in
@@ -57,7 +57,7 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <SmoothScroll>
-      <Navigation />
+      <SiteNav transparentOverHero />
       <main style={{ background: '#FFFFFF', width: '100%', maxWidth: '100%', overflowX: 'clip', boxSizing: 'border-box' }}>
         {/* 1. Unified Hero Video Playthrough -> Travel Styles showcase morph */}
         <HeroExperienceSequence />

@@ -404,26 +404,64 @@
   position: absolute;
   inset: 0;
   z-index: 0;
-  background: #0d1a29;
+  background: radial-gradient(ellipse 110% 85% at 82% 15%, #123246 0%, #081522 50%, #030609 100%);
 }
 
+/* Security weave: a guilloché-style diagonal line lattice in place of a stock
+   photo — reads as "encrypted document", not decoration. */
 .fo-vault__canvas-image {
   position: absolute;
   inset: 0;
   background-image:
-    radial-gradient(ellipse at center, rgba(14, 22, 32, 0.1) 0%, rgba(14, 22, 32, 0.8) 100%),
-    url("https://images.unsplash.com/photo-1517479149777-5f3b1511d5ad?auto=format&fit=crop&w=1200&q=80");
-  background-size: cover;
-  background-position: center 45%;
-  filter: contrast(1.08) saturate(1.1);
+    repeating-linear-gradient(
+      52deg,
+      rgba(8, 150, 191, 0.14) 0,
+      rgba(8, 150, 191, 0.14) 1px,
+      transparent 1px,
+      transparent 1.35rem
+    ),
+    repeating-linear-gradient(
+      -52deg,
+      rgba(37, 211, 102, 0.08) 0,
+      rgba(37, 211, 102, 0.08) 1px,
+      transparent 1px,
+      transparent 1.35rem
+    );
+  mask-image: radial-gradient(ellipse 90% 80% at 82% 10%, #000 45%, transparent 100%);
+}
+
+.fo-vault__canvas-scan {
+  position: absolute;
+  inset: -20% 0;
+  z-index: 1;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(8, 150, 191, 0.22) 46%,
+    rgba(8, 150, 191, 0.4) 50%,
+    rgba(8, 150, 191, 0.22) 54%,
+    transparent 100%
+  );
+  animation: fo-vault-scan 4.5s ease-in-out infinite;
+  mix-blend-mode: screen;
+}
+
+@keyframes fo-vault-scan {
+  0%,
+  100% {
+    transform: translateY(-30%);
+  }
+  50% {
+    transform: translateY(30%);
+  }
 }
 
 .fo-vault__canvas-glow {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 80% 20%, rgba(0, 210, 255, 0.25) 0%, transparent 60%),
-    linear-gradient(to top, rgba(10, 20, 30, 0.85) 0%, transparent 65%);
+    radial-gradient(circle at 80% 20%, rgba(0, 210, 255, 0.16) 0%, transparent 60%),
+    linear-gradient(to top, rgba(3, 6, 9, 0.9) 0%, transparent 60%);
   z-index: 1;
 }
 
@@ -749,108 +787,6 @@
   opacity: 1;
 }
 
-/* ── Summary Strip (Deck Style) ────────────────────────────── */
-.fo-vault__summary {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 10.5rem), 1fr));
-  gap: 0.85rem;
-  width: 100%;
-  min-width: 0;
-}
-
-.fo-vault__stat {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  min-width: 0;
-  padding: 1.5rem;
-  border-radius: 1.5rem;
-  background: #ffffff;
-  border: 0;
-  outline: none;
-  box-shadow: 0 8px 28px rgba(14, 22, 32, 0.06);
-  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.fo-vault__stat:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 12px 32px rgba(14, 22, 32, 0.09);
-}
-
-.fo-vault__stat-label {
-  margin: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  min-width: 0;
-  max-width: 100%;
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-}
-
-.fo-vault__stat-label > svg {
-  flex-shrink: 0;
-}
-
-.fo-vault__stat-label > span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.fo-vault__stat-label--sky {
-  color: var(--sky);
-}
-
-.fo-vault__stat-label--emerald {
-  color: #0f9f55;
-}
-
-.fo-vault__stat-label--amber {
-  color: #d97706;
-}
-
-.fo-vault__stat-label--danger {
-  color: var(--danger);
-}
-
-.fo-vault__stat-value {
-  margin: 0.2rem 0 0;
-  font-family: var(--font-hero);
-  font-size: clamp(1.5rem, 2.8vw, 1.85rem);
-  font-weight: 800;
-  letter-spacing: -0.04em;
-  line-height: 1;
-  color: #0e1620;
-  overflow-wrap: anywhere;
-}
-
-.fo-vault__stat-value--sm {
-  font-size: clamp(1.05rem, 2vw, 1.25rem);
-  letter-spacing: -0.02em;
-  line-height: 1.15;
-}
-
-.fo-vault__stat-note {
-  margin: 0;
-  font-size: 0.75rem;
-  line-height: 1.4;
-  color: var(--ink-soft);
-  overflow-wrap: anywhere;
-}
-
-.fo-vault__stat--warn .fo-vault__stat-value {
-  color: #d97706;
-}
-
-.fo-vault__stat--danger .fo-vault__stat-value {
-  color: var(--danger);
-}
-
 /* ── Toolbar & Search ──────────────────────────────────────── */
 .fo-vault__toolbar {
   display: flex;
@@ -1136,9 +1072,9 @@
   padding: 0;
   border-radius: 1.85rem;
   background: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.9);
+  border: 0;
   box-shadow:
-    0 24px 60px -15px rgba(0, 0, 0, 0.35),
+    0 24px 60px -15px rgba(0, 0, 0, 0.4),
     inset 0 1px 0 #ffffff;
   display: flex;
   flex-direction: column;
@@ -1388,9 +1324,9 @@
   .fo-vault__cta-primary,
   .fo-vault__cta-secondary,
   .fo-vault__action-pill,
-  .fo-vault__stat,
   .fo-vault__row,
   .fo-vault__canvas-tag,
+  .fo-vault__canvas-scan,
   .fo-vault__dial-progress,
   .fo-vault__close {
     transition: none !important;

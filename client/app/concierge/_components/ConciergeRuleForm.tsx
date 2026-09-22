@@ -19,6 +19,7 @@ type ConciergeRuleFormProps = {
   creating: boolean;
   disabled: boolean;
   message: string | null;
+  budgetError?: string | null;
   onNameChange: (v: string) => void;
   onTriggerChange: (v: ConciergeTrigger) => void;
   onThresholdChange: (v: string) => void;
@@ -44,6 +45,7 @@ export function ConciergeRuleForm({
   creating,
   disabled,
   message,
+  budgetError,
   onNameChange,
   onTriggerChange,
   onThresholdChange,
@@ -127,6 +129,8 @@ export function ConciergeRuleForm({
               onChange={(e) => onBudgetChange(e.target.value)}
               inputMode="decimal"
               aria-label="Maximum extra amount"
+              error={budgetError ?? undefined}
+              hint={budgetError ? undefined : "Cap on fare difference before a quote is prepared."}
             />
             <Input
               value={currency}
@@ -136,9 +140,6 @@ export function ConciergeRuleForm({
               maxLength={3}
             />
           </div>
-          <p className="fo-traveller__field-hint">
-            Cap on fare difference before a quote is prepared.
-          </p>
         </label>
 
         <div className="sm:col-span-2 flex flex-wrap items-center gap-3 pt-1">

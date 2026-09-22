@@ -24,6 +24,7 @@ import {
   TravellerPagination,
   TravellerSection,
   TravellerState,
+  TravellerStatStrip,
 } from "@/app/components/traveller";
 import {
   useEscalateJourneyMutation,
@@ -304,12 +305,6 @@ export function JourneyPageClient() {
           </div>
         </div>
 
-        <div className="fo-journey__nav-actions">
-          <Link href="/chat" className="fo-journey__action-pill">
-            <MessageCircle size={13} strokeWidth={2.5} />
-            <span>Plan with Ava</span>
-          </Link>
-        </div>
       </div>
 
       {/* ── Master Hero Showcase Section ─────────────────────────────── */}
@@ -367,6 +362,7 @@ export function JourneyPageClient() {
             <div className="fo-journey__canvas-backdrop">
               <div className="fo-journey__canvas-glow" />
               <div className="fo-journey__canvas-image" />
+              <div className="fo-journey__canvas-sweep" aria-hidden />
 
               {/* Dynamic Flight Route SVG Arc */}
               <svg className="fo-journey__canvas-route" viewBox="0 0 500 300" fill="none" preserveAspectRatio="none">
@@ -464,49 +460,46 @@ export function JourneyPageClient() {
         </div>
       </div>
 
-      {/* ── Summary Strip (same deck as /vault) ─────────────────────── */}
+      {/* ── Summary Strip (shared with /vault) ───────────────────────── */}
       {!isLoading && !isError ? (
-        <div className="fo-journey__summary" aria-label="Journey summary">
-          <div className="fo-journey__stat">
-            <p className="fo-journey__stat-label fo-journey__stat-label--sky">
-              <Radio size={12} strokeWidth={2} aria-hidden />
-              <span>Active Now</span>
-            </p>
-            <p className="fo-journey__stat-value">{inProgress.length}</p>
-            <p className="fo-journey__stat-note">In the air or at gate</p>
-          </div>
-
-          <div className="fo-journey__stat">
-            <p className="fo-journey__stat-label fo-journey__stat-label--amber">
-              <Clock size={12} strokeWidth={2} aria-hidden />
-              <span>Upcoming</span>
-            </p>
-            <p className="fo-journey__stat-value">{upcoming.length}</p>
-            <p className="fo-journey__stat-note">Ticketed &amp; ahead</p>
-          </div>
-
-          <div className="fo-journey__stat">
-            <p className="fo-journey__stat-label fo-journey__stat-label--emerald">
-              <ShieldCheck size={12} strokeWidth={2.2} aria-hidden />
-              <span>Completed</span>
-            </p>
-            <p className="fo-journey__stat-value">{completed.length}</p>
-            <p className="fo-journey__stat-note">Safely arrived</p>
-          </div>
-
-          <div className="fo-journey__stat">
-            <p className="fo-journey__stat-label fo-journey__stat-label--sky">
-              <Radio size={12} strokeWidth={2} aria-hidden />
-              <span>Radar Feed</span>
-            </p>
-            <p className="fo-journey__stat-value fo-journey__stat-value--sm">
-              {canPollLive ? "Live" : "Itinerary"}
-            </p>
-            <p className="fo-journey__stat-note">
-              {canPollLive ? "Automated satellite sync" : "Standard timetable"}
-            </p>
-          </div>
-        </div>
+        <TravellerStatStrip
+          aria-label="Journey summary"
+          stats={[
+            {
+              key: "active",
+              icon: <Radio size={12} strokeWidth={2} aria-hidden />,
+              label: "Active Now",
+              value: inProgress.length,
+              note: "In the air or at gate",
+              tone: "sky",
+            },
+            {
+              key: "upcoming",
+              icon: <Clock size={12} strokeWidth={2} aria-hidden />,
+              label: "Upcoming",
+              value: upcoming.length,
+              note: "Ticketed & ahead",
+              tone: "amber",
+            },
+            {
+              key: "completed",
+              icon: <ShieldCheck size={12} strokeWidth={2.2} aria-hidden />,
+              label: "Completed",
+              value: completed.length,
+              note: "Safely arrived",
+              tone: "emerald",
+            },
+            {
+              key: "radar",
+              icon: <Radio size={12} strokeWidth={2} aria-hidden />,
+              label: "Radar Feed",
+              value: canPollLive ? "Live" : "Itinerary",
+              note: canPollLive ? "Automated satellite sync" : "Standard timetable",
+              tone: "sky",
+              small: true,
+            },
+          ]}
+        />
       ) : null}
 
       {/* ── Flash Notifications ──────────────────────────────────────── */}

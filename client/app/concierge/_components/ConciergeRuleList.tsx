@@ -13,6 +13,7 @@ import { Pause, Play } from "lucide-react";
 type ConciergeRuleListProps = {
   rules: ConciergeRule[] | undefined;
   loading: boolean;
+  pendingRuleId: string | null;
   onDisable: (ruleId: string) => void;
   onEnable: (ruleId: string) => void;
 };
@@ -20,6 +21,7 @@ type ConciergeRuleListProps = {
 export function ConciergeRuleList({
   rules,
   loading,
+  pendingRuleId,
   onDisable,
   onEnable,
 }: ConciergeRuleListProps) {
@@ -29,8 +31,9 @@ export function ConciergeRuleList({
       note="Enabled rules evaluate on verified disruptions only."
     >
       {loading ? (
-        <div className="flex justify-center py-8">
+        <div className="flex flex-col items-center gap-2 py-8">
           <Spinner />
+          <p className="m-0 text-sm text-ink-soft">Loading rules…</p>
         </div>
       ) : !rules?.length ? (
         <TravellerState title="No rules yet">
@@ -63,20 +66,22 @@ export function ConciergeRuleList({
                       type="button"
                       size="sm"
                       variant="secondary"
+                      disabled={pendingRuleId === rule.id}
                       icon={<Pause className="h-3.5 w-3.5" aria-hidden />}
                       onClick={() => onDisable(rule.id)}
                     >
-                      Pause
+                      {pendingRuleId === rule.id ? "Pausing…" : "Pause"}
                     </Button>
                   ) : (
                     <Button
                       type="button"
                       size="sm"
                       variant="secondary"
+                      disabled={pendingRuleId === rule.id}
                       icon={<Play className="h-3.5 w-3.5" aria-hidden />}
                       onClick={() => onEnable(rule.id)}
                     >
-                      Enable
+                      {pendingRuleId === rule.id ? "Enabling…" : "Enable"}
                     </Button>
                   )}
                 </div>

@@ -5,12 +5,14 @@ import Link from "next/link";
 import {
   CalendarDays,
   ChevronRight,
+  Lock,
   MapPin,
   MessageCircle,
   Plus,
   Users,
 } from "lucide-react";
-import { Button, Input, SearchableSelect, Spinner } from "@/components/ui";
+import { Button, Input, SearchableSelect, Spinner, buttonClassName } from "@/components/ui";
+import "./mice.css";
 import {
   useCancelMiceEnquiryMutation,
   useCreateMiceEnquiryMutation,
@@ -21,10 +23,8 @@ import {
   type MiceEventType,
 } from "@/lib/api/mice.api";
 import { useAuthStore } from "@/store/auth.store";
-import { MiceGuestGate } from "./_components/MiceGuestGate";
 import { MiceRequirementToggles } from "./_components/MiceRequirementToggles";
 import { MiceStatusChip } from "./_components/MiceStatusChip";
-import { MiceTabs } from "./_components/MiceTabs";
 
 const TYPE_OPTIONS = [
   { value: "CONFERENCE", label: "Conference" },
@@ -120,14 +120,31 @@ export function MicePageClient() {
 
   if (!hasHydrated) {
     return (
-      <div className="flex justify-center py-16" aria-busy="true">
-        <Spinner />
+      <div className="fo-mice__boot" role="status" aria-live="polite">
+        <Spinner label="Loading MICE…" />
+        <p className="fo-mice__boot-label">Loading MICE desk</p>
       </div>
     );
   }
 
   if (!accessToken) {
-    return <MiceGuestGate />;
+    return (
+      <div className="fo-mice__gate">
+        <div className="fo-mice__gate-box">
+          <div className="fo-mice__gate-icon" aria-hidden>
+            <Lock size={22} strokeWidth={2} />
+          </div>
+          <h2 className="fo-mice__gate-title">Authentication Required</h2>
+          <p className="fo-mice__gate-desc">
+            Sign in to submit a meetings, incentives, conferences, or exhibitions enquiry. The desk
+            reviews requests manually — nothing is held or ticketed until a supplier confirms it.
+          </p>
+          <Link href="/login?redirect=%2Fmice" className={buttonClassName({ size: "md" })}>
+            Sign In to FlightOne
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   const eventsList = data || [];
@@ -208,19 +225,42 @@ export function MicePageClient() {
   }
 
   return (
-    <div className="fo-gm-page">
-      <header className="fo-gm-masthead">
-        <div className="fo-gm-masthead__inner">
-          <p className="fo-gm-kicker">MICE &amp; Events</p>
-          <h1 className="fo-gm-title">MICE desk</h1>
-          <p className="fo-gm-lede">
-            Enquiries are reviewed by the MICE desk. This is not automated event ticketing.
-          </p>
+    <div className="fo-mice__master-stage">
+      <div className="fo-mice__nav-rail">
+        <span className="fo-mice__brand-badge">
+          <span className="fo-mice__brand-dot" aria-hidden />
+          MICE
+        </span>
+        <div className="fo-mice__tabs" role="tablist" aria-label="MICE sections">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === "enquiry"}
+            className={`fo-mice__tab${activeTab === "enquiry" ? " fo-mice__tab--active" : ""}`}
+            onClick={() => setActiveTab("enquiry")}
+          >
+            Enquiry
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === "events"}
+            className={`fo-mice__tab${activeTab === "events" ? " fo-mice__tab--active" : ""}`}
+            onClick={() => setActiveTab("events")}
+          >
+            Events ({eventsList.length})
+          </button>
         </div>
+      </div>
+
+      <header className="fo-mice__hero">
+        <h1 className="fo-mice__title">MICE desk</h1>
+        <p className="fo-mice__lede">
+          Enquiries are reviewed by the MICE desk. This is not automated event ticketing.
+        </p>
       </header>
 
-      <MiceTabs active={activeTab} onChange={setActiveTab} eventCount={eventsList.length} />
-
+      <div className="fo-gm-page">
       {activeTab === "enquiry" ? (
         <div className="space-y-5">
           <section className="fo-gm-ledger">
@@ -437,8 +477,9 @@ export function MicePageClient() {
                 Only you can see these. Status is the enquiry lifecycle, not a confirmation.
               </p>
               {enquiriesLoading ? (
-                <div className="flex justify-center py-8" aria-busy="true">
+                <div className="flex flex-col items-center gap-2 py-8" aria-busy="true">
                   <Spinner />
+                  <p className="m-0 text-sm text-ink-soft">Loading enquiries…</p>
                 </div>
               ) : enquiriesError ? (
                 <div className="fo-gm-status">
@@ -568,8 +609,9 @@ export function MicePageClient() {
           </section>
         </div>
       ) : isLoading ? (
-        <div className="flex justify-center py-16" aria-busy="true">
+        <div className="flex flex-col items-center gap-2 py-16" aria-busy="true">
           <Spinner />
+          <p className="m-0 text-sm text-ink-soft">Loading MICE events…</p>
         </div>
       ) : isError ? (
         <div className="fo-gm-status">
@@ -674,6 +716,7 @@ export function MicePageClient() {
           </section>
         </div>
       )}
+    </div>
     </div>
   );
 }

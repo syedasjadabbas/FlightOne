@@ -5,14 +5,14 @@ import Link from "next/link";
 import {
   ArrowRight,
   CheckCircle2,
-  ClipboardList,
-  LogIn,
+  Lock,
   Mail,
   Plane,
   UserPlus,
   Users,
 } from "lucide-react";
-import { Button, Input, SearchableSelect, Spinner } from "@/components/ui";
+import { Button, Input, SearchableSelect, Spinner, buttonClassName } from "@/components/ui";
+import "./groups.css";
 import {
   useAcceptInviteMutation,
   useCancelGroupTravelRequestMutation,
@@ -124,52 +124,33 @@ export function GroupsPageClient() {
   const [createdRequestId, setCreatedRequestId] = useState<string | null>(null);
   const [createdGroupId, setCreatedGroupId] = useState<string | null>(null);
   const [quickMsg, setQuickMsg] = useState<string | null>(null);
+  const [inviteMsg, setInviteMsg] = useState<string | null>(null);
+  const [invitePendingId, setInvitePendingId] = useState<string | null>(null);
 
   if (!hasHydrated) {
     return (
-      <div className="flex justify-center py-16" role="status" aria-label="Loading">
-        <Spinner />
+      <div className="fo-groups__boot" role="status" aria-live="polite">
+        <Spinner label="Loading groups…" />
+        <p className="fo-groups__boot-label">Loading group bookings</p>
       </div>
     );
   }
 
   if (!accessToken) {
     return (
-      <div className="fo-gm-page">
-        <header className="fo-gm-masthead">
-          <div className="fo-gm-masthead__inner">
-            <p className="fo-gm-kicker">Group desk</p>
-            <h1 className="fo-gm-title">Group bookings</h1>
-            <p className="fo-gm-lede">
-              Requests for {MIN_GROUP_PASSENGERS}+ travellers go to the group desk for manual
-              review. No auto-ticketing, no invented fares.
-            </p>
+      <div className="fo-groups__gate">
+        <div className="fo-groups__gate-box">
+          <div className="fo-groups__gate-icon" aria-hidden>
+            <Lock size={22} strokeWidth={2} />
           </div>
-        </header>
-
-        <div className="fo-gm-status">
-          <p className="fo-gm-section__title">Sign in to continue</p>
-          <p className="fo-gm-section__hint">
-            Submit a route enquiry, track desk status, and open a collaboration workspace once a
-            request exists.
+          <h2 className="fo-groups__gate-title">Authentication Required</h2>
+          <p className="fo-groups__gate-desc">
+            Sign in to submit a {MIN_GROUP_PASSENGERS}+ traveller enquiry, track desk status, and
+            open a collaboration workspace. No auto-ticketing, no invented fares.
           </p>
-          <div className="fo-gm-actions">
-            <Link href="/login?redirect=%2Fgroups">
-              <Button size="sm" icon={<LogIn className="fo-gm-icon" aria-hidden />}>
-                Sign in
-              </Button>
-            </Link>
-            <Link href="/signup">
-              <Button size="sm" variant="ghost">
-                Create account
-              </Button>
-            </Link>
-            <Link href="/chat">
-              <Button size="sm" variant="secondary">
-                Ask Ava
-              </Button>
-            </Link>
-          </div>
+          <Link href="/login?redirect=%2Fgroups" className={buttonClassName({ size: "md" })}>
+            Sign In to FlightOne
+          </Link>
         </div>
       </div>
     );
@@ -263,42 +244,44 @@ export function GroupsPageClient() {
   }
 
   return (
-    <div className="fo-gm-page">
-      <header className="fo-gm-masthead">
-        <div className="fo-gm-masthead__inner">
-          <p className="fo-gm-kicker">Group desk</p>
-          <h1 className="fo-gm-title">Group bookings</h1>
-          <p className="fo-gm-lede">
-            Enquiries for {MIN_GROUP_PASSENGERS}+ travellers are reviewed by the group desk. This
-            is not automated group ticketing.
-          </p>
+    <div className="fo-groups__master-stage">
+      <div className="fo-groups__nav-rail">
+        <span className="fo-groups__brand-badge">
+          <span className="fo-groups__brand-dot" aria-hidden />
+          Groups
+        </span>
+        <div className="fo-groups__tabs" role="tablist" aria-label="Group sections">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === "enquiry"}
+            id="fo-gm-tab-enquiry"
+            className={`fo-groups__tab${activeTab === "enquiry" ? " fo-groups__tab--active" : ""}`}
+            onClick={() => setActiveTab("enquiry")}
+          >
+            Request ({MIN_GROUP_PASSENGERS}+)
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === "groups"}
+            id="fo-gm-tab-groups"
+            className={`fo-groups__tab${activeTab === "groups" ? " fo-groups__tab--active" : ""}`}
+            onClick={() => setActiveTab("groups")}
+          >
+            My groups ({active.length})
+          </button>
         </div>
+      </div>
+
+      <header className="fo-groups__hero">
+        <h1 className="fo-groups__title">Group bookings</h1>
+        <p className="fo-groups__lede">
+          Enquiries are reviewed by the group desk. This is not automated group ticketing.
+        </p>
       </header>
 
-      <div className="fo-gm-tabs" role="tablist" aria-label="Group desk sections">
-        <button
-          type="button"
-          role="tab"
-          aria-selected={activeTab === "enquiry"}
-          id="fo-gm-tab-enquiry"
-          className={`fo-gm-tab${activeTab === "enquiry" ? " fo-gm-tab--active" : ""}`}
-          onClick={() => setActiveTab("enquiry")}
-        >
-          <ClipboardList className="fo-gm-tab__icon" aria-hidden />
-          Group request ({MIN_GROUP_PASSENGERS}+)
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={activeTab === "groups"}
-          id="fo-gm-tab-groups"
-          className={`fo-gm-tab${activeTab === "groups" ? " fo-gm-tab--active" : ""}`}
-          onClick={() => setActiveTab("groups")}
-        >
-          <Users className="fo-gm-tab__icon" aria-hidden />
-          My groups ({active.length})
-        </button>
-      </div>
+      <div className="fo-gm-page">
 
       {pending.length > 0 ? (
         <div className="fo-gm-callout" role="region" aria-label="Pending invitations">
@@ -306,6 +289,11 @@ export function GroupsPageClient() {
             <Mail className="fo-gm-icon" aria-hidden />
             Pending invitations
           </p>
+          {inviteMsg ? (
+            <p className="fo-gm-msg" role="status">
+              {inviteMsg}
+            </p>
+          ) : null}
           {pending.map((g) => (
             <div key={g.id} className="fo-gm-invite">
               <div>
@@ -316,23 +304,43 @@ export function GroupsPageClient() {
                 <Button
                   type="button"
                   size="sm"
+                  disabled={invitePendingId === g.id}
                   onClick={async () => {
-                    await acceptInvite(g.id);
-                    void refetch();
+                    setInviteMsg(null);
+                    setInvitePendingId(g.id);
+                    try {
+                      await acceptInvite(g.id).unwrap();
+                      setInviteMsg(`Joined ${g.name}.`);
+                      void refetch();
+                    } catch {
+                      setInviteMsg("Could not accept the invitation. Try again.");
+                    } finally {
+                      setInvitePendingId(null);
+                    }
                   }}
                 >
-                  Accept
+                  {invitePendingId === g.id ? "Accepting…" : "Accept"}
                 </Button>
                 <Button
                   type="button"
                   size="sm"
                   variant="secondary"
+                  disabled={invitePendingId === g.id}
                   onClick={async () => {
-                    await declineInvite(g.id);
-                    void refetch();
+                    setInviteMsg(null);
+                    setInvitePendingId(g.id);
+                    try {
+                      await declineInvite(g.id).unwrap();
+                      setInviteMsg(`Declined invitation to ${g.name}.`);
+                      void refetch();
+                    } catch {
+                      setInviteMsg("Could not decline the invitation. Try again.");
+                    } finally {
+                      setInvitePendingId(null);
+                    }
                   }}
                 >
-                  Decline
+                  {invitePendingId === g.id ? "Declining…" : "Decline"}
                 </Button>
               </div>
             </div>
@@ -593,8 +601,9 @@ export function GroupsPageClient() {
                 Visible only to you. Status is the enquiry lifecycle, not a ticket.
               </p>
               {requestsLoading ? (
-                <div className="flex justify-center py-8" role="status" aria-label="Loading requests">
+                <div className="flex flex-col items-center gap-2 py-8" role="status">
                   <Spinner />
+                  <p className="m-0 text-sm text-ink-soft">Loading requests…</p>
                 </div>
               ) : requestsError ? (
                 <div className="fo-gm-status">
@@ -707,8 +716,9 @@ export function GroupsPageClient() {
       ) : (
         <div className="space-y-5">
           {isLoading ? (
-            <div className="flex justify-center py-16" role="status" aria-label="Loading groups">
+            <div className="flex flex-col items-center gap-2 py-16" role="status">
               <Spinner />
+              <p className="m-0 text-sm text-ink-soft">Loading groups…</p>
             </div>
           ) : isError ? (
             <div className="fo-gm-status">
@@ -834,6 +844,7 @@ export function GroupsPageClient() {
           )}
         </div>
       )}
+    </div>
     </div>
   );
 }

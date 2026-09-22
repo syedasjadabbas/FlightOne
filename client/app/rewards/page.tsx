@@ -2,7 +2,6 @@ import dynamic from "next/dynamic";
 import { RouteChunkFallback } from "@/components/RouteChunkFallback";
 import { SiteNav } from "@/components/SiteNav";
 import { TravellerShell } from "@/app/components/traveller";
-import "./rewards.css";
 
 const RewardsPageClient = dynamic(
   () =>
@@ -21,7 +20,7 @@ export default function RewardsPage() {
   return (
     <main className="fo-stage relative flex min-h-[100dvh] flex-col">
       <SiteNav />
-      <TravellerShell width="narrow">
+      <TravellerShell width="wide">
         <RewardsPageClient />
       </TravellerShell>
     </main>

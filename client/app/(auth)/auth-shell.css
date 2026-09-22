@@ -86,7 +86,7 @@
   position: relative;
   overflow: hidden;
   padding: clamp(1.35rem, 3vw, 2rem) clamp(1.35rem, 3vw, 2rem) clamp(1.15rem, 2.5vw, 1.6rem);
-  border: 1px solid rgba(255, 255, 255, 0.85);
+  border: 0;
   border-radius: 1.5rem;
   background:
     linear-gradient(
@@ -96,26 +96,10 @@
       #ffffff 100%
     );
   box-shadow:
-    0 24px 50px -18px rgba(14, 22, 32, 0.1),
-    0 1px 3px rgba(14, 22, 32, 0.04),
+    0 24px 50px -18px rgba(14, 22, 32, 0.14),
+    0 2px 8px -2px rgba(14, 22, 32, 0.06),
     inset 0 1px 0 #ffffff;
   backdrop-filter: blur(10px);
-}
-
-.fo-auth__panel::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: 3px;
-  border-top-left-radius: 1.5rem;
-  border-bottom-left-radius: 1.5rem;
-  background: linear-gradient(
-    180deg,
-    var(--sky) 0%,
-    color-mix(in oklab, var(--cyan) 65%, var(--navy)) 100%
-  );
 }
 
 .fo-auth__brand {
@@ -187,15 +171,6 @@
     opacity: 1;
     transform: scaleX(1);
   }
-}
-
-.fo-auth__eyebrow {
-  margin: 0 0 0.3rem;
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
 }
 
 .fo-auth__title {

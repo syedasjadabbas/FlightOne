@@ -158,7 +158,6 @@ export function ManagementDashboardClient() {
 
         <header className="fo-dash__hero">
           <div className="fo-dash__hero-copy">
-            <p className="fo-dash__eyebrow">FlightOne reporting</p>
             <h1 className="fo-dash__title">Management dashboard</h1>
             <p className="fo-dash__lede">
               Booking volume, multi-currency revenue, conversion, and supplier fulfillment.
@@ -574,13 +573,13 @@ export function ManagementDashboardClient() {
                   </div>
 
                   <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    <div className="flex flex-col justify-between rounded-[var(--fo-desk-radius)] border border-[var(--fo-desk-line)] bg-[color-mix(in_oklab,var(--bone)_30%,white)] p-4">
+                    <div className="flex flex-col justify-between rounded-2xl bg-[rgba(14,22,32,0.03)] p-4">
                       <div>
                         <div className="flex items-center justify-between">
                           <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--ink-soft)]">
                             Automation rate
                           </span>
-                          <span className="rounded bg-[color-mix(in_oklab,var(--navy)_6%,white)] px-2 py-0.5 text-[10px] font-bold text-[var(--navy)]">
+                          <span className="rounded-full bg-[rgba(14,22,32,0.06)] px-2 py-0.5 text-[10px] font-bold text-[var(--navy)]">
                             Target 90%
                           </span>
                         </div>
@@ -595,7 +594,7 @@ export function ManagementDashboardClient() {
                           autonomous
                         </div>
                       </div>
-                      <div className="mt-4 border-t border-[var(--fo-desk-line)] pt-2">
+                      <div className="mt-4 border-t border-[rgba(14,22,32,0.06)] pt-2">
                         <div className="fo-dash__progress-track">
                           <div
                             className={`fo-dash__progress-fill ${
@@ -615,7 +614,7 @@ export function ManagementDashboardClient() {
                       </div>
                     </div>
 
-                    <div className="flex flex-col justify-between rounded-[var(--fo-desk-radius)] border border-[var(--fo-desk-line)] bg-white p-4">
+                    <div className="flex flex-col justify-between rounded-2xl bg-[rgba(14,22,32,0.03)] p-4">
                       <div>
                         <div className="flex items-center justify-between">
                           <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--ink-soft)]">
@@ -643,7 +642,7 @@ export function ManagementDashboardClient() {
                           </div>
                         ) : null}
                       </div>
-                      <div className="mt-4 space-y-1 border-t border-[var(--fo-desk-line)] pt-2 text-[11px] text-[var(--ink-soft)]">
+                      <div className="mt-4 space-y-1 border-t border-[rgba(14,22,32,0.06)] pt-2 text-[11px] text-[var(--ink-soft)]">
                         <div className="flex justify-between">
                           <span>Repeat bookers</span>
                           <span className="font-mono font-semibold text-[var(--navy)]">
@@ -806,7 +805,7 @@ export function ManagementDashboardClient() {
                   ) : (
                     <div>
                       {creditAggregates ? (
-                        <div className="grid grid-cols-2 gap-3 border-b border-[var(--fo-desk-line)] bg-[color-mix(in_oklab,var(--bone)_40%,white)] px-4 py-3 sm:grid-cols-3">
+                        <div className="grid grid-cols-2 gap-3 border-b border-[rgba(14,22,32,0.06)] bg-[rgba(14,22,32,0.025)] px-4 py-3 sm:grid-cols-3">
                           <div>
                             <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--ink-faint)]">
                               Total limit
@@ -850,7 +849,7 @@ export function ManagementDashboardClient() {
                         </div>
                       ) : null}
 
-                      <div className="flex items-center justify-between border-b border-[var(--fo-desk-line)] bg-[color-mix(in_oklab,var(--electric)_4%,white)] px-4 py-2 text-[10.5px] text-[var(--ink-soft)]">
+                      <div className="flex items-center justify-between border-b border-[rgba(14,22,32,0.06)] bg-[color-mix(in_oklab,var(--electric)_4%,white)] px-4 py-2 text-[10.5px] text-[var(--ink-soft)]">
                         <span>
                           <strong className="text-[var(--navy)]">Settlement:</strong> 15–30 day
                           cycles
@@ -944,9 +943,9 @@ export function ManagementDashboardClient() {
                     <StatusBadge status={data.supplierPerformance.dataStatus} />
                   </div>
 
-                  <div className="flex items-center justify-between border-b border-[var(--fo-desk-line)] bg-[color-mix(in_oklab,var(--bone)_40%,white)] px-4 py-2 text-[10.5px] text-[var(--ink-soft)]">
+                  <div className="flex items-center justify-between border-b border-[rgba(14,22,32,0.06)] bg-[rgba(14,22,32,0.025)] px-4 py-2 text-[10.5px] text-[var(--ink-soft)]">
                     <div className="flex items-center gap-1.5">
-                      <span className="h-1.5 w-1.5 shrink-0 rounded-sm bg-[var(--cyan)]" aria-hidden />
+                      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--cyan)]" aria-hidden />
                       <span>
                         <strong className="text-[var(--navy)]">Gateway SLA:</strong> &lt;15s
                         timeout

@@ -87,7 +87,7 @@ export function OpsEscalationDetailClient({ id }: { id: string }) {
   const [refundCaseId, setRefundCaseId] = useState("");
   const [watchId, setWatchId] = useState("");
   const [snapshotId, setSnapshotId] = useState("");
-  const [localMsg, setLocalMsg] = useState<string | null>(null);
+  const [localMsg, setLocalMsg] = useState<{ text: string; error?: boolean } | null>(null);
 
   if (!hasHydrated) return <CaseLoading />;
   if (!accessToken) return <CaseSignInGate />;
@@ -108,10 +108,6 @@ export function OpsEscalationDetailClient({ id }: { id: string }) {
   const writeBackActions = Array.isArray(data.writeBackActions) ? data.writeBackActions : [];
   const canService = ["ASSIGNED", "IN_PROGRESS"].includes(data.status);
   const queueOpen = !["RESOLVED", "CANCELLED"].includes(data.status);
-  const feedbackWarn =
-    !!localMsg &&
-    (/failed|EXTERNAL_DEPENDENCY|incomplete/i.test(localMsg) ||
-      localMsg.startsWith("Consultant action failed"));
 
   async function runAction(
     actionType:
@@ -132,15 +128,19 @@ export function OpsEscalationDetailClient({ id }: { id: string }) {
       }).unwrap();
       const st = result.action?.status;
       if (st === "EXTERNAL_DEPENDENCY" || result.providerFailure) {
-        setLocalMsg(
-          `Write-back recorded as EXTERNAL_DEPENDENCY — provider/credentials incomplete (${result.action?.error || "see action log"}). Booking/service state only advanced where the underlying op succeeded.`,
-        );
+        setLocalMsg({
+          text: `Write-back recorded as EXTERNAL_DEPENDENCY — provider/credentials incomplete (${result.action?.error || "see action log"}). Booking/service state only advanced where the underlying op succeeded.`,
+          error: true,
+        });
       } else {
-        setLocalMsg(`Write-back ${st}: ${actionType}`);
+        setLocalMsg({ text: `Write-back ${st}: ${actionType}` });
       }
       await refetch();
     } catch {
-      setLocalMsg("Consultant action failed (permissions, assignment, or underlying service).");
+      setLocalMsg({
+        text: "Consultant action failed (permissions, assignment, or underlying service).",
+        error: true,
+      });
     }
   }
 
@@ -187,16 +187,21 @@ export function OpsEscalationDetailClient({ id }: { id: string }) {
   const poolLabel = data.routing?.pool || data.routingPool;
 
   return (
-    <div className="fo-ops-case">
-      <Link href="/ops/escalations" className="fo-ops-case__back">
-        <ArrowLeft className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
-        Queue
-      </Link>
+    <div className="fo-ops fo-ops__master-stage fo-ops-case">
+      <div className="fo-ops__nav-rail">
+        <span className="fo-ops__brand-badge">
+          <span className="fo-ops__brand-dot" aria-hidden />
+          Case
+        </span>
+        <Link href="/ops/escalations" className="fo-ops-case__back">
+          <ArrowLeft className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
+          Queue
+        </Link>
+      </div>
 
-      <header className="fo-ops-case__header">
-        <p className="fo-ops-case__eyebrow">Consultant case</p>
+      <header className="fo-ops__hero fo-ops-case__header">
         <div className="fo-ops-case__title-row">
-          <h1 className="fo-ops-case__title">{labelize(data.trigger)}</h1>
+          <h1 className="fo-ops__title">{labelize(data.trigger)}</h1>
           <div className="fo-ops-case__pills">
             <span className={caseStatusClass(data.status)}>{labelize(data.status)}</span>
             {poolLabel ? <span className="fo-desk__status">{poolLabel}</span> : null}
@@ -226,13 +231,13 @@ export function OpsEscalationDetailClient({ id }: { id: string }) {
                     setLocalMsg(null);
                     try {
                       await claim(id).unwrap();
-                      setLocalMsg("Claimed.");
+                      setLocalMsg({ text: "Claimed." });
                     } catch {
-                      setLocalMsg("Claim failed.");
+                      setLocalMsg({ text: "Claim failed.", error: true });
                     }
                   }}
                 >
-                  Claim
+                  {claimState.isLoading ? "Claiming…" : "Claim"}
                 </Button>
               ) : null}
               {["OPEN", "ASSIGNED"].includes(data.status) ? (
@@ -244,13 +249,13 @@ export function OpsEscalationDetailClient({ id }: { id: string }) {
                     setLocalMsg(null);
                     try {
                       await start(id).unwrap();
-                      setLocalMsg("Marked in progress.");
+                      setLocalMsg({ text: "Marked in progress." });
                     } catch {
-                      setLocalMsg("Start failed.");
+                      setLocalMsg({ text: "Start failed.", error: true });
                     }
                   }}
                 >
-                  Start work
+                  {startState.isLoading ? "Starting…" : "Start work"}
                 </Button>
               ) : null}
               <Button
@@ -261,13 +266,13 @@ export function OpsEscalationDetailClient({ id }: { id: string }) {
                   setLocalMsg(null);
                   try {
                     await cancel({ id, note: note || "Cancelled by consultant" }).unwrap();
-                    setLocalMsg("Cancelled.");
+                    setLocalMsg({ text: "Cancelled." });
                   } catch {
-                    setLocalMsg("Cancel failed.");
+                    setLocalMsg({ text: "Cancel failed.", error: true });
                   }
                 }}
               >
-                Cancel
+                {cancelState.isLoading ? "Cancelling…" : "Cancel"}
               </Button>
             </div>
             <div className="fo-ops-case__fields">
@@ -297,13 +302,13 @@ export function OpsEscalationDetailClient({ id }: { id: string }) {
                         resolutionNote: note.trim(),
                         outcome,
                       }).unwrap();
-                      setLocalMsg("Resolved.");
+                      setLocalMsg({ text: "Resolved." });
                     } catch {
-                      setLocalMsg("Resolve failed.");
+                      setLocalMsg({ text: "Resolve failed.", error: true });
                     }
                   }}
                 >
-                  Resolve
+                  {resolveState.isLoading ? "Resolving…" : "Resolve"}
                 </Button>
               </div>
             </div>
@@ -330,7 +335,7 @@ export function OpsEscalationDetailClient({ id }: { id: string }) {
                   disabled={actionState.isLoading || !data.bookingId}
                   onClick={() => runAction("CANCEL_BOOKING")}
                 >
-                  Cancel booking
+                  {actionState.isLoading ? "Working…" : "Cancel booking"}
                 </Button>
               </div>
               <OpsField
@@ -347,7 +352,7 @@ export function OpsEscalationDetailClient({ id }: { id: string }) {
                   disabled={actionState.isLoading || !canRefund}
                   onClick={() => runAction("REFUND_PROCESS")}
                 >
-                  Process refund
+                  {actionState.isLoading ? "Working…" : "Process refund"}
                 </Button>
                 <Button
                   size="sm"
@@ -355,7 +360,7 @@ export function OpsEscalationDetailClient({ id }: { id: string }) {
                   disabled={actionState.isLoading || !canRefund}
                   onClick={() => runAction("REFUND_REJECT")}
                 >
-                  Reject refund
+                  {actionState.isLoading ? "Working…" : "Reject refund"}
                 </Button>
               </div>
               {!canRefund ? (
@@ -383,7 +388,7 @@ export function OpsEscalationDetailClient({ id }: { id: string }) {
                   disabled={actionState.isLoading || !watchId.trim() || !snapshotId.trim()}
                   onClick={() => runAction("JOURNEY_REBOOK_HANDOFF")}
                 >
-                  Journey rebook handoff
+                  {actionState.isLoading ? "Working…" : "Journey rebook handoff"}
                 </Button>
               </div>
             </div>
@@ -393,10 +398,10 @@ export function OpsEscalationDetailClient({ id }: { id: string }) {
 
       {localMsg ? (
         <p
-          className={`fo-ops-case__feedback${feedbackWarn ? " fo-ops-case__feedback--warn" : ""}`}
+          className={`fo-ops-case__feedback${localMsg.error ? " fo-ops-case__feedback--warn" : ""}`}
           role="status"
         >
-          {localMsg}
+          {localMsg.text}
         </p>
       ) : null}
 
@@ -422,7 +427,7 @@ export function OpsEscalationDetailClient({ id }: { id: string }) {
                       {a.actionType}
                       {a.targetType ? ` · ${a.targetType}` : ""}
                       {a.error ? (
-                        <p className="mt-1 text-[12px] text-[var(--danger)]">{a.error}</p>
+                        <p className="mt-1 text-[12px] text-danger">{a.error}</p>
                       ) : null}
                     </td>
                     <td>

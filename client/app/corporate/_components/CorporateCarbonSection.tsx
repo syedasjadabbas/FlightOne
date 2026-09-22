@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { Leaf } from "lucide-react";
-import { Input } from "@/components/ui";
+import { Button, Input } from "@/components/ui";
+import { useAuthStore } from "@/store/auth.store";
 import { useGetCarbonDashboardQuery, useGetCarbonNudgesQuery } from "@/lib/api/corporate.api";
 import { DeskSectionHead, DeskStatus } from "./DeskSectionHead";
 
@@ -12,14 +13,34 @@ function kg(grams: number | null | undefined) {
 }
 
 export function CorporateCarbonSection({ companyId }: { companyId: string }) {
+  const hasHydrated = useAuthStore((s) => s.hasHydrated);
+  const accessToken = useAuthStore((s) => s.accessToken);
+  const skip = !hasHydrated || !accessToken;
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
-  const { data, isLoading } = useGetCarbonDashboardQuery({
-    companyId,
-    from: from || undefined,
-    to: to || undefined,
-  });
-  const { data: nudges } = useGetCarbonNudgesQuery(companyId);
+  const { data, isLoading, isError, refetch } = useGetCarbonDashboardQuery(
+    {
+      companyId,
+      from: from || undefined,
+      to: to || undefined,
+    },
+    { skip },
+  );
+  const { data: nudges } = useGetCarbonNudgesQuery(companyId, { skip });
+
+  if (isError) {
+    return (
+      <section className="fo-desk__panel fo-desk__stack">
+        <DeskSectionHead icon={Leaf} title="Carbon reporting" />
+        <p className="fo-desk__empty" style={{ padding: 0 }}>
+          Could not load the carbon dashboard.
+        </p>
+        <Button size="sm" variant="secondary" onClick={() => void refetch()}>
+          Retry
+        </Button>
+      </section>
+    );
+  }
 
   return (
     <section className="fo-desk__panel fo-desk__stack">

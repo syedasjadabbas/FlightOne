@@ -139,50 +139,6 @@
   color: var(--sky);
 }
 
-.fo-journey__nav-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.fo-journey__action-pill {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  height: 2.5rem;
-  padding: 0 1.15rem;
-  box-sizing: border-box;
-  border-radius: 9999px;
-  background: #0e1620;
-  color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  font-size: 0.8125rem;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  line-height: 1;
-  cursor: pointer;
-  box-shadow:
-    0 4px 14px rgba(14, 22, 32, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.18);
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-  text-decoration: none;
-}
-
-.fo-journey__action-pill:hover {
-  background: #020615;
-  color: #ffffff;
-  transform: translateY(-1px);
-  box-shadow:
-    0 8px 20px rgba(14, 22, 32, 0.32),
-    inset 0 1px 0 rgba(255, 255, 255, 0.25);
-}
-
-.fo-journey__action-pill:active {
-  transform: scale(0.97);
-  box-shadow: 0 2px 8px rgba(14, 22, 32, 0.18);
-}
-
 /* ── Master Hero Showcase ─────────────────────────────────── */
 .fo-journey__hero-showcase {
   display: grid;
@@ -421,26 +377,59 @@
   position: absolute;
   inset: 0;
   z-index: 0;
-  background: #09131e;
+  background: radial-gradient(ellipse 120% 90% at 50% 108%, #0d2a3a 0%, #061019 55%, #030609 100%);
 }
 
+/* Radar scope: range rings + rotating sweep, in place of a stock photo —
+   the backdrop now visualizes the page's own subject (live tracking). */
 .fo-journey__canvas-image {
   position: absolute;
   inset: 0;
   background-image:
-    radial-gradient(ellipse at center, rgba(14, 22, 32, 0.1) 0%, rgba(14, 22, 32, 0.82) 100%),
-    url("https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=1200&q=80");
-  background-size: cover;
-  background-position: center 40%;
-  filter: contrast(1.1) saturate(1.15);
+    repeating-radial-gradient(
+      circle at 50% 108%,
+      rgba(8, 150, 191, 0.16) 0,
+      rgba(8, 150, 191, 0.16) 1px,
+      transparent 1px,
+      transparent 15%
+    ),
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size:
+    100% 100%,
+    2.25rem 2.25rem,
+    2.25rem 2.25rem;
+  background-position: center;
+  mask-image: radial-gradient(ellipse 85% 75% at 50% 100%, #000 55%, transparent 100%);
+}
+
+.fo-journey__canvas-sweep {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: conic-gradient(
+    from 220deg at 50% 108%,
+    transparent 0deg,
+    rgba(8, 150, 191, 0.32) 18deg,
+    transparent 42deg
+  );
+  animation: fo-journey-sweep 5s linear infinite;
+  mix-blend-mode: screen;
+}
+
+@keyframes fo-journey-sweep {
+  to {
+    transform: rotate(360deg);
+    transform-origin: 50% 108%;
+  }
 }
 
 .fo-journey__canvas-glow {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 75% 25%, rgba(0, 210, 255, 0.25) 0%, transparent 60%),
-    linear-gradient(to top, rgba(10, 20, 30, 0.88) 0%, transparent 65%);
+    radial-gradient(circle at 75% 25%, rgba(0, 210, 255, 0.16) 0%, transparent 60%),
+    linear-gradient(to top, rgba(3, 6, 9, 0.92) 0%, transparent 60%);
   z-index: 1;
 }
 
@@ -716,96 +705,6 @@
   flex-shrink: 0;
   border-radius: 9999px;
   background: #25d366;
-}
-
-/* ── Summary Strip (Deck Style — borderless white cards) ───── */
-.fo-journey__summary {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 10.5rem), 1fr));
-  gap: 0.85rem;
-  width: 100%;
-  min-width: 0;
-}
-
-.fo-journey__stat {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  min-width: 0;
-  padding: 1.5rem;
-  border-radius: 1.5rem;
-  background: #ffffff;
-  border: 0;
-  outline: none;
-  box-shadow: 0 8px 28px rgba(14, 22, 32, 0.06);
-  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.fo-journey__stat:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 12px 32px rgba(14, 22, 32, 0.09);
-}
-
-.fo-journey__stat-label {
-  margin: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  min-width: 0;
-  max-width: 100%;
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-}
-
-.fo-journey__stat-label > svg {
-  flex-shrink: 0;
-}
-
-.fo-journey__stat-label > span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.fo-journey__stat-label--sky {
-  color: var(--sky);
-}
-
-.fo-journey__stat-label--emerald {
-  color: #0f9f55;
-}
-
-.fo-journey__stat-label--amber {
-  color: #d97706;
-}
-
-.fo-journey__stat-value {
-  margin: 0.2rem 0 0;
-  font-family: var(--font-hero);
-  font-size: clamp(1.5rem, 2.8vw, 1.85rem);
-  font-weight: 800;
-  letter-spacing: -0.04em;
-  line-height: 1;
-  color: #0e1620;
-  overflow-wrap: anywhere;
-}
-
-.fo-journey__stat-value--sm {
-  font-size: clamp(1.05rem, 2vw, 1.25rem);
-  letter-spacing: -0.02em;
-  line-height: 1.15;
-}
-
-.fo-journey__stat-note {
-  margin: 0;
-  font-size: 0.75rem;
-  line-height: 1.4;
-  color: var(--ink-soft);
-  overflow-wrap: anywhere;
 }
 
 /* ── Flash Notifications ──────────────────────────────────────── */
@@ -1297,10 +1196,9 @@
   .fo-journey__tab-pill,
   .fo-journey__cta-primary,
   .fo-journey__cta-secondary,
-  .fo-journey__action-pill,
-  .fo-journey__stat,
   .fo-journey__watch,
   .fo-journey__canvas-tag,
+  .fo-journey__canvas-sweep,
   .fo-journey__dial-progress,
   .fo-journey__brand-dot {
     transition: none !important;

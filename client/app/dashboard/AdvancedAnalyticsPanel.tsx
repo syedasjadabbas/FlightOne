@@ -76,7 +76,7 @@ export function AdvancedAnalyticsPanel({
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <div className="rounded-2xl border border-black/8 bg-[color-mix(in_oklab,var(--bone)_40%,white)] p-3">
+        <div className="rounded-2xl bg-[rgba(14,22,32,0.03)] p-4">
           <div className="mb-1.5 flex items-center justify-between gap-2">
             <p className="text-sm font-semibold text-navy">Forecast · volume</p>
             <StatusBadge status={data.forecasts.volume.status} />
@@ -88,7 +88,7 @@ export function AdvancedAnalyticsPanel({
             </p>
           ) : null}
         </div>
-        <div className="rounded-2xl border border-black/8 bg-[color-mix(in_oklab,var(--bone)_40%,white)] p-3">
+        <div className="rounded-2xl bg-[rgba(14,22,32,0.03)] p-4">
           <div className="mb-1.5 flex items-center justify-between gap-2">
             <p className="text-sm font-semibold text-navy">Forecast · spend</p>
             <StatusBadge status={data.forecasts.spend.status} />

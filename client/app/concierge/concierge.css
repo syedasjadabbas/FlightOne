@@ -116,18 +116,6 @@
   max-width: 40rem;
 }
 
-.fo-concierge__eyebrow {
-  margin: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-}
-
 .fo-concierge__title {
   margin: 0;
   font-family: var(--font-hero);
@@ -166,53 +154,6 @@
   border-radius: 1px;
   background: color-mix(in oklab, var(--cyan) 55%, var(--navy));
   vertical-align: middle;
-}
-
-.fo-concierge__summary {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  overflow: hidden;
-  border-radius: 1rem;
-  border: 1px solid color-mix(in oklab, var(--cyan) 14%, var(--line));
-  background: color-mix(in oklab, var(--bone) 35%, white);
-}
-
-.fo-concierge__stat {
-  min-width: 0;
-  padding: 0.85rem 1rem;
-}
-
-.fo-concierge__stat + .fo-concierge__stat {
-  border-left: 1px solid color-mix(in oklab, var(--cyan) 12%, var(--line));
-}
-
-.fo-concierge__stat-label {
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-}
-
-.fo-concierge__stat-value {
-  margin: 0.35rem 0 0;
-  font-family: var(--font-hero);
-  font-size: 1.35rem;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1.1;
-  color: var(--navy);
-  font-variant-numeric: tabular-nums;
-}
-
-.fo-concierge__stat-note {
-  margin: 0.25rem 0 0;
-  font-size: 0.6875rem;
-  color: var(--ink-faint);
 }
 
 .fo-concierge__flash {
@@ -265,8 +206,8 @@
   padding: 2rem 1.75rem;
   border-radius: 1.5rem;
   background: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.95);
-  box-shadow: 0 20px 50px -15px rgba(14, 22, 32, 0.1);
+  border: 0;
+  box-shadow: 0 20px 50px -15px rgba(14, 22, 32, 0.14);
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -308,20 +249,11 @@
 
 .fo-concierge__panel {
   border-radius: 1.15rem;
-  border: 1px solid color-mix(in oklab, var(--cyan) 12%, var(--line));
-  background: rgba(255, 255, 255, 0.9);
-  padding: 1rem 1.1rem;
-  box-shadow: 0 10px 28px -16px rgba(14, 22, 32, 0.08);
-}
-
-@media (max-width: 640px) {
-  .fo-concierge__stat-note {
-    display: none;
-  }
-
-  .fo-concierge__stat {
-    padding: 0.75rem 0.65rem;
-  }
+  border: 0;
+  background: rgba(255, 255, 255, 0.88);
+  padding: 1.15rem 1.25rem;
+  box-shadow: 0 8px 28px rgba(14, 22, 32, 0.06);
+  backdrop-filter: blur(12px);
 }
 
 @media (prefers-reduced-motion: reduce) {

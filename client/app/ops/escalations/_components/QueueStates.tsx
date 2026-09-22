@@ -4,16 +4,16 @@ import { Button } from "@/components/ui";
 
 export function QueueSignInGate() {
   return (
-    <div className="fo-ops-eq__gate" role="status">
-      <div className="fo-ops-eq__gate-icon" aria-hidden>
+    <div className="fo-ops__gate" role="status">
+      <div className="fo-ops__gate-icon" aria-hidden>
         <Lock className="h-4 w-4" strokeWidth={2} />
       </div>
-      <h1 className="fo-ops-eq__gate-title">Staff sign-in required</h1>
-      <p className="fo-ops-eq__gate-body">
+      <h1 className="fo-ops__gate-title">Staff sign-in required</h1>
+      <p className="fo-ops__gate-body">
         The consultant queue is limited to authenticated FlightOne staff. Sign in to view
         priority-ordered handoffs.
       </p>
-      <div className="fo-ops-eq__gate-actions">
+      <div className="fo-ops__gate-actions">
         <Link href="/login?redirect=%2Fops%2Fescalations">
           <Button size="sm">Staff sign in</Button>
         </Link>
@@ -29,16 +29,16 @@ export function QueueSignInGate() {
 
 export function QueuePermissionGate() {
   return (
-    <div className="fo-ops-eq__gate" role="status">
-      <div className="fo-ops-eq__gate-icon fo-ops-eq__gate-icon--warn" aria-hidden>
+    <div className="fo-ops__gate" role="status">
+      <div className="fo-ops__gate-icon fo-ops__gate-icon--warn" aria-hidden>
         <ShieldAlert className="h-4 w-4" strokeWidth={2} />
       </div>
-      <h1 className="fo-ops-eq__gate-title">Permission required</h1>
-      <p className="fo-ops-eq__gate-body">
+      <h1 className="fo-ops__gate-title">Permission required</h1>
+      <p className="fo-ops__gate-body">
         Your account is signed in but lacks <code>ops:escalations:read</code>. Ask an admin to
         grant consultant queue access.
       </p>
-      <div className="fo-ops-eq__gate-actions">
+      <div className="fo-ops__gate-actions">
         <Link href="/escalations">
           <Button size="sm" variant="secondary">
             Your customer escalations
@@ -56,12 +56,10 @@ export function QueuePermissionGate() {
 
 export function QueueEmpty() {
   return (
-    <div className="fo-ops-eq__state" role="status">
-      <div className="fo-ops-eq__state-icon" aria-hidden>
-        <Inbox className="h-4 w-4" strokeWidth={2} />
-      </div>
-      <p className="fo-ops-eq__state-title">No cases in this filter</p>
-      <p className="fo-ops-eq__state-body">
+    <div className="fo-ops__panel-state" role="status">
+      <Inbox className="h-4 w-4 text-ink-faint" strokeWidth={2} aria-hidden />
+      <p className="fo-ops__panel-state-title">No cases in this filter</p>
+      <p className="fo-ops__panel-state-body">
         Try another status or pool, or clear filters to see the full queue.
       </p>
     </div>
@@ -76,14 +74,12 @@ export function QueueError({
   onRetry: () => void;
 }) {
   return (
-    <div className="fo-ops-eq__state" role="alert">
-      <div className="fo-ops-eq__state-icon fo-ops-eq__state-icon--warn" aria-hidden>
-        <ShieldAlert className="h-4 w-4" strokeWidth={2} />
-      </div>
-      <p className="fo-ops-eq__state-title">
+    <div className="fo-ops__panel-state fo-ops__panel-state--error" role="alert">
+      <ShieldAlert className="h-4 w-4 text-danger" strokeWidth={2} aria-hidden />
+      <p className="fo-ops__panel-state-title">
         {unauthorized ? "Not authorized for the ops queue" : "Could not load queue"}
       </p>
-      <p className="fo-ops-eq__state-body">
+      <p className="fo-ops__panel-state-body">
         {unauthorized
           ? "Your session may lack the required permission, or it expired."
           : "Check your connection and try again."}

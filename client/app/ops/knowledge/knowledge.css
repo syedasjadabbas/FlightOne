@@ -2,6 +2,18 @@
  * Ops knowledge desk — local form chrome on fo-desk / fo-ops tokens.
  */
 
+/* Tactile card treatment for non-flush sections (filters / create / retrieve /
+   empty state) — matches the master-stage card family. The docs table stays
+   flush/flat, same as the dense tables elsewhere in ops. */
+.fo-ops .fo-desk__panel:not(.fo-desk__panel--flush) {
+  border-radius: 1.15rem;
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 8px 28px rgba(14, 22, 32, 0.06);
+  backdrop-filter: blur(12px);
+  padding: 1.15rem 1.25rem;
+}
+
 .fo-kb__field {
   display: flex;
   flex-direction: column;

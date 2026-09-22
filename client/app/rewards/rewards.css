@@ -1,3 +1,361 @@
+/* STAGE CHROME — AIVENTURE master-stage (match concierge/profile) */
+
+.fo-rewards__master-stage {
+  position: relative;
+  width: 100%;
+  padding: clamp(0.95rem, 2vw, 1.5rem);
+  border-radius: clamp(1.35rem, 2.6vw, 2rem);
+  background:
+    radial-gradient(ellipse 60% 45% at 88% 10%, rgba(8, 150, 191, 0.08) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 40% at 10% 90%, rgba(37, 211, 102, 0.045) 0%, transparent 55%),
+    linear-gradient(175deg, #e8ece9 0%, #e3e8e5 48%, #eef2ef 100%);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  box-shadow:
+    0 22px 52px -18px rgba(14, 22, 32, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+.fo-rewards__nav-rail {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+}
+
+.fo-rewards__brand-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  color: var(--navy);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow: 0 4px 14px -3px rgba(14, 22, 32, 0.05), inset 0 1px 0 #ffffff;
+  backdrop-filter: blur(8px);
+}
+
+.fo-rewards__brand-dot {
+  display: inline-block;
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 9999px;
+  background: var(--sky);
+  box-shadow: 0 0 0 3px rgba(8, 150, 191, 0.18);
+}
+
+.fo-rewards__tabs {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 8px 20px -6px rgba(14, 22, 32, 0.05), inset 0 1px 0 #ffffff;
+  backdrop-filter: blur(12px);
+}
+
+.fo-rewards__tab {
+  appearance: none;
+  height: 2.25rem;
+  padding: 0 0.9rem;
+  border: 1px solid transparent;
+  border-radius: 9999px;
+  background: transparent;
+  color: var(--ink-soft);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fo-rewards__tab:hover {
+  color: var(--navy);
+  background: rgba(255, 255, 255, 0.92);
+  transform: translateY(-0.5px);
+}
+
+.fo-rewards__tab:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--sky) 45%, transparent);
+  outline-offset: 2px;
+}
+
+.fo-rewards__tab--active {
+  background: #0e1620 !important;
+  color: #ffffff !important;
+  font-weight: 600;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 4px 14px rgba(14, 22, 32, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
+}
+
+.fo-rewards__rail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.fo-rewards__hero {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  max-width: 42rem;
+}
+
+.fo-rewards__title {
+  margin: 0;
+  font-family: var(--font-hero);
+  font-size: clamp(1.55rem, 3.2vw, 2rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.08;
+  color: var(--navy);
+}
+
+.fo-rewards__lede {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+.fo-rewards__boot {
+  display: flex;
+  min-height: 52vh;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 2rem;
+}
+
+.fo-rewards__boot-label {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.fo-rewards__gate {
+  display: flex;
+  min-height: 52vh;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.fo-rewards__gate-box {
+  max-width: 28rem;
+  width: 100%;
+  padding: 2rem 1.75rem;
+  border-radius: 1.5rem;
+  background: #ffffff;
+  border: 0;
+  box-shadow: 0 20px 50px -15px rgba(14, 22, 32, 0.14);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.fo-rewards__gate-icon {
+  display: inline-flex;
+  height: 3.25rem;
+  width: 3.25rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: rgba(8, 150, 191, 0.1);
+  color: var(--sky);
+}
+
+.fo-rewards__gate-icon--warn {
+  background: color-mix(in oklab, var(--danger) 10%, white);
+  color: var(--danger);
+}
+
+.fo-rewards__gate-title {
+  margin: 0;
+  font-family: var(--font-hero);
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #0e1620;
+}
+
+.fo-rewards__gate-desc {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+.fo-rewards__panel {
+  border-radius: clamp(1.25rem, 2.2vw, 1.85rem);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.88);
+  padding: 1.5rem;
+  box-shadow:
+    0 16px 36px -10px rgba(14, 22, 32, 0.06),
+    0 1px 3px rgba(14, 22, 32, 0.02),
+    inset 0 1px 0 #ffffff;
+  backdrop-filter: blur(12px);
+}
+
+/* ── Master Hero Showcase (balance + tier dial) ───────────── */
+.fo-rewards__hero-showcase {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(1.25rem, 2.2vw, 2rem);
+  align-items: stretch;
+  border-radius: clamp(1.25rem, 2.2vw, 1.85rem);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.88);
+  padding: clamp(1.25rem, 2.2vw, 2rem);
+  box-shadow:
+    0 16px 36px -10px rgba(14, 22, 32, 0.06),
+    0 1px 3px rgba(14, 22, 32, 0.02),
+    inset 0 1px 0 #ffffff;
+  backdrop-filter: blur(12px);
+}
+
+@media (min-width: 640px) {
+  .fo-rewards__hero-showcase {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+  }
+}
+
+.fo-rewards__hero-left {
+  min-width: 0;
+}
+
+.fo-rewards__hero-right {
+  display: flex;
+  justify-content: flex-start;
+}
+
+@media (min-width: 640px) {
+  .fo-rewards__hero-right {
+    justify-content: flex-end;
+  }
+}
+
+.fo-rewards__dial-widget {
+  width: 11.5rem;
+  padding: 0.85rem;
+  border-radius: 1.35rem;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(14, 22, 32, 0.06);
+  box-shadow: 0 10px 24px -10px rgba(14, 22, 32, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.fo-rewards__dial-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.fo-rewards__dial-label {
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+}
+
+.fo-rewards__dial-circle-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 5.25rem;
+}
+
+.fo-rewards__dial-svg {
+  width: 5.25rem;
+  height: 5.25rem;
+}
+
+.fo-rewards__dial-track {
+  fill: none;
+  stroke: rgba(14, 22, 32, 0.08);
+}
+
+.fo-rewards__dial-progress {
+  fill: none;
+  stroke: var(--sky);
+  transition: stroke-dashoffset 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fo-rewards__dial-value {
+  position: absolute;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  color: #0e1620;
+}
+
+.fo-rewards__dial-number {
+  font-family: var(--font-hero);
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.fo-rewards__dial-percent {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--sky);
+  margin-left: 1px;
+}
+
+.fo-rewards__dial-caption {
+  margin: 0;
+  font-size: 0.7rem;
+  line-height: 1.35;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+.fo-rewards__dial-caption--faint {
+  color: var(--ink-faint);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fo-rewards__dial-progress {
+    transition: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fo-rewards__tab {
+    transition: none;
+  }
+  .fo-rewards__tab:hover {
+    transform: none;
+  }
+}
+
+/* ── Existing rewards body styles ── */
 /**
  * Rewards — calm loyalty ledger.
  * Navy / bone / cyan / electric blue. No glow, no badge soup.
@@ -7,21 +365,6 @@
   display: flex;
   flex-direction: column;
   gap: clamp(1.35rem, 2.8vw, 2rem);
-}
-
-.fo-rewards__hero {
-  display: grid;
-  gap: 1.15rem;
-  padding: 1.15rem 0 1.25rem;
-  border-bottom: 1px solid color-mix(in oklab, var(--cyan) 14%, var(--line));
-}
-
-@media (min-width: 640px) {
-  .fo-rewards__hero {
-    grid-template-columns: 1fr minmax(12rem, 38%);
-    align-items: end;
-    gap: 1.5rem;
-  }
 }
 
 .fo-rewards__balance-label {
@@ -61,66 +404,6 @@
   font-size: 0.8125rem;
   line-height: 1.45;
   color: var(--ink-soft);
-}
-
-.fo-rewards__tier {
-  padding: 0.85rem 1rem;
-  border: 1px solid color-mix(in oklab, var(--line) 80%, var(--cyan));
-  border-radius: 0.45rem;
-  background: color-mix(in oklab, var(--joby-surface) 72%, white);
-}
-
-.fo-rewards__tier-row {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.75rem;
-}
-
-.fo-rewards__tier-name {
-  margin: 0;
-  font-family: var(--font-hero);
-  font-size: 1.05rem;
-  font-weight: 650;
-  letter-spacing: -0.02em;
-  color: var(--joby-navy);
-}
-
-.fo-rewards__tier-life {
-  margin: 0;
-  font-size: 0.75rem;
-  color: var(--ink-faint);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-.fo-rewards__tier-note {
-  margin: 0.4rem 0 0;
-  font-size: 0.75rem;
-  line-height: 1.4;
-  color: var(--ink-soft);
-}
-
-.fo-rewards__progress {
-  margin-top: 0.65rem;
-  height: 0.3rem;
-  overflow: hidden;
-  border-radius: 1px;
-  background: color-mix(in oklab, var(--cyan) 12%, white);
-}
-
-.fo-rewards__progress > span {
-  display: block;
-  height: 100%;
-  border-radius: 1px;
-  background: var(--cyan);
-  transition: width 0.3s var(--ease-standard);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .fo-rewards__progress > span {
-    transition: none;
-  }
 }
 
 .fo-rewards__steps {

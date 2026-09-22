@@ -1,8 +1,8 @@
+import { Suspense } from "react";
 import dynamic from "next/dynamic";
 import { RouteChunkFallback } from "@/components/RouteChunkFallback";
 import { SiteNav } from "@/components/SiteNav";
 import { TravellerShell } from "@/app/components/traveller";
-import "./refunds.css";
 
 const RefundsPageClient = dynamic(
   () =>
@@ -18,8 +18,10 @@ export default function RefundsPage() {
   return (
     <main className="fo-stage relative flex min-h-[100dvh] flex-col">
       <SiteNav />
-      <TravellerShell>
-        <RefundsPageClient />
+      <TravellerShell width="wide">
+        <Suspense fallback={<RouteChunkFallback label="Loading refunds…" />}>
+          <RefundsPageClient />
+        </Suspense>
       </TravellerShell>
     </main>
   );

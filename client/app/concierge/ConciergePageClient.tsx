@@ -2,12 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import {
-  AlertCircle,
-  Bot,
-  Lock,
-  ShieldOff,
-} from "lucide-react";
+import { AlertCircle, Lock, ShieldOff } from "lucide-react";
 import { Button, Spinner, buttonClassName } from "@/components/ui";
 import { useAuthStore } from "@/store/auth.store";
 import {
@@ -51,6 +46,7 @@ export function ConciergePageClient() {
   const [updateRule] = useUpdateConciergeRuleMutation();
   const [disableRule] = useDisableConciergeRuleMutation();
   const [killSwitch, { isLoading: killing }] = useConciergeKillSwitchMutation();
+  const [pendingRuleId, setPendingRuleId] = useState<string | null>(null);
 
   const [tab, setTab] = useState<Tab>("rules");
   const [name, setName] = useState("Rebook if delayed over 2 hours");
@@ -60,6 +56,7 @@ export function ConciergePageClient() {
   const [budgetMajor, setBudgetMajor] = useState("20000");
   const [currency, setCurrency] = useState("PKR");
   const [flash, setFlash] = useState<Flash | null>(null);
+  const [budgetError, setBudgetError] = useState<string | null>(null);
 
   const summary = useMemo(() => {
     const items = rules?.items ?? [];
@@ -130,10 +127,11 @@ export function ConciergePageClient() {
   async function onCreate(e: React.FormEvent) {
     e.preventDefault();
     setFlash(null);
+    setBudgetError(null);
     const hours = Number(thresholdHours);
     const major = Number(budgetMajor);
     if (!Number.isFinite(major) || major < 0) {
-      setFlash({ text: "Enter a valid authorised extra budget.", warn: true });
+      setBudgetError("Enter a valid authorised extra budget.");
       return;
     }
     try {
@@ -208,10 +206,6 @@ export function ConciergePageClient() {
       </div>
 
       <header className="fo-concierge__hero">
-        <p className="fo-concierge__eyebrow">
-          <Bot size={13} strokeWidth={2.2} aria-hidden />
-          Pre-authorised disruption rules
-        </p>
         <h1 className="fo-concierge__title">Travel Concierge</h1>
         <p className="fo-concierge__lede">
           You set the conditions. FlightOne prepares quotes and alerts — never silent tickets,
@@ -253,11 +247,15 @@ export function ConciergePageClient() {
             creating={creating}
             disabled={skip}
             message={null}
+            budgetError={budgetError}
             onNameChange={setName}
             onTriggerChange={setTrigger}
             onThresholdChange={setThresholdHours}
             onActionChange={setAction}
-            onBudgetChange={setBudgetMajor}
+            onBudgetChange={(v) => {
+              setBudgetError(null);
+              setBudgetMajor(v);
+            }}
             onCurrencyChange={setCurrency}
             onSubmit={onCreate}
           />
@@ -265,20 +263,31 @@ export function ConciergePageClient() {
           <ConciergeRuleList
             rules={rules?.items}
             loading={isLoading}
+            pendingRuleId={pendingRuleId}
             onDisable={async (ruleId) => {
+              setFlash(null);
+              setPendingRuleId(ruleId);
               try {
                 await disableRule(ruleId).unwrap();
+                setFlash({ text: "Rule paused." });
                 void refetch();
               } catch (err) {
                 showError(err, "That request could not be completed. Nothing was booked.");
+              } finally {
+                setPendingRuleId(null);
               }
             }}
             onEnable={async (ruleId) => {
+              setFlash(null);
+              setPendingRuleId(ruleId);
               try {
                 await updateRule({ ruleId, body: { enabled: true } }).unwrap();
+                setFlash({ text: "Rule enabled." });
                 void refetch();
               } catch (err) {
                 showError(err, "That request could not be completed. Nothing was booked.");
+              } finally {
+                setPendingRuleId(null);
               }
             }}
           />

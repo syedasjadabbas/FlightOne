@@ -2,11 +2,10 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { MessageCircle } from "lucide-react";
-import { Button, Spinner } from "@/components/ui";
+import { AlertCircle, Lock, MessageCircle } from "lucide-react";
+import { Button, Spinner, buttonClassName } from "@/components/ui";
 import { PermissionGate } from "@/components/PermissionGate";
 import {
-  TravellerPageHeader,
   TravellerPagination,
   TravellerState,
   TRAVELLER_PAGE_SIZE,
@@ -27,6 +26,7 @@ import {
   SupportQuickLinks,
   type EscalationsTab,
 } from "./_components";
+import "./escalations.css";
 
 export function EscalationsPageClient() {
   const hasHydrated = useAuthStore((s) => s.hasHydrated);
@@ -95,35 +95,38 @@ export function EscalationsPageClient() {
 
   if (!hasHydrated) {
     return (
-      <div className="flex justify-center py-16">
-        <Spinner />
+      <div className="fo-escalations__boot" role="status" aria-live="polite">
+        <Spinner label="Loading support…" />
+        <p className="fo-escalations__boot-label">Loading support</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <TravellerPageHeader
-        title="Support"
-        lede="Answers first. Open a consultant case when you need a human — or track ones already in flight."
-        actions={
-          <div className="flex flex-wrap gap-2">
-            <Link href="/chat">
-              <Button variant="secondary" size="sm" className="inline-flex items-center gap-1.5">
-                <MessageCircle size={14} aria-hidden />
-                Chat with Ava
+    <div className="fo-escalations__master-stage">
+      <div className="fo-escalations__nav-rail">
+        <span className="fo-escalations__brand-badge">
+          <span className="fo-escalations__brand-dot" aria-hidden />
+          Support
+        </span>
+        <div className="fo-escalations__rail-actions">
+          <PermissionGate anyOf={["ops:escalations:read"]}>
+            <Link href="/ops/escalations">
+              <Button variant="ghost" size="sm">
+                Consultant queue
               </Button>
             </Link>
-            <PermissionGate anyOf={["ops:escalations:read"]}>
-              <Link href="/ops/escalations">
-                <Button variant="ghost" size="sm">
-                  Consultant queue
-                </Button>
-              </Link>
-            </PermissionGate>
-          </div>
-        }
-      />
+          </PermissionGate>
+        </div>
+      </div>
+
+      <header className="fo-escalations__hero">
+        <h1 className="fo-escalations__title">Support</h1>
+        <p className="fo-escalations__lede">
+          Answers first. Open a consultant case when you need a human — or track ones already in
+          flight.
+        </p>
+      </header>
 
       <SupportQuickLinks />
 
@@ -139,6 +142,7 @@ export function EscalationsPageClient() {
           role="tabpanel"
           id="escalations-panel-knowledge"
           aria-labelledby="escalations-tab-knowledge"
+          className="fo-escalations__panel"
         >
           <KnowledgeBase
             categories={filteredCategories}
@@ -155,49 +159,86 @@ export function EscalationsPageClient() {
           role="tabpanel"
           id="escalations-panel-ticket"
           aria-labelledby="escalations-tab-ticket"
-          className="max-w-2xl"
+          className="fo-escalations__panel max-w-2xl"
         >
-          <EscalationTicketForm
-            signedIn={signedIn}
-            trigger={ticketTrigger}
-            onTriggerChange={setTicketTrigger}
-            bookingId={ticketBookingId}
-            onBookingIdChange={setTicketBookingId}
-            note={ticketNote}
-            onNoteChange={setTicketNote}
-            submitting={submittingTicket}
-            error={ticketError}
-            success={ticketSuccess}
-            onSubmit={handleTicketSubmit}
-            onViewCases={() => setActiveTab("mycases")}
-            onResetSuccess={() => setTicketSuccess(null)}
-          />
+          {!signedIn ? (
+            <div className="flex flex-col items-center gap-3 py-6 text-center">
+              <div className="fo-escalations__gate-icon" aria-hidden>
+                <Lock size={22} strokeWidth={2} />
+              </div>
+              <h2 className="fo-escalations__gate-title">Authentication Required</h2>
+              <p className="fo-escalations__gate-desc max-w-sm">
+                Sign in to open a consultant case so we can attach it to your account and bookings.
+              </p>
+              <Link
+                href="/login?redirect=%2Fescalations"
+                className={buttonClassName({ size: "md" })}
+              >
+                Sign In to FlightOne
+              </Link>
+            </div>
+          ) : (
+            <EscalationTicketForm
+              signedIn={signedIn}
+              trigger={ticketTrigger}
+              onTriggerChange={setTicketTrigger}
+              bookingId={ticketBookingId}
+              onBookingIdChange={setTicketBookingId}
+              note={ticketNote}
+              onNoteChange={setTicketNote}
+              submitting={submittingTicket}
+              error={ticketError}
+              success={ticketSuccess}
+              onSubmit={handleTicketSubmit}
+              onViewCases={() => setActiveTab("mycases")}
+              onResetSuccess={() => setTicketSuccess(null)}
+            />
+          )}
         </div>
       ) : null}
 
-      {activeTab === "mycases" && signedIn ? (
+      {activeTab === "mycases" ? (
         <div
           role="tabpanel"
           id="escalations-panel-mycases"
           aria-labelledby="escalations-tab-mycases"
           className="space-y-4"
         >
-          {isLoading ? (
-            <div className="flex justify-center py-12">
-              <Spinner />
+          {!signedIn ? (
+            <div className="fo-escalations__gate" style={{ minHeight: "auto" }}>
+              <div className="fo-escalations__gate-box">
+                <div className="fo-escalations__gate-icon" aria-hidden>
+                  <Lock size={22} strokeWidth={2} />
+                </div>
+                <h2 className="fo-escalations__gate-title">Authentication Required</h2>
+                <p className="fo-escalations__gate-desc">
+                  Sign in to view support cases tied to your FlightOne account.
+                </p>
+                <Link
+                  href="/login?redirect=%2Fescalations"
+                  className={buttonClassName({ size: "md" })}
+                >
+                  Sign In to FlightOne
+                </Link>
+              </div>
+            </div>
+          ) : isLoading ? (
+            <div className="fo-escalations__boot" style={{ minHeight: "24vh" }}>
+              <Spinner label="Loading cases…" />
             </div>
           ) : isError ? (
-            <TravellerState
-              variant="error"
-              title="Cases unavailable"
-              action={
-                <Button size="sm" onClick={() => refetch()}>
-                  Retry
+            <div className="fo-escalations__gate" style={{ minHeight: "auto" }}>
+              <div className="fo-escalations__gate-box">
+                <div className="fo-escalations__gate-icon fo-escalations__gate-icon--warn" aria-hidden>
+                  <AlertCircle size={22} strokeWidth={2} />
+                </div>
+                <h2 className="fo-escalations__gate-title">Cases Unavailable</h2>
+                <p className="fo-escalations__gate-desc">Could not load your support cases.</p>
+                <Button size="md" variant="secondary" onClick={() => void refetch()}>
+                  Retry Connection
                 </Button>
-              }
-            >
-              Could not load your support cases.
-            </TravellerState>
+              </div>
+            </div>
           ) : !items.length ? (
             <TravellerState
               title="No cases yet"

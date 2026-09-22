@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import { BarChart3 } from "lucide-react";
+import { useAuthStore } from "@/store/auth.store";
 import { useGetCompanyAnalyticsQuery } from "@/lib/api/corporate.api";
 import { AdvancedAnalyticsPanel } from "@/app/dashboard/AdvancedAnalyticsPanel";
 import { DeskSectionHead } from "./DeskSectionHead";
@@ -13,6 +14,9 @@ export function CorporateAnalyticsSection({
   companyId: string;
   canRead: boolean;
 }) {
+  const hasHydrated = useAuthStore((s) => s.hasHydrated);
+  const accessToken = useAuthStore((s) => s.accessToken);
+  const skip = !hasHydrated || !accessToken || !canRead;
   const range = useMemo(() => {
     const to = new Date();
     const from = new Date(to);
@@ -21,7 +25,7 @@ export function CorporateAnalyticsSection({
   }, []);
   const { data, isLoading, isError } = useGetCompanyAnalyticsQuery(
     { companyId, from: range.from, to: range.to },
-    { skip: !canRead },
+    { skip },
   );
 
   if (!canRead) {

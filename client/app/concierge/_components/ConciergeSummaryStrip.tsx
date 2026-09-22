@@ -1,4 +1,5 @@
 import { Activity, BellOff, ShieldCheck } from "lucide-react";
+import { TravellerStatStrip } from "@/app/components/traveller";
 
 type ConciergeSummaryStripProps = {
   activeCount: number;
@@ -11,39 +12,35 @@ export function ConciergeSummaryStrip({
   pausedCount,
   activityCount,
 }: ConciergeSummaryStripProps) {
-  const cells = [
-    {
-      label: "Active",
-      value: activeCount,
-      icon: ShieldCheck,
-      note: "Watching your trips",
-    },
-    {
-      label: "Paused",
-      value: pausedCount,
-      icon: BellOff,
-      note: "Will not fire",
-    },
-    {
-      label: "Activity",
-      value: activityCount,
-      icon: Activity,
-      note: "Recent runs",
-    },
-  ] as const;
-
   return (
-    <div className="fo-concierge__summary" aria-label="Concierge summary">
-      {cells.map(({ label, value, icon: Icon, note }) => (
-        <div key={label} className="fo-concierge__stat">
-          <p className="fo-concierge__stat-label">
-            <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden />
-            {label}
-          </p>
-          <p className="fo-concierge__stat-value">{value}</p>
-          <p className="fo-concierge__stat-note">{note}</p>
-        </div>
-      ))}
-    </div>
+    <TravellerStatStrip
+      aria-label="Concierge summary"
+      stats={[
+        {
+          key: "active",
+          icon: <ShieldCheck size={12} strokeWidth={2.2} aria-hidden />,
+          label: "Active",
+          value: activeCount,
+          note: "Watching your trips",
+          tone: "emerald",
+        },
+        {
+          key: "paused",
+          icon: <BellOff size={12} strokeWidth={2} aria-hidden />,
+          label: "Paused",
+          value: pausedCount,
+          note: "Will not fire",
+          tone: "amber",
+        },
+        {
+          key: "activity",
+          icon: <Activity size={12} strokeWidth={2} aria-hidden />,
+          label: "Activity",
+          value: activityCount,
+          note: "Recent runs",
+          tone: "sky",
+        },
+      ]}
+    />
   );
 }

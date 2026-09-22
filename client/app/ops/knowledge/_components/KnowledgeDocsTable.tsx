@@ -69,8 +69,8 @@ export function KnowledgeDocsTable({
             {paginateItems(items, page, pageSize).map((d) => (
               <tr key={d.id}>
                 <td>
-                  <span className="font-medium text-[var(--navy)]">{d.title}</span>{" "}
-                  <span className="fo-desk__mono text-[var(--ink-faint)]">v{d.version}</span>
+                  <span className="font-medium text-navy">{d.title}</span>{" "}
+                  <span className="fo-desk__mono text-ink-faint">v{d.version}</span>
                 </td>
                 <td>{humanizeToken(d.category)}</td>
                 <td>

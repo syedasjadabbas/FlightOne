@@ -31,7 +31,6 @@ export function OpsHubHeader() {
         </nav>
       </div>
       <header className="fo-ops__hero">
-        <p className="fo-ops__eyebrow">FlightOne staff desk</p>
         <h1 className="fo-ops__title">Operations</h1>
         <p className="fo-ops__lede">
           Integration health, outbox, finance visibility, commissions, reconciliation, and audit.

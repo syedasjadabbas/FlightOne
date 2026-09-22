@@ -515,6 +515,7 @@ export function VaultPageClient() {
             <div className="fo-vault__canvas-backdrop">
               <div className="fo-vault__canvas-glow" />
               <div className="fo-vault__canvas-image" />
+              <div className="fo-vault__canvas-scan" aria-hidden />
 
               {/* Security Network / Cryptographic SVG Arcs */}
               <svg className="fo-vault__canvas-route" viewBox="0 0 500 300" fill="none" preserveAspectRatio="none">

@@ -1,7 +1,7 @@
 import dynamic from "next/dynamic";
 import { RouteChunkFallback } from "@/components/RouteChunkFallback";
-import { DeskShell } from "@/components/DeskShell";
 import { SiteNav } from "@/components/SiteNav";
+import { TravellerShell } from "@/app/components/traveller";
 
 const MicePageClient = dynamic(
   () =>
@@ -19,11 +19,11 @@ export const metadata = {
 
 export default function MicePage() {
   return (
-    <main className="fo-stage fo-stage--desk relative flex min-h-[100dvh] flex-col">
+    <main className="fo-stage relative flex min-h-[100dvh] flex-col">
       <SiteNav />
-      <DeskShell canvas canvasWide>
+      <TravellerShell width="wide">
         <MicePageClient />
-      </DeskShell>
+      </TravellerShell>
     </main>
   );
 }
