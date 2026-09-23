@@ -306,6 +306,14 @@ export function VaultPageClient() {
   }
 
   async function onDownload(doc: VaultDocument) {
+    // For platform-issued tickets with a bookingId, open the checkout-style
+    // HTML ticket in a new tab (same design as post-checkout TicketDocumentView).
+    // The user can Ctrl+P / Save as PDF to get a beautiful ticket.
+    if (doc.type === "TICKET" && doc.bookingId) {
+      window.open(`/checkout/${doc.bookingId}/ticket`, "_blank", "noopener");
+      return;
+    }
+
     if (!doc.hasBinary) return;
     setBusyId(doc.id);
     setBusyAction("download");
@@ -330,6 +338,7 @@ export function VaultPageClient() {
       setBusyAction(null);
     }
   }
+
 
   async function onShare(doc: VaultDocument) {
     setBusyId(doc.id);

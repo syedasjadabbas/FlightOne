@@ -250,7 +250,7 @@ export function TicketDocumentView({ doc }: { doc: TicketDocument }) {
             <div className="fo-ticket__brand-headline">
               <span className="fo-ticket__brand-flight">FLIGHT</span>
               <span className="fo-ticket__brand-one">ONE</span>
-              <span className="fo-ticket__brand-tos">AI-TOS</span>
+
             </div>
             <p className="fo-ticket__brand-sub">
               Electronic Passenger Ticket &amp; Baggage Check · IATA Accredited
