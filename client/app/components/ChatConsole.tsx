@@ -34,7 +34,6 @@ import {
 import { ChatSidebar } from "./chat/ChatSidebar";
 import { GuestBanner } from "./GuestBanner";
 import { VoiceMicButton } from "./voice/VoiceMicButton";
-import { PredictiveSuggestions } from "./ask-ai/PredictiveSuggestions";
 
 /** Ava — full chat workspace + full results workspace (state preserved). */
 export function ChatConsole() {
@@ -418,7 +417,6 @@ export function ChatConsole() {
                   onTranscript={(text) => chat.send(text)}
                 />
               }
-              heroAccessory={<PredictiveSuggestions onSearch={(text) => chat.send(text)} />}
             />
           }
         />

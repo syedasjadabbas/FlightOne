@@ -875,7 +875,8 @@
   margin: 0.35rem 0 0;
   font-size: 0.9375rem;
   font-weight: 700;
-  color: var(--sky);
+  /* --sky is 3.43:1 on white (fails AA for text); --sky-solid is 4.78:1. */
+  color: var(--sky-solid);
 }
 
 .fo-journey__day {
@@ -960,7 +961,8 @@
 
 .fo-journey__leg {
   display: flex;
-  align-items: center;
+  /* Legs now carry several lines (route, facts, sectors) — pin the icon to the top. */
+  align-items: flex-start;
   gap: 0.65rem;
   font-size: 0.8125rem;
   line-height: 1.45;
@@ -1204,5 +1206,145 @@
     transition: none !important;
     animation: none !important;
     transform: none !important;
+  }
+}
+
+/* ── Itinerary detail (journey.details.js) ─────────────────── */
+.fo-journey__carrier {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.fo-journey__stops {
+  margin: -0.25rem 0 0;
+  font-family: var(--font-hero);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #0e1620;
+}
+
+.fo-journey__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fo-journey__facts li {
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--sky) 8%, #ffffff);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #0e1620;
+}
+
+.fo-journey__leg-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.fo-journey__leg-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.2rem 0.5rem;
+  margin: 0;
+}
+
+.fo-journey__leg-label {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sky-solid);
+}
+
+.fo-journey__leg-route {
+  font-weight: 700;
+  color: #0e1620;
+}
+
+.fo-journey__leg-cities,
+.fo-journey__leg-facts {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+}
+
+.fo-journey__ref {
+  margin-left: 0.4rem;
+  padding: 0.05rem 0.4rem;
+  border-radius: 0.3rem;
+  background: rgba(14, 22, 32, 0.05);
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.6875rem;
+  color: var(--ink-soft);
+}
+
+.fo-journey__segs {
+  margin: 0.4rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.fo-journey__seg-main {
+  display: grid;
+  grid-template-columns: 4.5rem minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 0.6rem;
+  padding: 0.45rem 0.65rem;
+  border-radius: 0.65rem;
+  background: color-mix(in oklab, var(--sky) 5%, #ffffff);
+  font-size: 0.8125rem;
+}
+
+.fo-journey__seg-flight {
+  font-weight: 700;
+  color: #0e1620;
+}
+
+.fo-journey__seg-times {
+  color: var(--ink-soft);
+}
+
+.fo-journey__seg-times strong {
+  color: #0e1620;
+  font-weight: 700;
+}
+
+.fo-journey__seg-nextday {
+  margin-left: 0.1rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  color: var(--sky-solid);
+}
+
+.fo-journey__seg-meta {
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.fo-journey__seg-layover {
+  margin: 0.2rem 0 0 0.65rem;
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+}
+
+@media (max-width: 40rem) {
+  .fo-journey__seg-main {
+    grid-template-columns: 1fr;
+    gap: 0.15rem;
   }
 }

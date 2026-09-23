@@ -9,6 +9,7 @@
  * sector.
  */
 import type { ItinerarySummary, OfferCard } from "@/lib/consultant/types";
+import type { FlightSegment } from "@/lib/inventory/types";
 
 export type TripLegRef = {
   originCode: string;
@@ -25,6 +26,10 @@ export type TripLegRef = {
   priceMinor?: number;
   currency?: string;
   supplierOfferSnapshotId?: string;
+  stops?: number;
+  // Every leg's sectors, so the journey card and ticket are not limited to
+  // the first leg (the only one whose sectors live on the booking snapshot).
+  segments?: FlightSegment[];
 };
 
 export function offerCardFromItinerary(itinerary: ItinerarySummary): OfferCard | null {
@@ -56,6 +61,8 @@ export function offerCardFromItinerary(itinerary: ItinerarySummary): OfferCard |
     priceMinor: l.priceMinor,
     currency: l.currency ?? itinerary.currency,
     supplierOfferSnapshotId: l.supplierOfferSnapshotId || snapshotId,
+    stops: l.stops,
+    ...(l.segments?.length ? { segments: l.segments } : {}),
   }));
 
   return {

@@ -40,6 +40,7 @@ import {
   maybeHotelCheckinReminder,
   maybeTransferReminder,
 } from "./journey.ancillaryChanges.js";
+import { buildJourneyItinerary, buildJourneySummary } from "./journey.details.js";
 
 const MAX_PAGE_SIZE = 100;
 
@@ -60,41 +61,15 @@ const BOOKING_TRAVELLER_SELECT = {
   currency: true,
   externalRef: true,
   metadata: true,
+  // Flown sectors live here, not in metadata — without it the journey card
+  // had no flight numbers or times. Read by buildJourneyItinerary only; the
+  // raw refs are never spread into the public payload.
+  supplierBookingRefs: true,
+  amountMinor: true,
+  supplierCode: true,
 };
 
 export { classifyJourneyPhase };
-
-function itineraryFromStored({ watch, booking, fields, meta }) {
-  const items = [];
-  const origin = fields.origin || meta.origin || null;
-  const destination = fields.destination || meta.destination || null;
-  if (watch.flightNumber || origin || destination || booking?.product === "FLIGHT") {
-    items.push({
-      kind: "FLIGHT",
-      flightNumber: watch.flightNumber || null,
-      origin,
-      destination,
-      departAt: watch.departAt || fields.departAt || null,
-      arriveAt: watch.arriveAt || fields.arriveAt || null,
-    });
-  }
-  if (fields.checkInDate || fields.confirmationRef || booking?.product === "HOTEL") {
-    items.push({
-      kind: "HOTEL",
-      checkInDate: fields.checkInDate || meta.checkInDate || null,
-      checkOutDate: fields.checkOutDate || null,
-      confirmationRef: fields.confirmationRef || meta.confirmationRef || null,
-    });
-  }
-  if (fields.transferRef || fields.transferPickupAt) {
-    items.push({
-      kind: "TRANSFER",
-      transferRef: fields.transferRef || null,
-      pickupAt: fields.transferPickupAt || null,
-    });
-  }
-  return items;
-}
 
 function liveFlightFromMeta(meta) {
   const lastPoll = asMeta(meta.lastPoll);
@@ -120,6 +95,7 @@ function liveFlightFromMeta(meta) {
 function toPublicJourney(watch, { booking = null, events = [] } = {}) {
   const meta = asMeta(watch.metadata);
   const fields = booking ? extractJourneyFieldsFromBooking(booking) : {};
+  const itinerary = buildJourneyItinerary({ watch, booking, fields, meta });
   const disruptions = events.filter(
     (e) => DISRUPTION_EVENT_TYPES.has(e.type) || (typeof e.severity === "number" && e.severity >= 2),
   );
@@ -134,7 +110,8 @@ function toPublicJourney(watch, { booking = null, events = [] } = {}) {
           ticketRef: booking.externalRef || null,
         }
       : null,
-    itinerary: itineraryFromStored({ watch, booking, fields, meta }),
+    itinerary,
+    summary: buildJourneySummary({ booking, itinerary }),
     events,
     disruptions,
     liveFlight: liveFlightFromMeta(meta),

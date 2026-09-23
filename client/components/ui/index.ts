@@ -20,3 +20,6 @@ export { Pagination, paginateItems, pageCountFor } from "./Pagination";
 export type { PaginationProps } from "./Pagination";
 
 export { QrCode } from "./QrCode";
+
+export { BrandedLoader } from "../BrandedLoader";
+export type { BrandedLoaderProps } from "../BrandedLoader";

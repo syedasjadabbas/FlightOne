@@ -14,7 +14,7 @@ import {
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
-import { Button, Input, Spinner } from "@/components/ui";
+import { Button, Input, Spinner, BrandedLoader } from "@/components/ui";
 import { useAuthStore } from "@/store/auth.store";
 import {
   useCreateDocumentMutation,
@@ -407,14 +407,11 @@ export function VaultPageClient() {
 
   if (!hasHydrated || (accessToken && (isLoading || capLoading))) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center py-24">
-        <div className="flex flex-col items-center gap-3">
-          <Spinner label="Opening encrypted Travel Vault…" />
-          <p className="text-xs tracking-wider uppercase text-ink-faint">
-            Decrypting credentials &amp; certificates
-          </p>
-        </div>
-      </div>
+      <BrandedLoader
+        title="Opening Encrypted Document Vault…"
+        subtitle="Authenticating biometric credentials, passport scans & secure certificates."
+        badge="AES-256 ENCRYPTED"
+      />
     );
   }
 

@@ -210,6 +210,16 @@ const BOOKINGS = [
     flightNumber: null,
     departOffsetDays: 21,
     supplierCode: "RATEHAWK",
+    // Stay detail the journey card renders. Check-out is derived from the
+    // check-in below (departOffsetDays + nights) so the two never disagree.
+    hotel: {
+      name: "Rove Downtown Dubai",
+      city: "Dubai",
+      cityCode: "DXB",
+      nights: 3,
+      roomType: "Rover Room, 1 King",
+      boardType: "Breakfast included",
+    },
   },
   {
     key: "lhe_yyz_cancelled",
@@ -253,6 +263,18 @@ async function seedBookings(userId) {
         carrier: b.carrier,
         flightNumber: b.flightNumber,
         departAt: departAt.toISOString(),
+        ...(b.hotel
+          ? {
+              hotel: {
+                ...b.hotel,
+                checkInDate: departAt.toISOString().slice(0, 10),
+                checkOutDate: days(b.departOffsetDays + b.hotel.nights)
+                  .toISOString()
+                  .slice(0, 10),
+                confirmationRef: b.externalRef,
+              },
+            }
+          : {}),
       },
     };
     await prisma.booking.upsert({

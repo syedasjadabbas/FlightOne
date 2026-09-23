@@ -1,5 +1,5 @@
 import dynamic from "next/dynamic";
-import { RouteChunkFallback } from "@/components/RouteChunkFallback";
+import { BrandedLoader } from "@/components/BrandedLoader";
 import { SiteNav } from "@/components/SiteNav";
 import { TravellerShell } from "@/app/components/traveller";
 import "./vault.css";
@@ -9,7 +9,15 @@ const VaultPageClient = dynamic(
     import("./VaultPageClient").then((m) => ({
       default: m.VaultPageClient,
     })),
-  { loading: () => <RouteChunkFallback label="Loading vault…" /> },
+  {
+    loading: () => (
+      <BrandedLoader
+        title="Loading Document Vault…"
+        subtitle="Establishing encrypted tunnel & biometric authentication protocols."
+        badge="AES-256 ENCRYPTED"
+      />
+    ),
+  },
 );
 
 export const metadata = {

@@ -25,6 +25,21 @@ export type JourneyEvent = {
   createdAt: string;
 };
 
+/** One flown sector. Local times are airport-local "HH:MM" strings. */
+export type JourneySegment = {
+  carrier: string | null;
+  flightNumber: string | null;
+  originCode: string;
+  destinationCode: string;
+  departDate: string | null;
+  departTimeLocal: string | null;
+  arriveDate: string | null;
+  arriveTimeLocal: string | null;
+  durationMinutes: number | null;
+  layoverMinutesAfter: number | null;
+  aircraft: string | null;
+};
+
 export type JourneyItineraryItem = {
   kind: "FLIGHT" | "HOTEL" | "TRANSFER" | string;
   flightNumber?: string | null;
@@ -37,6 +52,40 @@ export type JourneyItineraryItem = {
   confirmationRef?: string | null;
   transferRef?: string | null;
   pickupAt?: string | null;
+  // Flight leg detail (server: journey.details.js).
+  label?: string | null;
+  carrier?: string | null;
+  departDate?: string | null;
+  departTimeLocal?: string | null;
+  arriveDate?: string | null;
+  arriveTimeLocal?: string | null;
+  durationMinutes?: number | null;
+  stops?: number | null;
+  cabin?: string | null;
+  segments?: JourneySegment[];
+  // Hotel stay detail.
+  hotelName?: string | null;
+  city?: string | null;
+  cityCode?: string | null;
+  nights?: number | null;
+  roomType?: string | null;
+  boardType?: string | null;
+};
+
+export type JourneySummary = {
+  product: string | null;
+  tripType: "one_way" | "round_trip" | "multi_city" | "stay" | "unknown";
+  stops: string[];
+  flightCount: number;
+  cabin: string | null;
+  carrier: string | null;
+  firstDepartDate: string | null;
+  firstDepartTimeLocal: string | null;
+  lastArriveDate: string | null;
+  lastArriveTimeLocal: string | null;
+  amountMinor: number | null;
+  currency: string | null;
+  supplierCode: string | null;
 };
 
 export type JourneyLiveFlight = {
@@ -70,6 +119,8 @@ export type JourneyWatch = {
     ticketRef?: string | null;
   } | null;
   itinerary?: JourneyItineraryItem[];
+  /** Absent on older API responses — the card falls back to watch fields. */
+  summary?: JourneySummary;
   events?: JourneyEvent[];
   disruptions?: JourneyEvent[];
   liveFlight?: JourneyLiveFlight;

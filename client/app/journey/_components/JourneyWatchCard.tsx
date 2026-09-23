@@ -3,10 +3,10 @@
 import Link from "next/link";
 import {
   AlertTriangle,
-  ArrowRight,
   CheckCircle2,
   Clock,
   DoorOpen,
+  Hotel,
   LifeBuoy,
   Plane,
   RefreshCw,
@@ -14,6 +14,10 @@ import {
   Sparkles,
   Ticket,
 } from "lucide-react";
+import { airlineDisplayName } from "@/lib/consultant/airlines";
+import { iataToPlace } from "@/lib/inventory/places";
+import { formatMinor } from "@/lib/bookings/checkoutDisplay";
+import { formatTicketDate } from "@/lib/bookings/ticketDocument";
 import { Button } from "@/components/ui";
 import { TravellerChip } from "@/app/components/traveller";
 import type { JourneyWatch } from "@/lib/api/journey.api";
@@ -47,6 +51,14 @@ export type JourneyWatchCardProps = {
   onPrepareQuote: (supplierOfferSnapshotId: string) => void;
 };
 
+function cabinFact(cabin: string): string {
+  const c = cabin.toLowerCase();
+  if (c.includes("business")) return "Business";
+  if (c.includes("prem")) return "Premium Economy";
+  if (c.includes("first")) return "First";
+  return "Economy";
+}
+
 export function JourneyWatchCard({
   watch: w,
   busy,
@@ -62,13 +74,53 @@ export function JourneyWatchCard({
 }: JourneyWatchCardProps) {
   const live = w.liveFlight;
   const snap = live?.confirmed ? live.snapshot : null;
-  const flightLeg = (w.itinerary || []).find((i) => i.kind === "FLIGHT");
-  const origin = flightLeg?.origin || null;
-  const destination = flightLeg?.destination || null;
+  const itinerary = w.itinerary || [];
+  const summary = w.summary;
+  const flights = itinerary.filter((i) => i.kind === "FLIGHT");
+  const stay = itinerary.find((i) => i.kind === "HOTEL") ?? null;
+  // A hotel-only booking has no flight to track: no radar, no DEP/ARR banner.
+  const isStay = flights.length === 0 && stay != null;
+  const firstFlight = flights[0];
+  const lastFlight = flights[flights.length - 1];
+  const origin = firstFlight?.origin || null;
+  const destination =
+    summary?.tripType === "round_trip" ? firstFlight?.destination : lastFlight?.destination || null;
   const events = w.events || [];
   const disruptions = w.disruptions || [];
-  const flightLabel = w.flightNumber || w.booking?.product || "Flight Itinerary";
   const completed = w.status === "COMPLETED" || w.phase === "COMPLETED";
+
+  const headline = isStay
+    ? stay?.hotelName || "Hotel stay"
+    : summary?.tripType === "multi_city"
+      ? `Multi-city · ${flights.length} flights`
+      : w.flightNumber || firstFlight?.flightNumber || "Flight";
+  const carrierName = summary?.carrier ? airlineDisplayName(summary.carrier) : null;
+
+  // Airport-local times from the ticketed sectors beat the watch instants,
+  // which are empty until a monitored flight is polled.
+  const departTime = firstFlight?.departTimeLocal ?? formatTime(w.departAt);
+  const departDay = firstFlight?.departDate
+    ? formatTicketDate(firstFlight.departDate)
+    : formatDate(w.departAt);
+  const arriveLeg = summary?.tripType === "round_trip" ? firstFlight : lastFlight;
+  const arriveTime = arriveLeg?.arriveTimeLocal ?? formatTime(w.arriveAt);
+  const arriveDay = arriveLeg?.arriveDate
+    ? formatTicketDate(arriveLeg.arriveDate)
+    : formatDate(w.arriveAt);
+
+  const tripTypeLabel: Record<string, string> = {
+    one_way: "One way",
+    round_trip: "Round trip",
+    multi_city: "Multi-city",
+    stay: "Hotel stay",
+  };
+  const facts = [
+    summary?.tripType ? tripTypeLabel[summary.tripType] : null,
+    summary?.cabin ? cabinFact(summary.cabin) : null,
+    summary?.amountMinor != null && summary.currency
+      ? `Paid ${formatMinor(summary.amountMinor, summary.currency)}`
+      : null,
+  ].filter((f): f is string => Boolean(f));
 
   return (
     <article className="fo-journey__watch">
@@ -77,9 +129,12 @@ export function JourneyWatchCard({
         <div className="fo-journey__watch-identity">
           <div className="flex items-center gap-2">
             <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky/10 text-sky">
-              <Plane size={15} strokeWidth={2.2} />
+              {isStay ? <Hotel size={15} strokeWidth={2.2} /> : <Plane size={15} strokeWidth={2.2} />}
             </span>
-            <p className="fo-journey__flight">{flightLabel}</p>
+            <p className="fo-journey__flight">{headline}</p>
+            {carrierName && !isStay ? (
+              <span className="fo-journey__carrier">{carrierName}</span>
+            ) : null}
           </div>
           <TravellerChip tone={phaseChipTone(w.phase)}>
             {phaseLabel(w.phase, w.status)}
@@ -87,7 +142,7 @@ export function JourneyWatchCard({
         </div>
 
         <div className="fo-journey__watch-status">
-          {snap?.status ? (
+          {isStay ? null : snap?.status ? (
             <span className="fo-journey__fact fo-journey__fact--live">
               <CheckCircle2 size={12} strokeWidth={2.2} />
               Verified {String(snap.status)}
@@ -118,30 +173,78 @@ export function JourneyWatchCard({
         </div>
       </header>
 
-      {/* ── Route Arc Banner (Big IATA Codes) ──────────────────────── */}
-      <div className="fo-journey__route" aria-label="Flight Route">
-        <div className="fo-journey__endpoint">
-          <p className="fo-journey__iata">{origin || "DEP"}</p>
-          <p className="fo-journey__when">{formatTime(w.departAt)}</p>
-          <p className="fo-journey__day">{formatDate(w.departAt)}</p>
+      {/* ── Route / stay banner ─────────────────────────────────────── */}
+      {isStay && stay ? (
+        <div className="fo-journey__route" aria-label="Stay">
+          <div className="fo-journey__endpoint">
+            <p className="fo-journey__iata">{stay.cityCode || stay.city || "Stay"}</p>
+            <p className="fo-journey__when">Check-in</p>
+            <p className="fo-journey__day">
+              {stay.checkInDate ? formatTicketDate(stay.checkInDate.slice(0, 10)) : "—"}
+            </p>
+          </div>
+          <div className="fo-journey__route-mid" aria-hidden="true">
+            <span className="fo-journey__route-line" />
+            <span className="fo-journey__route-plane">
+              <Hotel size={14} strokeWidth={2.2} />
+            </span>
+            <span className="fo-journey__route-line" />
+          </div>
+          <div className="fo-journey__endpoint fo-journey__endpoint--arrive">
+            <p className="fo-journey__iata">
+              {typeof stay.nights === "number" ? `${stay.nights}N` : "—"}
+            </p>
+            <p className="fo-journey__when">Check-out</p>
+            <p className="fo-journey__day">
+              {stay.checkOutDate ? formatTicketDate(stay.checkOutDate.slice(0, 10)) : "—"}
+            </p>
+          </div>
         </div>
+      ) : (
+        <div className="fo-journey__route" aria-label="Flight route">
+          <div className="fo-journey__endpoint">
+            <p className="fo-journey__iata">{origin || "—"}</p>
+            <p className="fo-journey__when">{departTime}</p>
+            <p className="fo-journey__day">
+              {[origin ? iataToPlace(origin) : null, departDay].filter(Boolean).join(" · ")}
+            </p>
+          </div>
 
-        <div className="fo-journey__route-mid" aria-hidden="true">
-          <span className="fo-journey__route-line" />
-          <span className="fo-journey__route-plane">
-            <Plane size={14} strokeWidth={2.2} className="rotate-90" />
-          </span>
-          <span className="fo-journey__route-line" />
+          <div className="fo-journey__route-mid" aria-hidden="true">
+            <span className="fo-journey__route-line" />
+            <span className="fo-journey__route-plane">
+              <Plane size={14} strokeWidth={2.2} className="rotate-90" />
+            </span>
+            <span className="fo-journey__route-line" />
+          </div>
+
+          <div className="fo-journey__endpoint fo-journey__endpoint--arrive">
+            <p className="fo-journey__iata">{destination || "—"}</p>
+            <p className="fo-journey__when">{arriveTime}</p>
+            <p className="fo-journey__day">
+              {[destination ? iataToPlace(destination) : null, arriveDay]
+                .filter(Boolean)
+                .join(" · ")}
+            </p>
+          </div>
         </div>
+      )}
 
-        <div className="fo-journey__endpoint fo-journey__endpoint--arrive">
-          <p className="fo-journey__iata">{destination || "ARR"}</p>
-          <p className="fo-journey__when">{formatTime(w.arriveAt)}</p>
-          <p className="fo-journey__day">{formatDate(w.arriveAt)}</p>
-        </div>
-      </div>
+      {summary?.tripType === "multi_city" && summary.stops.length > 2 ? (
+        <p className="fo-journey__stops" aria-label="Trip route">
+          {summary.stops.join(" → ")}
+        </p>
+      ) : null}
 
-      {!live?.confirmed ? (
+      {facts.length > 0 ? (
+        <ul className="fo-journey__facts" aria-label="Booking summary">
+          {facts.map((f) => (
+            <li key={f}>{f}</li>
+          ))}
+        </ul>
+      ) : null}
+
+      {!isStay && !live?.confirmed ? (
         <p className="fo-journey__muted">
           {live?.reason ||
             "Live delays, gates, and cancellations are verified automatically via real-time satellite telemetry."}
@@ -151,10 +254,14 @@ export function JourneyWatchCard({
       {/* ── Itinerary Section ───────────────────────────────────────── */}
       <div className="fo-journey__block">
         <h3 className="fo-journey__block-title">
-          <Plane size={12} strokeWidth={2.2} className="text-sky" />
-          <span>Flight &amp; Stay Itinerary</span>
+          {isStay ? (
+            <Hotel size={12} strokeWidth={2.2} className="text-sky" />
+          ) : (
+            <Plane size={12} strokeWidth={2.2} className="text-sky" />
+          )}
+          <span>{isStay ? "Stay details" : "Flight itinerary"}</span>
         </h3>
-        <JourneyItinerary items={w.itinerary || []} />
+        <JourneyItinerary items={itinerary} />
       </div>
 
       {/* ── Disruptions Notice ──────────────────────────────────────── */}
@@ -179,7 +286,7 @@ export function JourneyWatchCard({
       <div className="fo-journey__block">
         <h3 className="fo-journey__block-title">
           <Clock size={12} strokeWidth={2.2} className="text-sky" />
-          <span>Live Telemetry &amp; Gate Timeline</span>
+          <span>{isStay ? "Stay updates" : "Live Telemetry & Gate Timeline"}</span>
         </h3>
         <JourneyTimeline events={events} />
       </div>
@@ -198,15 +305,17 @@ export function JourneyWatchCard({
         </div>
 
         <div className="fo-journey__actions">
-          <Button
-            size="sm"
-            variant="secondary"
-            disabled={(isPolling && busy) || completed}
-            onClick={onPoll}
-            icon={<RefreshCw size={13} strokeWidth={2} className={isPolling && busy ? "animate-spin" : ""} />}
-          >
-            {isPolling && busy ? "Polling Radar…" : "Refresh Radar"}
-          </Button>
+          {isStay ? null : (
+            <Button
+              size="sm"
+              variant="secondary"
+              disabled={(isPolling && busy) || completed}
+              onClick={onPoll}
+              icon={<RefreshCw size={13} strokeWidth={2} className={isPolling && busy ? "animate-spin" : ""} />}
+            >
+              {isPolling && busy ? "Polling Radar…" : "Refresh Radar"}
+            </Button>
+          )}
           <Button
             size="sm"
             variant="secondary"

@@ -19,7 +19,7 @@ import {
   Ticket,
   Vault,
 } from "lucide-react";
-import { Button, Spinner } from "@/components/ui";
+import { Button, Spinner, BrandedLoader } from "@/components/ui";
 import {
   TravellerPagination,
   TravellerSection,
@@ -219,14 +219,11 @@ export function JourneyPageClient() {
 
   if (!hasHydrated || (accessToken && isLoading)) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center py-24">
-        <div className="flex flex-col items-center gap-3">
-          <Spinner label="Opening Live Mission Control…" />
-          <p className="text-xs tracking-wider uppercase text-ink-faint">
-            Synchronizing satellite telemetry &amp; flight gates
-          </p>
-        </div>
-      </div>
+      <BrandedLoader
+        title="Synchronizing flight radar…"
+        subtitle="Tracking live satellite telemetry, gate changes & verified flight updates."
+        badge="LIVE RADAR ACTIVE"
+      />
     );
   }
 
