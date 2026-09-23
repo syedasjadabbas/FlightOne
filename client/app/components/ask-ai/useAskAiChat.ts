@@ -424,7 +424,7 @@ export function useAskAiChat(
     const wantsBestFare = BEST_FARE_RE.test(trimmed);
     if (wantsBestFare) setSortKey("price");
 
-    const userMsg: UiMessage = {
+    const userMsg: UiMessage = { 
       id: crypto.randomUUID(),
       role: "user",
       content: trimmed,
