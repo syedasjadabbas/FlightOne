@@ -1,9 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import {
   BookUser,
   CreditCard,
   Download,
+  ExternalLink,
   FileText,
   Lock,
   RefreshCw,
@@ -14,7 +16,7 @@ import {
   Ticket,
   Trash2,
 } from "lucide-react";
-import { Button } from "@/components/ui";
+import { Button, buttonClassName } from "@/components/ui";
 import { DocumentOcrPanel } from "@/app/profile/_components/DocumentOcrPanel";
 import type { IdentityDocument } from "@/lib/api/profile.api";
 import type { VaultDocument } from "@/lib/api/vault.api";
@@ -131,6 +133,17 @@ export function VaultDocRow({
           <Button size="sm" variant="secondary" disabled={busy} onClick={onDetails}>
             Details
           </Button>
+          {doc.type === "TICKET" && doc.bookingId ? (
+            <Link
+              href={`/checkout/${doc.bookingId}`}
+              className={buttonClassName({ size: "sm", variant: "ghost" })}
+              title="Open full interactive e-ticket in new tab"
+              target="_blank"
+            >
+              <ExternalLink size={13} strokeWidth={2} aria-hidden />
+              Ticket
+            </Link>
+          ) : null}
           {doc.hasBinary && doc.isActive ? (
             <Button
               size="sm"

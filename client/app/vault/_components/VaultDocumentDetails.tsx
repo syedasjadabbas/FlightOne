@@ -7,6 +7,7 @@ import {
   AlertCircle,
   Check,
   Download,
+  ExternalLink,
   Lock,
   RefreshCw,
   Share2,
@@ -14,7 +15,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import { Button, Input, Spinner } from "@/components/ui";
+import { Button, buttonClassName, Input, Spinner } from "@/components/ui";
 import {
   useGetVaultDocumentQuery,
   useUpdateVaultDocumentMutation,
@@ -422,11 +423,22 @@ export function VaultDocumentDetails({
                     {busyAction === "download"
                       ? "Downloading…"
                       : doc.type === "TICKET"
-                        ? "Download Ticket"
+                        ? "Download PDF Ticket"
                         : doc.type === "HOTEL_VOUCHER"
                           ? "Download Voucher"
                           : "Download Scan"}
                   </Button>
+                ) : null}
+                {doc.type === "TICKET" && doc.bookingId ? (
+                  <Link
+                    href={`/checkout/${doc.bookingId}`}
+                    className={buttonClassName({ size: "sm", variant: "secondary" })}
+                    title="Open full interactive electronic ticket in a new tab"
+                    target="_blank"
+                  >
+                    <ExternalLink size={13} strokeWidth={2} aria-hidden />
+                    View Live Ticket
+                  </Link>
                 ) : null}
                 {doc.isActive ? (
                   <Button

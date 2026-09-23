@@ -1099,26 +1099,64 @@ export async function ingestBookingDocuments({
   travellerSnapshot,
   currency,
   amountMinor,
+  netMinor,
+  supplierBookingRefs,
+  metadata,
 }) {
   const { buildBookingPrintable } = await import("./vault.printables.js");
   const created = [];
   const issuedAt = new Date().toISOString();
+
+  let resolvedBooking = null;
+  if (bookingId && (!supplierBookingRefs || !metadata || !travellerSnapshot)) {
+    try {
+      resolvedBooking = await prisma.booking.findUnique({
+        where: { id: bookingId },
+        select: {
+          id: true,
+          product: true,
+          currency: true,
+          amountMinor: true,
+          netMinor: true,
+          externalRef: true,
+          travellerSnapshot: true,
+          supplierBookingRefs: true,
+          metadata: true,
+        },
+      });
+    } catch {
+      // ignore
+    }
+  }
+
+  const finalProduct = product || resolvedBooking?.product || "FLIGHT";
+  const finalCurrency = currency || resolvedBooking?.currency || "PKR";
+  const finalAmountMinor = amountMinor != null ? amountMinor : (resolvedBooking?.amountMinor ?? 0);
+  const finalNetMinor = netMinor != null ? netMinor : resolvedBooking?.netMinor;
+  const finalExternalRef = externalRef || resolvedBooking?.externalRef || null;
+  const finalTraveller = travellerSnapshot || resolvedBooking?.travellerSnapshot || null;
+  const finalRefs = supplierBookingRefs || resolvedBooking?.supplierBookingRefs || {};
+  const finalMeta = metadata || resolvedBooking?.metadata || {};
+
   const refsMeta = {
     ticketNumbers: ticketNumbers ?? null,
     voucherRefs: voucherRefs ?? null,
-    externalRef: externalRef ?? null,
+    externalRef: finalExternalRef,
     issuedAt,
   };
 
   const printableArgs = {
-    product,
+    product: finalProduct,
     bookingId,
-    externalRef,
+    externalRef: finalExternalRef,
     ticketNumbers,
     voucherRefs,
-    travellerSnapshot,
-    currency,
-    amountMinor,
+    travellerSnapshot: finalTraveller,
+    currency: finalCurrency,
+    amountMinor: finalAmountMinor,
+    netMinor: finalNetMinor,
+    supplierBookingRefs: finalRefs,
+    metadata: finalMeta,
     issuedAt,
   };
 
@@ -1126,12 +1164,12 @@ export async function ingestBookingDocuments({
     where: { bookingId, type: "TICKET" },
     select: { id: true },
   });
-  if (!existingTicket && (product === "FLIGHT" || product === "PACKAGE" || ticketNumbers?.length)) {
+  if (!existingTicket && (finalProduct === "FLIGHT" || finalProduct === "PACKAGE" || ticketNumbers?.length)) {
     const printable = buildBookingPrintable("TICKET", printableArgs);
     const row = await persistPlatformPrintable({
       userId,
       type: "TICKET",
-      title: `${PRODUCT_LABELS[product] ?? product} ticket — booking ${bookingId}`,
+      title: printable?.title || `${PRODUCT_LABELS[finalProduct] ?? finalProduct} ticket — ${finalExternalRef || bookingId.slice(-6).toUpperCase()}`,
       bookingId,
       fileMeta: refsMeta,
       printable,
@@ -1139,7 +1177,7 @@ export async function ingestBookingDocuments({
     created.push(row);
   }
 
-  if (product === "HOTEL" || product === "PACKAGE" || voucherRefs?.length) {
+  if (finalProduct === "HOTEL" || finalProduct === "PACKAGE" || voucherRefs?.length) {
     const existingVoucher = await prisma.vaultDocument.findFirst({
       where: { bookingId, type: "HOTEL_VOUCHER" },
       select: { id: true },
@@ -1149,7 +1187,7 @@ export async function ingestBookingDocuments({
       const row = await persistPlatformPrintable({
         userId,
         type: "HOTEL_VOUCHER",
-        title: `${PRODUCT_LABELS[product] ?? product} voucher — booking ${bookingId}`,
+        title: printable?.title || `${PRODUCT_LABELS[finalProduct] ?? finalProduct} voucher — ${finalExternalRef || bookingId.slice(-6).toUpperCase()}`,
         bookingId,
         fileMeta: refsMeta,
         printable,

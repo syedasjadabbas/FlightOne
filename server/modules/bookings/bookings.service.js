@@ -239,6 +239,9 @@ async function ingestVaultDocumentsSafe({
   travellerSnapshot,
   currency,
   amountMinor,
+  netMinor,
+  supplierBookingRefs,
+  metadata,
 }) {
   try {
     await vaultService.ingestBookingDocuments({
@@ -251,6 +254,9 @@ async function ingestVaultDocumentsSafe({
       travellerSnapshot,
       currency,
       amountMinor,
+      netMinor,
+      supplierBookingRefs,
+      metadata,
     });
   } catch (e) {
     // eslint-disable-next-line no-console
@@ -1362,6 +1368,9 @@ export async function ticketBooking(userId, bookingId, { clientAmountMinor } = {
     travellerSnapshot: ticketed.travellerSnapshot,
     currency: ticketed.currency,
     amountMinor: ticketed.amountMinor,
+    netMinor: ticketed.netMinor,
+    supplierBookingRefs: ticketed.supplierBookingRefs,
+    metadata: ticketed.metadata,
   });
 
   await sendBookingConfirmationNotificationSafe(ticketed);
