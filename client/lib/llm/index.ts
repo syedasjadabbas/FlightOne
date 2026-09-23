@@ -37,9 +37,22 @@ function authHeaders(): HeadersInit | null {
   };
 }
 
+/**
+ * True when no provider can possibly answer, so the request is skipped here
+ * instead of paying a full HTTP round-trip to Express only to be told
+ * "No LLM provider available". Every caller already handles a null result.
+ *
+ * `LLM_PROVIDER` is read on the Express side too — this mirrors its "off"
+ * switch rather than replacing it.
+ */
+function llmDisabled(): boolean {
+  return (process.env.LLM_PROVIDER || "auto").toLowerCase() === "off";
+}
+
 export async function complete(
   req: CompletionRequest,
 ): Promise<CompletionResult | null> {
+  if (llmDisabled()) return null;
   const headers = authHeaders();
   if (!headers) return null;
 
@@ -80,6 +93,7 @@ export async function complete(
 export async function* completeStream(
   req: CompletionRequest,
 ): AsyncGenerator<string, CompletionResult | null, void> {
+  if (llmDisabled()) return null;
   const headers = authHeaders();
   if (!headers) return null;
 

@@ -345,10 +345,15 @@ async function replyAskAi(
     const system = `${buildAskAiSystemPrompt(args.location)}\n\n${context}`;
     const messages: ChatTurn[] = [...req.history, { role: "user", content: req.message }];
 
-    const llmResult = await streamOrCompleteReply(
-      { system, messages, temperature: 0.6, maxTokens: 280, timeoutMs: 120000 },
-      args.sink?.onToken,
-    );
+    // Demo mode is self-contained: skip the narration call entirely rather
+    // than paying an HTTP round-trip to Express that can only fail, and fall
+    // straight through to the deterministic template reply below.
+    const llmResult = isDemoInventoryEnabled()
+      ? null
+      : await streamOrCompleteReply(
+          { system, messages, temperature: 0.6, maxTokens: 280, timeoutMs: 120000 },
+          args.sink?.onToken,
+        );
 
     reply = llmResult?.text?.trim() ?? "";
     provider = llmResult?.provider ?? "template";
