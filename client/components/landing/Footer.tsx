@@ -727,7 +727,7 @@ export default function Footer() {
           <div
             style={{
               fontFamily: 'var(--font-display)',
-              fontSize: 'clamp(4.2rem, 11vw, 8.5rem)',
+              fontSize: 'clamp(3.2rem, 11vw, 8.5rem)',
               fontWeight: 700,
               letterSpacing: '-0.04em',
               color: '#F5F4DF',

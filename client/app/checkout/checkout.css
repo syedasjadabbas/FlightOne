@@ -269,6 +269,27 @@
   transform: scale(0.98);
 }
 
+@media (max-width: 640px) {
+  .fo-checkout .fo-checkout__steps {
+    gap: 0.35rem;
+  }
+  .fo-checkout .fo-checkout__step {
+    font-size: 0.6875rem;
+  }
+  .fo-checkout .fo-checkout__step-row {
+    grid-template-columns: 1.15rem 1fr;
+    column-gap: 0.35rem;
+  }
+  .fo-checkout .fo-checkout__step-marker {
+    width: 1.15rem;
+    height: 1.15rem;
+    font-size: 0.65rem;
+  }
+  .fo-checkout .fo-checkout__traveller {
+    padding: 0.85rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .fo-checkout .fo-checkout__traveller-edit {
     transition: none;

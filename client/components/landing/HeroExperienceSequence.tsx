@@ -318,8 +318,8 @@ export default function HeroExperienceSequence() {
         }
 
         // Card sizing: Larger, more prominent center image with comfortable viewport bounds
-        const normalCardSize = Math.max(300, Math.min(availableH - 4, Math.min(w * 0.52, 780)));
-        const finaleCardSize = Math.max(240, Math.min(availableH * 0.48, Math.min(w * 0.46, 560)));
+        const normalCardSize = Math.max(w < 640 ? 220 : 300, Math.min(availableH - 4, Math.min(w * 0.52, 780)));
+        const finaleCardSize = Math.max(w < 640 ? 180 : 240, Math.min(availableH * 0.48, Math.min(w * 0.46, 560)));
 
         const thumbSize = Math.max(90, Math.min(normalCardSize * 0.22, 160));
         const thumbScale = thumbSize / normalCardSize;
@@ -805,9 +805,9 @@ export default function HeroExperienceSequence() {
             ref={heroSlide1Ref}
             style={{
               position: 'absolute',
-              bottom: '4.5rem',
-              left: '3.5rem',
-              right: '3.5rem',
+              bottom: 'clamp(2.5rem, 5vh, 4.5rem)',
+              left: 'clamp(1.25rem, 4vw, 3.5rem)',
+              right: 'clamp(1.25rem, 4vw, 3.5rem)',
               maxWidth: '600px',
               zIndex: 25,
               pointerEvents: 'none',
@@ -847,9 +847,9 @@ export default function HeroExperienceSequence() {
             ref={heroSlide2Ref}
             style={{
               position: 'absolute',
-              bottom: '4.5rem',
-              left: '3.5rem',
-              right: '3.5rem',
+              bottom: 'clamp(2.5rem, 5vh, 4.5rem)',
+              left: 'clamp(1.25rem, 4vw, 3.5rem)',
+              right: 'clamp(1.25rem, 4vw, 3.5rem)',
               maxWidth: '600px',
               zIndex: 25,
               pointerEvents: 'none',

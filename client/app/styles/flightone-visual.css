@@ -852,7 +852,21 @@
   .fo-chrome-footer__inner {
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.45rem;
+    gap: 0.65rem;
+    padding: 0.85rem clamp(0.75rem, 2vw, 1.25rem) 1rem;
+  }
+
+  .fo-chrome-footer__links {
+    width: 100%;
+    gap: 0.35rem 0.45rem;
+  }
+
+  .fo-chrome-footer__link-pill,
+  .fo-chrome-footer__links a {
+    height: 2rem;
+    min-height: 2rem;
+    padding: 0 0.65rem;
+    font-size: 0.7rem;
   }
 
   .fo-chrome-footer--auth .fo-chrome-footer__inner {

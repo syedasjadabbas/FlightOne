@@ -201,14 +201,15 @@ export default function PartnersSection() {
           width: '100%',
           maxWidth: '100%',
           boxSizing: 'border-box',
-          height: '100vh',
+          height: '100dvh',
+          minHeight: '100vh',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
           alignItems: 'center',
           overflow: 'hidden',
           backgroundColor: '#F4F3DC',
-          padding: '0 clamp(2rem, 4.5vw, 4.5rem)',
+          padding: '0 clamp(1.5rem, 4.5vw, 4.5rem)',
         }}
       >
         <div

@@ -378,7 +378,7 @@ export function SiteNav({
           {/* Desktop Left Nav Links */}
           <nav
             aria-label="Primary navigation"
-            className="hidden md:flex items-center gap-1 pl-2 border-l border-black/6"
+            className="hidden lg:flex items-center gap-1 pl-2 border-l border-black/6"
           >
             <NavLink href="/" label="Home" />
 
@@ -394,7 +394,7 @@ export function SiteNav({
                     "--ink-soft": "#55606e",
                     "--ink-faint": "#7a8494",
                   } as React.CSSProperties}
-                  className="absolute top-[calc(100%+10px)] left-0 z-50 w-72 rounded-3xl border border-black/10 bg-white p-2 shadow-[0_24px_54px_-12px_rgba(14,22,32,0.22),0_4px_16px_rgba(14,22,32,0.06)] backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-150"
+                  className="absolute top-[calc(100%+10px)] left-0 z-50 w-72 max-w-[calc(100vw-2rem)] rounded-3xl border border-black/10 bg-white p-2 shadow-[0_24px_54px_-12px_rgba(14,22,32,0.22),0_4px_16px_rgba(14,22,32,0.06)] backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-150"
                 >
                   <div className="px-3 py-1.5 mb-1 border-b border-black/4">
                     <p className="text-[10.5px] font-bold uppercase tracking-wider text-ink-faint">
@@ -426,7 +426,7 @@ export function SiteNav({
                     "--ink-soft": "#55606e",
                     "--ink-faint": "#7a8494",
                   } as React.CSSProperties}
-                  className="absolute top-[calc(100%+10px)] left-0 z-50 w-84 rounded-3xl border border-black/10 bg-white p-2 shadow-[0_24px_54px_-12px_rgba(14,22,32,0.22),0_4px_16px_rgba(14,22,32,0.06)] backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-150"
+                  className="absolute top-[calc(100%+10px)] left-0 z-50 w-84 max-w-[calc(100vw-2rem)] rounded-3xl border border-black/10 bg-white p-2 shadow-[0_24px_54px_-12px_rgba(14,22,32,0.22),0_4px_16px_rgba(14,22,32,0.06)] backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-150"
                 >
                   <div className="px-3 py-1.5 mb-1 border-b border-black/4">
                     <p className="text-[10.5px] font-bold uppercase tracking-wider text-ink-faint">
@@ -447,7 +447,7 @@ export function SiteNav({
         {/* ── RIGHT: Ava · Journey · Vault · Notifications · Account ── */}
         <div className="flex items-center gap-2 sm:gap-3">
           {/* Desktop Right Links */}
-          <div className="hidden md:flex items-center gap-1.5">
+          <div className="hidden lg:flex items-center gap-1.5">
             <NavLink href="/chat?new=true" label="Ava +" highlight onClick={handleAvaClick} />
             <NavLink href="/journey" label="My Journey" />
             <NavLink href="/vault" label="Vault" />
@@ -484,7 +484,7 @@ export function SiteNav({
                       "--ink-soft": "#55606e",
                       "--ink-faint": "#7a8494",
                     } as React.CSSProperties}
-                    className="absolute top-[calc(100%+10px)] right-0 z-50 w-80 rounded-3xl border border-black/10 bg-white p-3 shadow-[0_24px_54px_-12px_rgba(14,22,32,0.22),0_4px_16px_rgba(14,22,32,0.06)] backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-150"
+                    className="absolute top-[calc(100%+10px)] right-0 z-50 w-80 max-w-[calc(100vw-2rem)] rounded-3xl border border-black/10 bg-white p-3 shadow-[0_24px_54px_-12px_rgba(14,22,32,0.22),0_4px_16px_rgba(14,22,32,0.06)] backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-150"
                   >
                     <div className="flex items-center justify-between pb-2 mb-2 border-b border-black/6">
                       <div className="flex items-center gap-2">
@@ -577,7 +577,7 @@ export function SiteNav({
                       "--ink-soft": "#55606e",
                       "--ink-faint": "#7a8494",
                     } as React.CSSProperties}
-                    className="absolute top-[calc(100%+10px)] right-0 z-50 w-72 rounded-3xl border border-black/10 bg-white p-2.5 shadow-[0_24px_54px_-12px_rgba(14,22,32,0.22),0_4px_16px_rgba(14,22,32,0.06)] backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-150"
+                    className="absolute top-[calc(100%+10px)] right-0 z-50 w-72 max-w-[calc(100vw-2rem)] rounded-3xl border border-black/10 bg-white p-2.5 shadow-[0_24px_54px_-12px_rgba(14,22,32,0.22),0_4px_16px_rgba(14,22,32,0.06)] backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-150"
                   >
                     {/* User Identity Card Header */}
                     <div className="flex items-center gap-3 p-3 mb-2 rounded-2xl bg-[#f8fafb] border border-black/6">
@@ -674,14 +674,24 @@ export function SiteNav({
             )}
           </div>
 
-          {/* Mobile Hamburger Button */}
+          {/* Quick Ava+ Shortcut on Tablet/Mobile */}
+          <Link
+            href="/chat?new=true"
+            onClick={handleAvaClick}
+            className="inline-flex lg:hidden h-9 shrink-0 items-center gap-1.5 rounded-full border border-white/15 bg-[#0e1620] px-3.5 text-[12.5px] font-bold text-white shadow-[0_2px_8px_rgba(14,22,32,0.18)] whitespace-nowrap transition-all duration-150 active:scale-95"
+          >
+            <Sparkles size={12} strokeWidth={2.5} className="text-cyan" aria-hidden />
+            <span>Ava +</span>
+          </Link>
+
+          {/* Mobile/Tablet Hamburger Button */}
           <button
             type="button"
             id="nav-mobile-toggle"
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
             aria-expanded={mobileOpen}
             onClick={() => setMobileOpen((prev) => !prev)}
-            className="flex md:hidden h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white/80 text-navy transition-all hover:bg-white active:scale-95"
+            className="flex lg:hidden h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white/80 text-navy transition-all hover:bg-white active:scale-95"
           >
             {mobileOpen ? (
               <X size={18} strokeWidth={2.2} aria-hidden />
@@ -699,7 +709,7 @@ export function SiteNav({
           role="dialog"
           aria-modal="true"
           aria-label="Mobile navigation"
-          className="fixed inset-0 z-40 flex flex-col bg-white/95 pt-20 pb-8 px-6 backdrop-blur-2xl overflow-y-auto animate-in fade-in duration-200"
+          className="fixed inset-0 z-40 flex flex-col bg-white/95 pt-20 pb-[calc(2rem+env(safe-area-inset-bottom,0px))] px-6 backdrop-blur-2xl overflow-y-auto animate-in fade-in duration-200"
         >
           <nav className="flex-1 flex flex-col gap-2">
             <Link

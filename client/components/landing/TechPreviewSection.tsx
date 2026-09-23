@@ -103,7 +103,8 @@ export default function TechPreviewSection() {
           width: '100%',
           maxWidth: '100%',
           boxSizing: 'border-box',
-          height: '100vh',
+          height: '100dvh',
+          minHeight: '100vh',
           overflow: 'hidden',
           backgroundColor: '#F4F3DC',
         }}
@@ -175,7 +176,7 @@ export default function TechPreviewSection() {
               width: '100%',
               maxWidth: '100%',
               boxSizing: 'border-box',
-              padding: '0 clamp(2rem, 4.5vw, 4.5rem)',
+              padding: '0 clamp(1.5rem, 4.5vw, 4.5rem)',
               margin: '0 auto',
             }}
           >
@@ -184,7 +185,7 @@ export default function TechPreviewSection() {
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                gap: '3rem',
+                gap: 'clamp(1.5rem, 3vh, 3rem)',
                 flexWrap: 'wrap',
                 width: '100%',
               }}
@@ -200,7 +201,7 @@ export default function TechPreviewSection() {
                 <h2
                   style={{
                     fontFamily: 'var(--font-display)',
-                    fontSize: 'clamp(2.75rem, 4.8vw, 5.25rem)',
+                    fontSize: 'clamp(2.5rem, 4.8vw, 5.25rem)',
                     fontWeight: 600,
                     lineHeight: 1.06,
                     letterSpacing: '-0.035em',
@@ -211,7 +212,7 @@ export default function TechPreviewSection() {
                   Transparent pricing,<br />visa support built in
                 </h2>
 
-                <div style={{ marginTop: '2.5rem' }}>
+                <div style={{ marginTop: 'clamp(1.25rem, 3vh, 2.5rem)' }}>
                   <Link
                     href="/flights"
                     style={{
