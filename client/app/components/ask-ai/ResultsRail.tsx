@@ -117,8 +117,6 @@ export function ResultsRail({
 }) {
   const [tab, setTab] = useState<ResultsTab>("flights");
   const [expanded, setExpanded] = useState(workspace);
-  const [editingTitle, setEditingTitle] = useState(false);
-  const [titleDraft, setTitleDraft] = useState("");
   const [workspaceLimit, setWorkspaceLimit] = useState(WORKSPACE_PAGE);
 
   const apiSearching = busy && searchPhase === "search";
@@ -163,9 +161,6 @@ export function ResultsRail({
     setWorkspaceLimit(WORKSPACE_PAGE);
   }, [panel?.legRoute, panel?.tripTitle, originIdx, tab, workspace, sortKey, offers.length]);
 
-  useEffect(() => {
-    if (panel?.tripTitle) setTitleDraft(panel.tripTitle);
-  }, [panel?.tripTitle]);
 
   useEffect(() => {
     if (panel?.multiCity && (panel.itineraries?.length ?? 0) > 0) {
@@ -182,11 +177,6 @@ export function ResultsRail({
       ? "Try changing your dates, destination, stops, or departure time."
       : "Try changing your dates, destination, stops, or departure time.");
 
-  function commitTitle() {
-    const next = titleDraft.trim();
-    if (next && next !== panel?.tripTitle) onTripTitleChange?.(next);
-    setEditingTitle(false);
-  }
 
   const isTripsView = tab === "trips" || (multiCity && rawItineraryCount > 0);
   const showFullList = workspace || expanded;
@@ -256,7 +246,7 @@ export function ResultsRail({
   const routeHeadline =
     panel?.legRoute ??
     panel?.queryLabel ??
-    (panel?.tripTitle && !editingTitle ? panel.tripTitle : null);
+    (panel?.tripTitle ?? null);
 
   const filterSidebar =
     showSidebar && sidebarFacets && sidebarFilters && onSidebarFiltersChange ? (
@@ -321,7 +311,7 @@ export function ResultsRail({
     />
   ) : tab === "trips" ? (
     sortedItineraries.length > 0 ? (
-      <div className="trip-card-list w-full space-y-3">
+      <div className="results-flight-list">
         {displayItineraries.map((it, i) => (
           <ItinerarySummaryCard key={it.id} itinerary={it} index={i} onSelect={onViewTrip} />
         ))}
@@ -492,42 +482,12 @@ export function ResultsRail({
                 </div>
 
                 <div className="results-summary__route">
-                  {tab !== "trips" && routeLine && !panel?.tripTitle && !editingTitle ? (
-                    <p className="results-eyebrow">
-                      Live flights
-                      <LiveInventoryBadge updating={busy && searchPhase === "search"} />
-                    </p>
-                  ) : null}
-                  {panel?.tripTitle || editingTitle ? (
-                    editingTitle ? (
-                      <input
-                        autoFocus
-                        value={titleDraft}
-                        onChange={(e) => setTitleDraft(e.target.value)}
-                        onBlur={commitTitle}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") commitTitle();
-                          if (e.key === "Escape") {
-                            setTitleDraft(panel?.tripTitle ?? "");
-                            setEditingTitle(false);
-                          }
-                        }}
-                        className="results-title-input"
-                        aria-label="Edit trip title"
-                      />
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setTitleDraft(panel?.tripTitle ?? "");
-                          setEditingTitle(true);
-                        }}
-                        className="results-route-headline results-route-headline--button"
-                        title="Click to rename"
-                      >
-                        {panel?.tripTitle}
-                      </button>
-                    )
+                  <p className="results-eyebrow">
+                    {multiCity || tab === "trips" ? "Multi-city journey" : "Live flights"}
+                    <LiveInventoryBadge updating={busy && searchPhase === "search"} />
+                  </p>
+                  {panel?.tripTitle ? (
+                    <h1 className="results-route-headline">{panel.tripTitle}</h1>
                   ) : routeLine ? (
                     <RouteEditorial route={routeLine} />
                   ) : null}
@@ -536,7 +496,7 @@ export function ResultsRail({
                     passengers={passengersLabel}
                     cabin={cabinLabel}
                   />
-                  {routeIata && tab !== "trips" ? (
+                  {routeIata ? (
                     <ResultsRoutePath originCode={routeIata.origin} destCode={routeIata.dest} />
                   ) : null}
                 </div>
@@ -704,36 +664,10 @@ export function ResultsRail({
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
             <p className="results-rail__eyebrow">Live results</p>
-            {panel?.tripTitle || editingTitle ? (
-              editingTitle ? (
-                <input
-                  autoFocus
-                  value={titleDraft}
-                  onChange={(e) => setTitleDraft(e.target.value)}
-                  onBlur={commitTitle}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") commitTitle();
-                    if (e.key === "Escape") {
-                      setTitleDraft(panel?.tripTitle ?? "");
-                      setEditingTitle(false);
-                    }
-                  }}
-                  className="mt-0.5 w-full rounded border border-[var(--line)] bg-[var(--surface)] px-1.5 py-0.5 text-[14px] font-semibold tracking-[-0.02em] text-[var(--ink)] outline-none focus:border-[var(--signal)]"
-                  aria-label="Edit trip title"
-                />
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setTitleDraft(panel?.tripTitle ?? "");
-                    setEditingTitle(true);
-                  }}
-                  className="mt-0.5 block w-full truncate text-left text-[14px] font-semibold tracking-[-0.02em] text-[var(--ink)] hover:text-[var(--signal)]"
-                  title="Click to rename"
-                >
-                  {panel?.tripTitle}
-                </button>
-              )
+            {panel?.tripTitle ? (
+              <h2 className="mt-0.5 block w-full truncate text-left text-[14px] font-semibold tracking-[-0.02em] text-[var(--ink)]">
+                {panel.tripTitle}
+              </h2>
             ) : null}
             {panel?.dateSpan ? (
               <p className="mt-0.5 text-[12px] font-medium text-[var(--ink-soft)]">{panel.dateSpan}</p>

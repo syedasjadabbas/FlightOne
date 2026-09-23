@@ -152,6 +152,7 @@ export function ChatLayout({
   }, [messages]);
 
   const showResultsOnLatest =
+    !busy &&
     (chatResultsState === "results" || resultCount > 0) &&
     latestAssistantId != null;
 
@@ -297,7 +298,7 @@ export function ChatLayout({
                     <span className="hidden text-xs font-medium text-[var(--ink-soft)] sm:inline">
                       Travel consultant
                     </span>
-                    {resultCount > 0 && onOpenResults ? (
+                    {!busy && resultCount > 0 && onOpenResults ? (
                       <button
                         type="button"
                         onClick={onOpenResults}
@@ -481,13 +482,14 @@ export function ChatLayout({
                 const showIdentity =
                   m.role === "assistant" && (i === 0 || prev?.role !== "assistant");
                 const shouldShowFooter =
-                  (isLatestAssistant && showResultsOnLatest) ||
-                  (m.role === "assistant" &&
-                    resultCount > 0 &&
-                    m.content &&
-                    (m.content.toLowerCase().includes("options for") ||
-                      m.content.toLowerCase().includes("live options") ||
-                      m.content.toLowerCase().includes("live flights")));
+                  !busy &&
+                  ((isLatestAssistant && showResultsOnLatest) ||
+                    (m.role === "assistant" &&
+                      resultCount > 0 &&
+                      m.content &&
+                      (m.content.toLowerCase().includes("options for") ||
+                        m.content.toLowerCase().includes("live options") ||
+                        m.content.toLowerCase().includes("live flights"))));
 
                 const footer =
                   shouldShowFooter ? (

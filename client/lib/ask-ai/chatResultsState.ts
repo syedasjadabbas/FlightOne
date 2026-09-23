@@ -29,9 +29,9 @@ export function canShowResultsWorkspace(args: {
   busy: boolean;
   searchPhase: SearchPhase;
 }): boolean {
+  if (args.busy) return false;
   if (!isLiveSearchPanel(args.searchPanel)) return false;
-  if (args.resultCount > 0) return true;
-  return args.busy && args.searchPhase === "search";
+  return args.resultCount > 0;
 }
 
 /**

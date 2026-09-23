@@ -39,6 +39,7 @@ import {
 } from "lucide-react";
 import { useAuthStore } from "@/store/auth.store";
 import { useLogoutMutation } from "@/lib/api/auth.api";
+import { useGetProfileQuery } from "@/lib/api/profile.api";
 
 /* ─────────────────────────────────────────────────────────────────────────────
    Types & Static Data
@@ -81,6 +82,9 @@ export function SiteNav({
   const isAuthenticated = useAuthStore((s) => Boolean(s.accessToken));
   const user = useAuthStore((s) => s.user);
   const userLabel = useAuthStore((s) => s.user?.name ?? s.user?.email ?? null);
+  const { data: profile } = useGetProfileQuery(undefined, {
+    skip: !hasHydrated || !isAuthenticated,
+  });
   const [logout, { isLoading: isLoggingOut }] = useLogoutMutation();
 
   const [openDropdown, setOpenDropdown] = useState<DropdownId>(null);
@@ -184,7 +188,15 @@ export function SiteNav({
   };
 
   const isDark = theme === "dark";
-  const userInitials = (userLabel || "U")
+  const profileMeta = (
+    profile?.metadata && typeof profile.metadata === "object" ? profile.metadata : {}
+  ) as Record<string, unknown>;
+  const avatarUrl =
+    typeof profileMeta.avatarUrl === "string" && profileMeta.avatarUrl.trim()
+      ? profileMeta.avatarUrl.trim()
+      : undefined;
+  const displayName = profile?.displayName || user?.name || userLabel?.split("@")[0] || "Traveler";
+  const userInitials = (displayName || "U")
     .split(" ")
     .map((n) => n[0])
     .join("")
@@ -551,11 +563,19 @@ export function SiteNav({
                         }
                   }
                 >
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-navy text-[11.5px] font-bold text-white shadow-xs">
-                    {userInitials}
+                  <div className="relative flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-navy text-[11.5px] font-bold text-white shadow-xs">
+                    {avatarUrl ? (
+                      <img
+                        src={avatarUrl}
+                        alt=""
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      userInitials
+                    )}
                   </div>
                   <span className="text-[13px] font-bold truncate max-w-28" style={{ color: "var(--navy)" }}>
-                    {user?.name || userLabel?.split("@")[0] || "Traveler"}
+                    {displayName}
                   </span>
                   <ChevronDown
                     size={12}
@@ -581,13 +601,21 @@ export function SiteNav({
                   >
                     {/* User Identity Card Header */}
                     <div className="flex items-center gap-3 p-3 mb-2 rounded-2xl bg-[#f8fafb] border border-black/6">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#0e1620] text-[13px] font-bold text-white shadow-sm ring-2 ring-sky/30">
-                        {userInitials}
+                      <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#0e1620] text-[13px] font-bold text-white shadow-sm ring-2 ring-sky/30">
+                        {avatarUrl ? (
+                          <img
+                            src={avatarUrl}
+                            alt=""
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          userInitials
+                        )}
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-1.5">
                           <p className="text-[13.5px] font-bold text-navy truncate">
-                            {user?.name || "Verified Traveler"}
+                            {displayName}
                           </p>
                           <span className="h-2 w-2 rounded-full bg-emerald shrink-0 ring-2 ring-emerald/20" />
                         </div>
@@ -785,9 +813,22 @@ export function SiteNav({
             <div className="mt-4 pt-4 border-t border-black/10">
               {isAuthenticated ? (
                 <div className="space-y-1">
-                  <div className="px-4 py-2 mb-2 rounded-2xl bg-black/5">
-                    <p className="text-[13px] font-bold text-navy">{user?.name || "Traveler"}</p>
-                    <p className="text-[11.5px] text-ink-faint">{user?.email}</p>
+                  <div className="flex items-center gap-3 px-4 py-2.5 mb-2 rounded-2xl bg-black/5">
+                    <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-navy text-[12px] font-bold text-white shadow-xs">
+                      {avatarUrl ? (
+                        <img
+                          src={avatarUrl}
+                          alt=""
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        userInitials
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[13px] font-bold text-navy truncate">{displayName}</p>
+                      <p className="text-[11.5px] text-ink-faint truncate">{user?.email}</p>
+                    </div>
                   </div>
                   <Link
                     href="/profile"

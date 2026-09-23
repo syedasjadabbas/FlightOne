@@ -88,6 +88,21 @@ export function readRefreshTokenFromRequest(req) {
   return null;
 }
 
+function isAllowedDevOrigin(origin) {
+  if (!origin) return true;
+  try {
+    const u = new URL(origin);
+    const h = u.hostname;
+    if (h === "localhost" || h === "127.0.0.1" || h === "0.0.0.0") return true;
+    if (/^192\.168\.\d{1,3}\.\d{1,3}$/.test(h)) return true;
+    if (/^10\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(h)) return true;
+    if (/^172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3}$/.test(h)) return true;
+  } catch {
+    return false;
+  }
+  return false;
+}
+
 /**
  * CSRF gate for cookie-based session mutation.
  * Skipped when the refresh token is supplied via body/header (non-cookie clients).
@@ -100,13 +115,26 @@ export function assertCookieAuthRequestAllowed(req, { usedCookie } = {}) {
 
   const allowed = parseCorsOrigins();
   const origin = String(req.headers?.origin || "").trim();
-  if (origin && (allowed.length === 0 || allowed.includes(origin))) return;
+  if (
+    origin &&
+    (allowed.length === 0 ||
+      allowed.includes(origin) ||
+      (process.env.NODE_ENV !== "production" && isAllowedDevOrigin(origin)))
+  ) {
+    return;
+  }
 
   const referer = String(req.headers?.referer || "").trim();
   if (referer) {
     try {
       const refOrigin = new URL(referer).origin;
-      if (allowed.length === 0 || allowed.includes(refOrigin)) return;
+      if (
+        allowed.length === 0 ||
+        allowed.includes(refOrigin) ||
+        (process.env.NODE_ENV !== "production" && isAllowedDevOrigin(refOrigin))
+      ) {
+        return;
+      }
     } catch {
       /* ignore */
     }

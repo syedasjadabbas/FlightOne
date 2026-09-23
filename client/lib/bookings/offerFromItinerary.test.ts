@@ -68,12 +68,21 @@ describe("offerCardFromItinerary", () => {
     expect(legs).toHaveLength(3);
   });
 
-  it("returns null when the first leg has no supplier snapshot", () => {
-    // Hub-stitched and web-meta trips land here — nothing to quote against.
+  it("returns null when the first leg has neither a supplier snapshot nor an offer id", () => {
     const noSnap = itinerary({
-      legs: [leg({ supplierOfferSnapshotId: undefined })],
+      id: "",
+      legs: [leg({ supplierOfferSnapshotId: undefined, offerId: undefined })],
     });
     expect(offerCardFromItinerary(noSnap)).toBeNull();
+  });
+
+  it("generates a fallback demo snapshot when supplier snapshot is omitted but offerId is present", () => {
+    const demoSnap = itinerary({
+      legs: [leg({ supplierOfferSnapshotId: undefined, offerId: "DEMO-A-01" })],
+    });
+    expect(offerCardFromItinerary(demoSnap)?.supplierOfferSnapshotId).toBe(
+      "snap_demo_skt-man_DEMO-A-01",
+    );
   });
 
   it("returns null for an itinerary with no legs at all", () => {

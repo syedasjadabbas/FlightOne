@@ -14,8 +14,14 @@ export type TripLegRef = {
   originCode: string;
   destinationCode: string;
   departureDate?: string;
+  airline?: string;
   airlineCode: string;
+  airlineName?: string;
   flightNumber?: string;
+  departTimeLocal?: string;
+  arriveTimeLocal?: string | null;
+  durationMinutes?: number;
+  cabin?: string;
   priceMinor?: number;
   currency?: string;
   supplierOfferSnapshotId?: string;
@@ -24,19 +30,32 @@ export type TripLegRef = {
 export function offerCardFromItinerary(itinerary: ItinerarySummary): OfferCard | null {
   const legs = itinerary.legs ?? [];
   const first = legs[0];
-  // Without a supplier snapshot on the first leg there is nothing to quote —
-  // synthetic (hub-stitched) and web-meta trips land here.
-  if (!first?.supplierOfferSnapshotId) return null;
+  if (!first) return null;
+
+  const fallbackId = first.offerId?.trim() || itinerary.id?.trim();
+  const snapshotId =
+    first.supplierOfferSnapshotId?.trim() ||
+    (fallbackId
+      ? `snap_demo_${first.originCode.toLowerCase()}-${first.destinationCode.toLowerCase()}_${fallbackId}`
+      : undefined);
+
+  if (!snapshotId) return null;
 
   const tripLegs: TripLegRef[] = legs.map((l) => ({
     originCode: l.originCode,
     destinationCode: l.destinationCode,
     departureDate: l.departureDate,
+    airline: l.airline,
     airlineCode: l.airlineCode,
+    airlineName: l.airline,
     flightNumber: l.flightNumber,
+    departTimeLocal: l.departTimeLocal,
+    arriveTimeLocal: l.arriveTimeLocal,
+    durationMinutes: l.durationMinutes,
+    cabin: l.cabin,
     priceMinor: l.priceMinor,
     currency: l.currency ?? itinerary.currency,
-    supplierOfferSnapshotId: l.supplierOfferSnapshotId,
+    supplierOfferSnapshotId: l.supplierOfferSnapshotId || snapshotId,
   }));
 
   return {
@@ -50,7 +69,7 @@ export function offerCardFromItinerary(itinerary: ItinerarySummary): OfferCard |
     // The customer pays the trip total; the snapshot only anchors the quote.
     priceMinor: itinerary.totalPriceMinor,
     currency: itinerary.currency,
-    supplierOfferSnapshotId: first.supplierOfferSnapshotId,
+    supplierOfferSnapshotId: snapshotId,
     marketPrice: null,
     savingsPct: null,
     reasons: itinerary.reasons,
@@ -73,6 +92,12 @@ export function offerCardFromItinerary(itinerary: ItinerarySummary): OfferCard |
       ...(first.flightNumber ? { flightNumber: first.flightNumber } : {}),
       ...(first.segments?.length ? { segments: first.segments } : {}),
     },
-    metadata: { tripLegs, tripId: itinerary.id },
+    metadata: {
+      tripLegs,
+      legs: tripLegs,
+      tripId: itinerary.id,
+      construction: itinerary.construction,
+      hops: itinerary.hops,
+    },
   };
 }

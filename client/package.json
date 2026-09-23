@@ -7,8 +7,8 @@
   },
   "scripts": {
     "build": "node ./scripts/next-with-realpath.mjs build",
-    "start": "node ./scripts/next-with-realpath.mjs start",
-    "dev": "node ./scripts/next-with-realpath.mjs dev",
+    "start": "node ./scripts/next-with-realpath.mjs start -H 0.0.0.0 -p 3000",
+    "dev": "node ./scripts/next-with-realpath.mjs dev -H 0.0.0.0 -p 3000",
     "lint": "eslint",
     "test": "vitest run --config vitest.config.mjs",
     "test:watch": "vitest --config vitest.config.mjs"

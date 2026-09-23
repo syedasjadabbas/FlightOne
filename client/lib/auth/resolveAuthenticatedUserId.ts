@@ -1,4 +1,4 @@
-import { API_BASE_URL, type ApiEnvelope } from "@/lib/api/baseApi";
+import { getApiBaseUrl, type ApiEnvelope } from "@/lib/api/baseApi";
 
 /**
  * Resolve the authenticated user from the incoming Authorization header by
@@ -8,7 +8,7 @@ export async function resolveAuthenticatedUserId(request: Request): Promise<stri
   const auth = request.headers.get("authorization");
   if (!auth?.toLowerCase().startsWith("bearer ")) return null;
   try {
-    const res = await fetch(`${API_BASE_URL}/auth/me`, {
+    const res = await fetch(`${getApiBaseUrl()}/auth/me`, {
       headers: { Authorization: auth, Accept: "application/json" },
       cache: "no-store",
     });

@@ -16,6 +16,7 @@ export type QuoteableOffer = {
   originCode?: string;
   destinationCode?: string;
   cabin?: string;
+  metadata?: Record<string, unknown>;
 };
 
 export type QuoteCorporateContext = {
@@ -29,10 +30,7 @@ export type ServerQuoteRequest = {
   supplierOfferSnapshotId: string;
   route?: string;
   cabin?: string;
-  metadata?: {
-    companyId?: string;
-    projectCodeId?: string;
-  };
+  metadata?: Record<string, unknown>;
 };
 
 export function offerHasQuoteSnapshot(offer: QuoteableOffer): boolean {
@@ -58,7 +56,9 @@ export function quotePayloadFromOffer(
 
   const companyId = corporate?.companyId?.trim() || undefined;
   const projectCodeId = corporate?.projectCodeId?.trim() || undefined;
-  const metadata: { companyId?: string; projectCodeId?: string } = {};
+  const metadata: Record<string, unknown> = {
+    ...(offer.metadata && typeof offer.metadata === "object" ? offer.metadata : {}),
+  };
   if (companyId) metadata.companyId = companyId;
   if (projectCodeId && companyId) metadata.projectCodeId = projectCodeId;
 

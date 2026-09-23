@@ -14,6 +14,66 @@ export const dynamic = "force-dynamic";
  * Returns null when minting fails, so the caller falls through to the normal
  * "no snapshot" 409 rather than surfacing a confusing demo-specific error.
  */
+function padHhmm(timeStr: unknown): string | undefined {
+  if (typeof timeStr !== "string" || !timeStr.trim()) return undefined;
+  const match = timeStr.trim().match(/^(\d{1,2}):(\d{2})/);
+  if (!match) return undefined;
+  const hours = match[1].padStart(2, "0");
+  const minutes = match[2];
+  return `${hours}:${minutes}`;
+}
+
+function cleanIsoDate(dateStr: unknown): string {
+  if (typeof dateStr === "string" && dateStr.trim()) {
+    const match = dateStr.trim().match(/^(\d{4}-\d{2}-\d{2})/);
+    if (match) return match[1];
+  }
+  return new Date().toISOString().slice(0, 10);
+}
+
+function cleanSegment(seg: any, defaultDate: string) {
+  if (!seg || typeof seg !== "object") return null;
+  const rawCarrier = String(seg.carrier ?? seg.airlineCode ?? seg.airline ?? "FL1").trim();
+  const carrier = (
+    rawCarrier.length > 3
+      ? (rawCarrier.match(/\b[A-Z0-9]{2,3}\b/i)?.[0] ?? rawCarrier.slice(0, 3))
+      : rawCarrier
+  ).toUpperCase();
+  const originCode = String(seg.originCode ?? "").trim().slice(0, 3).toUpperCase();
+  const destinationCode = String(seg.destinationCode ?? "").trim().slice(0, 3).toUpperCase();
+  if (originCode.length !== 3 || destinationCode.length !== 3) return null;
+
+  const departureDate = cleanIsoDate(seg.departureDate || defaultDate);
+  const arrivalDate = cleanIsoDate(seg.arrivalDate || departureDate);
+  const departTimeLocal = padHhmm(seg.departTimeLocal) || "08:00";
+  const arriveTimeLocal = padHhmm(seg.arriveTimeLocal) || "12:00";
+
+  return {
+    carrier,
+    flightNumber: String(seg.flightNumber ?? "FL100").slice(0, 10),
+    originCode,
+    destinationCode,
+    departureDate,
+    departTimeLocal,
+    arrivalDate,
+    arriveTimeLocal,
+    ...(typeof seg.durationMinutes === "number" && seg.durationMinutes >= 0
+      ? { durationMinutes: Math.round(seg.durationMinutes) }
+      : {}),
+    ...(typeof seg.layoverMinutesAfter === "number" && seg.layoverMinutesAfter >= 0
+      ? { layoverMinutesAfter: Math.round(seg.layoverMinutesAfter) }
+      : {}),
+    ...(seg.aircraft ? { aircraft: String(seg.aircraft).slice(0, 10) } : {}),
+    ...(seg.bookingClass ? { bookingClass: String(seg.bookingClass).slice(0, 3) } : {}),
+  };
+}
+
+/**
+ * Exchange an offline demo fare for a real SupplierOfferSnapshot row.
+ *
+ * Returns null when minting fails, so the caller falls through to the normal
+ * "no snapshot" 409 rather than surfacing a confusing demo-specific error.
+ */
 async function mintDemoSnapshot(
   input: Record<string, unknown>,
   auth: string,
@@ -22,9 +82,26 @@ async function mintDemoSnapshot(
   const netMinor = Number(input.priceMinor);
   if (!Number.isInteger(netMinor) || netMinor <= 0) return null;
 
-  const origin = String(flight.originCode ?? input.originCode ?? "").toUpperCase();
-  const destination = String(flight.destinationCode ?? input.destinationCode ?? "").toUpperCase();
+  const origin = String(flight.originCode ?? input.originCode ?? "").toUpperCase().slice(0, 3);
+  const destination = String(flight.destinationCode ?? input.destinationCode ?? "").toUpperCase().slice(0, 3);
   if (origin.length !== 3 || destination.length !== 3) return null;
+
+  const departureDate = cleanIsoDate(flight.departureDate);
+  const rawCarrier = String(flight.airlineCode ?? flight.airline ?? "FL1").trim();
+  const carrier = (
+    rawCarrier.length > 3
+      ? (rawCarrier.match(/\b[A-Z0-9]{2,3}\b/i)?.[0] ?? rawCarrier.slice(0, 3))
+      : rawCarrier
+  ).toUpperCase();
+
+  const departTimeLocal = padHhmm(flight.departTimeLocal);
+  const arriveTimeLocal = padHhmm(flight.arriveTimeLocal);
+
+  const rawSegments = Array.isArray(flight.segments) ? flight.segments : [];
+  const segments = rawSegments.map((s) => cleanSegment(s, departureDate)).filter(Boolean);
+
+  const rawReturnSegments = Array.isArray(flight.returnSegments) ? flight.returnSegments : [];
+  const returnSegments = rawReturnSegments.map((s) => cleanSegment(s, departureDate)).filter(Boolean);
 
   const res = await fetch(`${API_BASE_URL}/suppliers/demo-snapshot`, {
     method: "POST",
@@ -34,36 +111,36 @@ async function mintDemoSnapshot(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      offerId: String(input.id ?? ""),
+      offerId: String(input.id ?? `demo_${Date.now()}`),
       currency: String(input.currency ?? "PKR").toUpperCase().slice(0, 3),
       netMinor,
       product: input.type === "hotel" ? "HOTEL" : "FLIGHT",
       itinerary: {
         origin,
         destination,
-        departureDate: flight.departureDate ?? new Date().toISOString().slice(0, 10),
-        ...(input.returnDate ? { returnDate: input.returnDate } : {}),
-        ...(flight.cabin ? { cabin: String(flight.cabin) } : {}),
-        ...(flight.airlineCode ? { carrier: String(flight.airlineCode) } : {}),
-        ...(typeof flight.stops === "number" ? { stops: flight.stops } : {}),
-        ...(typeof flight.durationMinutes === "number"
-          ? { durationMinutes: flight.durationMinutes }
+        departureDate,
+        ...(input.returnDate ? { returnDate: cleanIsoDate(input.returnDate) } : {}),
+        ...(flight.cabin ? { cabin: String(flight.cabin).slice(0, 20) } : {}),
+        ...(carrier ? { carrier } : {}),
+        ...(typeof flight.stops === "number" ? { stops: Math.min(Math.max(0, flight.stops), 5) } : {}),
+        ...(typeof flight.durationMinutes === "number" && flight.durationMinutes > 0
+          ? { durationMinutes: Math.round(flight.durationMinutes) }
           : {}),
-        ...(flight.flightNumber ? { flightNumber: String(flight.flightNumber) } : {}),
-        ...(flight.departTimeLocal ? { departTimeLocal: String(flight.departTimeLocal) } : {}),
-        ...(flight.arriveTimeLocal ? { arriveTimeLocal: String(flight.arriveTimeLocal) } : {}),
-        // Sectors are what the e-ticket prints — without them the issued
-        // ticket shows an origin/destination pair with blank times.
-        ...(Array.isArray(flight.segments) ? { segments: flight.segments } : {}),
-        ...(Array.isArray(flight.returnSegments)
-          ? { returnSegments: flight.returnSegments }
-          : {}),
+        ...(flight.flightNumber ? { flightNumber: String(flight.flightNumber).slice(0, 10) } : {}),
+        ...(departTimeLocal ? { departTimeLocal } : {}),
+        ...(arriveTimeLocal ? { arriveTimeLocal } : {}),
+        ...(segments.length > 0 ? { segments } : {}),
+        ...(returnSegments.length > 0 ? { returnSegments } : {}),
       },
     }),
     cache: "no-store",
   });
 
-  if (!res.ok) return null;
+  if (!res.ok) {
+    const errorText = await res.text().catch(() => "");
+    console.error("[mintDemoSnapshot] Failed to mint demo snapshot:", res.status, errorText);
+    return null;
+  }
   const json = (await res.json().catch(() => null)) as
     | { data?: { supplierOfferSnapshotId?: string } }
     | null;

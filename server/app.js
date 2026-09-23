@@ -69,22 +69,46 @@ const app = express();
 app.set("trust proxy", 1);
 app.set("env", process.env.NODE_ENV || "development");
 
-const corsOrigin = process.env.CORS_ORIGIN
-  ? process.env.CORS_ORIGIN.split(",").map((s) => s.trim()).filter(Boolean)
-  : isProductionEnv()
-    ? []
-    : true;
+function isAllowedDevOrigin(origin) {
+  if (!origin) return true;
+  try {
+    const u = new URL(origin);
+    const h = u.hostname;
+    if (h === "localhost" || h === "127.0.0.1" || h === "0.0.0.0") return true;
+    if (/^192\.168\.\d{1,3}\.\d{1,3}$/.test(h)) return true;
+    if (/^10\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(h)) return true;
+    if (/^172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3}$/.test(h)) return true;
+  } catch {
+    return false;
+  }
+  return false;
+}
 
-if (isProductionEnv() && (!Array.isArray(corsOrigin) || corsOrigin.length === 0)) {
+const explicitCorsOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(",").map((s) => s.trim()).filter(Boolean)
+  : [];
+
+if (isProductionEnv() && explicitCorsOrigins.length === 0) {
   console.error(
     "Unsafe production configuration:\n- CORS_ORIGIN must list real frontend origin(s)",
   );
   process.exit(1);
 }
 
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (explicitCorsOrigins.includes(origin)) return callback(null, true);
+    if (!isProductionEnv() && isAllowedDevOrigin(origin)) return callback(null, true);
+    if (isProductionEnv()) return callback(new AppError(403, "Not allowed by CORS"));
+    return callback(null, true);
+  },
+  credentials: true,
+};
+
 app.use(helmet());
 app.use(compressionMiddleware());
-app.use(cors({ origin: corsOrigin, credentials: true }));
+app.use(cors(corsOptions));
 app.use(requestContext);
 app.use(requestTiming);
 app.use(morgan(isProductionEnv() ? "combined" : "dev"));

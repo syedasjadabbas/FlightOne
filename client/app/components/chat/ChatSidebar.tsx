@@ -19,6 +19,7 @@ import {
   Plane,
 } from "lucide-react";
 import { useAuthStore } from "@/store/auth.store";
+import { useGetProfileQuery } from "@/lib/api/profile.api";
 import type { ConversationSummary } from "@/lib/api/conversations.api";
 import { requestConversationEscalation } from "@/lib/ask-ai/persistConversation";
 
@@ -215,15 +216,29 @@ export function ChatSidebar({
     setMenuOpenId(null);
   };
 
+  const hasHydrated = useAuthStore((s) => s.hasHydrated);
+  const { data: profile } = useGetProfileQuery(undefined, {
+    skip: !hasHydrated || !accessToken,
+  });
+
+  const profileMeta = (
+    profile?.metadata && typeof profile.metadata === "object" ? profile.metadata : {}
+  ) as Record<string, unknown>;
+  const avatarUrl =
+    typeof profileMeta.avatarUrl === "string" && profileMeta.avatarUrl.trim()
+      ? profileMeta.avatarUrl.trim()
+      : undefined;
+
+  const displayName = profile?.displayName || user?.name || "Traveller";
   const userInitials = useMemo(() => {
-    if (!user?.name) return "U";
-    return user.name
+    if (!displayName) return "U";
+    return displayName
       .split(" ")
       .map((n) => n[0])
       .slice(0, 2)
       .join("")
       .toUpperCase();
-  }, [user?.name]);
+  }, [displayName]);
 
   return (
     <>
@@ -567,12 +582,20 @@ export function ChatSidebar({
                 className="flex min-w-0 items-center gap-2.5 rounded-xl p-1.5 transition-colors duration-150 hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sky)]/40"
                 title="View Profile"
               >
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--sky-solid)] text-[12px] font-bold text-white">
-                  {userInitials}
+                <div className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--sky-solid)] text-[12px] font-bold text-white">
+                  {avatarUrl ? (
+                    <img
+                      src={avatarUrl}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    userInitials
+                  )}
                 </div>
                 <div className="min-w-0">
                   <p className="truncate text-[13px] font-semibold leading-tight text-slate-200">
-                    {user.name || "Traveller"}
+                    {displayName}
                   </p>
                   <p className="truncate text-[12px] leading-tight text-slate-400">{user.email}</p>
                 </div>

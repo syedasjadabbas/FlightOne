@@ -1,114 +1,145 @@
 "use client";
 
+import { useState } from "react";
+import { Plane } from "lucide-react";
+import type { FlightSegment } from "@/lib/inventory/types";
 import type { ItinerarySummary } from "@/lib/consultant/types";
+import {
+  formatDayLabel,
+  formatDurationLabel,
+  stopsLabel,
+} from "../flightOfferFormat";
+import { formatBaggageAllowance, fareFamilyLabel } from "@/lib/inventory/fareDisplay";
+import { FlightTimeline } from "@/components/travel/FlightTimeline";
+import { AirlineMark } from "./ResultsVisual";
+import { DoodleStamp } from "@/components/travel/TravelDoodles";
 
-const ANGLE_LABEL: Record<string, string> = {
-  best_value: "Best",
-  cheapest: "Cheapest",
-  fastest: "Fastest",
-  premium: "Premium",
-  top_rated: "Top rated",
-  recommended: "Recommended",
+const ANGLE_BADGE: Record<string, { label: string; tone: "best" | "cheap" | "value" | "other" }> = {
+  best_value: { label: "Best", tone: "best" },
+  recommended: { label: "Best", tone: "best" },
+  cheapest: { label: "Cheapest", tone: "cheap" },
+  fastest: { label: "Fastest", tone: "other" },
+  premium: { label: "Premium", tone: "other" },
+  top_rated: { label: "Good value", tone: "value" },
 };
 
-function formatDuration(minutes: number): string {
-  if (minutes <= 0) return "—";
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
-  if (h === 0) return `${m}m`;
-  if (m === 0) return `${h}h`;
-  return `${h}h ${m}m`;
-}
-
-function AirlineMark({ code }: { code: string }) {
+function AngleBadge({ angle }: { angle: string }) {
+  const badge = ANGLE_BADGE[angle] ?? { label: angle, tone: "other" as const };
   return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={`https://images.kiwi.com/airlines/32/${code}.png`}
-      alt=""
-      width={28}
-      height={28}
-      className="rounded-md bg-white object-contain p-0.5"
-      onError={(e) => {
-        e.currentTarget.style.display = "none";
-        const sibling = e.currentTarget.nextElementSibling as HTMLElement | null;
-        if (sibling) sibling.hidden = false;
-      }}
-    />
+    <span className={`flight-result-badge flight-result-badge--${badge.tone}`}>
+      {badge.label}
+    </span>
   );
 }
 
-function LegRow({
-  leg,
-  index,
-  isLast,
+function isFeaturedOffer(angle: string): boolean {
+  return angle === "best_value" || angle === "recommended";
+}
+
+function legSegmentList(leg: NonNullable<ItinerarySummary["legs"]>[number]): FlightSegment[] {
+  if (leg.segments?.length) return leg.segments;
+  return [
+    {
+      carrier: leg.airlineCode,
+      flightNumber: leg.flightNumber ?? "",
+      aircraft: leg.aircraft ?? null,
+      originCode: leg.originCode,
+      destinationCode: leg.destinationCode,
+      departureDate: leg.departureDate ?? "",
+      departTimeLocal: leg.departTimeLocal,
+      arrivalDate: leg.departureDate ?? "",
+      arriveTimeLocal: leg.arriveTimeLocal ?? "",
+      durationMinutes: leg.durationMinutes,
+    },
+  ];
+}
+
+function ItineraryDetails({
+  itinerary,
+  onSelect,
 }: {
-  leg: NonNullable<ItinerarySummary["legs"]>[number];
-  index: number;
-  isLast: boolean;
+  itinerary: ItinerarySummary;
+  onSelect?: (itinerary: ItinerarySummary) => void;
 }) {
+  const legs = itinerary.legs ?? [];
+  const isMultiTicket = itinerary.construction === "multiple_tickets";
+
+  const benefits: string[] = [
+    isMultiTicket ? "Separate tickets (self-transfer)" : "Single through-ticket",
+  ];
+  if (legs.some((l) => l.refundable)) benefits.push("Refundable options");
+  const baggageSet = new Set(
+    legs
+      .map((l) => formatBaggageAllowance(undefined, l.baggageKg))
+      .filter((b): b is string => Boolean(b && b.trim())),
+  );
+  if (baggageSet.size > 0) {
+    benefits.push([...baggageSet].join(" · "));
+  }
+
+  const parts = itinerary.totalPrice.trim().split(/\s+/);
+  const priceCode = parts.length > 1 ? parts[0] : itinerary.currency;
+  const priceAmount = parts.length > 1 ? parts.slice(1).join(" ") : itinerary.totalPrice;
+
   return (
-    <div className="trip-leg-row group relative">
-      {!isLast ? (
-        <span
-          className="trip-leg-row__connector absolute left-[13px] top-[2rem] bottom-0 w-px bg-[var(--line)]"
-          aria-hidden
-        />
-      ) : null}
+    <div className="flight-result-details">
+      <div className="space-y-5">
+        {legs.map((leg, i) => {
+          const segments = legSegmentList(leg);
+          const dayLabel = leg.departureDate ? formatDayLabel(leg.departureDate) : null;
+          return (
+            <div key={`${leg.originCode}-${leg.destinationCode}-${i}`} className="space-y-2.5">
+              <div className="flex items-baseline justify-between gap-2 border-b border-[var(--line)]/60 pb-1.5">
+                <span className="text-[12px] font-semibold text-[var(--navy)]">
+                  Flight {i + 1}: {leg.originCode} → {leg.destinationCode}
+                </span>
+                {dayLabel ? (
+                  <span className="text-[12px] text-[var(--ink-soft)]">{dayLabel}</span>
+                ) : null}
+              </div>
+              <FlightTimeline
+                segments={segments}
+                hubStitched={isMultiTicket}
+                variant="compact"
+              />
+            </div>
+          );
+        })}
+      </div>
 
-      <div className="relative flex gap-3 py-2.5 sm:grid sm:grid-cols-[auto_1fr_auto] sm:items-center sm:gap-4">
-        <div className="flex shrink-0 items-center gap-2 sm:flex-col sm:gap-1">
-          <span className="relative flex h-7 w-7 items-center justify-center overflow-hidden rounded-lg ring-1 ring-[var(--line)]">
-            <AirlineMark code={leg.airlineCode} />
-            <span
-              hidden
-              className="absolute inset-0 flex items-center justify-center bg-[var(--mist)] text-[9px] font-bold text-[var(--signal)]"
-            >
-              {leg.airlineCode.slice(0, 2)}
-            </span>
-          </span>
-          <span className="hidden text-[10px] font-medium text-[var(--ink-faint)] sm:block">
-            Leg {index + 1}
-          </span>
-        </div>
-
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
-            <p className="font-mono text-[13px] font-semibold tracking-tight text-[var(--ink)]">
-              {leg.originCode}
-              <span className="mx-1.5 text-[var(--ink-faint)]">→</span>
-              {leg.destinationCode}
-            </p>
-            <p className="text-[12px] tabular-nums text-[var(--ink-soft)]">
-              {leg.departTimeLocal}
-              {leg.arriveTimeLocal ? (
-                <>
-                  <span className="mx-1 text-[var(--ink-faint)]">–</span>
-                  {leg.arriveTimeLocal}
-                </>
-              ) : null}
-            </p>
+      <div className="flight-result-details__fare-strip mt-3">
+        <div className="flight-result-details__fare-info">
+          <div className="flight-result-details__fare-head">
+            <DoodleStamp className="flight-result-details__fare-doodle" />
+            <p className="flight-result-details__fare-label">Complete trip fare</p>
           </div>
-          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-[var(--ink-soft)]">
-            <span>{leg.airline}</span>
-            <span className="text-[var(--ink-faint)]">·</span>
-            <span>
-              {leg.stops <= 0 ? "Nonstop" : leg.stops === 1 ? "1 stop" : `${leg.stops} stops`}
-            </span>
-            {leg.stopCodes?.map((code) => (
-              <span
-                key={code}
-                className="rounded bg-[var(--mist)] px-1.5 py-px font-mono text-[10px] font-medium text-[var(--ink-soft)]"
-              >
-                {code}
-              </span>
+          <ul className="flight-result-details__benefits">
+            {benefits.map((row) => (
+              <li key={row}>{row}</li>
             ))}
-          </div>
+          </ul>
+          <span className="flight-result-row__fare-count">
+            {legs.length} flights combined in this itinerary
+          </span>
         </div>
+        <div className="flight-result-details__price-block">
+          {priceCode ? (
+            <span className="flight-result-row__price-code">{priceCode}</span>
+          ) : null}
+          <span className="flight-result-details__fare-price">{priceAmount}</span>
+        </div>
+      </div>
 
-        <p className="shrink-0 self-start text-[12px] font-medium tabular-nums text-[var(--ink-soft)] sm:self-center">
-          {formatDuration(leg.durationMinutes)}
-        </p>
+      <div className="flight-result-details__footer">
+        {onSelect ? (
+          <button
+            type="button"
+            onClick={() => onSelect(itinerary)}
+            className="flight-result-details__link cursor-pointer"
+          >
+            Full details & booking →
+          </button>
+        ) : null}
       </div>
     </div>
   );
@@ -123,96 +154,173 @@ export function ItinerarySummaryCard({
   index?: number;
   onSelect?: (itinerary: ItinerarySummary) => void;
 }) {
-  const angle = ANGLE_LABEL[itinerary.angle] ?? itinerary.angle;
+  const [expanded, setExpanded] = useState(false);
   const isMultiTicket = itinerary.construction === "multiple_tickets";
   const hasMarketReference =
     itinerary.hasMarketReferenceLeg ||
     (itinerary.legs?.some((leg) => leg.marketReference) ?? false);
   const legs = itinerary.legs ?? [];
+  const featured = isFeaturedOffer(itinerary.angle);
+
   const parts = itinerary.totalPrice.trim().split(/\s+/);
-  const currency = parts.length > 1 ? parts[0] : itinerary.currency;
-  const amount = parts.length > 1 ? parts.slice(1).join(" ") : itinerary.totalPrice;
-  const totalDuration = legs.reduce((sum, leg) => sum + (leg.durationMinutes || 0), 0);
+  const priceCode = parts.length > 1 ? parts[0] : "";
+  const priceAmount = parts.length > 1 ? parts.slice(1).join(" ") : itinerary.totalPrice;
 
   return (
     <article
-      className="trip-card offer-enter offer-surface w-full overflow-hidden rounded-2xl border border-transparent bg-[var(--surface)]"
-      style={{
-        animationDelay: `${60 + index * 50}ms`,
-        boxShadow: "var(--shadow-soft), inset 0 1px 0 #ffffff",
-      }}
+      className={`flight-result-row offer-enter${featured ? " flight-result-row--featured" : ""}${
+        expanded ? " flight-result-row--expanded" : ""
+      }`}
+      style={{ animationDelay: `${20 + Math.min(index, 16) * 25}ms` }}
     >
-      {/* Header — badges + price across full width */}
-      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[var(--line)]/80 px-4 py-3 sm:px-5">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="rounded-md bg-[var(--signal)]/14 px-2 py-0.5 text-[11px] font-semibold text-[var(--signal-bright)]">
-            {angle}
-          </span>
-          {isMultiTicket ? (
-            <span className="rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium text-amber-800">
-              Self-transfer
-            </span>
-          ) : null}
-          {hasMarketReference ? (
-            <span className="rounded-md border border-sky-500/30 bg-sky-500/10 px-2 py-0.5 text-[11px] font-medium text-sky-800">
-              Market reference
-            </span>
-          ) : null}
-          {!itinerary.constraintsSatisfied ? (
-            <span className="text-[11px] font-medium text-[var(--ember-soft)]">Partial match</span>
-          ) : null}
-          {totalDuration > 0 ? (
-            <span className="text-[11px] tabular-nums text-[var(--ink-faint)]">
-              {formatDuration(totalDuration)} total
-            </span>
-          ) : null}
-        </div>
-        <div className="text-right">
-          <p className="text-[10px] font-medium uppercase tracking-wide text-[var(--ink-faint)]">
-            {currency}
-          </p>
-          <p className="offer-price text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[var(--ink)] sm:text-[1.5rem]">
-            {amount}
-          </p>
-        </div>
+      <div className="flight-result-row__main">
+        <button
+          type="button"
+          className="flight-result-row__expand-hit text-left"
+          onClick={() => setExpanded((v) => !v)}
+          aria-expanded={expanded}
+          aria-controls={`trip-details-${itinerary.id}`}
+        >
+          {legs.length > 0 ? (
+            legs.map((leg, legIdx) => {
+              const duration = formatDurationLabel(leg.durationMinutes, "short");
+              const baggage = formatBaggageAllowance(undefined, leg.baggageKg);
+              const segments = legSegmentList(leg);
+              const viaCode =
+                leg.stops > 0 && segments.length > 0
+                  ? segments[0]?.destinationCode
+                  : leg.stopCodes?.[0] ?? null;
+              const stopsText =
+                viaCode && leg.stops > 0
+                  ? `${stopsLabel(leg.stops)} · ${viaCode}`
+                  : stopsLabel(leg.stops);
+
+              const cabinText =
+                fareFamilyLabel(undefined, leg.cabin) ??
+                (leg.cabin === "business"
+                  ? "Business"
+                  : leg.cabin === "premium"
+                    ? "Premium Economy"
+                    : "Economy");
+
+              const dayLabel = leg.departureDate ? formatDayLabel(leg.departureDate) : null;
+              const metaItems = [dayLabel, cabinText, baggage].filter(Boolean) as string[];
+
+              return (
+                <div
+                  key={`${leg.originCode}-${leg.destinationCode}-${legIdx}`}
+                  className={`flight-result-row__scan${
+                    legIdx > 0 ? " pt-4 mt-4 border-t border-[var(--line)]/60" : ""
+                  }`}
+                >
+                  <div className="flight-result-row__col flight-result-row__col--airline">
+                    <div className="flight-result-row__identity">
+                      <AirlineMark code={leg.airlineCode} />
+                      <div className="flight-result-row__identity-text">
+                        {legIdx === 0 ? <AngleBadge angle={itinerary.angle} /> : null}
+                        <span className="flight-result-row__airline">{leg.airline}</span>
+                        {leg.flightNumber ? (
+                          <span className="flight-result-row__fn tabular-nums">
+                            {leg.flightNumber}
+                          </span>
+                        ) : null}
+                      </div>
+                    </div>
+                    {legIdx === 0 && (isMultiTicket || hasMarketReference) && (
+                      <div className="flight-result-row__tags">
+                        {isMultiTicket ? (
+                          <span className="flight-result-row__tag">Self-transfer</span>
+                        ) : null}
+                        {hasMarketReference ? (
+                          <span className="flight-result-row__tag">Market ref</span>
+                        ) : null}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flight-result-row__col flight-result-row__col--dep">
+                    <span className="flight-result-row__time tabular-nums">
+                      {leg.departTimeLocal}
+                    </span>
+                    <span className="flight-result-row__code">{leg.originCode}</span>
+                  </div>
+
+                  <div className="flight-result-row__col flight-result-row__col--mid">
+                    <span className="flight-result-row__dur">{duration}</span>
+                    <span className="flight-result-row__line" aria-hidden>
+                      <span className="flight-result-row__line-dot flight-result-row__line-dot--start" />
+                      <span className="flight-result-row__line-track" />
+                      <span className="flight-result-row__line-plane" aria-hidden>
+                        <Plane className="flight-result-row__line-plane-icon" aria-hidden />
+                      </span>
+                      <span className="flight-result-row__line-dot flight-result-row__line-dot--end" />
+                    </span>
+                    <span className="flight-result-row__stops">{stopsText}</span>
+                  </div>
+
+                  <div className="flight-result-row__col flight-result-row__col--arr">
+                    <span className="flight-result-row__time tabular-nums">
+                      {leg.arriveTimeLocal ?? "—"}
+                    </span>
+                    <span className="flight-result-row__code">{leg.destinationCode}</span>
+                  </div>
+
+                  <div className="flight-result-row__col flight-result-row__col--meta">
+                    <div className="flight-result-row__meta">
+                      {metaItems.map((item, i) => (
+                        <span key={i} className="flight-result-row__meta-item">
+                          {i > 0 ? (
+                            <span className="flight-result-row__meta-dot" aria-hidden>
+                              ·
+                            </span>
+                          ) : null}
+                          <span>{item}</span>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <div className="p-3 text-[13px] text-[var(--ink-soft)]">
+              {itinerary.hops.join(" → ")}
+            </div>
+          )}
+        </button>
       </div>
 
-      {/* Legs — full width timeline */}
-      <div className="px-4 py-1 sm:px-5">
-        {legs.length > 0 ? (
-          legs.map((leg, i) => (
-            <LegRow
-              key={`${leg.originCode}-${leg.destinationCode}-${i}`}
-              leg={leg}
-              index={i}
-              isLast={i === legs.length - 1}
-            />
-          ))
-        ) : (
-          <p className="py-3 text-[13px] leading-relaxed text-[var(--ink-soft)]">
-            {itinerary.hops.join(" → ")}
-          </p>
-        )}
+      <div className="flight-result-row__aside">
+        <div className="flight-result-row__price">
+          <span className="flight-result-row__price-label">YOUR FARE</span>
+          <div className="flight-result-row__price-val">
+            {priceCode ? (
+              <span className="flight-result-row__price-code">{priceCode}</span>
+            ) : null}
+            <span className="offer-price flight-result-row__price-amount">{priceAmount}</span>
+            <span className="flight-result-row__fare-count">
+              {legs.length} flights · {isMultiTicket ? "Separate tickets" : "1 ticket"}
+            </span>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => onSelect?.(itinerary)}
+          className="flight-result-row__cta focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/40 focus-visible:ring-offset-1"
+        >
+          View deal
+          <span aria-hidden>→</span>
+        </button>
       </div>
 
-      {/* Footer — CTA spans card width */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--line)]/80 px-4 py-3 sm:px-5">
-        <p className="text-[12px] text-[var(--ink-soft)]">
-          {isMultiTicket ? "Separate tickets · allow time between legs" : "Single ticket"}
-        </p>
-        {onSelect ? (
-          <button
-            type="button"
-            onClick={() => onSelect(itinerary)}
-            className="book-btn min-w-[9rem] flex-1 cursor-pointer rounded-full bg-[var(--sky-solid)] px-4 py-2.5 text-[13px] font-semibold tracking-[-0.01em] text-white hover:bg-[color-mix(in_oklab,var(--electric)_90%,var(--navy))] sm:flex-none sm:px-6"
-          >
-            View deal
-          </button>
-        ) : (
-          <span className="inline-flex min-w-[9rem] flex-1 items-center justify-center rounded-full bg-[var(--sky-solid)] px-4 py-2.5 text-[13px] font-semibold text-white sm:flex-none">
-            View deal
-          </span>
-        )}
+      <div
+        id={`trip-details-${itinerary.id}`}
+        className={`flight-result-row__expand-panel${expanded ? " is-open" : ""}`}
+        aria-hidden={!expanded}
+      >
+        <div className="flight-result-row__expand-inner">
+          {expanded ? <ItineraryDetails itinerary={itinerary} onSelect={onSelect} /> : null}
+        </div>
       </div>
     </article>
   );

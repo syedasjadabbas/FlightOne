@@ -116,7 +116,7 @@ describe("canShowResultsWorkspace", () => {
     ).toBe(false);
   });
 
-  it("true when offers exist", () => {
+  it("true when offers exist and not busy", () => {
     expect(
       canShowResultsWorkspace({
         searchPanel: liveResultsPanel,
@@ -125,5 +125,16 @@ describe("canShowResultsWorkspace", () => {
         searchPhase: "done",
       }),
     ).toBe(true);
+  });
+
+  it("false while Ava is busy processing", () => {
+    expect(
+      canShowResultsWorkspace({
+        searchPanel: liveResultsPanel,
+        resultCount: 1,
+        busy: true,
+        searchPhase: "search",
+      }),
+    ).toBe(false);
   });
 });

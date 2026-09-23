@@ -14,8 +14,37 @@ import { formatApiError } from "./formatApiError";
  * `createApi` instance, or the cache/tag system splits.
  */
 
-export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8084/api/v1";
+export function getApiBaseUrl(): string {
+  if (typeof window !== "undefined") {
+    const hostname = window.location.hostname;
+    const protocol = window.location.protocol;
+    const defaultPort = "8084";
+
+    if (process.env.NEXT_PUBLIC_API_URL) {
+      try {
+        const url = new URL(process.env.NEXT_PUBLIC_API_URL);
+        if (
+          hostname &&
+          (url.hostname === "localhost" ||
+            url.hostname === "127.0.0.1" ||
+            /^192\.168\./.test(url.hostname) ||
+            /^10\./.test(url.hostname) ||
+            /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(url.hostname))
+        ) {
+          const apiPort = url.port || defaultPort;
+          return `${protocol}//${hostname}:${apiPort}${url.pathname.replace(/\/$/, "")}`;
+        }
+        return process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, "");
+      } catch {
+        /* ignore invalid URL format and fall through */
+      }
+    }
+    return `${protocol}//${hostname}:${defaultPort}/api/v1`;
+  }
+  return (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8084/api/v1").replace(/\/$/, "");
+}
+
+export const API_BASE_URL = getApiBaseUrl();
 
 /** The server's fixed response envelope: `{ success, message, data }`. */
 export interface ApiEnvelope<T> {
@@ -27,22 +56,12 @@ export interface ApiEnvelope<T> {
 /** CSRF header required for cookie-authenticated auth POSTs (cross-origin safe). */
 export const CSRF_HEADER = "X-FlightOne-CSRF";
 
-const rawBaseQuery = fetchBaseQuery({
-  baseUrl: API_BASE_URL,
-  credentials: "include",
-  prepareHeaders: (headers) => {
-    const { accessToken } = useAuthStore.getState();
-    if (accessToken) headers.set("Authorization", `Bearer ${accessToken}`);
-    headers.set(CSRF_HEADER, "1");
-    return headers;
-  },
-});
-
 /**
  * Wraps `fetchBaseQuery` to:
- *  1. unwrap the `{ success, message, data }` envelope so every endpoint's
+ *  1. dynamically target the matching backend origin on localhost or LAN,
+ *  2. unwrap the `{ success, message, data }` envelope so every endpoint's
  *     `query`/`transformResponse` just deals in plain response shapes,
- *  2. on a 401, attempt exactly one `/auth/refresh` + retry (dev guide §3);
+ *  3. on a 401, attempt exactly one `/auth/refresh` + retry (dev guide §3);
  *     if that fails, clear the session so the next protected navigation
  *     bounces to `/login` via `proxy.ts`.
  */
@@ -51,6 +70,18 @@ const baseQueryWithReauth: BaseQueryFn<
   unknown,
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
+  const currentBaseUrl = getApiBaseUrl();
+  const rawBaseQuery = fetchBaseQuery({
+    baseUrl: currentBaseUrl,
+    credentials: "include",
+    prepareHeaders: (headers) => {
+      const { accessToken } = useAuthStore.getState();
+      if (accessToken) headers.set("Authorization", `Bearer ${accessToken}`);
+      headers.set(CSRF_HEADER, "1");
+      return headers;
+    },
+  });
+
   let result = await rawBaseQuery(args, api, extraOptions);
 
   if (result.error?.status === 401) {

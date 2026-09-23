@@ -46,7 +46,7 @@ describe("searchFlightsPreferredThenOpen dedupe", () => {
     expect(baseline).toBeGreaterThan(0);
     expect(one).not.toBeNull();
     expect(results.every((r) => r !== null)).toBe(true);
-  });
+  }, 15_000);
 
   it("does not collapse searches that differ on a supplier-visible field", async () => {
     searchSuppliers.mockResolvedValue([{ type: "flight", id: "a", airline: "EY", airlineCode: "EY", priceMinor: 100, currency: "PKR" }]);

@@ -1541,7 +1541,7 @@
   border-radius: 0;
   border-bottom: 1px solid color-mix(in oklab, var(--line) 60%, transparent);
   background: var(--white);
-  padding: 1rem var(--fo-page-gutter);
+  padding: 1.35rem var(--fo-page-gutter);
   cursor: pointer;
   transition:
     background 0.15s ease,
@@ -1713,14 +1713,14 @@
 .flight-result-row__identity {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.65rem;
 }
 
 .flight-result-row__identity-text {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.25rem 0.4rem;
+  gap: 0.35rem 0.5rem;
   min-width: 0;
 }
 
@@ -2081,7 +2081,7 @@
 .fo-detail-hero {
   position: relative;
   z-index: 1;
-  max-width: 28rem;
+  max-width: min(100%, 46rem);
   padding-top: 0.35rem;
   animation: fo-detail-hero-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
@@ -2108,8 +2108,9 @@
 
 .fo-detail-hero__route {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
-  gap: 0.55rem;
+  gap: 0.35rem 0.55rem;
   font-family: var(--font-hero, var(--font-sora), sans-serif);
   font-size: clamp(2.1rem, 6vw, 3.25rem);
   font-weight: 700;
@@ -2131,7 +2132,7 @@
   margin: 0.45rem 0 0;
   font-size: 1rem;
   color: var(--ink-soft);
-  max-width: 22rem;
+  max-width: 38rem;
 }
 
 .fo-detail-hero__chips {

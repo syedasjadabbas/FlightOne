@@ -221,7 +221,15 @@ export function CheckoutBookingSummary({
     | { creditMinor?: number; points?: number }
     | undefined;
 
-  const hasRoute = Boolean(originCode && destCode);
+  const multiCityLegs: Record<string, any>[] = Array.isArray(meta.tripLegs)
+    ? meta.tripLegs
+    : Array.isArray(meta.legs) && meta.legs.length > 1
+      ? meta.legs
+      : Array.isArray(itin.legs) && itin.legs.length > 1
+        ? itin.legs
+        : [];
+
+  const hasRoute = Boolean(originCode && destCode) || multiCityLegs.length > 0;
 
   return (
     <div className="flex flex-col gap-4">
@@ -239,7 +247,44 @@ export function CheckoutBookingSummary({
           </Link>
         </div>
 
-        {hasRoute ? (
+        {multiCityLegs.length > 1 ? (
+          <div className="space-y-3">
+            {multiCityLegs.map((leg, i) => {
+              const legOrigin = leg.originCode || originCode || "—";
+              const legDest = leg.destinationCode || destCode || "—";
+              const legAirlineCode = leg.airlineCode || airlineCode;
+              const legAirlineTitle =
+                metaString(leg, "airlineName") || getAirlineName(legAirlineCode);
+              const legFlightNum = leg.flightNumber || (i === 0 ? flightNum : null);
+              const legDepart =
+                leg.departTime || leg.departTimeLocal || (i === 0 ? departTime : null);
+              const legArrive =
+                leg.arriveTime || leg.arriveTimeLocal || (i === 0 ? arriveTime : null);
+              const legDate = formatDisplayDate(
+                leg.departureDate || (i === 0 ? meta.departureDate : null),
+              );
+              const legDur =
+                metaString(leg, "duration") ||
+                formatMinutes(leg.durationMinutes) ||
+                (i === 0 ? duration : null);
+              return (
+                <FlightLeg
+                  key={`${legOrigin}-${legDest}-${i}`}
+                  originCode={legOrigin}
+                  destCode={legDest}
+                  airlineCode={legAirlineCode}
+                  airlineTitle={legAirlineTitle}
+                  flightNum={legFlightNum}
+                  cabinText={cabinText}
+                  departTime={legDepart}
+                  arriveTime={legArrive}
+                  dateLabel={legDate}
+                  duration={legDur}
+                />
+              );
+            })}
+          </div>
+        ) : hasRoute ? (
           <div className="space-y-3">
             <FlightLeg
               originCode={originCode!}

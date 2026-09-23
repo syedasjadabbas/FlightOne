@@ -8,9 +8,9 @@ import { LoadingRouteTrack } from "@/components/travel/TravelDoodles";
 type DeskStepId = "extract" | "search" | "reply";
 
 const DESK_STEPS: ReadonlyArray<{ id: DeskStepId; label: string }> = [
-  { id: "extract", label: "Read trip" },
-  { id: "search", label: "Search fares" },
-  { id: "reply", label: "Write reply" },
+  { id: "extract", label: "Read request" },
+  { id: "search", label: "Review options" },
+  { id: "reply", label: "Prepare answer" },
 ];
 
 function phaseRank(phase: SearchPhase): number {
@@ -55,20 +55,20 @@ export function loadingBubbleCopy(
     case "search":
       return {
         primary: route
-          ? `Searching live fares (${route})…`
-          : "Searching live fares…",
-        secondary: "Building complete trips",
+          ? `Reviewing available options (${route})…`
+          : "Reviewing available options…",
+        secondary: "Matching schedules & fares",
       };
     case "reply":
       return {
-        primary: "Writing reply…",
+        primary: "Preparing your answer…",
         secondary: "Packaging options for you",
       };
     case "extract":
     default:
       return {
-        primary: "Reading your trip…",
-        secondary: "Cities, dates & travellers",
+        primary: "Reading your request…",
+        secondary: "Understanding dates & preferences",
       };
   }
 }

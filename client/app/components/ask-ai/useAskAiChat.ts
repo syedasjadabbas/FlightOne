@@ -27,6 +27,7 @@ import {
   routeCodesFromTravelPlan,
   type LoadingRouteCodes,
 } from "@/lib/ask-ai/loadingRoute";
+import { getPhaseSchedule } from "@/lib/ask-ai/processingTiming";
 import {
   clearChatHandoff,
   loadChatHandoff,
@@ -89,6 +90,14 @@ export function useAskAiChat(
   const sendInFlightRef = useRef(false);
   /** Lets the user abandon an in-flight search instead of waiting it out. */
   const abortRef = useRef<AbortController | null>(null);
+  const activeTurnTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  function clearActiveTurnTimers() {
+    for (const t of activeTurnTimersRef.current) {
+      clearTimeout(t);
+    }
+    activeTurnTimersRef.current = [];
+  }
   const accessToken = useAuthStore((s) => s.accessToken);
   const hasHydratedAuth = useAuthStore((s) => s.hasHydrated);
 
@@ -377,6 +386,7 @@ export function useAskAiChat(
     // rendered duplicate user/assistant bubbles. A ref flips synchronously.
     if (!trimmed || busy || sendInFlightRef.current) return;
     sendInFlightRef.current = true;
+    clearActiveTurnTimers();
 
     const turnId = crypto.randomUUID();
     if (process.env.NODE_ENV === "development") {
@@ -416,6 +426,23 @@ export function useAskAiChat(
     });
     setLoadingRoute(routePreview);
 
+    const schedule = getPhaseSchedule(trimmed, {
+      hasRoute: Boolean(routePreview?.origin && routePreview?.destination),
+      previousPlan: previousTravelPlan,
+    });
+    const startTime = Date.now();
+
+    // Schedule natural state transitions across the processing duration
+    const tSearch = setTimeout(() => {
+      setSearchPhase("search");
+    }, schedule.extractUntilMs);
+
+    const tReply = setTimeout(() => {
+      setSearchPhase("reply");
+    }, schedule.searchUntilMs);
+
+    activeTurnTimersRef.current = [tSearch, tReply];
+
     const keepPriceSort = (
       panel: NonNullable<AskAiChatResult["searchPanel"]>,
     ) => {
@@ -428,9 +455,14 @@ export function useAskAiChat(
       }
     };
 
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     try {
       if (process.env.NODE_ENV === "development") {
-        console.log(`[chat] request id=${turnId}`);
+        console.log(
+          `[chat] request id=${turnId}, targetDuration=${schedule.totalDurationMs}ms`,
+        );
       }
       const accessToken = useAuthStore.getState().accessToken;
       const escalationTrigger = accessToken ? detectEscalationIntent(trimmed) : null;
@@ -456,6 +488,7 @@ export function useAskAiChat(
               status: ticket.status,
               deduplicated: ticket.deduplicated,
             });
+            clearActiveTurnTimers();
             setMessages((prev) =>
               prev.map((m) =>
                 m.id === assistantId
@@ -473,8 +506,6 @@ export function useAskAiChat(
         // Fall through to Ava if escalate API failed (e.g. network) — guidance still applies.
       }
       const corp = useCorporateProfileStore.getState();
-      const controller = new AbortController();
-      abortRef.current = controller;
       const res = await fetch("/api/chat", {
         signal: controller.signal,
         method: "POST",
@@ -503,81 +534,157 @@ export function useAskAiChat(
         console.log(`[chat] response id=${turnId}`);
       }
 
+      // Stage all incoming data during processing without premature reveal
+      const staged = {
+        reply: "",
+        provider: null as string | null,
+        searchPanel: null as SearchResultsPanel | null,
+        travelPlan: undefined as TravelPlan | null | undefined,
+        followUpSuggestions: [] as string[],
+        error: null as string | null,
+      };
+
       const ctype = res.headers.get("content-type") || "";
       if (!ctype.includes("text/event-stream") || !res.body) {
-        applyFinal(
-          assistantId,
-          (await res.json()) as ConsultantResponse,
-          keepPriceSort,
-          trimmed,
+        const json = (await res.json()) as ConsultantResponse;
+        staged.reply = json.reply;
+        staged.provider = json.meta.provider;
+        staged.searchPanel = json.searchPanel ?? null;
+        staged.travelPlan = json.meta.travelPlan;
+        staged.followUpSuggestions = json.searchPanel?.followUpSuggestions ?? [];
+      } else {
+        await readSse(res.body, (event) => {
+          if (event.type === "searchResults") {
+            const panel = event.panel;
+            staged.searchPanel = panel;
+            staged.followUpSuggestions = panel.followUpSuggestions ?? [];
+            if (event.meta?.travelPlan !== undefined) {
+              staged.travelPlan = event.meta.travelPlan ?? null;
+              const fromPlan = routeCodesFromTravelPlan(event.meta.travelPlan ?? null);
+              if (fromPlan) setLoadingRoute(fromPlan);
+            }
+            if (event.meta?.provider) {
+              staged.provider = event.meta.provider;
+            }
+            return;
+          }
+          if (event.type === "token") {
+            staged.reply += event.delta;
+            return;
+          }
+          if (event.type === "done") {
+            if (event.result.reply) staged.reply = event.result.reply;
+            if (event.result.meta?.provider) staged.provider = event.result.meta.provider;
+            if (event.result.meta?.travelPlan !== undefined) staged.travelPlan = event.result.meta.travelPlan ?? null;
+            if (event.result.searchPanel) {
+              staged.searchPanel = event.result.searchPanel;
+              if (event.result.searchPanel.followUpSuggestions) {
+                staged.followUpSuggestions = event.result.searchPanel.followUpSuggestions;
+              }
+            }
+            return;
+          }
+          if (event.type === "error") {
+            staged.error = event.message;
+          }
+        });
+      }
+
+      if (staged.error) {
+        clearActiveTurnTimers();
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === assistantId
+              ? { ...m, content: staged.error || networkErrorReply() }
+              : m,
+          ),
         );
+        setSearchPhase("done");
+        setLoadingRoute(null);
         return;
       }
 
-      await readSse(res.body, (event) => {
-        if (event.type === "status") {
-          setSearchPhase(event.phase === "done" ? "done" : event.phase);
-          return;
-        }
-        if (event.type === "searchResults") {
-          const panel = event.panel;
-          setFollowUpSuggestions(panel.followUpSuggestions ?? []);
-          if (event.meta?.travelPlan !== undefined) {
-            setPreviousTravelPlan(event.meta.travelPlan ?? null);
-            const fromPlan = routeCodesFromTravelPlan(event.meta.travelPlan ?? null);
-            if (fromPlan) setLoadingRoute(fromPlan);
-          }
+      // Check remaining delay to provide realistic AI processing experience
+      const elapsed = Date.now() - startTime;
+      const remaining = Math.max(0, schedule.totalDurationMs - elapsed);
 
-          if (isLiveSearchPanel(panel)) {
-            setSearchPanel(panel);
-            setSearchResultMessageId(assistantId);
-            setFilterPills(panel.filterPills);
-            setActiveOriginIdx(0);
-            if (event.meta.provider) setProvider(event.meta.provider);
-            keepPriceSort(panel);
-          }
-          return;
+      if (remaining > 0) {
+        await new Promise<void>((resolve, reject) => {
+          const timeout = setTimeout(resolve, remaining);
+          const onAbort = () => {
+            clearTimeout(timeout);
+            reject(new DOMException("Aborted", "AbortError"));
+          };
+          controller.signal.addEventListener("abort", onAbort, { once: true });
+        });
+      }
+
+      // Completed naturally: clean up timers and commit staged results in one atomic reveal
+      clearActiveTurnTimers();
+
+      const finalReply = staged.reply || "Here are the best options for your trip.";
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === assistantId
+            ? {
+                ...m,
+                content: finalReply,
+                provider: staged.provider,
+              }
+            : m,
+        ),
+      );
+
+      if (staged.provider) setProvider(staged.provider);
+      if (staged.travelPlan !== undefined) {
+        setPreviousTravelPlan(staged.travelPlan ?? null);
+        const fromPlan = routeCodesFromTravelPlan(staged.travelPlan ?? null);
+        if (fromPlan) setLoadingRoute(fromPlan);
+      }
+
+      if (staged.searchPanel && isLiveSearchPanel(staged.searchPanel)) {
+        const incomingCount =
+          (staged.searchPanel.offers?.length ?? 0) + (staged.searchPanel.itineraries?.length ?? 0);
+        setSearchPanel((prev) => {
+          const prevCount =
+            (prev?.offers?.length ?? 0) + (prev?.itineraries?.length ?? 0);
+          if (incomingCount === 0 && prevCount > 0) return prev;
+          return staged.searchPanel;
+        });
+        setSearchResultMessageId(assistantId);
+        if (incomingCount > 0) {
+          setFilterPills(staged.searchPanel.filterPills);
         }
-        if (event.type === "token") {
-          setSearchPhase((p) =>
-            p === "search" || p === "extract" ? "reply" : p,
-          );
-          setMessages((prev) =>
-            prev.map((m) =>
-              m.id === assistantId
-                ? { ...m, content: m.content + event.delta }
-                : m,
-            ),
-          );
-          return;
-        }
-        if (event.type === "done") {
-          applyFinal(assistantId, event.result, keepPriceSort, trimmed);
-          setSearchPhase("done");
-          return;
-        }
-        if (event.type === "error") {
-          setMessages((prev) =>
-            prev.map((m) =>
-              m.id === assistantId
-                ? { ...m, content: m.content || event.message }
-                : m,
-            ),
-          );
-          setSearchPhase("done");
-        }
-      });
+        keepPriceSort(staged.searchPanel);
+      }
+
+      if (staged.followUpSuggestions.length > 0) {
+        setFollowUpSuggestions(staged.followUpSuggestions);
+      }
+
+      setSearchPhase("done");
+      setLoadingRoute(null);
+
+      if (trimmed && finalReply.trim()) {
+        void persistAuthenticatedTurn(
+          trimmed,
+          finalReply,
+          staged.provider,
+          staged.travelPlan !== undefined ? staged.travelPlan : previousTravelPlanRef.current,
+          staged.searchPanel ?? searchPanelRef.current,
+        );
+      }
     } catch (err) {
+      clearActiveTurnTimers();
       // A user-initiated stop is not a failure — replace the empty bubble with
       // an honest note rather than a network-error message they didn't cause.
       if ((err as Error)?.name === "AbortError") {
         setMessages((prev) =>
-          prev
-            .map((m) =>
-              m.id === assistantId
-                ? { ...m, content: m.content || "Search stopped." }
-                : m,
-            ),
+          prev.map((m) =>
+            m.id === assistantId
+              ? { ...m, content: m.content || "Search stopped." }
+              : m,
+          ),
         );
         setSearchPhase("done");
         setLoadingRoute(null);
@@ -591,80 +698,18 @@ export function useAskAiChat(
         ),
       );
       setSearchPhase("done");
+      setLoadingRoute(null);
     } finally {
+      clearActiveTurnTimers();
       setBusy(false);
       sendInFlightRef.current = false;
       abortRef.current = null;
     }
   }
 
-  function applyFinal(
-    assistantId: string,
-    data: ConsultantResponse,
-    keepPriceSort?: (
-      panel: NonNullable<AskAiChatResult["searchPanel"]>,
-    ) => void,
-    userContent?: string,
-  ) {
-    setProvider(data.meta.provider);
-    if (data.meta.travelPlan !== undefined) {
-      setPreviousTravelPlan(data.meta.travelPlan ?? null);
-      const fromPlan = routeCodesFromTravelPlan(data.meta.travelPlan ?? null);
-      if (fromPlan) setLoadingRoute(fromPlan);
-    }
-    if (data.searchPanel) {
-      const incoming = data.searchPanel;
-      setFollowUpSuggestions(incoming.followUpSuggestions ?? []);
-
-      if (isLiveSearchPanel(incoming)) {
-        const incomingCount =
-          (incoming.offers?.length ?? 0) + (incoming.itineraries?.length ?? 0);
-        setSearchPanel((prev) => {
-          const prevCount =
-            (prev?.offers?.length ?? 0) + (prev?.itineraries?.length ?? 0);
-          if (incomingCount === 0 && prevCount > 0) return prev;
-          return incoming;
-        });
-        setSearchResultMessageId(assistantId);
-        if (incomingCount > 0) {
-          setFilterPills(incoming.filterPills);
-        }
-        keepPriceSort?.(incoming);
-      }
-    }
-    const replyFromApi = data.reply || "";
-    // Capture the resolved reply from the updater, but DO NOT persist inside
-    // it: a state updater must be pure. React invokes it twice under
-    // StrictMode, which fired the save twice and created two conversations
-    // for one send — the duplicate sidebar entries.
-    let finalReply = replyFromApi;
-    setMessages((prev) => {
-      const existing = prev.find((m) => m.id === assistantId)?.content || "";
-      finalReply = replyFromApi || existing;
-      return prev.map((m) =>
-        m.id === assistantId
-          ? {
-              ...m,
-              content: finalReply,
-              provider: data.meta.provider,
-            }
-          : m,
-      );
-    });
-
-    if (userContent && finalReply.trim()) {
-      void persistAuthenticatedTurn(
-        userContent,
-        finalReply,
-        data.meta.provider,
-        data.meta.travelPlan ?? previousTravelPlanRef.current,
-        data.searchPanel ?? searchPanelRef.current,
-      );
-    }
-  }
-
   /** Abandon the in-flight search. No-op when nothing is running. */
   function stop() {
+    clearActiveTurnTimers();
     abortRef.current?.abort();
   }
 

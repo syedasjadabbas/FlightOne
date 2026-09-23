@@ -1,8 +1,7 @@
 import { useAuthStore, type AuthSession } from "@/store/auth.store";
 import { getJwtExpiryMs, isJwtExpired } from "@/lib/auth/jwt";
+import { getApiBaseUrl } from "@/lib/api/baseApi";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8084/api/v1";
 const CSRF_HEADER = "X-FlightOne-CSRF";
 
 /** Cross-tab + in-tab single-flight so only one refresh hits the API. */
@@ -142,7 +141,7 @@ async function runRefresh(): Promise<boolean> {
   const { setSession, clearSession } = useAuthStore.getState();
 
   try {
-    const res = await fetch(`${API_BASE_URL}/auth/refresh`, {
+    const res = await fetch(`${getApiBaseUrl()}/auth/refresh`, {
       method: "POST",
       credentials: "include",
       headers: {
