@@ -168,6 +168,11 @@ export function ResultsRail({
     }
   }, [panel]);
 
+  const routeIata = useMemo(
+    () => resolveRouteIata(panel, offers),
+    [panel, offers],
+  );
+
   if (!visible) return null;
 
   const emptyMessage =
@@ -224,11 +229,6 @@ export function ResultsRail({
     panel?.passengers != null && panel.passengers > 0
       ? `${panel.passengers} ${panel.passengers === 1 ? "traveller" : "travellers"}`
       : null;
-
-  const routeIata = useMemo(
-    () => resolveRouteIata(panel, offers),
-    [panel, offers],
-  );
 
   const canClearFilters = Boolean(sidebarFacets && sidebarFilters && onSidebarFiltersChange);
   const clearFilters = () => {
