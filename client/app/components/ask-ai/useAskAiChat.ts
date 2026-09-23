@@ -420,7 +420,7 @@ export function useAskAiChat(
     if (process.env.NODE_ENV === "development") {
       console.log(`[chat] submit id=${turnId}`);
     }
-
+ 
     const wantsBestFare = BEST_FARE_RE.test(trimmed);
     if (wantsBestFare) setSortKey("price");
 
