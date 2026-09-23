@@ -1,26 +1,36 @@
-export function quickPrompts(originCity: string) {
-  const origin = originCity === "your city" ? "Lahore" : originCity;
-  return [
-    {
-      title: `${origin} → Dubai`,
-      subtitle: "Flights & skyline stays",
-      label: `Flights from ${origin} to Dubai`,
-      prompt: `Flights from ${origin} to Dubai`,
-    },
-    {
-      title: "Weekend in Istanbul",
-      subtitle: "City break with hotel options",
-      label: "Weekend in Istanbul",
-      prompt: `Weekend trip to Istanbul from ${originCity} — flights and hotel`,
-    },
-    {
-      title: "Family escape to Malaysia",
-      subtitle: "Flights & hotels for the group",
-      label: "Family holiday in Malaysia",
-      prompt: `Family holiday in Malaysia from ${originCity} — flights and hotels for 4`,
-    },
-  ];
-}
+/**
+ * Starter routes on the empty chat.
+ *
+ * Each `prompt` is a query from the demo fare corpus (lib/demo/galileo-fares.json),
+ * word for word, so every card lands on exact fares — one per search shape the
+ * demo shows off: one-way, round trip, multi-city. Hard-coded rather than read
+ * from the corpus because this runs in the browser and the corpus is 7 MB;
+ * chatQuickPrompts.test.ts fails if a prompt drifts out of the corpus.
+ *
+ * The origin is fixed to Lahore on purpose: the corpus is priced from Lahore,
+ * and substituting the traveller's city would break the exact match.
+ */
+export const STARTER_ROUTES = [
+  {
+    title: "Lahore → Dubai",
+    subtitle: "Cheapest one-way · 15 Oct",
+    label: "Cheapest Lahore to Dubai on 15 October",
+    prompt: "Cheapest Lahore to Dubai on 15 October",
+  },
+  {
+    title: "Lahore ⇄ London",
+    subtitle: "Round trip · 18 Oct – 2 Nov",
+    label: "Round trip Lahore to London, 18 October to 2 November",
+    prompt: "Round trip Lahore to London, out 18 October back 2 November",
+  },
+  {
+    title: "London & Paris",
+    subtitle: "Multi-city Europe · 5–14 Nov",
+    label: "Multi-city Lahore, London, Paris, 5 to 14 November",
+    prompt:
+      "Multi-city: Lahore to London on 5 November, London to Paris on 9 November, Paris back to Lahore on 14 November",
+  },
+] as const;
 
 export const COMPOSER_QUICK_ACTIONS = [
   {

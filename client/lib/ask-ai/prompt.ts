@@ -4,6 +4,7 @@ import type {
   ItinerarySummary,
 } from "@/lib/consultant/types";
 import type { TravellerLocation } from "@/lib/geo/types";
+import { tripRouteLabel } from "./tripStops";
 
 export const ASK_AI_NAME = "Ava";
 
@@ -92,7 +93,7 @@ export function askAiTemplateReply(
   const trips = itineraries?.length ? itineraries : [];
   if (trips.length > 0) {
     const cheapest = [...trips].sort((a, b) => a.totalPriceMinor - b.totalPriceMinor)[0];
-    const route = cheapest.hops.join(" → ");
+    const route = tripRouteLabel(cheapest);
     return (
       `Here are the best-value multi-city fares for your trip — lowest complete journey is ${cheapest.totalPrice}` +
       (route ? ` (${route})` : "") +

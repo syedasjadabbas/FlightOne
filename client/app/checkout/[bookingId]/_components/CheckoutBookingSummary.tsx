@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import { buttonClassName } from "@/components/ui";
 import { formatMinor } from "@/lib/bookings/checkoutDisplay";
+import { useLastChatUrl } from "@/lib/ask-ai/useLastChatUrl";
+import { AirlineMark } from "@/app/components/ask-ai/ResultsVisual";
 
 type BookingLike = {
   id: string;
@@ -125,6 +127,7 @@ export function CheckoutBookingSummary({
   tickets?: string[];
   vouchers?: string[];
 }) {
+  const backToSearchHref = useLastChatUrl();
   const meta = (
     booking.metadata && typeof booking.metadata === "object" ? booking.metadata : {}
   ) as Record<string, any>;
@@ -240,7 +243,7 @@ export function CheckoutBookingSummary({
             <h2 className="m-0 text-[14px] font-semibold text-[var(--navy)]">Trip</h2>
           </div>
           <Link
-            href="/chat"
+            href={backToSearchHref}
             className="text-[12px] font-medium text-[var(--cyan)] underline-offset-2 hover:underline"
           >
             Edit search
@@ -447,52 +450,60 @@ function FlightLeg({
     .join(" · ");
 
   return (
-    <div className="rounded-[var(--fo-desk-radius)] border border-[var(--fo-desk-line)] bg-[var(--fo-desk-wash)] p-3">
-      <div className="mb-2.5 flex items-center gap-2.5">
-        {airlineCode ? (
-          <div className="flex h-7 w-7 items-center justify-center rounded bg-[var(--navy)] text-[11px] font-bold tracking-wide text-[var(--white)]">
-            {airlineCode.slice(0, 2).toUpperCase()}
-          </div>
-        ) : null}
-        <div className="min-w-0">
-          <h3 className="m-0 text-[13px] font-semibold leading-tight text-[var(--navy)]">
-            {getCityName(originCode)} → {getCityName(destCode)}
-          </h3>
-          {metaLine ? (
-            <p className="m-0 text-[12px] text-[var(--ink-soft)]">{metaLine}</p>
+    <div className="rounded-[var(--fo-desk-radius)] border border-[var(--fo-desk-line)] bg-[var(--fo-desk-wash)] p-3.5 shadow-sm transition-colors hover:border-[var(--fo-desk-line-strong)]">
+      <div className="mb-3 flex items-center justify-between gap-2.5">
+        <div className="flex items-center gap-2.5">
+          {airlineCode ? (
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-md border border-[var(--fo-desk-line)] bg-white p-0.5">
+              <AirlineMark code={airlineCode} />
+            </div>
           ) : null}
+          <div className="min-w-0">
+            <h3 className="m-0 text-[13px] font-semibold leading-tight text-navy">
+              {getCityName(originCode)} → {getCityName(destCode)}
+            </h3>
+            {metaLine ? (
+              <p className="m-0 text-[11px] text-ink-soft">{metaLine}</p>
+            ) : null}
+          </div>
         </div>
+        <span className="rounded bg-[color-mix(in_oklab,var(--cyan)_12%,white)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-navy">
+          Flight Sector
+        </span>
       </div>
 
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="m-0 text-[12px] font-semibold uppercase tracking-wider text-[var(--ink-soft)]">
+          <p className="m-0 font-mono text-[11px] font-bold uppercase tracking-wider text-cyan">
             {originCode}
           </p>
-          <p className="m-0 text-[15px] font-semibold leading-tight text-[var(--navy)]">
+          <p className="m-0 text-[16px] font-bold leading-tight tabular-nums text-navy">
             {departTime || "—"}
           </p>
           {dateLabel ? (
-            <p className="mt-0.5 text-[12px] text-[var(--ink-soft)]">{dateLabel}</p>
+            <p className="mt-0.5 text-[11px] text-ink-soft">{dateLabel}</p>
           ) : null}
         </div>
 
-        <div className="flex max-w-[120px] flex-1 flex-col items-center px-1">
+        <div className="flex max-w-[130px] flex-1 flex-col items-center px-1">
           {duration ? (
-            <span className="mb-1 text-[12px] text-[var(--ink-soft)]">{duration}</span>
+            <span className="mb-1 text-[11px] font-medium text-ink-soft">{duration}</span>
           ) : null}
-          <div className="h-px w-full bg-[var(--fo-desk-line-strong)]" />
+          <div className="relative flex w-full items-center">
+            <div className="h-0.5 w-full bg-[var(--fo-desk-line-strong)]" />
+            <Plane className="absolute left-1/2 -translate-x-1/2 rotate-45 h-3.5 w-3.5 text-cyan" />
+          </div>
         </div>
 
         <div className="text-right">
-          <p className="m-0 text-[12px] font-semibold uppercase tracking-wider text-[var(--ink-soft)]">
+          <p className="m-0 font-mono text-[11px] font-bold uppercase tracking-wider text-cyan">
             {destCode}
           </p>
-          <p className="m-0 text-[15px] font-semibold leading-tight text-[var(--navy)]">
+          <p className="m-0 text-[16px] font-bold leading-tight tabular-nums text-navy">
             {arriveTime || "—"}
           </p>
           {dateLabel ? (
-            <p className="mt-0.5 text-[12px] text-[var(--ink-soft)]">{dateLabel}</p>
+            <p className="mt-0.5 text-[11px] text-ink-soft">{dateLabel}</p>
           ) : null}
         </div>
       </div>

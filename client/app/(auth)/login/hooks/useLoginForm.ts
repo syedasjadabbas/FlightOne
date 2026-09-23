@@ -28,11 +28,22 @@ export type LoginStep =
 
 export type ChallengeMode = "totp" | "backup_code";
 
-/** Seed defaults from server `DEMO_USER_*` — local login convenience only. */
-const LOCAL_DEMO_EMAIL =
-  process.env.NODE_ENV === "development" ? "demo@flightone.local" : "";
-const LOCAL_DEMO_PASSWORD =
-  process.env.NODE_ENV === "development" ? "DemoPass123!" : "";
+/**
+ * Login pre-fill for demos — on in every environment, including production,
+ * by product decision (2026-09-23): the site is a demo deployment.
+ *
+ * These values ship in the public JS bundle. `demo@flightone.local` holds the
+ * Super Admin role, so while this is on, anyone can sign in as an admin.
+ * Turn it off by building with NEXT_PUBLIC_DEMO_LOGIN=false; point it at a
+ * different account with NEXT_PUBLIC_DEMO_LOGIN_EMAIL / _PASSWORD.
+ */
+const DEMO_LOGIN_ENABLED = process.env.NEXT_PUBLIC_DEMO_LOGIN !== "false";
+const LOCAL_DEMO_EMAIL = DEMO_LOGIN_ENABLED
+  ? (process.env.NEXT_PUBLIC_DEMO_LOGIN_EMAIL ?? "demo@flightone.local")
+  : "";
+const LOCAL_DEMO_PASSWORD = DEMO_LOGIN_ENABLED
+  ? (process.env.NEXT_PUBLIC_DEMO_LOGIN_PASSWORD ?? "DemoPass123!")
+  : "";
 
 /** Colocated to `/login` only — multi-step auth handling standard & mandatory staff 2FA. */
 export function useLoginForm() {

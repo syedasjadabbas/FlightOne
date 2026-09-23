@@ -20,6 +20,7 @@ import {
 } from "@/lib/bookings/checkoutDisplay";
 import { visaWarningFromMetadata } from "@/lib/bookings/visaCheckoutWarning";
 import { useAuthStore } from "@/store/auth.store";
+import { useLastChatUrl } from "@/lib/ask-ai/useLastChatUrl";
 import {
   useAcceptPriceChangeMutation,
   useGetBookingQuery,
@@ -153,6 +154,9 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
   const hasHydrated = useAuthStore((s) => s.hasHydrated);
   const accessToken = useAuthStore((s) => s.accessToken);
   const user = useAuthStore((s) => s.user);
+  // Back to the exact chat state (conversation, results, open deal) this
+  // booking was started from — not a bare /chat that resets the search.
+  const backToSearchHref = useLastChatUrl();
 
   const { data: booking, isLoading, isError, refetch, error } = useGetBookingQuery(bookingId, {
     skip: !hasHydrated || !accessToken,
@@ -476,7 +480,7 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
     <div className="fo-checkout w-full pb-10">
       <header className="fo-desk__header">
         <Link
-          href="/chat"
+          href={backToSearchHref}
           className="inline-flex items-center gap-1.5 text-[13px] font-medium text-[var(--ink-soft)] transition-colors hover:text-[var(--navy)]"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden />

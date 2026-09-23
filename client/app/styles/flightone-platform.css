@@ -2128,6 +2128,53 @@
   transform: translateY(-0.12em);
 }
 
+/* Multi-city: 3–5 airports have to fit where a single A→B pair did. Smaller
+   type keeps a typical 4-stop trip on one line on desktop, and each
+   code+arrow pair is unbreakable so a wrap never strands an arrow. */
+.fo-detail-hero__route--multi {
+  /* Inline flow, not flex: `text-wrap: balance` (inherited from the base
+     route rule) only balances line boxes, so a flex route stranded the last
+     code alone on line two ("LHE → HKG → NRT → ICN →" / "LHE"). */
+  display: block;
+  margin: 0;
+  line-height: 1.08;
+  font-size: clamp(1.85rem, 4.6vw, 2.75rem);
+}
+
+.fo-detail-hero__route--long {
+  font-size: clamp(1.6rem, 3.8vw, 2.25rem);
+}
+
+.fo-detail-hero__stop {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.28em;
+  margin-right: 0.28em;
+  white-space: nowrap;
+}
+
+.fo-detail-hero__stop:last-child {
+  margin-right: 0;
+}
+
+/* A multi-city route spans most of the stage width on phones, so the scene
+   art (sized to clear a short A→B pair) ends up behind the airport codes.
+   Knock it back so it stays ambience rather than competing with the route. */
+@media (max-width: 40rem) {
+  .fo-detail-stage--multi .fo-detail-stage__scene {
+    opacity: 0.3;
+  }
+}
+
+/* Open-jaw ground gap: arrive at one airport, depart from another. Quieter
+   than an arrow on purpose — no flight connects these two codes. */
+.fo-detail-hero__gap {
+  font-size: 0.5em;
+  font-weight: 500;
+  color: var(--ink-faint);
+  transform: translateY(-0.12em);
+}
+
 .fo-detail-hero__cities {
   margin: 0.45rem 0 0;
   font-size: 1rem;

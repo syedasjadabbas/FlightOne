@@ -18,6 +18,9 @@ export type AskAiView = "chat" | "results";
 /** Result of a book attempt — `navigating` means a page redirect is under way. */
 export type BookOfferOutcome = { navigating: boolean };
 
+/** Open detail modal, by id — an offer (single leg) or a trip (multi-city). */
+export type DetailSelection = { offerId: string | null; tripId: string | null };
+
 /**
  * Two full-screen workspaces: Chat and Results.
  * Both stay mounted so conversation + search state are preserved when switching.
@@ -50,6 +53,9 @@ export function AskAiShell({
   onViewChange,
   resultsWorkspaceAvailable,
   conversationId,
+  restoreDetail,
+  onRestoreDetailDone,
+  onDetailChange,
 }: {
   chat: ReactNode;
   panel: SearchResultsPanel | null;
@@ -86,6 +92,15 @@ export function AskAiShell({
   resultsWorkspaceAvailable?: boolean;
   /** Module 04 feedback attribution (optional). */
   conversationId?: string | null;
+  /**
+   * One-shot: reopen this deal's detail modal (from the URL after Back from
+   * checkout). Consumed once — `onRestoreDetailDone` fires whether or not the
+   * deal still exists in the current results.
+   */
+  restoreDetail?: DetailSelection | null;
+  onRestoreDetailDone?: () => void;
+  /** Which deal's detail modal is open, so the page can mirror it in the URL. */
+  onDetailChange?: (selection: DetailSelection) => void;
 }) {
   const [detailOffer, setDetailOffer] = useState<OfferCard | null>(null);
   /** True while a quote is in flight, so the detail modal holds instead of closing. */
@@ -96,6 +111,40 @@ export function AskAiShell({
 
   const isControlled = viewControlled !== undefined;
   const view = isControlled ? viewControlled : viewUncontrolled;
+
+  useEffect(() => {
+    onDetailChange?.({
+      offerId: detailOffer?.id ?? null,
+      tripId: detailTrip?.id ?? null,
+    });
+    // Parent callback identity is not a trigger — only the selection is.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [detailOffer, detailTrip]);
+
+  useEffect(() => {
+    if (!restoreDetail) return;
+    // Search the full inventory, not just the filtered/sorted page — a deal
+    // hidden by a sidebar filter is still the one the traveller had open.
+    if (restoreDetail.offerId) {
+      const all = [
+        ...(panel?.offers ?? []),
+        ...(panel?.originVariants?.flatMap((v) => v.offers ?? []) ?? []),
+        ...displayedOffers,
+      ];
+      const offer = all.find((o) => o.id === restoreDetail.offerId);
+      // Applying a one-shot selection from the URL (external), not deriving
+      // state that could be computed during render.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      if (offer) setDetailOffer(offer);
+    } else if (restoreDetail.tripId) {
+      const all = [...(panel?.itineraries ?? []), ...(displayedItineraries ?? [])];
+      const trip = all.find((t) => t.id === restoreDetail.tripId);
+      if (trip) setDetailTrip(trip);
+    }
+    onRestoreDetailDone?.();
+    // One-shot on the selection; inventory is already loaded when it arrives.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [restoreDetail]);
 
   function setView(next: AskAiView) {
     if (!isControlled) setViewUncontrolled(next);

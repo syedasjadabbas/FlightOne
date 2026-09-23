@@ -11,6 +11,13 @@ import {
 } from "@/lib/ask-ai/chatResultsState";
 import { useTravellerLocation } from "./useTravellerLocation";
 import { AskAiShell, useAskAiChat, type AskAiView } from "./ask-ai";
+import type { DetailSelection } from "./ask-ai/AskAiShell";
+import {
+  EMPTY_CHAT_URL_STATE,
+  buildChatSearch,
+  parseChatUrlState,
+  rememberChatUrl,
+} from "@/lib/ask-ai/chatUrlState";
 import { ChatLayout } from "./ChatLayout";
 import { useAuthStore } from "@/store/auth.store";
 import {
@@ -41,6 +48,22 @@ export function ChatConsole() {
   const [resumingId, setResumingId] = useState<string | null>(null);
   const searchParams = useSearchParams();
   const initialQueryHandledRef = useRef(false);
+
+  // --- URL state: Back from checkout lands on the same results + open deal ---
+  // Read once at mount; the URL is rewritten below as the traveller moves.
+  const [initialUrlState] = useState(() =>
+    typeof window === "undefined"
+      ? EMPTY_CHAT_URL_STATE
+      : parseChatUrlState(window.location.search),
+  );
+  const [detail, setDetail] = useState<DetailSelection>({ offerId: null, tripId: null });
+  const [restoreDetail, setRestoreDetail] = useState<DetailSelection | null>(null);
+  /**
+   * False until the URL's view / open deal has been re-applied (or ruled out).
+   * URL writes wait on it — writing earlier would replace `view=results&offer=…`
+   * with the empty mount state before it was ever read.
+   */
+  const [urlApplied, setUrlApplied] = useState(false);
 
   const handleDeleteConversation = async (id: string) => {
     try {
@@ -157,6 +180,48 @@ export function ChatConsole() {
       }),
     [chat.searchPanel, resultCount, chat.busy, chat.searchPhase],
   );
+
+  // Re-apply the URL's view and open deal once the thread is back in memory.
+  const urlRestoreStartedRef = useRef(false);
+  useEffect(() => {
+    if (!chat.restored || urlApplied || urlRestoreStartedRef.current) return;
+    urlRestoreStartedRef.current = true;
+    if (initialUrlState.view === "results" && resultsWorkspaceAvailable) {
+      // Syncing from an external source (the URL) once the async session
+      // restore lands — the case this rule carves out, run exactly once.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setView("results");
+      if (initialUrlState.offerId || initialUrlState.tripId) {
+        // AskAiShell reopens the modal, then reports back via onRestoreDetailDone.
+        setRestoreDetail({
+          offerId: initialUrlState.offerId,
+          tripId: initialUrlState.tripId,
+        });
+        return;
+      }
+    }
+    setUrlApplied(true);
+  }, [chat.restored, urlApplied, initialUrlState, resultsWorkspaceAvailable]);
+
+  // Mirror conversation / view / open deal into the URL. replaceState, not
+  // push: moving around inside chat should not stack Back presses — the entry
+  // that matters is the one checkout returns to.
+  useEffect(() => {
+    if (!urlApplied) return;
+    const next = `${window.location.pathname}${buildChatSearch(
+      {
+        conversationId: chat.conversationId,
+        view,
+        offerId: detail.offerId,
+        tripId: detail.tripId,
+      },
+      window.location.search,
+    )}`;
+    if (next !== `${window.location.pathname}${window.location.search}`) {
+      window.history.replaceState(null, "", next);
+    }
+    rememberChatUrl(next);
+  }, [urlApplied, chat.conversationId, view, detail]);
 
   const resultNoun = useMemo(() => {
     const panel = chat.searchPanel;
@@ -287,6 +352,12 @@ export function ChatConsole() {
           onViewChange={setView}
           resultsWorkspaceAvailable={resultsWorkspaceAvailable}
           conversationId={chat.conversationId}
+          restoreDetail={restoreDetail}
+          onRestoreDetailDone={() => {
+            setRestoreDetail(null);
+            setUrlApplied(true);
+          }}
+          onDetailChange={setDetail}
           onBookOffer={(offer) => {
             const currentToken = useAuthStore.getState().accessToken;
             if (!currentToken) {

@@ -52,6 +52,11 @@ export interface AskAiChatResult {
   loadingRoute: LoadingRouteCodes | null;
   /** Server conversation id when authenticated (Module 04 feedback attribution). */
   conversationId: string | null;
+  /**
+   * True once the initial session restore has settled. The URL's view / open
+   * deal can only be re-applied after this — before it there is no panel.
+   */
+  restored: boolean;
   /** Load a prior authenticated conversation by id (history picker). */
   resumeConversationById: (id: string) => Promise<boolean>;
   /** Clear active thread context and start a brand-new conversation. */

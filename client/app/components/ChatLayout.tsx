@@ -29,7 +29,7 @@ import { SearchErrorFooter, isTravelSearchError } from "./chat/SearchErrorFooter
 import {
   COMPOSER_QUICK_ACTIONS,
   RECOVERY_QUICK_ACTIONS,
-  quickPrompts,
+  STARTER_ROUTES,
 } from "./chat/chatQuickPrompts";
 
 const HERO_TOOLS = [
@@ -115,7 +115,7 @@ export function ChatLayout({
   const originCity = location?.place || location?.city || "your city";
   const isActiveChat = messages.some((m) => m.role === "user");
   const showHero = !isActiveChat && messages.length === 1;
-  const inspire = useMemo(() => quickPrompts(originCity), [originCity]);
+  const inspire = STARTER_ROUTES;
 
   useEffect(() => {
     if (!isActiveChat) {

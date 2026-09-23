@@ -106,6 +106,67 @@ describe("buildTicketDocument", () => {
     });
     expect(doc.segments).toHaveLength(1);
   });
+
+  it("extracts multi-city legs and hops for complex multi-trip itineraries", () => {
+    const multiCityBooking = {
+      id: "bk_multi",
+      currency: "PKR",
+      amountMinor: 48225900,
+      externalRef: "DEMO-MULTI7",
+      metadata: {
+        hops: ["LHE", "LHR", "SFO", "MCO", "LHE"],
+        tripLegs: [
+          {
+            originCode: "LHE",
+            destinationCode: "LHR",
+            airlineCode: "RX",
+            flightNumber: "RX101",
+            departureDate: "2026-11-05",
+            departTimeLocal: "09:30",
+            arriveTimeLocal: "14:15",
+            durationMinutes: 525,
+            cabin: "economy",
+          },
+          {
+            originCode: "LHR",
+            destinationCode: "SFO",
+            airlineCode: "B6",
+            flightNumber: "B642",
+            departureDate: "2026-11-07",
+            departTimeLocal: "11:00",
+            arriveTimeLocal: "14:30",
+            durationMinutes: 630,
+            cabin: "economy",
+          },
+          {
+            originCode: "MCO",
+            destinationCode: "LHE",
+            airlineCode: "QR",
+            flightNumber: "QR732",
+            departureDate: "2026-11-22",
+            departTimeLocal: "18:00",
+            arriveTimeLocal: "22:45",
+            durationMinutes: 945,
+            cabin: "economy",
+          },
+        ],
+      },
+      supplierBookingRefs: {},
+      travellerSnapshot: { firstName: "Ahmad", lastName: "Khan" },
+    };
+
+    const doc = buildTicketDocument(multiCityBooking);
+    expect(doc.isMultiCity).toBe(true);
+    expect(doc.hops).toEqual(["LHE", "LHR", "SFO", "MCO", "LHE"]);
+    expect(doc.legs).toHaveLength(3);
+    expect(doc.legs?.[0]?.originCode).toBe("LHE");
+    expect(doc.legs?.[0]?.destinationCode).toBe("LHR");
+    expect(doc.legs?.[1]?.originCode).toBe("LHR");
+    expect(doc.legs?.[1]?.destinationCode).toBe("SFO");
+    expect(doc.legs?.[2]?.originCode).toBe("MCO");
+    expect(doc.legs?.[2]?.destinationCode).toBe("LHE");
+    expect(doc.segments).toHaveLength(3);
+  });
 });
 
 describe("formatters", () => {

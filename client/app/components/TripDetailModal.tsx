@@ -4,6 +4,7 @@ import { useEffect, useId, useRef } from "react";
 import { createPortal } from "react-dom";
 import type { FlightSegment } from "@/lib/inventory/types";
 import type { ItinerarySummary } from "@/lib/consultant/types";
+import { tripStops } from "@/lib/ask-ai/tripStops";
 import { formatPriceMinor } from "@/lib/ask-ai/sidebarFilters";
 import {
   cabinLabel,
@@ -208,7 +209,7 @@ function FarePanel({
         aria-busy={booking}
         className="fo-fare-summary__cta"
       >
-        {booking ? "Opening checkout…" : "View Deal"}
+        {booking ? "Opening checkout…" : "Proceed to checkout"}
         {booking ? null : <span aria-hidden>→</span>}
       </button>
 
@@ -301,14 +302,17 @@ export function TripDetailModal({
   const hasMarketReference =
     itinerary.hasMarketReferenceLeg ||
     (itinerary.legs?.some((leg) => leg.marketReference) ?? false);
-  const hops =
-    itinerary.hops.length > 0
-      ? itinerary.hops
-      : legs.length > 0
-        ? [legs[0].originCode, ...legs.map((l) => l.destinationCode)]
-        : ["LHE", "DXB"];
-  const firstOrigin = hops[0] || "LHE";
-  const lastDest = hops[hops.length - 1] || "LHE";
+  const hops = tripStops(itinerary);
+  const firstOrigin = hops[0]?.code || "LHE";
+  const lastDest = hops[hops.length - 1]?.code || "LHE";
+  // Screen readers get the journey as a sentence rather than a string of codes.
+  const routeSpoken = hops
+    .map((s, i) =>
+      i === 0
+        ? iataToPlace(s.code)
+        : `${s.groundGapBefore ? "then from" : "to"} ${iataToPlace(s.code)}`,
+    )
+    .join(" ");
   const totalDuration =
     legs.reduce((sum, leg) => sum + (leg.durationMinutes || 0), 0);
   const cabins = [...new Set(legs.map((l) => l.cabin).filter(Boolean))] as ("economy" | "premium" | "business")[];
@@ -376,31 +380,47 @@ export function TripDetailModal({
           </div>
         </div>
 
-        <div className="fo-detail-stage">
+        <div className="fo-detail-stage fo-detail-stage--multi">
           <DetailScene
             className="fo-detail-stage__scene"
             from={firstOrigin}
             to={lastDest}
           />
           <div className="fo-detail-hero">
-            <p className="fo-detail-hero__kicker">Your flight</p>
-            <div className="fo-detail-hero__route" id={titleId}>
-              {hops.map((hop, i) => (
-                <span key={hop + i} className="inline-flex items-center">
-                  {i > 0 && (
-                    <span className="fo-detail-hero__arrow" aria-hidden>
-                      →
-                    </span>
-                  )}
-                  <span className="fo-detail-hero__code tabular-nums">{hop}</span>
-                </span>
-              ))}
-            </div>
+            <p className="fo-detail-hero__kicker">Your trip · Multi-city</p>
+            <h2
+              className={`fo-detail-hero__route fo-detail-hero__route--multi${
+                hops.length > 4 ? " fo-detail-hero__route--long" : ""
+              }`}
+              id={titleId}
+              aria-label={routeSpoken}
+            >
+              {hops.map((stop, i) => {
+                const next = hops[i + 1];
+                return (
+                  // The connector travels with the code BEFORE it, so a wrapped
+                  // line ends "LHR →" (reads as "continues") rather than
+                  // starting with a stray arrow.
+                  <span key={`${stop.code}-${i}`} className="fo-detail-hero__stop" aria-hidden>
+                    <span className="fo-detail-hero__code tabular-nums">{stop.code}</span>
+                    {next ? (
+                      next.groundGapBefore ? (
+                        <span className="fo-detail-hero__gap" title="Separate departure airport">
+                          /
+                        </span>
+                      ) : (
+                        <span className="fo-detail-hero__arrow">→</span>
+                      )
+                    ) : null}
+                  </span>
+                );
+              })}
+            </h2>
             <p className="fo-detail-hero__cities">
-              {hops.map(iataToPlace).join(" to ")}
+              {hops.map((s) => iataToPlace(s.code)).join(" · ")}
             </p>
             <ul className="fo-detail-hero__chips" aria-label="Trip summary">
-              <li>Multi-city ({legs.length} flights)</li>
+              <li>{legs.length} flights</li>
               {totalDuration > 0 ? (
                 <li>{formatDurationLabel(totalDuration, "long")} total</li>
               ) : null}
@@ -458,7 +478,7 @@ export function TripDetailModal({
                 })
               ) : (
                 <p className="py-4 text-[14px] text-[var(--ink-soft)]">
-                  {itinerary.hops.join(" → ")}
+                  {hops.map((s) => s.code).join(" → ")}
                 </p>
               )}
             </section>
@@ -482,7 +502,7 @@ export function TripDetailModal({
           aria-busy={booking}
           className="fo-detail-mobile-bar__cta"
         >
-          {booking ? "Opening checkout…" : "View Deal"}
+          {booking ? "Opening checkout…" : "Proceed to checkout"}
         </button>
       </div>
     </div>

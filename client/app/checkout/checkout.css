@@ -306,126 +306,577 @@
    see the @media print block at the end, which strips app chrome so Cmd-P /
    "Download" produces the ticket alone. */
 
+/* ── Electronic Ticket View (TicketDocumentView) ──────────────────────────────
+   Luxury Tactile Boarding Pass & E-Ticket: double-bezel elevation, cosmic
+   aerospace brand identity, physical boarding pass perforations, airline badges,
+   itemized fare receipt, and high-fidelity print output. */
+
 .fo-ticket {
-  --fo-ticket-pad: 1.25rem;
+  --fo-ticket-pad: 1.5rem;
   background: var(--white);
-  border-radius: 0.875rem;
+  border-radius: 1rem;
+  border: 1px solid color-mix(in oklab, var(--navy) 12%, transparent);
   overflow: hidden;
   box-shadow:
-    0 1px 2px color-mix(in oklab, var(--navy) 6%, transparent),
-    0 6px 16px -6px color-mix(in oklab, var(--navy) 14%, transparent),
-    0 18px 40px -24px color-mix(in oklab, var(--navy) 22%, transparent);
+    0 1px 3px color-mix(in oklab, var(--navy) 6%, transparent),
+    0 8px 24px -8px color-mix(in oklab, var(--navy) 14%, transparent),
+    0 24px 48px -20px color-mix(in oklab, var(--navy) 20%, transparent);
+  transition: box-shadow 0.2s ease;
 }
 
+/* 1. Brand Header: Cosmic Aerospace Indigo & Golden-Sky Trim */
 .fo-ticket__head {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 1.25rem;
   padding: var(--fo-ticket-pad);
-  background: var(--deep-navy);
+  background: linear-gradient(135deg, #020712 0%, #05142b 55%, #08244d 100%);
   color: var(--white);
+  overflow: hidden;
+  border-bottom: 3px solid transparent;
+  border-image: linear-gradient(90deg, #0284c7 0%, #38bdf8 30%, #f59e0b 50%, #38bdf8 70%, #0284c7 100%) 1;
+}
+
+.fo-ticket__head-bg-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle at 100% 0%, rgba(56, 189, 248, 0.18) 0%, transparent 50%),
+    radial-gradient(circle at 0% 100%, rgba(245, 158, 11, 0.1) 0%, transparent 40%),
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 24px 24px, 24px 24px;
 }
 
 .fo-ticket__brand {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
-  gap: 0.625rem;
+  gap: 0.875rem;
 }
 
-.fo-ticket__brand-mark {
+.fo-ticket__crest-emblem {
+  position: relative;
   display: grid;
   place-items: center;
-  width: 2rem;
-  height: 2rem;
+  width: 2.75rem;
+  height: 2.75rem;
   border-radius: 9999px;
-  background: var(--sky-solid);
-  color: var(--white);
+  background: linear-gradient(135deg, #0896bf 0%, #0369a1 100%);
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 0 16px rgba(8, 150, 191, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.4);
 }
 
-.fo-ticket__brand-name {
-  display: block;
-  font-size: 0.9375rem;
-  font-weight: 650;
-  letter-spacing: -0.01em;
+.fo-ticket__crest-ring {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.fo-ticket__crest-compass {
+  position: absolute;
+  width: 1.75rem;
+  height: 1.75rem;
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.fo-ticket__crest-plane {
+  position: relative;
+  width: 1.125rem;
+  height: 1.125rem;
+  color: #ffffff;
+  transform: rotate(-45deg);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.fo-ticket__brand-headline {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 1.1875rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  line-height: 1.2;
+}
+
+.fo-ticket__brand-flight {
+  color: #ffffff;
+}
+
+.fo-ticket__brand-one {
+  color: #38bdf8;
+  text-shadow: 0 0 12px rgba(56, 189, 248, 0.5);
+}
+
+.fo-ticket__brand-tos {
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  background: rgba(245, 158, 11, 0.2);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #fbbf24;
 }
 
 .fo-ticket__brand-sub {
-  display: block;
+  margin: 0.25rem 0 0;
   font-size: 0.6875rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  /* 70% white on --deep-navy clears AA for this size. */
-  color: color-mix(in oklab, var(--white) 70%, transparent);
+  color: rgba(255, 255, 255, 0.72);
 }
 
-.fo-ticket__refs {
+/* Digital Boarding Plaque */
+.fo-ticket__plaque {
+  position: relative;
+  z-index: 1;
   display: flex;
-  gap: 1.5rem;
-  margin: 0;
-  text-align: right;
+  align-items: center;
+  gap: 1.125rem;
+  padding: 0.625rem 0.875rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 0.75rem;
+  backdrop-filter: blur(8px);
 }
 
-.fo-ticket__refs dt {
-  font-size: 0.6875rem;
+.fo-ticket__qr-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  background: #ffffff;
+  padding: 0.375rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.fo-ticket__qr-img {
+  display: block;
+  border-radius: 0.25rem;
+}
+
+.fo-ticket__qr-label {
+  font-size: 0.5rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #0b2238;
+}
+
+.fo-ticket__refs-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 9.5rem;
+}
+
+.fo-ticket__ref-label {
+  font-size: 0.625rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: color-mix(in oklab, var(--white) 70%, transparent);
+  color: rgba(255, 255, 255, 0.65);
 }
 
-.fo-ticket__refs dd {
-  margin: 0.125rem 0 0;
-  font-size: 0.875rem;
-  font-weight: 650;
+.fo-ticket__status-dot-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.fo-ticket__status-dot {
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 9999px;
+  background: #10b981;
+  box-shadow: 0 0 6px #10b981;
+}
+
+.fo-ticket__status-text {
+  font-size: 0.5625rem;
+  font-weight: 700;
+  color: #34d399;
+  letter-spacing: 0.06em;
+}
+
+.fo-ticket__pnr-val-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.fo-ticket__pnr-val {
+  font-size: 1.0625rem;
+  font-weight: 800;
+  font-family: var(--font-display, monospace);
+  letter-spacing: 0.06em;
+  color: #38bdf8;
   font-variant-numeric: tabular-nums;
 }
 
-.fo-ticket__demo {
-  margin: 0;
-  padding: 0.625rem var(--fo-ticket-pad);
-  background: color-mix(in oklab, #b45309 12%, var(--white));
-  color: #7c3f06;
+.fo-ticket__copy-btn {
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 0.375rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.fo-ticket__copy-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.fo-ticket__tkt-val {
+  display: block;
   font-size: 0.75rem;
-  font-weight: 550;
+  font-weight: 650;
+  color: rgba(255, 255, 255, 0.9);
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-display, monospace);
 }
 
-.fo-ticket__body {
-  padding: var(--fo-ticket-pad);
-  display: grid;
-  gap: 1.25rem;
+/* 2. Physical Boarding Pass Tear Perforation Notch */
+.fo-ticket__notch-perforation {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 1.5rem;
+  background: var(--white);
+  margin: 0 calc(-1 * var(--fo-ticket-pad));
+  padding: 0 var(--fo-ticket-pad);
+  overflow: hidden;
 }
 
-.fo-ticket__meta {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
-  gap: 0.875rem 1rem;
-  margin: 0;
-  padding-bottom: 1rem;
-  border-bottom: 1px dashed var(--fo-desk-line);
+.fo-ticket__notch {
+  position: absolute;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 9999px;
+  background: var(--fo-desk-bg, #f1f5f9);
+  border: 1px solid color-mix(in oklab, var(--navy) 12%, transparent);
 }
 
-.fo-ticket__meta dt {
-  font-size: 0.6875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--ink-soft);
+.fo-ticket__notch--left {
+  left: -0.625rem;
+  box-shadow: inset -2px 0 4px rgba(0, 0, 0, 0.06);
 }
 
-.fo-ticket__meta dd {
-  margin: 0.1875rem 0 0;
-  font-size: 0.875rem;
+.fo-ticket__notch--right {
+  right: -0.625rem;
+  box-shadow: inset 2px 0 4px rgba(0, 0, 0, 0.06);
+}
+
+.fo-ticket__notch-line {
+  width: 100%;
+  height: 0;
+  border-bottom: 2px dashed color-mix(in oklab, var(--navy) 16%, transparent);
+  margin: 0 0.75rem;
+}
+
+/* 3. Demo Banner */
+.fo-ticket__demo-ribbon {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.625rem var(--fo-ticket-pad);
+  background: color-mix(in oklab, #f59e0b 14%, var(--white));
+  border-bottom: 1px solid color-mix(in oklab, #f59e0b 24%, transparent);
+  color: #92400e;
+  font-size: 0.75rem;
   font-weight: 600;
-  color: var(--navy);
 }
 
-.fo-ticket__bound-title {
-  margin: 0 0 0.625rem;
+/* 4. Journey Billboard & Key Meta Grid */
+.fo-ticket__billboard {
+  padding: 1.25rem var(--fo-ticket-pad) 1rem;
+  background: linear-gradient(to bottom, color-mix(in oklab, var(--fo-sky-mist, #eef7fb) 50%, var(--white)), var(--white));
+  border-bottom: 1px solid color-mix(in oklab, var(--navy) 8%, transparent);
+}
+
+.fo-ticket__route-banner {
+  display: grid;
+  grid-template-columns: minmax(7rem, 1fr) minmax(8rem, 1.4fr) minmax(7rem, 1fr);
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1rem 1.25rem;
+  background: var(--white);
+  border: 1px solid color-mix(in oklab, var(--navy) 9%, transparent);
+  border-radius: 0.875rem;
+  box-shadow: 0 2px 8px -2px color-mix(in oklab, var(--navy) 6%, transparent);
+}
+
+/* Multi-City Route Billboard */
+.fo-ticket__route-banner--multi {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  padding: 1rem 1.25rem;
+}
+
+.fo-ticket__multi-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.fo-ticket__route-type-pill--multi {
+  background: color-mix(in oklab, #0284c7 10%, var(--white));
+  color: #0369a1;
+  border-color: color-mix(in oklab, #0284c7 22%, transparent);
+}
+
+.fo-ticket__multi-stops-track {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.625rem;
+}
+
+.fo-ticket__multi-stop-node {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.fo-ticket__multi-stop-bubble {
+  display: flex;
+  flex-direction: column;
+  padding: 0.375rem 0.75rem;
+  background: color-mix(in oklab, var(--navy) 3%, var(--white));
+  border: 1px solid color-mix(in oklab, var(--navy) 10%, transparent);
+  border-radius: 0.5rem;
+}
+
+.fo-ticket__multi-stop-code {
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: var(--navy);
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.fo-ticket__multi-stop-city {
+  font-size: 0.6875rem;
+  color: var(--ink-soft);
+  margin-top: 0.0625rem;
+}
+
+.fo-ticket__multi-stop-connector {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: #0284c7;
+}
+
+.fo-ticket__multi-connector-line {
+  width: 0.875rem;
+  height: 2px;
+  background: color-mix(in oklab, #0284c7 50%, transparent);
+}
+
+.fo-ticket__multi-connector-plane {
+  width: 0.875rem;
+  height: 0.875rem;
+  transform: rotate(45deg);
+}
+
+.fo-ticket__route-city {
+  display: flex;
+  flex-direction: column;
+}
+
+.fo-ticket__route-city--dest {
+  text-align: right;
+  align-items: flex-end;
+}
+
+.fo-ticket__route-code {
+  font-size: 1.75rem;
+  font-weight: 850;
+  color: var(--navy);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.fo-ticket__route-name {
+  font-size: 0.9375rem;
+  font-weight: 650;
+  color: var(--navy);
+  margin-top: 0.125rem;
+}
+
+.fo-ticket__route-sub {
+  font-size: 0.6875rem;
+  color: var(--ink-soft);
+  margin-top: 0.125rem;
+}
+
+.fo-ticket__route-flow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.fo-ticket__route-trajectory {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.fo-ticket__route-line {
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(90deg, #0896bf, #38bdf8);
+}
+
+.fo-ticket__route-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  border: 2px solid #0896bf;
+  background: var(--white);
+}
+
+.fo-ticket__route-plane-badge {
+  display: grid;
+  place-items: center;
+  width: 1.875rem;
+  height: 1.875rem;
+  border-radius: 9999px;
+  background: var(--white);
+  border: 1.5px solid #0896bf;
+  color: #0896bf;
+  box-shadow: 0 2px 8px rgba(8, 150, 191, 0.2);
+  margin: 0 0.375rem;
+}
+
+.fo-ticket__route-plane-icon {
+  width: 1rem;
+  height: 1rem;
+  transform: rotate(45deg);
+}
+
+.fo-ticket__route-type-pill {
   font-size: 0.6875rem;
   font-weight: 650;
   text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.1875rem 0.625rem;
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--cyan) 10%, var(--white));
+  color: var(--sky-solid);
+  border: 1px solid color-mix(in oklab, var(--cyan) 20%, transparent);
+}
+
+/* 4-Card Meta Grid */
+.fo-ticket__meta-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  margin: 1rem 0 0;
+  padding: 0;
+}
+
+.fo-ticket__meta-card {
+  padding: 0.75rem 0.875rem;
+  background: var(--white);
+  border: 1px solid color-mix(in oklab, var(--navy) 8%, transparent);
+  border-radius: 0.625rem;
+}
+
+.fo-ticket__meta-title {
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+}
+
+.fo-ticket__meta-value {
+  margin: 0.25rem 0 0;
+  font-size: 0.875rem;
+  font-weight: 650;
+  color: var(--navy);
+}
+
+.fo-ticket__meta-value--passenger {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.fo-ticket__pax-badge {
+  display: inline-block;
+  font-size: 0.625rem;
+  font-weight: 650;
+  color: var(--sky-solid);
+}
+
+.fo-ticket__cabin-pill {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 650;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--navy) 6%, var(--white));
+  color: var(--navy);
+  border: 1px solid color-mix(in oklab, var(--navy) 10%, transparent);
+}
+
+.fo-ticket__meta-value--baggage {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.8125rem;
+}
+
+/* 5. Flight Sectors / Timelines */
+.fo-ticket__body {
+  padding: 1.25rem var(--fo-ticket-pad);
+  display: grid;
+  gap: 1.5rem;
+}
+
+.fo-ticket__bound {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.fo-ticket__bound-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.fo-ticket__bound-title {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 750;
+  text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--sky-solid);
+}
+
+.fo-ticket__bound-count {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--ink-soft);
 }
 
 .fo-ticket__sectors {
@@ -437,117 +888,374 @@
 }
 
 .fo-ticket__sector {
-  padding: 0.875rem;
-  border-radius: 0.625rem;
-  background: var(--fo-desk-wash);
+  padding: 1rem 1.125rem;
+  border-radius: 0.75rem;
+  background: var(--fo-desk-wash, #f8fafc);
+  border: 1px solid color-mix(in oklab, var(--navy) 8%, transparent);
 }
 
-.fo-ticket__sector-flight {
+.fo-ticket__sector-head {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.625rem;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-bottom: 0.75rem;
+  margin-bottom: 0.875rem;
+  border-bottom: 1px solid color-mix(in oklab, var(--navy) 7%, transparent);
 }
 
-.fo-ticket__sector-code {
-  font-size: 0.8125rem;
-  font-weight: 650;
+.fo-ticket__sector-airline {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.fo-ticket__sector-airline-name {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 700;
   color: var(--navy);
-  font-variant-numeric: tabular-nums;
+}
+
+.fo-ticket__sector-flightno {
+  display: block;
+  font-size: 0.6875rem;
+  font-weight: 650;
+  color: var(--sky-solid);
+  letter-spacing: 0.04em;
+}
+
+.fo-ticket__sector-tags {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.fo-ticket__sector-aircraft {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  padding: 0.1875rem 0.5rem;
+  border-radius: 9999px;
+  background: var(--white);
+  border: 1px solid color-mix(in oklab, var(--navy) 8%, transparent);
+  color: var(--ink-soft);
 }
 
 .fo-ticket__sector-class {
   font-size: 0.6875rem;
-  padding: 0.125rem 0.5rem;
+  font-weight: 650;
+  padding: 0.1875rem 0.5rem;
   border-radius: 9999px;
-  background: color-mix(in oklab, var(--navy) 8%, var(--white));
-  color: var(--ink-soft);
+  background: color-mix(in oklab, var(--cyan) 10%, var(--white));
+  border: 1px solid color-mix(in oklab, var(--cyan) 25%, transparent);
+  color: var(--sky-solid);
 }
 
+/* Flight Sector Leg Scan */
 .fo-ticket__sector-leg {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: minmax(7rem, 1fr) minmax(8rem, 1.4fr) minmax(7rem, 1fr);
   align-items: center;
-  gap: 0.75rem;
+  gap: 1rem;
+}
+
+.fo-ticket__stop {
+  display: flex;
+  flex-direction: column;
 }
 
 .fo-ticket__stop--end {
   text-align: right;
+  align-items: flex-end;
 }
 
 .fo-ticket__stop-time {
-  display: block;
-  font-size: 1.125rem;
-  font-weight: 650;
+  font-size: 1.375rem;
+  font-weight: 800;
   color: var(--navy);
   font-variant-numeric: tabular-nums;
-  line-height: 1.2;
+  line-height: 1.1;
+}
+
+.fo-ticket__stop-code-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.375rem;
+  margin-top: 0.125rem;
+}
+
+.fo-ticket__stop-code-row--end {
+  justify-content: flex-end;
+}
+
+.fo-ticket__stop-code {
+  font-size: 0.9375rem;
+  font-weight: 750;
+  color: var(--navy);
+}
+
+.fo-ticket__stop-city {
+  font-size: 0.8125rem;
+  color: var(--ink-soft);
+}
+
+.fo-ticket__stop-airport {
+  font-size: 0.625rem;
+  color: var(--ink-soft);
+  margin-top: 0.125rem;
+}
+
+.fo-ticket__stop-date {
+  font-size: 0.6875rem;
+  font-weight: 550;
+  color: var(--ink-soft);
+  margin-top: 0.25rem;
 }
 
 .fo-ticket__nextday {
   font-size: 0.625rem;
-  color: var(--sky-solid);
-  margin-left: 0.125rem;
+  font-weight: 700;
+  color: #ea580c;
+  margin-left: 0.25rem;
 }
 
-.fo-ticket__stop-code {
-  display: block;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: var(--ink-soft);
-}
-
-.fo-ticket__stop-date {
-  display: block;
-  font-size: 0.6875rem;
-  color: var(--ink-soft);
-}
-
+/* Midline flight vector */
 .fo-ticket__leg-mid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.fo-ticket__leg-track {
   position: relative;
-  display: grid;
-  place-items: center;
-  gap: 0.25rem;
+  display: flex;
+  align-items: center;
+  width: 100%;
 }
 
 .fo-ticket__leg-line {
-  display: block;
-  width: 100%;
-  height: 1px;
-  background: var(--fo-desk-line-strong);
+  flex: 1;
+  height: 2px;
+  background: repeating-linear-gradient(90deg, #94a3b8, #94a3b8 4px, transparent 4px, transparent 8px);
+}
+
+.fo-ticket__leg-node {
+  width: 0.4375rem;
+  height: 0.4375rem;
+  border-radius: 9999px;
+  border: 1.5px solid #0896bf;
+  background: var(--white);
+}
+
+.fo-ticket__leg-plane-wrap {
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 9999px;
+  background: var(--white);
+  border: 1px solid #0896bf;
+  color: #0896bf;
+  margin: 0 0.25rem;
 }
 
 .fo-ticket__leg-icon {
-  width: 0.875rem;
-  height: 0.875rem;
-  color: var(--sky-solid);
+  width: 0.75rem;
+  height: 0.75rem;
+  transform: rotate(45deg);
+}
+
+.fo-ticket__leg-chips {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
 }
 
 .fo-ticket__leg-duration {
   font-size: 0.6875rem;
-  color: var(--ink-soft);
-  white-space: nowrap;
+  font-weight: 650;
+  color: var(--navy);
+  font-variant-numeric: tabular-nums;
 }
 
-.fo-ticket__layover {
-  margin: 0.625rem 0 0;
-  font-size: 0.6875rem;
+.fo-ticket__leg-nonstop {
+  font-size: 0.5625rem;
+  font-weight: 600;
+  text-transform: uppercase;
   color: var(--ink-soft);
+}
+
+/* Layover Banner */
+.fo-ticket__layover-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.875rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  background: color-mix(in oklab, #f59e0b 8%, var(--white));
+  border: 1px solid color-mix(in oklab, #f59e0b 22%, transparent);
+}
+
+.fo-ticket__layover-lead {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 650;
+  color: #92400e;
+}
+
+.fo-ticket__layover-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.fo-ticket__layover-badge {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.fo-ticket__layover-baggage {
+  font-size: 0.6875rem;
+  color: #92400e;
 }
 
 .fo-ticket__nosectors {
-  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: 0.625rem;
+  background: var(--fo-desk-wash);
+  color: var(--navy);
   font-size: 0.8125rem;
+}
+
+/* 6. Financial & Security Seal Section */
+.fo-ticket__financial-seal {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 1.25rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed color-mix(in oklab, var(--navy) 14%, transparent);
+}
+
+.fo-ticket__security-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.fo-ticket__security-seal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.625rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  color: #065f46;
+}
+
+.fo-ticket__barcode-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.625rem 0.875rem;
+  background: var(--white);
+  border: 1px solid color-mix(in oklab, var(--navy) 10%, transparent);
+  border-radius: 0.5rem;
+}
+
+.fo-ticket__barcode-bars {
+  display: flex;
+  align-items: stretch;
+  height: 2.25rem;
+  gap: 1px;
+  overflow: hidden;
+}
+
+.fo-ticket__barcode-bar {
+  display: inline-block;
+  height: 100%;
+  background: transparent;
+}
+
+.fo-ticket__barcode-bar--dark {
+  background: #0f172a;
+}
+
+.fo-ticket__barcode-text {
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-align: center;
+  color: var(--navy);
+  font-family: var(--font-display, monospace);
+}
+
+.fo-ticket__security-notice {
+  margin: 0;
+  font-size: 0.6875rem;
+  line-height: 1.4;
   color: var(--ink-soft);
+}
+
+/* Fare Receipt Card */
+.fo-ticket__fare-receipt-card {
+  padding: 1rem 1.125rem;
+  background: var(--white);
+  border: 1px solid color-mix(in oklab, var(--navy) 10%, transparent);
+  border-radius: 0.75rem;
+  box-shadow: 0 2px 6px -1px color-mix(in oklab, var(--navy) 5%, transparent);
+}
+
+.fo-ticket__fare-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 0.625rem;
+  margin-bottom: 0.625rem;
+  border-bottom: 1px solid color-mix(in oklab, var(--navy) 8%, transparent);
+}
+
+.fo-ticket__fare-card-title {
+  font-size: 0.6875rem;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--navy);
+}
+
+.fo-ticket__paid-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.625rem;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  color: #059669;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
 }
 
 .fo-ticket__fare-rows {
   margin: 0;
   display: grid;
-  gap: 0.375rem;
+  gap: 0.4375rem;
 }
 
-.fo-ticket__fare-rows > div {
+.fo-ticket__fare-row {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
@@ -556,61 +1264,113 @@
   color: var(--ink-soft);
 }
 
-.fo-ticket__fare-rows dd {
+.fo-ticket__fare-row dd {
   margin: 0;
   font-variant-numeric: tabular-nums;
+  color: var(--navy);
 }
 
 .fo-ticket__fare-total {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
   margin-top: 0.375rem;
-  padding-top: 0.5rem;
-  border-top: 1px dashed var(--fo-desk-line);
+  padding-top: 0.625rem;
+  border-top: 1px solid color-mix(in oklab, var(--navy) 10%, transparent);
 }
 
-.fo-ticket__fare-total dt,
-.fo-ticket__fare-total dd {
-  font-size: 1rem !important;
-  font-weight: 650;
-  color: var(--navy) !important;
+.fo-ticket__fare-total dt {
+  font-size: 0.9375rem;
+  font-weight: 750;
+  color: var(--navy);
 }
 
+.fo-ticket__fare-total-amount {
+  margin: 0;
+  font-size: 1.1875rem;
+  font-weight: 850;
+  color: var(--navy);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 7. Official Agency Footer */
 .fo-ticket__foot {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem 1rem;
-  justify-content: space-between;
-  padding: 0.75rem var(--fo-ticket-pad);
+  flex-direction: column;
+  gap: 0.375rem;
+  padding: 0.875rem var(--fo-ticket-pad);
   background: color-mix(in oklab, var(--navy) 4%, var(--white));
+  border-top: 1px solid color-mix(in oklab, var(--navy) 8%, transparent);
   font-size: 0.6875rem;
   color: var(--ink-soft);
 }
 
-@media (max-width: 30rem) {
-  .fo-ticket__refs {
+.fo-ticket__foot-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.fo-ticket__foot-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+/* Responsive Overrides */
+@media (max-width: 48rem) {
+  .fo-ticket__meta-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .fo-ticket__financial-seal {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 32rem) {
+  .fo-ticket {
+    --fo-ticket-pad: 1rem;
+  }
+
+  .fo-ticket__head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .fo-ticket__plaque {
+    width: 100%;
+  }
+
+  .fo-ticket__route-banner {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
     text-align: left;
+  }
+
+  .fo-ticket__route-city--dest {
+    text-align: left;
+    align-items: flex-start;
   }
 
   .fo-ticket__sector-leg {
     grid-template-columns: 1fr;
-    gap: 0.5rem;
+    gap: 0.75rem;
   }
 
   .fo-ticket__stop--end {
     text-align: left;
+    align-items: flex-start;
   }
 
-  .fo-ticket__leg-mid {
-    grid-auto-flow: column;
-    justify-content: start;
-    gap: 0.5rem;
-  }
-
-  .fo-ticket__leg-line {
-    width: 2rem;
+  .fo-ticket__meta-grid {
+    grid-template-columns: 1fr;
   }
 }
 
-/* Download = print-to-PDF: hide app chrome so only the ticket prints. */
+/* ── PRINT MEDIA OPTIMIZATION ────────────────────────────────────────────────
+   Flawless A4 / Letter output when travellers click Download or press Cmd+P. */
 @media print {
   body * {
     visibility: hidden;
@@ -625,12 +1385,48 @@
     position: absolute;
     inset: 0 auto auto 0;
     width: 100%;
+    margin: 0;
+    padding: 0;
+    border-radius: 0;
+    border: none;
     box-shadow: none;
+    background: #ffffff !important;
   }
 
   .fo-ticket__head {
-    /* Force the brand bar to print rather than drop to white. */
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    background: #020712 !important;
+    color: #ffffff !important;
+  }
+
+  .fo-ticket__brand-flight {
+    color: #ffffff !important;
+  }
+
+  .fo-ticket__brand-one {
+    color: #38bdf8 !important;
+  }
+
+  .fo-ticket__plaque,
+  .fo-ticket__crest-emblem,
+  .fo-ticket__paid-badge,
+  .fo-ticket__cabin-pill,
+  .fo-ticket__sector,
+  .fo-ticket__layover-card,
+  .fo-ticket__meta-card {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .fo-ticket__bound,
+  .fo-ticket__financial-seal,
+  .fo-ticket__sector {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .fo-ticket__copy-btn {
+    display: none !important;
   }
 }

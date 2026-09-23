@@ -217,7 +217,7 @@ function FarePanel({
         aria-busy={booking}
         className="fo-fare-summary__cta"
       >
-        {booking ? "Opening checkout…" : "View Deal"}
+        {booking ? "Opening checkout…" : "Proceed to checkout"}
         {booking ? null : <span aria-hidden>→</span>}
       </button>
 
@@ -496,7 +496,7 @@ export function FlightOfferDetailModal({
           aria-busy={booking}
           className="fo-detail-mobile-bar__cta"
         >
-          {booking ? "Opening checkout…" : "View Deal"}
+          {booking ? "Opening checkout…" : "Proceed to checkout"}
         </button>
       </div>
     </div>

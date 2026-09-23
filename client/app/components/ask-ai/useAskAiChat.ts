@@ -33,6 +33,7 @@ import {
   loadChatHandoff,
   saveChatHandoff,
 } from "@/lib/ask-ai/chatHandoff";
+import { parseChatUrlState } from "@/lib/ask-ai/chatUrlState";
 import {
   ensureConversationId,
   loadConversationResumeById,
@@ -86,6 +87,8 @@ export function useAskAiChat(
   const searchPanelRef = useRef<SearchResultsPanel | null>(null);
   const previousTravelPlanRef = useRef<TravelPlan | null>(null);
   const sessionRestoredRef = useRef(false);
+  /** True once the session restore (snapshot or server thread) has settled. */
+  const [restored, setRestored] = useState(false);
   /** Synchronous double-submit guard — see the comment in `send()`. */
   const sendInFlightRef = useRef(false);
   /** Lets the user abandon an in-flight search instead of waiting it out. */
@@ -118,6 +121,16 @@ export function useAskAiChat(
   useEffect(() => {
     if (!hasHydratedAuth || sessionRestoredRef.current) return;
     sessionRestoredRef.current = true;
+    // Every exit path below must flip this, or ChatConsole never reopens the
+    // results view / detail modal the URL asked for.
+    const done = () => setRestored(true);
+
+    // `?c=` pins the thread this URL was showing (ChatConsole writes it), so
+    // Back from checkout reopens THAT conversation, not merely the latest one.
+    const urlConversationId =
+      typeof window !== "undefined"
+        ? parseChatUrlState(window.location.search).conversationId
+        : null;
 
     const isExplicitNew =
       typeof window !== "undefined" &&
@@ -126,6 +139,7 @@ export function useAskAiChat(
 
     if (isExplicitNew) {
       clearChatHandoff();
+      done();
       return;
     }
 
@@ -138,9 +152,13 @@ export function useAskAiChat(
       )[0] as PerformanceNavigationTiming | undefined;
       if (nav?.type === "reload") {
         clearChatHandoff();
+        done();
         return;
       }
-      if (!handoff) return;
+      if (!handoff) {
+        done();
+        return;
+      }
 
       const restored = handoff.messages.filter((m) => m.content?.trim());
       if (restored.length > 0) setMessages(restored);
@@ -163,12 +181,20 @@ export function useAskAiChat(
           setFilterPills(handoff.filterPills);
         }
       }
+      done();
       return;
     }
 
-    // Authenticated: prefer in-tab handoff (login/signup), else resume latest server thread.
+    // Authenticated: prefer the in-tab snapshot — it is the freshest copy and
+    // holds the live search panel — when it is the thread the URL asks for.
+    // Otherwise load that thread from the server, else the latest one.
+    const handoffMatchesUrl =
+      !urlConversationId ||
+      !handoff?.conversationId ||
+      handoff.conversationId === urlConversationId;
+
     void (async () => {
-      if (handoff) {
+      if (handoff && handoffMatchesUrl) {
         const restored = handoff.messages.filter((m) => m.content?.trim());
         if (restored.length > 0) setMessages(restored);
         if (handoff.previousTravelPlan) {
@@ -207,7 +233,9 @@ export function useAskAiChat(
         return;
       }
 
-      const resume = await loadLatestConversationResume();
+      const resume =
+        (urlConversationId ? await loadConversationResumeById(urlConversationId) : null) ??
+        (await loadLatestConversationResume());
       if (!resume) return;
       setConversationId(resume.conversationId);
       conversationIdRef.current = resume.conversationId;
@@ -226,7 +254,7 @@ export function useAskAiChat(
           setFilterPills(resume.searchPanel.filterPills);
         }
       }
-    })();
+    })().finally(done);
   }, [hasHydratedAuth, accessToken]);
 
   // Keep a handoff snapshot so /login → /chat doesn't wipe the active thread.
@@ -774,6 +802,7 @@ export function useAskAiChat(
     onTripTitleChange,
     loadingRoute,
     conversationId,
+    restored,
     resumeConversationById: async (id: string) => {
       const resume = await loadConversationResumeById(id);
       if (!resume) return false;

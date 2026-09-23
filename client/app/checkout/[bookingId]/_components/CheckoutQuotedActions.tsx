@@ -31,10 +31,9 @@ export type PaymentMethodOption =
 export type QuotedProgressionStep = "TRAVELLER" | "PAYMENT";
 
 const payMethodClass = (active: boolean) =>
-  `flex flex-col items-center text-center rounded-[var(--fo-desk-radius)] border p-3 transition-colors ${
-    active
-      ? "border-[var(--cyan)] bg-[var(--fo-desk-wash)] ring-1 ring-[var(--cyan)]"
-      : "border-[var(--fo-desk-line)] bg-[var(--white)] hover:border-[var(--fo-desk-line-strong)]"
+  `flex flex-col items-center text-center rounded-[var(--fo-desk-radius)] border p-3 transition-colors ${active
+    ? "border-[var(--cyan)] bg-[var(--fo-desk-wash)] ring-1 ring-[var(--cyan)]"
+    : "border-[var(--fo-desk-line)] bg-[var(--white)] hover:border-[var(--fo-desk-line-strong)]"
   }`;
 
 export function CheckoutQuotedActions({
@@ -141,9 +140,8 @@ export function CheckoutQuotedActions({
                 type="button"
                 disabled={fieldDisabled}
                 onClick={() => onSelectCompanion(comp)}
-                className={`fo-desk__chip ${
-                  formData.companionId === comp.id ? "fo-desk__chip--active" : ""
-                }`}
+                className={`fo-desk__chip ${formData.companionId === comp.id ? "fo-desk__chip--active" : ""
+                  }`}
               >
                 {comp.fullName}
                 {comp.relationship ? ` (${comp.relationship})` : ""}
@@ -169,9 +167,8 @@ export function CheckoutQuotedActions({
               </div>
             </div>
             <ChevronDown
-              className={`h-4 w-4 text-[var(--ink-soft)] transition-transform ${
-                isPassengerOpen ? "rotate-180" : ""
-              }`}
+              className={`h-4 w-4 text-[var(--ink-soft)] transition-transform ${isPassengerOpen ? "rotate-180" : ""
+                }`}
               aria-hidden
             />
           </button>
@@ -329,7 +326,7 @@ export function CheckoutQuotedActions({
     <div className="space-y-4">
       <div className="fo-checkout__traveller fo-desk__panel flex flex-wrap items-center justify-between gap-3">
         <div className="flex min-w-0 items-start gap-3">
-          <div className="fo-checkout__traveller-avatar">
+          <div className="fo-checkout__traveller-avatar" style={{ marginTop: 2 }}>
             <User className="h-4 w-4" aria-hidden />
           </div>
           <div className="min-w-0">
@@ -641,11 +638,10 @@ export function CheckoutReservedActions({
                   type="button"
                   disabled={busy || corporateBlocked}
                   onClick={() => setPayMethod(id)}
-                  className={`inline-flex items-center justify-center gap-1.5 rounded-[var(--fo-desk-radius)] border p-2.5 text-[12px] font-semibold transition-colors ${
-                    payMethod === id
+                  className={`inline-flex items-center justify-center gap-1.5 rounded-[var(--fo-desk-radius)] border p-2.5 text-[12px] font-semibold transition-colors ${payMethod === id
                       ? "border-[var(--cyan)] bg-[var(--fo-desk-wash)] text-[var(--navy)]"
                       : "border-[var(--fo-desk-line)] bg-[var(--white)] text-[var(--ink-soft)] hover:border-[var(--fo-desk-line-strong)]"
-                  }`}
+                    }`}
                 >
                   <Icon className="h-3.5 w-3.5" aria-hidden />
                   {label}

@@ -137,7 +137,7 @@ function ItineraryDetails({
             onClick={() => onSelect(itinerary)}
             className="flight-result-details__link cursor-pointer"
           >
-            Full details & booking →
+            Proceed to checkout →
           </button>
         ) : null}
       </div>
@@ -308,7 +308,7 @@ export function ItinerarySummaryCard({
           onClick={() => onSelect?.(itinerary)}
           className="flight-result-row__cta focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/40 focus-visible:ring-offset-1"
         >
-          View deal
+          Proceed to checkout
           <span aria-hidden>→</span>
         </button>
       </div>
