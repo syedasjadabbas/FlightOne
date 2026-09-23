@@ -18,6 +18,10 @@ dist/
 .env*.local
 *.pem
 *.key.json
+*-key.json
+*key.json
+flight-one-key.json
+gcs-cors.json
 
 # Local temp & test directories
 scratch/
