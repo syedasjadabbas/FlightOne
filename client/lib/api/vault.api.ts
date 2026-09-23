@@ -237,17 +237,44 @@ export const {
   useShareVaultDocumentMutation,
 } = vaultApi;
 
+import { getApiBaseUrl, CSRF_HEADER } from "@/lib/api/baseApi";
+import { useAuthStore } from "@/store/auth.store";
+import { refreshSessionOnce } from "@/lib/auth/refreshSession";
+
 /** Authenticated binary download (blob) — not via RTK Query JSON. */
 export async function downloadVaultDocumentBlob(
   documentId: string,
-  accessToken: string,
-  apiBase = API_BASE_URL,
+  accessToken?: string,
+  apiBase?: string,
 ): Promise<Blob> {
-  const res = await fetch(`${apiBase}/vault/${documentId}/download`, {
-    headers: { Authorization: `Bearer ${accessToken}` },
-  });
+  const base = apiBase || getApiBaseUrl();
+  let token = accessToken || useAuthStore.getState().accessToken;
+
+  const doFetch = async (t?: string) => {
+    const headers: Record<string, string> = {
+      [CSRF_HEADER]: "1",
+    };
+    if (t) {
+      headers.Authorization = `Bearer ${t}`;
+    }
+    return fetch(`${base}/vault/${documentId}/download`, {
+      headers,
+      credentials: "include",
+    });
+  };
+
+  let res = await doFetch(token);
+  if (res.status === 401) {
+    const refreshed = await refreshSessionOnce({ force: true });
+    if (refreshed) {
+      token = useAuthStore.getState().accessToken;
+      res = await doFetch(token);
+    }
+  }
+
   if (!res.ok) {
     throw new Error(`Vault download failed (${res.status})`);
   }
   return res.blob();
 }
+

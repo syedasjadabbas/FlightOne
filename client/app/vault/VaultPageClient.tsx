@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useMemo, useState } from "react";
 import {
@@ -306,19 +306,24 @@ export function VaultPageClient() {
   }
 
   async function onDownload(doc: VaultDocument) {
-    if (!accessToken || !doc.hasBinary) return;
+    if (!doc.hasBinary) return;
     setBusyId(doc.id);
     setBusyAction("download");
     setActionError(null);
     try {
-      const blob = await downloadVaultDocumentBlob(doc.id, accessToken);
+      const blob = await downloadVaultDocumentBlob(doc.id, accessToken || undefined);
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = doc.originalFilename || `${doc.type.toLowerCase()}.bin`;
+      const defaultExt = doc.contentType === "application/pdf" || doc.type === "TICKET" || doc.type === "HOTEL_VOUCHER" ? "pdf" : "bin";
+      a.download = doc.originalFilename || `${doc.type.toLowerCase()}-${doc.id.slice(0, 8)}.${defaultExt}`;
+      document.body.appendChild(a);
       a.click();
-      URL.revokeObjectURL(url);
-    } catch {
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+      setActionSuccess(`Downloaded ${a.download}`);
+    } catch (err) {
+      console.error("[vault-download]", err);
       setActionError("Download failed.");
     } finally {
       setBusyId(null);

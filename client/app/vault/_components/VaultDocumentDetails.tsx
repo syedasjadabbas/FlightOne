@@ -419,7 +419,13 @@ export function VaultDocumentDetails({
                       )
                     }
                   >
-                    {busyAction === "download" ? "Downloading…" : "Download Scan"}
+                    {busyAction === "download"
+                      ? "Downloading…"
+                      : doc.type === "TICKET"
+                        ? "Download Ticket"
+                        : doc.type === "HOTEL_VOUCHER"
+                          ? "Download Voucher"
+                          : "Download Scan"}
                   </Button>
                 ) : null}
                 {doc.isActive ? (
