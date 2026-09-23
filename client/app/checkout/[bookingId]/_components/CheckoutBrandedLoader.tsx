@@ -10,9 +10,9 @@ export interface CheckoutBrandedLoaderProps {
 }
 
 export function CheckoutBrandedLoader({
-  title = "Connecting to Global Distribution System…",
-  subtitle = "Securing live Galileo GDS inventory, fare locks & traveller credentials.",
-  badge = "GDS SECURE SESSION",
+  title = "Connecting to secure reservation systems…",
+  subtitle = "Securing live inventory, fare locks & traveller credentials.",
+  badge = "SECURE SESSION",
   className = "",
 }: CheckoutBrandedLoaderProps) {
   return (

@@ -233,7 +233,7 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
     return (
       <CheckoutBrandedLoader
         title="Restoring secure session…"
-        subtitle="Verifying traveller credentials and encrypted Galileo GDS channel."
+        subtitle="Verifying traveller credentials and encrypted booking channel."
       />
     );
   }
@@ -260,7 +260,7 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
     return (
       <CheckoutBrandedLoader
         title="Retrieving your reservation…"
-        subtitle="Verifying live Galileo GDS fare locks, baggage allowances & airline seat locks."
+        subtitle="Verifying live fare locks, baggage allowances & airline seat locks."
       />
     );
   }

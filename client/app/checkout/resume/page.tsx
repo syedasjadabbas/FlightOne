@@ -67,7 +67,7 @@ export default function CheckoutResumePage() {
     <main className="fo-checkout w-full">
       <CheckoutBrandedLoader
         title="Preparing your booking…"
-        subtitle="Confirming live Galileo GDS fare locks and opening traveller details."
+        subtitle="Confirming live airline fare locks and opening traveller details."
       />
     </main>
   );

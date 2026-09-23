@@ -12,7 +12,7 @@ const CheckoutClient = dynamic(
     loading: () => (
       <CheckoutBrandedLoader
         title="Loading checkout workspace…"
-        subtitle="Initializing FlightOne encrypted booking session & Galileo GDS interface."
+        subtitle="Initializing FlightOne encrypted booking session & reservation systems."
       />
     ),
   },

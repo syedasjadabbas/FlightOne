@@ -240,7 +240,7 @@ export function ExpandedFareCard({
 
         <div className="fo-expanded-fare__guarantee">
           <ShieldCheck className="fo-expanded-fare__shield-icon" aria-hidden />
-          <span>GDS Guaranteed</span>
+          <span>Guaranteed Fare</span>
         </div>
       </div>
 
