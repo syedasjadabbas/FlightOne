@@ -61,6 +61,7 @@ export function CheckoutQuotedActions({
   quotedStep = "TRAVELLER",
   onContinueToCheckout,
   onBackToTraveller,
+  actionError,
 }: {
   formData: TravellerFormData;
   setFormData: React.Dispatch<React.SetStateAction<TravellerFormData>>;
@@ -86,6 +87,7 @@ export function CheckoutQuotedActions({
   quotedStep?: QuotedProgressionStep;
   onContinueToCheckout?: () => void;
   onBackToTraveller?: () => void;
+  actionError?: string | null;
 }) {
   const hasCompanions = savedCompanions.length > 0;
   const [isPassengerOpen, setIsPassengerOpen] = useState(true);
@@ -479,6 +481,12 @@ export function CheckoutQuotedActions({
             </div>
           ) : null}
 
+          {actionError ? (
+            <div className="fo-checkout__alert text-[13px] text-[var(--danger)]" role="alert">
+              {actionError}
+            </div>
+          ) : null}
+
           <div className="fo-checkout__cta-row pt-1">
             <Button
               type="button"
@@ -532,6 +540,7 @@ export function CheckoutReservedActions({
   onTicket,
   amountMinor = 0,
   currency = "PKR",
+  actionError,
 }: {
   busy: boolean;
   canTicket: boolean;
@@ -552,6 +561,7 @@ export function CheckoutReservedActions({
   onTicket: () => void;
   amountMinor?: number;
   currency?: string;
+  actionError?: string | null;
 }) {
   const isPending1Link = Boolean(pendingPaymentDetails?.consumerNumber);
   const formattedPayAmount = amountMinor > 0 ? formatMinor(amountMinor, currency) : "";
@@ -683,6 +693,12 @@ export function CheckoutReservedActions({
           {payMethod === "onelink_ibft" ? (
             <div className="fo-checkout__notice text-[12px] text-[var(--ink-soft)]">
               Generates a 1Bill number for bank transfer before the hold expires.
+            </div>
+          ) : null}
+
+          {actionError ? (
+            <div className="fo-checkout__alert text-[13px] text-[var(--danger)]" role="alert">
+              {actionError}
             </div>
           ) : null}
 

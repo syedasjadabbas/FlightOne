@@ -250,7 +250,7 @@ export async function downloadVaultDocumentBlob(
   const base = apiBase || getApiBaseUrl();
   let token = accessToken || useAuthStore.getState().accessToken;
 
-  const doFetch = async (t?: string) => {
+  const doFetch = async (t?: string | null) => {
     const headers: Record<string, string> = {
       [CSRF_HEADER]: "1",
     };

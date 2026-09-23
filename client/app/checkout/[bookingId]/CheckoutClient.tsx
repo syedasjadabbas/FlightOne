@@ -597,6 +597,7 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
               onReserve={() => void onReserve()}
               amountMinor={booking.amountMinor}
               currency={booking.currency}
+              actionError={actionError}
             />
           ) : null}
 
@@ -621,6 +622,7 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
               onTicket={() => void onTicket()}
               amountMinor={booking.amountMinor}
               currency={booking.currency}
+              actionError={actionError}
             />
           ) : null}
 

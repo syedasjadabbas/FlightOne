@@ -1017,16 +1017,23 @@ export async function reserveBooking(
       })
     : null;
   if (!payment && !pendingHold) {
-    const cap = paymentsService.getPaymentCapability();
-    if (!companyId && !cap.canCapture) {
-      const err = new AppError(503, "Payment gateway is not configured");
-      err.code = paymentsService.PAYMENT_UNCONFIGURED;
-      err.details = { capability: cap };
+    const isSimulatedOrDev =
+      process.env.NODE_ENV !== "production" &&
+      (process.env.ALLOW_SIMULATED_PAYMENT === "true" ||
+        process.env.ALLOW_SIMULATED_BOOKING === "true");
+
+    if (!isSimulatedOrDev) {
+      const cap = paymentsService.getPaymentCapability();
+      if (!companyId && !cap.canCapture) {
+        const err = new AppError(503, "Payment gateway is not configured");
+        err.code = paymentsService.PAYMENT_UNCONFIGURED;
+        err.details = { capability: cap };
+        throw err;
+      }
+      const err = new AppError(402, "Payment required before supplier reservation");
+      err.code = "PAYMENT_REQUIRED";
       throw err;
     }
-    const err = new AppError(402, "Payment required before supplier reservation");
-    err.code = "PAYMENT_REQUIRED";
-    throw err;
   }
 
   assertSupplierCanReserve(booking);
