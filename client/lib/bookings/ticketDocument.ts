@@ -202,7 +202,7 @@ export function buildTicketDocument(booking: {
         : [];
 
   const ticketLegs: TicketLeg[] = rawLegs
-    .map((leg, i) => {
+    .map((leg, i): TicketLeg | null => {
       const segs = asSegments(leg.segments);
       const lOrigin = asString(leg.originCode) ?? segs[0]?.originCode;
       const lDest = asString(leg.destinationCode) ?? segs[segs.length - 1]?.destinationCode;

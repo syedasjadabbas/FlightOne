@@ -1372,32 +1372,89 @@
 /* ── PRINT MEDIA OPTIMIZATION ────────────────────────────────────────────────
    Flawless A4 / Letter output when travellers click Download or press Cmd+P. */
 @media print {
-  body * {
-    visibility: hidden;
+  @page {
+    size: A4 portrait;
+    margin: 8mm 10mm 8mm 10mm;
   }
 
-  .fo-ticket,
-  .fo-ticket * {
-    visibility: visible;
-  }
-
-  .fo-ticket {
-    position: absolute;
-    inset: 0 auto auto 0;
-    width: 100%;
-    margin: 0;
-    padding: 0;
-    border-radius: 0;
-    border: none;
-    box-shadow: none;
+  /* 1. Reset root & body flow so the browser paginates naturally */
+  html, body {
     background: #ffffff !important;
-  }
-
-  .fo-ticket__head {
+    color: #020712 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 100% !important;
+    overflow: visible !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+  }
+
+  /* 2. Hide all non-ticket website UI chrome */
+  header:not(.fo-ticket__head),
+  footer:not(.fo-ticket__foot),
+  nav,
+  aside,
+  .fo-checkout__steps,
+  .fo-desk__panel,
+  .fo-checkout__traveller,
+  .fo-checkout__actions,
+  .fo-checkout__notice,
+  .fo-checkout__alert,
+  .fo-ticket__copy-btn,
+  .no-print {
+    display: none !important;
+  }
+
+  /* 3. Neutralize layout grids/containers that wrap the ticket */
+  .grid,
+  .fo-desk,
+  .fo-desk--checkout,
+  .fo-checkout,
+  main,
+  section,
+  div:not(.fo-ticket):not(.fo-ticket *) {
+    display: block !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    overflow: visible !important;
+  }
+
+  /* 4. Elegant A4-proportioned Ticket Document */
+  .fo-ticket {
+    --fo-ticket-pad: 0.875rem !important;
+    position: static !important;
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+    overflow: visible !important;
+    page-break-after: auto;
+    break-after: auto;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Force brand color gradients & backgrounds */
+  .fo-ticket__head {
+    padding: 0.875rem var(--fo-ticket-pad) !important;
     background: #020712 !important;
     color: #ffffff !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 
   .fo-ticket__brand-flight {
@@ -1408,25 +1465,76 @@
     color: #38bdf8 !important;
   }
 
-  .fo-ticket__plaque,
-  .fo-ticket__crest-emblem,
-  .fo-ticket__paid-badge,
-  .fo-ticket__cabin-pill,
-  .fo-ticket__sector,
-  .fo-ticket__layover-card,
-  .fo-ticket__meta-card {
+  .fo-ticket__plaque {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
 
-  .fo-ticket__bound,
-  .fo-ticket__financial-seal,
-  .fo-ticket__sector {
+  .fo-ticket__crest-emblem,
+  .fo-ticket__paid-badge,
+  .fo-ticket__cabin-pill,
+  .fo-ticket__meta-card,
+  .fo-ticket__layover-card,
+  .fo-ticket__route-type-pill {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .fo-ticket__billboard {
+    padding: 0.75rem var(--fo-ticket-pad) 0.625rem !important;
     page-break-inside: avoid !important;
     break-inside: avoid !important;
   }
 
-  .fo-ticket__copy-btn {
-    display: none !important;
+  .fo-ticket__route-banner {
+    padding: 0.625rem 0.875rem !important;
+  }
+
+  .fo-ticket__meta-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 0.5rem !important;
+    margin: 0.625rem 0 0 !important;
+  }
+
+  .fo-ticket__meta-card {
+    padding: 0.375rem 0.5rem !important;
+  }
+
+  .fo-ticket__body {
+    padding: 0.75rem var(--fo-ticket-pad) !important;
+    overflow: visible !important;
+  }
+
+  .fo-ticket__bound {
+    margin-bottom: 0.75rem !important;
+  }
+
+  .fo-ticket__sector {
+    padding: 0.625rem 0.875rem !important;
+    margin-bottom: 0.5rem !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .fo-ticket__financial-seal {
+    display: grid !important;
+    grid-template-columns: 1.15fr 1fr !important;
+    gap: 0.875rem !important;
+    margin-top: 0.75rem !important;
+    padding-top: 0.75rem !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .fo-ticket__fare-receipt-card {
+    padding: 0.625rem 0.75rem !important;
+  }
+
+  .fo-ticket__foot {
+    padding: 0.5rem var(--fo-ticket-pad) !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 }
