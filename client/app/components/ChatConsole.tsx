@@ -325,6 +325,7 @@ export function ChatConsole() {
             <ChatLayout
               messages={chat.messages}
               busy={chat.busy}
+              onStop={chat.stop}
               searchPhase={chat.searchPhase}
               onSend={chat.send}
               banner={<GuestBanner />}

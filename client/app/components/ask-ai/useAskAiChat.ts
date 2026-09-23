@@ -85,6 +85,10 @@ export function useAskAiChat(
   const searchPanelRef = useRef<SearchResultsPanel | null>(null);
   const previousTravelPlanRef = useRef<TravelPlan | null>(null);
   const sessionRestoredRef = useRef(false);
+  /** Synchronous double-submit guard — see the comment in `send()`. */
+  const sendInFlightRef = useRef(false);
+  /** Lets the user abandon an in-flight search instead of waiting it out. */
+  const abortRef = useRef<AbortController | null>(null);
   const accessToken = useAuthStore((s) => s.accessToken);
   const hasHydratedAuth = useAuthStore((s) => s.hasHydrated);
 
@@ -368,7 +372,11 @@ export function useAskAiChat(
 
   async function send(text: string) {
     const trimmed = text.trim();
-    if (!trimmed || busy) return;
+    // `busy` is React state, so two submits in the same tick both read the
+    // stale `false` and both proceed — which persisted the turn twice and
+    // rendered duplicate user/assistant bubbles. A ref flips synchronously.
+    if (!trimmed || busy || sendInFlightRef.current) return;
+    sendInFlightRef.current = true;
 
     const turnId = crypto.randomUUID();
     if (process.env.NODE_ENV === "development") {
@@ -465,7 +473,10 @@ export function useAskAiChat(
         // Fall through to Ava if escalate API failed (e.g. network) — guidance still applies.
       }
       const corp = useCorporateProfileStore.getState();
+      const controller = new AbortController();
+      abortRef.current = controller;
       const res = await fetch("/api/chat", {
+        signal: controller.signal,
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -556,7 +567,22 @@ export function useAskAiChat(
           setSearchPhase("done");
         }
       });
-    } catch {
+    } catch (err) {
+      // A user-initiated stop is not a failure — replace the empty bubble with
+      // an honest note rather than a network-error message they didn't cause.
+      if ((err as Error)?.name === "AbortError") {
+        setMessages((prev) =>
+          prev
+            .map((m) =>
+              m.id === assistantId
+                ? { ...m, content: m.content || "Search stopped." }
+                : m,
+            ),
+        );
+        setSearchPhase("done");
+        setLoadingRoute(null);
+        return;
+      }
       setMessages((prev) =>
         prev.map((m) =>
           m.id === assistantId
@@ -567,6 +593,8 @@ export function useAskAiChat(
       setSearchPhase("done");
     } finally {
       setBusy(false);
+      sendInFlightRef.current = false;
+      abortRef.current = null;
     }
   }
 
@@ -629,11 +657,41 @@ export function useAskAiChat(
     });
   }
 
+  /** Abandon the in-flight search. No-op when nothing is running. */
+  function stop() {
+    abortRef.current?.abort();
+  }
+
+  /**
+   * Re-run a turn from an edited user message. Everything from that message
+   * onward is dropped first, so the thread stays a truthful transcript rather
+   * than accumulating an edited message beside its original answer.
+   */
+  function editAndResend(messageId: string, nextText: string) {
+    const trimmed = nextText.trim();
+    if (!trimmed || busy || sendInFlightRef.current) return;
+    const idx = messages.findIndex((m) => m.id === messageId);
+    if (idx < 0) return;
+    setMessages((prev) => prev.slice(0, idx));
+    void send(trimmed);
+  }
+
+  /** Re-ask the most recent user message — for a failed or unhelpful answer. */
+  function retryLastTurn() {
+    if (busy || sendInFlightRef.current) return;
+    const lastUser = [...messages].reverse().find((m) => m.role === "user");
+    if (!lastUser) return;
+    editAndResend(lastUser.id, lastUser.content);
+  }
+
   return {
     messages,
     busy,
     provider,
     send,
+    stop,
+    editAndResend,
+    retryLastTurn,
     searchPanel,
     searchPhase,
     searchResultMessageId,

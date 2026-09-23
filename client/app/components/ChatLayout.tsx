@@ -4,9 +4,9 @@ import { useMemo, useRef, useState, useEffect, type ReactNode } from "react";
 import {
   ArrowRight,
   ArrowUp,
+  Square,
   BedDouble,
   GitCompareArrows,
-  Loader2,
   Map,
   MoreHorizontal,
   PanelLeft,
@@ -64,6 +64,7 @@ const HERO_TOOLS = [
 export function ChatLayout({
   messages,
   busy,
+  onStop,
   searchPhase = "idle",
   onSend,
   banner,
@@ -85,6 +86,8 @@ export function ChatLayout({
 }: {
   messages: UiMessage[];
   busy: boolean;
+  /** Abandon the in-flight search. */
+  onStop?: () => void;
   searchPhase?: SearchPhase;
   onSend: (text: string) => void;
   banner?: ReactNode;
@@ -218,6 +221,24 @@ export function ChatLayout({
       document.body.classList.remove("fo-chat-active");
     };
   }, [isActiveChat]);
+
+  // ⌘/Ctrl+K focuses the composer from anywhere; Escape stops an in-flight
+  // search. The sidebar was keyboard-reachable but the chat itself was not.
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        inputRef.current?.focus();
+        return;
+      }
+      if (e.key === "Escape" && busy) {
+        e.preventDefault();
+        onStop?.();
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [busy, onStop]);
 
   useChatViewportLayout(isActiveChat, composerDockRef);
   useLandingDocumentFit(!isActiveChat);
@@ -602,14 +623,18 @@ export function ChatLayout({
                 <div className="flex shrink-0 items-center gap-1.5 pb-0.5">
                   {composerAccessory}
 
+                  {/* While a search runs this becomes Stop. Previously it was a
+                      disabled spinner, so a mistyped destination meant waiting
+                      out the full supplier round-trip with no way to abandon it. */}
                   <button
-                    type="submit"
-                    disabled={busy || !input.trim()}
-                    className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--sky-solid)] text-white shadow-[0_4px_14px_rgba(8,150,191,0.35),inset_0_1px_0_rgba(255,255,255,0.3)] transition-all duration-150 hover:-translate-y-px hover:bg-[color-mix(in_oklab,var(--electric)_90%,var(--navy))] hover:shadow-[0_8px_22px_rgba(0,122,229,0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sky)]/40 active:translate-y-0 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40 disabled:shadow-none disabled:hover:translate-y-0"
-                    aria-label="Send message"
+                    type={busy ? "button" : "submit"}
+                    onClick={busy ? onStop : undefined}
+                    disabled={busy ? false : !input.trim()}
+                    className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--sky-solid)] text-white shadow-[0_4px_14px_rgba(8,150,191,0.35),inset_0_1px_0_rgba(255,255,255,0.3)] transition-all duration-150 hover:-translate-y-px hover:bg-[#096fcf] hover:shadow-[0_8px_22px_rgba(0,122,229,0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sky)]/40 active:translate-y-0 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40 disabled:shadow-none disabled:hover:translate-y-0"
+                    aria-label={busy ? "Stop search" : "Send message"}
                   >
                     {busy ? (
-                      <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2.2} aria-hidden />
+                      <Square className="h-3 w-3 fill-current" strokeWidth={0} aria-hidden />
                     ) : (
                       <ArrowUp className="h-4 w-4" strokeWidth={2.4} aria-hidden />
                     )}

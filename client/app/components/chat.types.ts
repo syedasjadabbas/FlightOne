@@ -22,6 +22,12 @@ export interface AskAiChatResult {
   busy: boolean;
   provider: string | null;
   send: (text: string) => void;
+  /** Abandon the in-flight search. No-op when nothing is running. */
+  stop: () => void;
+  /** Re-run a turn from an edited user message, dropping everything after it. */
+  editAndResend: (messageId: string, nextText: string) => void;
+  /** Re-ask the most recent user message. */
+  retryLastTurn: () => void;
   searchPanel: SearchResultsPanel | null;
   searchPhase: SearchPhase;
   /** Assistant message id bound to the latest completed live search (if any). */
