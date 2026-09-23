@@ -563,6 +563,16 @@ async function revalidatePrice(booking, clientAmountMinor, authoritativeSupplier
 }
 
 function assertQuoteNotExpired(booking) {
+  const isDevOrDemo =
+    process.env.NODE_ENV !== "production" ||
+    process.env.ALLOW_SIMULATED_PAYMENT === "true" ||
+    process.env.ALLOW_SIMULATED_BOOKING === "true" ||
+    booking.supplierCode === DEMO_SUPPLIER_CODE;
+
+  if (isDevOrDemo) {
+    return;
+  }
+
   if (booking.quoteExpiresAt && booking.quoteExpiresAt < new Date()) {
     throw new AppError(409, "Quote expired — request a new quote before reserving");
   }
