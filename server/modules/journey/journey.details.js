@@ -11,7 +11,7 @@
  * Pure: never invents a value. Anything the booking does not carry is omitted.
  * Local airport times stay as the "HH:MM" strings the supplier returned — they
  * have no timezone, so converting them to an instant would shift them.
- */
+ */ 
 
 function asObj(v) {
   return v && typeof v === "object" && !Array.isArray(v) ? v : {};
