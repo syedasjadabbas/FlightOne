@@ -23,12 +23,12 @@ export function TicketIssuedPanel({ booking }: { booking: BookingLike }) {
 
   return (
     <div className="space-y-4">
-      <div className="fo-desk__panel space-y-3 text-center">
-        <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-[var(--fo-desk-wash)] text-[var(--cyan)]">
+      <div className="fo-desk__panel space-y-3 text-center no-print fo-ticket-issued-header">
+        <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-(--fo-desk-wash) text-cyan">
           <Check className="h-5 w-5" aria-hidden />
         </div>
-        <h3 className="m-0 text-[16px] font-semibold text-[var(--navy)]">Ticket issued</h3>
-        <p className="mx-auto m-0 max-w-md text-[13px] text-[var(--ink-soft)]">
+        <h3 className="m-0 text-[16px] font-semibold text-navy">Ticket issued</h3>
+        <p className="mx-auto m-0 max-w-md text-[13px] text-ink-soft">
           {doc.pnr ? `Confirmed under PNR ${doc.pnr}. ` : "Confirmed. "}
           A copy is in your email and Traveller Vault.
         </p>
@@ -48,7 +48,7 @@ export function TicketIssuedPanel({ booking }: { booking: BookingLike }) {
           </Link>
         </div>
 
-        <p className="m-0 pt-1 text-[12px] text-[var(--ink-soft)]">
+        <p className="m-0 pt-1 text-[12px] text-ink-soft">
           <Link href="/journey" className="underline underline-offset-2">
             View in My Journey
           </Link>

@@ -3914,3 +3914,10 @@ html.fo-results-active .fo-stage--chat > .fo-chat-app {
   0% { transform: translateX(-100%); }
   100% { transform: translateX(250%); }
 }
+
+@media print {
+  .no-print,
+  .no-print * {
+    display: none !important;
+  }
+}

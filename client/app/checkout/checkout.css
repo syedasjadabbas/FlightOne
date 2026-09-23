@@ -1644,30 +1644,16 @@
     print-color-adjust: exact !important;
   }
 
-  /* 2. Hide all non-ticket website UI chrome */
-  header:not(.fo-ticket__head),
-  footer:not(.fo-ticket__foot),
-  nav,
-  aside,
-  .fo-checkout__steps,
-  .fo-desk__panel,
-  .fo-checkout__traveller,
-  .fo-checkout__actions,
-  .fo-checkout__notice,
-  .fo-checkout__alert,
-  .fo-ticket__copy-btn,
-  .no-print {
-    display: none !important;
-  }
-
-  /* 3. Neutralize layout grids/containers that wrap the ticket */
+  /* 2. Neutralize layout grids/containers that wrap the ticket */
   .grid,
+  .fo-stage,
+  .fo-stage--desk,
   .fo-desk,
   .fo-desk--checkout,
+  .fo-desk__layout,
+  .fo-desk__main,
   .fo-checkout,
-  main,
-  section,
-  div:not(.fo-ticket):not(.fo-ticket *) {
+  main {
     display: block !important;
     max-width: 100% !important;
     width: 100% !important;
@@ -1677,6 +1663,27 @@
     box-shadow: none !important;
     background: transparent !important;
     overflow: visible !important;
+  }
+
+  /* 3. Hide all non-ticket website UI chrome & confirmation banners */
+  header:not(.fo-ticket__head),
+  footer:not(.fo-ticket__foot),
+  nav,
+  aside,
+  .site-nav,
+  .fo-desk__aside,
+  .fo-desk__panel,
+  .fo-ticket-issued-header,
+  .fo-ticket-issued-header *,
+  .fo-checkout__steps,
+  .fo-checkout__traveller,
+  .fo-checkout__actions,
+  .fo-checkout__notice,
+  .fo-checkout__alert,
+  .fo-ticket__copy-btn,
+  .no-print,
+  .no-print * {
+    display: none !important;
   }
 
   /* 4. Elegant A4-proportioned Ticket Document */
