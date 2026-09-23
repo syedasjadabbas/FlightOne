@@ -1,5 +1,6 @@
-import type { OfferCardFlight } from "@/lib/consultant/types";
+import type { OfferCard, OfferCardFlight } from "@/lib/consultant/types";
 import type { BaggageAllowance, FareRulesSummary } from "@/lib/inventory/fareTypes";
+import type { FlightSegment } from "@/lib/inventory/types";
 import {
   BAGGAGE_UNAVAILABLE,
   FARE_RULES_UNAVAILABLE,
@@ -8,8 +9,176 @@ import {
   sanitizeFareRuleText,
 } from "@/lib/inventory/fareDisplay";
 
-export function formatDurationLabel(minutes: number, style: "short" | "long" = "short"): string {
-  if (minutes <= 0) return "";
+export interface OfferLeg {
+  originCode: string;
+  destinationCode: string;
+  departureDate?: string;
+  airline?: string;
+  airlineCode: string;
+  flightNumber?: string;
+  departTimeLocal: string;
+  arriveTimeLocal?: string | null;
+  durationMinutes?: number;
+  stops?: number;
+  cabin?: "economy" | "premium" | "business" | string;
+  baggageKg?: number;
+  segments: FlightSegment[];
+  label?: string;
+}
+
+export function parseOfferLegs(offer: OfferCard): OfferLeg[] {
+  const f = offer.flight;
+  if (!f) return [];
+
+  const rawTripLegs = Array.isArray(offer.metadata?.tripLegs)
+    ? (offer.metadata.tripLegs as Record<string, unknown>[])
+    : Array.isArray(offer.metadata?.legs)
+      ? (offer.metadata.legs as Record<string, unknown>[])
+      : null;
+
+  if (rawTripLegs && rawTripLegs.length > 1) {
+    return rawTripLegs.map((leg, i) => {
+      const segs: FlightSegment[] =
+        Array.isArray(leg.segments) && (leg.segments as unknown[]).length > 0
+          ? (leg.segments as FlightSegment[])
+          : [
+              {
+                carrier: (leg.airlineCode as string) || (leg.carrier as string) || f.airlineCode,
+                flightNumber: (leg.flightNumber as string) || (leg.airlineCode as string) || f.flightNumber || "",
+                aircraft: (leg.aircraft as string) || null,
+                originCode: (leg.originCode as string) || f.originCode,
+                destinationCode: (leg.destinationCode as string) || f.destinationCode,
+                departureDate: (leg.departureDate as string) || f.departureDate || "",
+                departTimeLocal: (leg.departTimeLocal as string) || (leg.departTime as string) || "—",
+                arrivalDate: (leg.arrivalDate as string) || (leg.departureDate as string) || f.departureDate || "",
+                arriveTimeLocal: (leg.arriveTimeLocal as string) || (leg.arriveTime as string) || "—",
+                durationMinutes: typeof leg.durationMinutes === "number" ? leg.durationMinutes : null,
+              },
+            ];
+
+      const lOrigin = (leg.originCode as string) || segs[0]?.originCode || f.originCode;
+      const lDest = (leg.destinationCode as string) || segs[segs.length - 1]?.destinationCode || f.destinationCode;
+
+      return {
+        originCode: lOrigin,
+        destinationCode: lDest,
+        departureDate: (leg.departureDate as string) || segs[0]?.departureDate || f.departureDate,
+        departTimeLocal: (leg.departTimeLocal as string) || segs[0]?.departTimeLocal || "—",
+        arriveTimeLocal: (leg.arriveTimeLocal as string) || segs[segs.length - 1]?.arriveTimeLocal || "—",
+        durationMinutes:
+          typeof leg.durationMinutes === "number"
+            ? leg.durationMinutes
+            : segs.reduce((sum, s) => sum + (s.durationMinutes || 0), 0) || undefined,
+        airline: (leg.airline as string) || (leg.airlineName as string) || f.airline,
+        airlineCode: (leg.airlineCode as string) || (leg.carrier as string) || f.airlineCode,
+        flightNumber: (leg.flightNumber as string) || segs[0]?.flightNumber,
+        stops: typeof leg.stops === "number" ? leg.stops : Math.max(0, segs.length - 1),
+        cabin: (leg.cabin as string) || f.cabin,
+        baggageKg: typeof leg.baggageKg === "number" ? leg.baggageKg : f.baggageKg,
+        segments: segs,
+        label: `Flight ${i + 1}: ${lOrigin} → ${lDest}`,
+      };
+    });
+  }
+
+  const defaultOutbound: FlightSegment[] =
+    f.segments && f.segments.length > 0
+      ? f.segments
+      : [
+          {
+            carrier: f.airlineCode,
+            flightNumber: f.flightNumber || f.airlineCode,
+            aircraft: f.aircraft ?? null,
+            originCode: f.originCode,
+            destinationCode: f.destinationCode,
+            departureDate: f.departureDate || "",
+            departTimeLocal: f.departTimeLocal,
+            arrivalDate: f.departureDate || "",
+            arriveTimeLocal: f.arriveTimeLocal || "",
+            durationMinutes: f.durationMinutes,
+          },
+        ];
+
+  if (offer.roundTrip && ((f.returnSegments && f.returnSegments.length > 0) || offer.returnDate || f.returnDate)) {
+    const returnSegs: FlightSegment[] =
+      f.returnSegments && f.returnSegments.length > 0
+        ? f.returnSegments
+        : [
+            {
+              carrier: f.airlineCode,
+              flightNumber: f.flightNumber || f.airlineCode,
+              aircraft: f.aircraft ?? null,
+              originCode: f.destinationCode,
+              destinationCode: f.originCode,
+              departureDate: offer.returnDate || f.returnDate || f.departureDate || "",
+              departTimeLocal: "—",
+              arrivalDate: offer.returnDate || f.returnDate || f.departureDate || "",
+              arriveTimeLocal: "—",
+              durationMinutes: f.returnDurationMinutes ?? f.durationMinutes,
+            },
+          ];
+
+    return [
+      {
+        originCode: f.originCode,
+        destinationCode: f.destinationCode,
+        departureDate: f.departureDate,
+        departTimeLocal: f.departTimeLocal,
+        arriveTimeLocal: f.arriveTimeLocal,
+        durationMinutes: f.durationMinutes,
+        airline: f.airline,
+        airlineCode: f.airlineCode,
+        flightNumber: f.flightNumber,
+        stops: f.stops,
+        cabin: f.cabin,
+        baggageKg: f.baggageKg,
+        segments: defaultOutbound,
+        label: `Flight 1: Outbound · ${f.originCode} → ${f.destinationCode}`,
+      },
+      {
+        originCode: f.destinationCode,
+        destinationCode: f.originCode,
+        departureDate: offer.returnDate || f.returnDate || f.departureDate,
+        departTimeLocal: returnSegs[0]?.departTimeLocal || "—",
+        arriveTimeLocal: returnSegs[returnSegs.length - 1]?.arriveTimeLocal || "—",
+        durationMinutes: f.returnDurationMinutes ?? f.durationMinutes,
+        airline: returnSegs[0]?.carrier ? f.airline : f.airline,
+        airlineCode: returnSegs[0]?.carrier || f.airlineCode,
+        flightNumber: returnSegs[0]?.flightNumber || f.flightNumber,
+        stops: typeof f.returnStops === "number" ? f.returnStops : Math.max(0, returnSegs.length - 1),
+        cabin: f.cabin,
+        baggageKg: f.baggageKg,
+        segments: returnSegs,
+        label: `Flight 2: Return · ${f.destinationCode} → ${f.originCode}`,
+      },
+    ];
+  }
+
+  return [
+    {
+      originCode: f.originCode,
+      destinationCode: f.destinationCode,
+      departureDate: f.departureDate,
+      departTimeLocal: f.departTimeLocal,
+      arriveTimeLocal: f.arriveTimeLocal,
+      durationMinutes: f.durationMinutes,
+      airline: f.airline,
+      airlineCode: f.airlineCode,
+      flightNumber: f.flightNumber,
+      stops: f.stops,
+      cabin: f.cabin,
+      baggageKg: f.baggageKg,
+      segments: defaultOutbound,
+      label: `Flight 1: ${f.originCode} → ${f.destinationCode}`,
+    },
+  ];
+}
+
+export function formatDurationLabel(
+  minutes?: number | null,
+  style: "short" | "long" = "short",
+): string {
+  if (!minutes || minutes <= 0) return "";
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
   if (style === "long") {

@@ -775,26 +775,30 @@
 .fo-loading-route-wrap {
   display: flex;
   align-items: center;
-  gap: 0.45rem;
+  justify-content: space-between;
+  width: 100%;
+  gap: 0.65rem;
   margin-top: 0.55rem;
-  max-width: 14rem;
   color: var(--sky);
 }
 
 .thinking-bubble .fo-loading-route-wrap {
-  margin-top: 0.7rem;
-  padding-top: 0.55rem;
+  width: 100%;
+  margin-top: 0.75rem;
+  padding-top: 0.6rem;
   border-top: 1px solid color-mix(in oklab, var(--line) 55%, transparent);
+  box-sizing: border-box;
   max-width: none;
 }
 
 .fo-loading-route__code {
   flex-shrink: 0;
-  font-size: 0.625rem;
+  font-size: 0.6875rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   color: var(--sky);
-  opacity: 0.72;
+  opacity: 0.85;
+  line-height: 1;
 }
 
 .fo-loading-route {
@@ -802,8 +806,8 @@
   flex: 1;
   min-width: 0;
   width: 100%;
-  max-width: 9rem;
-  height: 1.35rem;
+  max-width: none;
+  height: 1.4rem;
   overflow: visible;
 }
 
@@ -826,7 +830,7 @@
 
 .fo-loading-route__plane {
   color: var(--sky);
-  offset-path: path("M8 18 C 36 6, 60 24, 90 12 S 122 10, 132 14");
+  offset-path: path("M8 16 C 65 4, 115 22, 175 10 C 205 4, 235 8, 252 12");
   offset-rotate: auto;
   animation: fo-plane-travel-path 2.4s ease-in-out infinite;
 }
@@ -857,7 +861,7 @@
       opacity: 0.55;
     }
     50% {
-      transform: translate(72px, -2px);
+      transform: translate(240px, -4px);
       opacity: 1;
     }
   }

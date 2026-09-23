@@ -1,5 +1,5 @@
 import dynamic from "next/dynamic";
-import { RouteChunkFallback } from "@/components/RouteChunkFallback";
+import { CheckoutBrandedLoader } from "./_components/CheckoutBrandedLoader";
 import { DeskShell } from "@/components/DeskShell";
 import { SiteNav } from "@/components/SiteNav";
 
@@ -8,7 +8,14 @@ const CheckoutClient = dynamic(
     import("./CheckoutClient").then((m) => ({
       default: m.CheckoutClient,
     })),
-  { loading: () => <RouteChunkFallback label="Loading checkout…" /> },
+  {
+    loading: () => (
+      <CheckoutBrandedLoader
+        title="Loading checkout workspace…"
+        subtitle="Initializing FlightOne encrypted booking session & Galileo GDS interface."
+      />
+    ),
+  },
 );
 
 export const metadata = {
@@ -22,7 +29,7 @@ export default async function CheckoutPage({
 }) {
   const { bookingId } = await params;
   return (
-    <main className="fo-stage fo-stage--desk relative flex min-h-[100dvh] flex-col">
+    <main className="fo-stage fo-stage--desk relative flex min-h-dvh flex-col">
       <SiteNav />
       <DeskShell checkout>
         <CheckoutClient bookingId={bookingId} />

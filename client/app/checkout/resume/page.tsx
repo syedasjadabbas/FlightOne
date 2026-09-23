@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/auth.store";
 import { Button } from "@/components/ui";
 import { startCheckout, takePendingCheckout } from "@/lib/bookings/startCheckout";
+import { CheckoutBrandedLoader } from "../[bookingId]/_components/CheckoutBrandedLoader";
 
 /**
  * Post-login checkout continuation.
@@ -48,26 +49,26 @@ export default function CheckoutResumePage() {
     });
   }, [hasHydrated, accessToken, router]);
 
+  if (error) {
+    return (
+      <main className="fo-checkout flex min-h-[60vh] w-full items-center justify-center p-4">
+        <div className="fo-desk__panel w-full max-w-md p-8 text-center" role="status" aria-live="polite">
+          <h1 className="fo-desk__title">Couldn&apos;t continue checkout</h1>
+          <p className="fo-desk__lede mt-2">{error}</p>
+          <Button className="mt-6" onClick={() => router.replace("/chat")}>
+            Back to search
+          </Button>
+        </div>
+      </main>
+    );
+  }
+
   return (
-    <main className="fo-checkout w-full pb-10">
-      <div className="fo-desk__panel mx-auto mt-16 max-w-md p-8 text-center" role="status" aria-live="polite">
-        {error ? (
-          <>
-            <h1 className="fo-desk__title">Couldn&apos;t continue checkout</h1>
-            <p className="fo-desk__lede mt-2">{error}</p>
-            <Button className="mt-6" onClick={() => router.replace("/chat")}>
-              Back to search
-            </Button>
-          </>
-        ) : (
-          <>
-            <h1 className="fo-desk__title">Preparing your booking…</h1>
-            <p className="fo-desk__lede mt-2">
-              Confirming the fare and opening traveller details.
-            </p>
-          </>
-        )}
-      </div>
+    <main className="fo-checkout w-full">
+      <CheckoutBrandedLoader
+        title="Preparing your booking…"
+        subtitle="Confirming live Galileo GDS fare locks and opening traveller details."
+      />
     </main>
   );
 }

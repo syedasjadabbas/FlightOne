@@ -310,13 +310,24 @@ export function LoadingRouteTrack({
   return (
     <div className={`fo-loading-route-wrap ${className ?? ""}`} aria-hidden>
       <span className="fo-loading-route__code">{from}</span>
-      <svg className="fo-loading-route" viewBox="0 0 140 28" fill="none">
+      <svg
+        className="fo-loading-route"
+        viewBox="0 0 260 26"
+        preserveAspectRatio="none"
+        fill="none"
+      >
         <path
           className="fo-loading-route__path"
-          d="M8 18 C 36 6, 60 24, 90 12 S 122 10, 132 14"
+          vectorEffect="non-scaling-stroke"
+          d="M8 16 C 65 4, 115 22, 175 10 C 205 4, 235 8, 252 12"
         />
-        <circle cx="8" cy="18" r="2.5" className="fo-loading-route__node" />
-        <circle cx="132" cy="14" r="2.5" className="fo-loading-route__node fo-loading-route__node--end" />
+        <circle cx="8" cy="16" r="2.5" className="fo-loading-route__node" />
+        <circle
+          cx="252"
+          cy="12"
+          r="2.5"
+          className="fo-loading-route__node fo-loading-route__node--end"
+        />
         <g className="fo-loading-route__plane">
           <path
             d="M0 0c3.2-.45 5.8-2.1 8.4-4.2l1.3-.65.65 1.9-2.1 1.25c-1.25 2.3-3 4.2-5.1 5.45l-2.1.65.65-1.9 1.55-2.5Z"

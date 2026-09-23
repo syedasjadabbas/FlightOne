@@ -2654,6 +2654,314 @@
   transform: translateX(2px);
 }
 
+/* ── Expanded Flight Fare & Policies Card ──────────────────────── */
+
+.fo-expanded-fare {
+  margin-top: 0.75rem;
+  padding: 0.95rem 1.15rem;
+  border-radius: 14px;
+  background: linear-gradient(145deg, #ffffff 0%, color-mix(in oklab, var(--sky) 3%, white) 50%, color-mix(in oklab, var(--navy) 2.5%, white) 100%);
+  border: 1px solid color-mix(in oklab, var(--line) 85%, var(--sky) 15%);
+  box-shadow: 0 4px 16px -4px rgba(6, 24, 44, 0.04), 0 1px 3px rgba(6, 24, 44, 0.02), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.fo-expanded-fare:hover {
+  border-color: color-mix(in oklab, var(--sky) 35%, var(--line));
+  box-shadow: 0 6px 20px -4px rgba(6, 24, 44, 0.06), 0 2px 4px rgba(6, 24, 44, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.fo-expanded-fare__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid color-mix(in oklab, var(--line) 75%, transparent);
+  margin-bottom: 0.85rem;
+}
+
+.fo-expanded-fare__identity {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+}
+
+.fo-expanded-fare__icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 10px;
+  background: color-mix(in oklab, var(--cyan) 14%, white);
+  border: 1px solid color-mix(in oklab, var(--cyan) 28%, transparent);
+  color: var(--cyan);
+  flex-shrink: 0;
+}
+
+.fo-expanded-fare__sparkle-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.fo-expanded-fare__title-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.fo-expanded-fare__title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--navy);
+  letter-spacing: -0.01em;
+}
+
+.fo-expanded-fare__tags {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.2rem;
+}
+
+.fo-expanded-fare__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  background: color-mix(in oklab, var(--navy) 5%, white);
+  border: 1px solid color-mix(in oklab, var(--line) 85%, transparent);
+  color: var(--ink-soft);
+}
+
+.fo-expanded-fare__badge--class {
+  background: color-mix(in oklab, var(--cyan) 12%, white);
+  border-color: color-mix(in oklab, var(--cyan) 25%, transparent);
+  color: var(--navy);
+  font-weight: 700;
+}
+
+.fo-expanded-fare__badge--sky {
+  background: color-mix(in oklab, var(--sky) 10%, white);
+  border-color: color-mix(in oklab, var(--sky) 22%, transparent);
+  color: var(--sky);
+}
+
+.fo-expanded-fare__badge--warn {
+  background: #fffbeb;
+  border-color: #fde68a;
+  color: #b45309;
+}
+
+.fo-expanded-fare__guarantee {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: #047857;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.fo-expanded-fare__shield-icon {
+  width: 0.875rem;
+  height: 0.875rem;
+  color: #059669;
+}
+
+.fo-expanded-fare__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 0.85rem 1.25rem;
+  margin-bottom: 0.95rem;
+}
+
+.fo-expanded-fare__section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.fo-expanded-fare__section-head {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 0.2rem;
+}
+
+.fo-expanded-fare__section-icon {
+  width: 0.875rem;
+  height: 0.875rem;
+  color: var(--sky);
+}
+
+.fo-expanded-fare__items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.fo-expanded-fare__item {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+.fo-expanded-fare__item-bullet {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transform: translateY(-1px);
+}
+
+.fo-expanded-fare__item-bullet--emerald {
+  background: #10b981;
+  box-shadow: 0 0 0 2px #d1fae5;
+}
+
+.fo-expanded-fare__item-bullet--amber {
+  background: #f59e0b;
+  box-shadow: 0 0 0 2px #fef3c7;
+}
+
+.fo-expanded-fare__item-bullet--rose {
+  background: #ef4444;
+  box-shadow: 0 0 0 2px #fee2e2;
+}
+
+.fo-expanded-fare__item-bullet--sky {
+  background: var(--sky);
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--sky) 20%, white);
+}
+
+.fo-expanded-fare__item-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.fo-expanded-fare__rule-label {
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.fo-expanded-fare__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid color-mix(in oklab, var(--line) 75%, transparent);
+}
+
+.fo-expanded-fare__price-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.fo-expanded-fare__price-eyebrow {
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.fo-expanded-fare__price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+}
+
+.fo-expanded-fare__price-code {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--sky);
+  letter-spacing: 0.04em;
+}
+
+.fo-expanded-fare__price-amount {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--navy);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.fo-expanded-fare__price-note {
+  font-size: 0.6875rem;
+  color: var(--ink-faint);
+}
+
+.fo-expanded-fare__cta-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.25rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--navy) 0%, color-mix(in oklab, var(--navy) 82%, var(--cyan)) 100%);
+  color: #ffffff;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  box-shadow: 0 2px 8px rgba(6, 24, 44, 0.16), 0 1px 2px rgba(6, 24, 44, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  text-decoration: none;
+}
+
+.fo-expanded-fare__cta-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(6, 24, 44, 0.22);
+  background: linear-gradient(135deg, color-mix(in oklab, var(--navy) 90%, var(--cyan)) 0%, var(--cyan) 100%);
+}
+
+.fo-expanded-fare__cta-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(6, 24, 44, 0.15);
+}
+
+.fo-expanded-fare__cta-arrow {
+  width: 0.875rem;
+  height: 0.875rem;
+  transition: transform 0.2s ease;
+}
+
+.fo-expanded-fare__cta-btn:hover .fo-expanded-fare__cta-arrow {
+  transform: translateX(3px);
+}
+
+@media (max-width: 480px) {
+  .fo-expanded-fare__cta-btn {
+    width: 100%;
+    margin-top: 0.25rem;
+  }
+}
+
 /* ── Fare summary sections ────────────────────────────────────── */
 
 .fo-fare-summary__divider {

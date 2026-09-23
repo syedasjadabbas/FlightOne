@@ -8,6 +8,7 @@ import {
   cabinLabel,
   formatDayLabel,
   formatDurationLabel,
+  parseOfferLegs,
   stopsLabel,
 } from "./flightOfferFormat";
 import {
@@ -317,8 +318,8 @@ export function FlightOfferDetailModal({
   const flight = offer.flight!;
   const titleId = useId();
   const closeRef = useRef<HTMLButtonElement>(null);
-  const outbound = syntheticOutbound(flight);
-  const returnSegments = flight.returnSegments ?? [];
+  const legs = parseOfferLegs(offer);
+  const isMultiLeg = legs.length > 1;
   const isRoundTrip = Boolean(offer.roundTrip);
   const outDur =
     flight.durationMinutes > 0 ? formatDurationLabel(flight.durationMinutes, "long") : null;
@@ -326,7 +327,7 @@ export function FlightOfferDetailModal({
     flight.returnDurationMinutes && flight.returnDurationMinutes > 0
       ? formatDurationLabel(flight.returnDurationMinutes, "long")
       : null;
-  const tripType = isRoundTrip ? "Round trip" : "One way";
+  const tripType = isRoundTrip ? "Round trip" : isMultiLeg ? "Multi-city journey" : "One way";
   const stopsBit =
     typeof flight.returnStops === "number"
       ? `${stopsLabel(flight.stops)} / ${stopsLabel(flight.returnStops)}`
@@ -431,50 +432,33 @@ export function FlightOfferDetailModal({
                 </p>
               </div>
 
-              <div className="fo-detail-bound">
-                <BoundHero
-                  segments={outbound}
-                  durationMinutes={flight.durationMinutes}
-                  stops={flight.stops}
-                  label={isRoundTrip ? "Outbound" : "Departure"}
-                />
-                <FlightTimeline
-                  segments={outbound}
-                  connectionWarnings={flight.connectionWarnings}
-                  hubStitched={offer.hubStitched}
-                  variant="rail"
-                />
-              </div>
-
-              {isRoundTrip ? (
-                <div className="fo-detail-bound fo-detail-bound--return">
-                  {returnSegments.length > 0 ? (
-                    <>
-                      <BoundHero
-                        segments={returnSegments}
-                        durationMinutes={flight.returnDurationMinutes}
-                        stops={flight.returnStops}
-                        label="Return"
-                      />
-                      <FlightTimeline
-                        segments={returnSegments}
-                        connectionWarnings={flight.connectionWarnings}
-                        hubStitched={offer.hubStitched}
-                        variant="rail"
-                      />
-                    </>
-                  ) : (
-                    <>
-                      <p className="fo-bound-hero__label">Return</p>
-                      <p className="fo-detail-bound__empty">
-                        Return on{" "}
-                        {formatDayLabel(offer.returnDate) || offer.returnDate || "your return date"} —
-                        exact times confirmed at booking.
-                      </p>
-                    </>
+              {legs.map((leg, i) => (
+                <div
+                  key={`${leg.originCode}-${leg.destinationCode}-${i}`}
+                  className={`fo-detail-bound${i > 0 ? " fo-detail-bound--return" : ""}`}
+                >
+                  <BoundHero
+                    segments={leg.segments}
+                    durationMinutes={leg.durationMinutes}
+                    stops={leg.stops}
+                    label={leg.label || `Flight ${i + 1}: ${leg.originCode} → ${leg.destinationCode}`}
+                  />
+                  <FlightTimeline
+                    segments={leg.segments}
+                    connectionWarnings={i === 0 ? flight.connectionWarnings : undefined}
+                    hubStitched={offer.hubStitched}
+                    variant="rail"
+                  />
+                  {offer.hubStitched && i < legs.length - 1 && (
+                    <div className="mt-3 flex items-center gap-2 rounded-xl border border-[color-mix(in_oklab,var(--electric)_20%,var(--line))] bg-[color-mix(in_oklab,var(--electric)_5%,white)] px-3.5 py-2 text-[12px] text-ink-soft">
+                      <span className="h-1.5 w-1.5 rounded-full bg-electric" aria-hidden />
+                      <span>
+                        Self-transfer in <strong>{iataToPlace(leg.destinationCode)} ({leg.destinationCode})</strong> · Separate ticket
+                      </span>
+                    </div>
                   )}
                 </div>
-              ) : null}
+              ))}
             </section>
           </div>
 

@@ -10,7 +10,7 @@ import {
   Ticket,
   AlertCircle,
 } from "lucide-react";
-import { Button, Spinner, buttonClassName } from "@/components/ui";
+import { Button, buttonClassName } from "@/components/ui";
 import {
   isBookingTicketed,
   parsePriceChangedError,
@@ -56,6 +56,7 @@ import { CheckoutCorporateSection } from "./_components/CheckoutCorporateSection
 import { CheckoutRewardsSection } from "./_components/CheckoutRewardsSection";
 import { CheckoutVisaWarning } from "./_components/CheckoutVisaWarning";
 import { CheckoutPriceChangeAlert } from "./_components/CheckoutPriceChangeAlert";
+import { CheckoutBrandedLoader } from "./_components/CheckoutBrandedLoader";
 import { TicketIssuedPanel } from "./_components/TicketIssuedPanel";
 import {
   CheckoutQuotedActions,
@@ -126,26 +127,6 @@ function CheckoutProgressBar({
         </li>
       ))}
     </ol>
-  );
-}
-
-function CheckoutStatePanel({
-  children,
-  tone = "default",
-}: {
-  children: React.ReactNode;
-  tone?: "default" | "danger";
-}) {
-  return (
-    <div
-      className={`fo-desk__panel space-y-4 text-center ${
-        tone === "danger"
-          ? "border-[color-mix(in_oklab,var(--danger)_28%,var(--fo-desk-line))]"
-          : ""
-      }`}
-    >
-      {children}
-    </div>
   );
 }
 
@@ -250,47 +231,53 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
 
   if (!hasHydrated) {
     return (
-      <CheckoutStatePanel>
-        <Spinner label="Loading session…" />
-      </CheckoutStatePanel>
+      <CheckoutBrandedLoader
+        title="Restoring secure session…"
+        subtitle="Verifying traveller credentials and encrypted Galileo GDS channel."
+      />
     );
   }
 
   if (!accessToken) {
     return (
-      <CheckoutStatePanel>
-        <p className="m-0 text-[14px] text-[var(--ink-soft)]">
-          Sign in to continue checkout. Guests cannot book.
-        </p>
-        <Link
-          href={`/login?redirect=${encodeURIComponent(`/checkout/${bookingId}`)}`}
-          className={buttonClassName({ size: "md" })}
-        >
-          Log in
-        </Link>
-      </CheckoutStatePanel>
+      <div className="flex min-h-[55vh] items-center justify-center py-12">
+        <div className="fo-desk__panel w-full max-w-md space-y-4 p-8 text-center">
+          <p className="m-0 text-[14px] text-ink-soft">
+            Sign in to continue checkout. Guests cannot book.
+          </p>
+          <Link
+            href={`/login?redirect=${encodeURIComponent(`/checkout/${bookingId}`)}`}
+            className={buttonClassName({ size: "md" })}
+          >
+            Log in
+          </Link>
+        </div>
+      </div>
     );
   }
 
   if (isLoading) {
     return (
-      <CheckoutStatePanel>
-        <Spinner label="Loading booking…" />
-      </CheckoutStatePanel>
+      <CheckoutBrandedLoader
+        title="Retrieving your reservation…"
+        subtitle="Verifying live Galileo GDS fare locks, baggage allowances & airline seat locks."
+      />
     );
   }
 
   if (isError || !booking) {
     return (
-      <CheckoutStatePanel tone="danger">
-        <p className="m-0 flex items-center justify-center gap-2 text-[14px] font-medium text-[var(--danger)]" role="alert">
-          <AlertCircle className="h-4 w-4 shrink-0" aria-hidden />
-          {apiErrorMessage(error) || "Booking not found"}
-        </p>
-        <Button variant="secondary" onClick={() => void refetch()}>
-          Retry
-        </Button>
-      </CheckoutStatePanel>
+      <div className="flex min-h-[55vh] items-center justify-center py-12">
+        <div className="fo-desk__panel w-full max-w-md space-y-4 border-[color-mix(in_oklab,var(--danger)_28%,var(--fo-desk-line))] p-8 text-center">
+          <p className="m-0 flex items-center justify-center gap-2 text-[14px] font-medium text-danger" role="alert">
+            <AlertCircle className="h-4 w-4 shrink-0" aria-hidden />
+            {apiErrorMessage(error) || "Booking not found"}
+          </p>
+          <Button variant="secondary" onClick={() => void refetch()}>
+            Retry
+          </Button>
+        </div>
+      </div>
     );
   }
 
@@ -481,7 +468,7 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
       <header className="fo-desk__header">
         <Link
           href={backToSearchHref}
-          className="inline-flex items-center gap-1.5 text-[13px] font-medium text-[var(--ink-soft)] transition-colors hover:text-[var(--navy)]"
+          className="inline-flex items-center gap-1.5 text-[13px] font-medium text-ink-soft transition-colors hover:text-navy"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden />
           Back to search
@@ -560,14 +547,14 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
           ) : null}
 
           {!payCap?.configured && !isBookingTicketed(booking.status) ? (
-            <div className="fo-checkout__notice text-[13px] text-[var(--ink-soft)]">
+            <div className="fo-checkout__notice text-[13px] text-ink-soft">
               Payment gateway unconfigured — live card capture is unavailable until credentials are
               set.
             </div>
           ) : null}
 
           {actionError ? (
-            <div className="fo-checkout__alert text-[13px] text-[var(--danger)]" role="alert">
+            <div className="fo-checkout__alert text-[13px] text-danger" role="alert">
               {actionError}
             </div>
           ) : null}

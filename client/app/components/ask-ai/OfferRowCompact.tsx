@@ -4,17 +4,21 @@ import { useState } from "react";
 import { Plane } from "lucide-react";
 import type { FlightSegment } from "@/lib/inventory/types";
 import type { OfferCard } from "@/lib/consultant/types";
-import { formatDurationLabel, stopsLabel } from "../flightOfferFormat";
+import {
+  formatDayLabel,
+  formatDurationLabel,
+  parseOfferLegs,
+  stopsLabel,
+} from "../flightOfferFormat";
 import { offerLayoverMinutes } from "@/lib/ask-ai/sidebarFilters";
 import {
   formatBaggageAllowance,
-  formatFareRulesSummary,
   fareFamilyLabel,
 } from "@/lib/inventory/fareDisplay";
 import { FlightTimeline } from "@/components/travel/FlightTimeline";
 import { AirlineMark } from "./ResultsVisual";
-import { DoodleStamp } from "@/components/travel/TravelDoodles";
 import { OfferFeedbackControls } from "./OfferFeedbackControls";
+import { ExpandedFareCard } from "./ExpandedFareCard";
 
 const ANGLE_BADGE: Record<string, { label: string; tone: "best" | "cheap" | "value" | "other" }> = {
   best_value: { label: "Best", tone: "best" },
@@ -24,31 +28,6 @@ const ANGLE_BADGE: Record<string, { label: string; tone: "best" | "cheap" | "val
   premium: { label: "Premium", tone: "other" },
   top_rated: { label: "Good value", tone: "value" },
 };
-
-function cabinOrBrand(f: NonNullable<OfferCard["flight"]>): string {
-  return (
-    fareFamilyLabel(f.fareBrandName, f.cabin) ??
-    (f.cabin === "business" ? "Business" : f.cabin === "premium" ? "Premium Economy" : "Economy")
-  );
-}
-
-function fareBenefitRows(
-  f: NonNullable<OfferCard["flight"]>,
-  baggage: string,
-  fareRules: string,
-): string[] {
-  const rows: string[] = [];
-  const brand = cabinOrBrand(f);
-  if (brand) rows.push(brand);
-  if (f.bookingClass) rows.push(`Class ${f.bookingClass}`);
-  for (const part of baggage.split(" · ")) {
-    if (part.trim()) rows.push(part.trim());
-  }
-  for (const part of fareRules.split(" · ")) {
-    if (part.trim()) rows.push(part.trim());
-  }
-  return rows;
-}
 
 function isFeaturedOffer(angle: string): boolean {
   return angle === "best_value" || angle === "recommended";
@@ -89,53 +68,52 @@ function FlightDetails({
   onViewOffer: (offer: OfferCard) => void;
 }) {
   const f = offer.flight!;
-  const segments = segmentList(f);
+  const legs = parseOfferLegs(offer);
   const baggage = formatBaggageAllowance(f.baggageAllowance, f.baggageKg);
-  const fareRules = formatFareRulesSummary(f.fareRulesSummary, f.refundable);
-
-  const benefits = fareBenefitRows(f, baggage, fareRules);
 
   return (
     <div className="flight-result-details">
-      <FlightTimeline
-        segments={segments}
-        connectionWarnings={f.connectionWarnings}
-        hubStitched={offer.hubStitched}
-        variant="compact"
+      <div className="space-y-4">
+        {legs.map((leg, i) => {
+          const dayLabel = leg.departureDate ? formatDayLabel(leg.departureDate) : null;
+          return (
+            <div key={`${leg.originCode}-${leg.destinationCode}-${i}`} className="space-y-2.5">
+              <div className="flex items-baseline justify-between gap-2 border-b border-(--line)/60 pb-1.5">
+                <span className="text-[12px] font-semibold text-navy">
+                  {leg.label || `Flight ${i + 1}: ${leg.originCode} → ${leg.destinationCode}`}
+                </span>
+                {dayLabel ? (
+                  <span className="text-[12px] text-ink-soft">{dayLabel}</span>
+                ) : null}
+              </div>
+              <FlightTimeline
+                segments={leg.segments}
+                connectionWarnings={i === 0 ? f.connectionWarnings : undefined}
+                hubStitched={offer.hubStitched}
+                variant="compact"
+              />
+            </div>
+          );
+        })}
+      </div>
+
+      <ExpandedFareCard
+        fareBrand={f.fareBrandName}
+        cabin={f.cabin}
+        bookingClass={f.bookingClass}
+        isMultiLeg={legs.length > 1}
+        isMultiTicket={offer.hubStitched}
+        isRoundTrip={offer.roundTrip}
+        legCount={legs.length}
+        faresOnItinerary={offer.faresOnItinerary}
+        baggageAllowance={f.baggageAllowance}
+        baggageKg={f.baggageKg}
+        baggageSummary={baggage}
+        fareRulesSummary={f.fareRulesSummary}
+        refundable={f.refundable}
+        price={offer.price}
+        onAction={() => onViewOffer(offer)}
       />
-      <div className="flight-result-details__fare-strip">
-        <div className="flight-result-details__fare-info">
-          <div className="flight-result-details__fare-head">
-            <DoodleStamp className="flight-result-details__fare-doodle" />
-            <p className="flight-result-details__fare-label">Your fare</p>
-          </div>
-          <ul className="flight-result-details__benefits">
-            {benefits.map((row) => (
-              <li key={row}>{row}</li>
-            ))}
-          </ul>
-          {offer.faresOnItinerary && offer.faresOnItinerary > 1 ? (
-            <span className="flight-result-row__fare-count">
-              {offer.faresOnItinerary} fares on this itinerary
-            </span>
-          ) : null}
-        </div>
-        <div className="flight-result-details__price-block">
-          {offer.price.trim().split(/\s+/).length > 1 ? (
-            <span className="flight-result-row__price-code">
-              {offer.price.trim().split(/\s+/)[0]}
-            </span>
-          ) : null}
-          <span className="flight-result-details__fare-price">
-            {offer.price.trim().split(/\s+/).slice(1).join(" ") || offer.price}
-          </span>
-        </div>
-      </div>
-      <div className="flight-result-details__footer">
-        <button type="button" onClick={() => onViewOffer(offer)} className="flight-result-details__link">
-          Full details & booking →
-        </button>
-      </div>
     </div>
   );
 }
@@ -153,37 +131,14 @@ function FlightRow({
 }) {
   const [expanded, setExpanded] = useState(false);
   const f = offer.flight!;
-  const duration = formatDurationLabel(f.durationMinutes, "short");
-  const baggage = formatBaggageAllowance(f.baggageAllowance, f.baggageKg);
-  const layoverMins = offerLayoverMinutes(offer);
-  const layover =
-    layoverMins > 0 ? `${formatDurationLabel(layoverMins, "short")} layover` : null;
-  const segments = segmentList(f);
-  const viaCode =
-    f.stops > 0 && segments.length > 0
-      ? segments[0]?.destinationCode
-      : null;
-  const stopsText =
-    viaCode && f.stops > 0
-      ? `${stopsLabel(f.stops)} · ${viaCode}`
-      : stopsLabel(f.stops);
+  const legs = parseOfferLegs(offer);
+  const isMultiLeg = legs.length > 1;
 
   const priceParts = offer.price.trim().split(/\s+/);
   const priceCode = priceParts.length > 1 ? priceParts[0] : "";
   const priceAmount = priceParts.length > 1 ? priceParts.slice(1).join(" ") : offer.price;
 
   const featured = isFeaturedOffer(offer.angle);
-
-  const cabinText =
-    fareFamilyLabel(f.fareBrandName, f.cabin) ??
-    (f.cabin === "business"
-      ? "Business"
-      : f.cabin === "premium"
-        ? "Premium Economy"
-        : "Economy");
-
-  const baggageItems = baggage ? baggage.split(" · ").map((s) => s.trim()).filter(Boolean) : [];
-  const metaItems = [cabinText, ...baggageItems, layover].filter(Boolean) as string[];
 
   return (
     <article
@@ -193,76 +148,112 @@ function FlightRow({
       <div className="flight-result-row__main">
         <button
           type="button"
-          className="flight-result-row__expand-hit"
+          className="flight-result-row__expand-hit text-left"
           onClick={() => setExpanded((v) => !v)}
           aria-expanded={expanded}
           aria-controls={`offer-details-${offer.id}`}
         >
-          <div className="flight-result-row__scan">
-            <div className="flight-result-row__col flight-result-row__col--airline">
-              <div className="flight-result-row__identity">
-                <AirlineMark code={f.airlineCode} />
-                <div className="flight-result-row__identity-text">
-                  <AngleBadge angle={offer.angle} />
-                  <span className="flight-result-row__airline">{f.airline}</span>
-                  {f.flightNumber ? (
-                    <span className="flight-result-row__fn tabular-nums">{f.flightNumber}</span>
-                  ) : null}
+          {legs.map((leg, legIdx) => {
+            const duration = formatDurationLabel(leg.durationMinutes, "short");
+            const baggage = formatBaggageAllowance(f.baggageAllowance, leg.baggageKg ?? f.baggageKg);
+            const viaCode =
+              (leg.stops ?? 0) > 0 && leg.segments.length > 0
+                ? leg.segments[0]?.destinationCode
+                : null;
+            const stopsText =
+              viaCode && (leg.stops ?? 0) > 0
+                ? `${stopsLabel(leg.stops ?? 0)} · ${viaCode}`
+                : stopsLabel(leg.stops ?? (leg.segments.length > 1 ? leg.segments.length - 1 : 0));
+
+            const cabinText =
+              fareFamilyLabel(f.fareBrandName, leg.cabin ?? f.cabin) ??
+              (leg.cabin === "business"
+                ? "Business"
+                : leg.cabin === "premium"
+                  ? "Premium Economy"
+                  : "Economy");
+
+            const baggageItems = baggage ? baggage.split(" · ").map((s) => s.trim()).filter(Boolean) : [];
+            const dayLabel = isMultiLeg && leg.departureDate ? formatDayLabel(leg.departureDate) : null;
+            const layoverMins = legIdx === 0 ? offerLayoverMinutes(offer) : 0;
+            const layover =
+              layoverMins > 0 ? `${formatDurationLabel(layoverMins, "short")} layover` : null;
+
+            const metaItems = [dayLabel, cabinText, ...baggageItems, layover].filter(Boolean) as string[];
+
+            return (
+              <div
+                key={`${leg.originCode}-${leg.destinationCode}-${legIdx}`}
+                className={`flight-result-row__scan${
+                  legIdx > 0 ? " pt-4 mt-4 border-t border-(--line)/60" : ""
+                }`}
+              >
+                <div className="flight-result-row__col flight-result-row__col--airline">
+                  <div className="flight-result-row__identity">
+                    <AirlineMark code={leg.airlineCode} />
+                    <div className="flight-result-row__identity-text">
+                      {legIdx === 0 ? <AngleBadge angle={offer.angle} /> : null}
+                      <span className="flight-result-row__airline">{leg.airline}</span>
+                      {leg.flightNumber ? (
+                        <span className="flight-result-row__fn tabular-nums">{leg.flightNumber}</span>
+                      ) : null}
+                    </div>
+                  </div>
+                  {legIdx === 0 && (offer.roundTrip || f.nearbyAirport || offer.hubStitched) && (
+                    <div className="flight-result-row__tags">
+                      {offer.roundTrip ? (
+                        <span className="flight-result-row__tag">Round trip</span>
+                      ) : null}
+                      {f.nearbyAirport ? (
+                        <span className="flight-result-row__tag">Nearby</span>
+                      ) : null}
+                      {offer.hubStitched ? (
+                        <span className="flight-result-row__tag">Multi-ticket</span>
+                      ) : null}
+                    </div>
+                  )}
                 </div>
-              </div>
-              {(offer.roundTrip || f.nearbyAirport || offer.hubStitched) && (
-                <div className="flight-result-row__tags">
-                  {offer.roundTrip ? (
-                    <span className="flight-result-row__tag">Round trip</span>
-                  ) : null}
-                  {f.nearbyAirport ? (
-                    <span className="flight-result-row__tag">Nearby</span>
-                  ) : null}
-                  {offer.hubStitched ? (
-                    <span className="flight-result-row__tag">Multi-ticket</span>
-                  ) : null}
+
+                <div className="flight-result-row__col flight-result-row__col--dep">
+                  <span className="flight-result-row__time tabular-nums">{leg.departTimeLocal}</span>
+                  <span className="flight-result-row__code">{leg.originCode}</span>
                 </div>
-              )}
-            </div>
 
-            <div className="flight-result-row__col flight-result-row__col--dep">
-              <span className="flight-result-row__time tabular-nums">{f.departTimeLocal}</span>
-              <span className="flight-result-row__code">{f.originCode}</span>
-            </div>
-
-            <div className="flight-result-row__col flight-result-row__col--mid">
-              <span className="flight-result-row__dur">{duration}</span>
-              <span className="flight-result-row__line" aria-hidden>
-                <span className="flight-result-row__line-dot flight-result-row__line-dot--start" />
-                <span className="flight-result-row__line-track" />
-                <span className="flight-result-row__line-plane" aria-hidden>
-                  <Plane className="flight-result-row__line-plane-icon" aria-hidden />
-                </span>
-                <span className="flight-result-row__line-dot flight-result-row__line-dot--end" />
-              </span>
-              <span className="flight-result-row__stops">{stopsText}</span>
-            </div>
-
-            <div className="flight-result-row__col flight-result-row__col--arr">
-              <span className="flight-result-row__time tabular-nums">{f.arriveTimeLocal ?? "—"}</span>
-              <span className="flight-result-row__code">{f.destinationCode}</span>
-            </div>
-
-            <div className="flight-result-row__col flight-result-row__col--meta">
-              <div className="flight-result-row__meta">
-                {metaItems.map((item, i) => (
-                  <span key={i} className="flight-result-row__meta-item">
-                    {i > 0 ? (
-                      <span className="flight-result-row__meta-dot" aria-hidden>
-                        ·
-                      </span>
-                    ) : null}
-                    <span>{item}</span>
+                <div className="flight-result-row__col flight-result-row__col--mid">
+                  <span className="flight-result-row__dur">{duration}</span>
+                  <span className="flight-result-row__line" aria-hidden>
+                    <span className="flight-result-row__line-dot flight-result-row__line-dot--start" />
+                    <span className="flight-result-row__line-track" />
+                    <span className="flight-result-row__line-plane" aria-hidden>
+                      <Plane className="flight-result-row__line-plane-icon" aria-hidden />
+                    </span>
+                    <span className="flight-result-row__line-dot flight-result-row__line-dot--end" />
                   </span>
-                ))}
+                  <span className="flight-result-row__stops">{stopsText}</span>
+                </div>
+
+                <div className="flight-result-row__col flight-result-row__col--arr">
+                  <span className="flight-result-row__time tabular-nums">{leg.arriveTimeLocal ?? "—"}</span>
+                  <span className="flight-result-row__code">{leg.destinationCode}</span>
+                </div>
+
+                <div className="flight-result-row__col flight-result-row__col--meta">
+                  <div className="flight-result-row__meta">
+                    {metaItems.map((item, i) => (
+                      <span key={i} className="flight-result-row__meta-item">
+                        {i > 0 ? (
+                          <span className="flight-result-row__meta-dot" aria-hidden>
+                            ·
+                          </span>
+                        ) : null}
+                        <span>{item}</span>
+                      </span>
+                    ))}
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
+            );
+          })}
         </button>
       </div>
 

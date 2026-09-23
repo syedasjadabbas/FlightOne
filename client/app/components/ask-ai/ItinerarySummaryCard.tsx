@@ -12,7 +12,7 @@ import {
 import { formatBaggageAllowance, fareFamilyLabel } from "@/lib/inventory/fareDisplay";
 import { FlightTimeline } from "@/components/travel/FlightTimeline";
 import { AirlineMark } from "./ResultsVisual";
-import { DoodleStamp } from "@/components/travel/TravelDoodles";
+import { ExpandedFareCard } from "./ExpandedFareCard";
 
 const ANGLE_BADGE: Record<string, { label: string; tone: "best" | "cheap" | "value" | "other" }> = {
   best_value: { label: "Best", tone: "best" },
@@ -64,22 +64,40 @@ function ItineraryDetails({
   const legs = itinerary.legs ?? [];
   const isMultiTicket = itinerary.construction === "multiple_tickets";
 
-  const benefits: string[] = [
-    isMultiTicket ? "Separate tickets (self-transfer)" : "Single through-ticket",
-  ];
-  if (legs.some((l) => l.refundable)) benefits.push("Refundable options");
+  const baggageItems: string[] = [];
   const baggageSet = new Set(
     legs
       .map((l) => formatBaggageAllowance(undefined, l.baggageKg))
-      .filter((b): b is string => Boolean(b && b.trim())),
+      .filter((b): b is string => Boolean(b && b.trim() && !b.toLowerCase().includes("unavailable"))),
   );
   if (baggageSet.size > 0) {
-    benefits.push([...baggageSet].join(" · "));
+    baggageItems.push(...baggageSet);
+  } else {
+    baggageItems.push("Standard cabin baggage included (Subject to airline policy)");
   }
 
-  const parts = itinerary.totalPrice.trim().split(/\s+/);
-  const priceCode = parts.length > 1 ? parts[0] : itinerary.currency;
-  const priceAmount = parts.length > 1 ? parts.slice(1).join(" ") : itinerary.totalPrice;
+  const customRules: Array<{ label: string; value: string }> = [
+    {
+      label: "Ticket construction",
+      value: isMultiTicket
+        ? "Separate tickets (self-transfer between connections)"
+        : "Single through-ticket (baggage transferred to final destination)",
+    },
+    {
+      label: "Cancellation / refund",
+      value: legs.some((l) => l.refundable)
+        ? "Refundable options available on selected segments"
+        : "Standard non-refundable fare conditions",
+    },
+    {
+      label: "Connection protection",
+      value: isMultiTicket
+        ? "Protected transfer window recommended"
+        : "Airline guaranteed connection",
+    },
+  ];
+
+  const firstCabin = legs[0]?.cabin;
 
   return (
     <div className="flight-result-details">
@@ -89,12 +107,12 @@ function ItineraryDetails({
           const dayLabel = leg.departureDate ? formatDayLabel(leg.departureDate) : null;
           return (
             <div key={`${leg.originCode}-${leg.destinationCode}-${i}`} className="space-y-2.5">
-              <div className="flex items-baseline justify-between gap-2 border-b border-[var(--line)]/60 pb-1.5">
-                <span className="text-[12px] font-semibold text-[var(--navy)]">
+              <div className="flex items-baseline justify-between gap-2 border-b border-(--line)/60 pb-1.5">
+                <span className="text-[12px] font-semibold text-navy">
                   Flight {i + 1}: {leg.originCode} → {leg.destinationCode}
                 </span>
                 {dayLabel ? (
-                  <span className="text-[12px] text-[var(--ink-soft)]">{dayLabel}</span>
+                  <span className="text-[12px] text-ink-soft">{dayLabel}</span>
                 ) : null}
               </div>
               <FlightTimeline
@@ -107,40 +125,18 @@ function ItineraryDetails({
         })}
       </div>
 
-      <div className="flight-result-details__fare-strip mt-3">
-        <div className="flight-result-details__fare-info">
-          <div className="flight-result-details__fare-head">
-            <DoodleStamp className="flight-result-details__fare-doodle" />
-            <p className="flight-result-details__fare-label">Complete trip fare</p>
-          </div>
-          <ul className="flight-result-details__benefits">
-            {benefits.map((row) => (
-              <li key={row}>{row}</li>
-            ))}
-          </ul>
-          <span className="flight-result-row__fare-count">
-            {legs.length} flights combined in this itinerary
-          </span>
-        </div>
-        <div className="flight-result-details__price-block">
-          {priceCode ? (
-            <span className="flight-result-row__price-code">{priceCode}</span>
-          ) : null}
-          <span className="flight-result-details__fare-price">{priceAmount}</span>
-        </div>
-      </div>
-
-      <div className="flight-result-details__footer">
-        {onSelect ? (
-          <button
-            type="button"
-            onClick={() => onSelect(itinerary)}
-            className="flight-result-details__link cursor-pointer"
-          >
-            Proceed to checkout →
-          </button>
-        ) : null}
-      </div>
+      <ExpandedFareCard
+        fareBrand="Complete Multi-Flight Itinerary"
+        cabin={firstCabin}
+        isMultiLeg={legs.length > 1}
+        isMultiTicket={isMultiTicket}
+        legCount={legs.length}
+        customBaggageItems={baggageItems}
+        customRules={customRules}
+        price={itinerary.totalPrice}
+        priceCode={itinerary.currency}
+        onAction={onSelect ? () => onSelect(itinerary) : undefined}
+      />
     </div>
   );
 }
@@ -210,7 +206,7 @@ export function ItinerarySummaryCard({
                 <div
                   key={`${leg.originCode}-${leg.destinationCode}-${legIdx}`}
                   className={`flight-result-row__scan${
-                    legIdx > 0 ? " pt-4 mt-4 border-t border-[var(--line)]/60" : ""
+                    legIdx > 0 ? " pt-4 mt-4 border-t border-(--line)/60" : ""
                   }`}
                 >
                   <div className="flight-result-row__col flight-result-row__col--airline">
@@ -283,7 +279,7 @@ export function ItinerarySummaryCard({
               );
             })
           ) : (
-            <div className="p-3 text-[13px] text-[var(--ink-soft)]">
+            <div className="p-3 text-[13px] text-ink-soft">
               {itinerary.hops.join(" → ")}
             </div>
           )}
