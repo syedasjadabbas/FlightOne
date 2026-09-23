@@ -17,6 +17,7 @@ import {
   searchSuppliers,
   type FlightSearchQuery,
 } from "./supplierSearch";
+import { isDemoInventoryEnabled, searchDemoFlights } from "@/lib/demo/demoInventory";
 
 /**
  * Majors commonly competitive on PK / Asia / Gulf–US leisure routes.
@@ -111,6 +112,34 @@ export function discoveryCarriersToProbe(
   return homeCarrierMissing ? [homeCarrier!, ...genericProbes] : [...genericProbes];
 }
 
+/**
+ * In-flight + short-TTL dedupe. This is the real chokepoint: every routed
+ * search (primary, nearby-gateway, hub-stitch) calls THIS, not
+ * `searchLiveFlights`, so the cache has to live here to be effective.
+ *
+ * A multi-leg ask searched the same origin/destination/date tuple 5-6 times,
+ * each a fresh 20-50s Travelport round-trip, until concurrent duplicates
+ * saturated the connection and calls began tripping the 45s abort.
+ *
+ * ponytail: process-local Map; move to Redis only if this runs multi-instance
+ * and cross-process duplication measurably matters.
+ */
+const SEARCH_TTL_MS = 60_000;
+const inflight = new Map<string, { at: number; promise: Promise<Offer[] | null> }>();
+
+function dedupeKey(q: FlightSearchQuery, carriers: string[]): string {
+  return [
+    q.origin,
+    q.destination,
+    q.departureDate,
+    q.returnDate ?? "",
+    q.passengers ?? 1,
+    q.cabinClass ?? "",
+    (q as { requestedCurrency?: string }).requestedCurrency ?? "",
+    carriers.join(","),
+  ].join("|");
+}
+
 export async function searchFlightsPreferredThenOpen(
   query: FlightSearchQuery,
   preferredCarriers?: string[],
@@ -122,6 +151,33 @@ export async function searchFlightsPreferredThenOpen(
         .filter((c) => /^[A-Z0-9]{2}$/.test(c)),
     ),
   ].slice(0, 6);
+
+  const key = dedupeKey(query, carriers);
+  const now = Date.now();
+  for (const [k, v] of inflight) {
+    if (now - v.at > SEARCH_TTL_MS) inflight.delete(k);
+  }
+  const hit = inflight.get(key);
+  if (hit) return hit.promise;
+
+  const promise = runSearch(query, carriers);
+  // A rejected search must not be cached as a permanent failure.
+  inflight.set(key, { at: now, promise });
+  promise.catch(() => inflight.delete(key));
+  return promise;
+}
+
+async function runSearch(
+  query: FlightSearchQuery,
+  carriers: string[],
+): Promise<Offer[] | null> {
+  // Demo mode short-circuits every supplier call. Sits inside runSearch (not
+  // above the cache) so the dedupe still collapses repeats, and so a corpus
+  // miss falls through to the real search rather than returning empty.
+  if (isDemoInventoryEnabled()) {
+    const demo = searchDemoFlights({ ...query, preferredCarriers: carriers });
+    if (demo) return demo;
+  }
 
   if (carriers.length > 0) {
     const [forced, open] = await Promise.all([

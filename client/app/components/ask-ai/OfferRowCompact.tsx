@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Plane } from "lucide-react";
 import type { FlightSegment } from "@/lib/inventory/types";
 import type { OfferCard } from "@/lib/consultant/types";
 import { formatDurationLabel, stopsLabel } from "../flightOfferFormat";
@@ -173,6 +174,17 @@ function FlightRow({
 
   const featured = isFeaturedOffer(offer.angle);
 
+  const cabinText =
+    fareFamilyLabel(f.fareBrandName, f.cabin) ??
+    (f.cabin === "business"
+      ? "Business"
+      : f.cabin === "premium"
+        ? "Premium Economy"
+        : "Economy");
+
+  const baggageItems = baggage ? baggage.split(" · ").map((s) => s.trim()).filter(Boolean) : [];
+  const metaItems = [cabinText, ...baggageItems, layover].filter(Boolean) as string[];
+
   return (
     <article
       className={`flight-result-row offer-enter${featured ? " flight-result-row--featured" : ""}${expanded ? " flight-result-row--expanded" : ""}`}
@@ -224,7 +236,7 @@ function FlightRow({
                 <span className="flight-result-row__line-dot flight-result-row__line-dot--start" />
                 <span className="flight-result-row__line-track" />
                 <span className="flight-result-row__line-plane" aria-hidden>
-                  ✈
+                  <Plane className="flight-result-row__line-plane-icon" aria-hidden />
                 </span>
                 <span className="flight-result-row__line-dot flight-result-row__line-dot--end" />
               </span>
@@ -237,24 +249,18 @@ function FlightRow({
             </div>
 
             <div className="flight-result-row__col flight-result-row__col--meta">
-              <p className="flight-result-row__meta">
-                <span>
-                  {fareFamilyLabel(f.fareBrandName, f.cabin) ??
-                    (f.cabin === "business"
-                      ? "Business"
-                      : f.cabin === "premium"
-                        ? "Premium Economy"
-                        : "Economy")}
-                </span>
-                <span aria-hidden>·</span>
-                <span>{baggage}</span>
-                {layover ? (
-                  <>
-                    <span aria-hidden>·</span>
-                    <span>{layover}</span>
-                  </>
-                ) : null}
-              </p>
+              <div className="flight-result-row__meta">
+                {metaItems.map((item, i) => (
+                  <span key={i} className="flight-result-row__meta-item">
+                    {i > 0 ? (
+                      <span className="flight-result-row__meta-dot" aria-hidden>
+                        ·
+                      </span>
+                    ) : null}
+                    <span>{item}</span>
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
         </button>
@@ -262,19 +268,21 @@ function FlightRow({
 
       <div className="flight-result-row__aside">
         <div className="flight-result-row__price">
-          <span className="flight-result-row__price-label">Your fare</span>
-          {priceCode ? (
-            <span className="flight-result-row__price-code">{priceCode}</span>
-          ) : null}
-          <span className="offer-price flight-result-row__price-amount">{priceAmount}</span>
-          {offer.faresOnItinerary && offer.faresOnItinerary > 1 ? (
-            <span className="flight-result-row__fare-count">{offer.faresOnItinerary} fares</span>
-          ) : null}
+          <span className="flight-result-row__price-label">YOUR FARE</span>
+          <div className="flight-result-row__price-val">
+            {priceCode ? (
+              <span className="flight-result-row__price-code">{priceCode}</span>
+            ) : null}
+            <span className="offer-price flight-result-row__price-amount">{priceAmount}</span>
+            {offer.faresOnItinerary && offer.faresOnItinerary > 1 ? (
+              <span className="flight-result-row__fare-count">{offer.faresOnItinerary} fares</span>
+            ) : null}
+          </div>
         </div>
         <button
           type="button"
           onClick={() => onViewOffer(offer)}
-          className="flight-result-row__cta focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sky)]/40 focus-visible:ring-offset-1"
+          className="flight-result-row__cta focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/40 focus-visible:ring-offset-1"
         >
           View deal
           <span aria-hidden>→</span>
@@ -321,7 +329,7 @@ function GenericRow({
         <button
           type="button"
           onClick={() => onViewOffer(offer)}
-          className="flight-result-row__cta focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sky)]/40 focus-visible:ring-offset-1"
+          className="flight-result-row__cta focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/40 focus-visible:ring-offset-1"
         >
           View deal
           <span aria-hidden>→</span>

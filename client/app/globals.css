@@ -2894,9 +2894,11 @@ html.fo-results-active .fo-stage--chat > .fo-chat-app {
   margin-bottom: 0.2rem;
 }
 
+/* Kept in step with the same rule in flightone-platform.css, which overrides
+   this one: the logo is taller than its text line, so flex-start misaligned it. */
 .flight-result-row__identity {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 0.5rem;
 }
 
@@ -3009,25 +3011,44 @@ html.fo-results-active .fo-stage--chat > .fo-chat-app {
   text-align: right;
 }
 
-.flight-result-row__price-code {
+.flight-result-row__price-label {
   display: block;
   font-size: 9px;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--ink-faint);
+  margin-bottom: 0.1rem;
+}
+
+.flight-result-row__price-val {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 0.35rem;
+  flex-wrap: nowrap;
+}
+
+.flight-result-row__price-code {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--navy);
 }
 
 .flight-result-row__price-amount {
-  font-size: 1.05rem;
-  font-weight: 700;
+  font-size: 1.35rem !important;
+  font-weight: 800 !important;
   line-height: 1.1;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
+  color: var(--navy);
 }
 
 .flight-result-row__fare-count {
-  display: block;
-  margin-top: 0.1rem;
+  display: inline-flex;
+  align-items: center;
+  margin-top: 0;
   font-size: 10px;
   font-weight: 500;
   color: var(--ink-soft);

@@ -81,6 +81,24 @@ function allowSimulatedBooking() {
   );
 }
 
+/** Supplier code minted for offers served from the offline demo corpus. */
+export const DEMO_SUPPLIER_CODE = "GALILEO_DEMO";
+
+/**
+ * Demo fares reserve and "ticket" without any supplier call.
+ *
+ * Deliberately a SEPARATE code from GALILEO: reusing GALILEO would route these
+ * bookings into live Travelport reserve/ticket, which would either fail or —
+ * worse — act on a real GDS with fabricated fare data. Gated on demo mode and
+ * hard-blocked in production so it can never mint a ticket for a real booking.
+ */
+function allowDemoBooking() {
+  return (
+    process.env.NODE_ENV !== "production" &&
+    process.env.DEMO_FLIGHT_INVENTORY === "true"
+  );
+}
+
 /**
  * @param {string | null | undefined} supplierCode
  * @param {{ product?: string } | null} [booking]
@@ -90,6 +108,7 @@ export function getSupplierBookingCapability(supplierCode, booking = null) {
   const product = booking?.product ? String(booking.product).toUpperCase() : null;
   const travelport = isTravelportConfigured();
   const simulated = allowSimulatedBooking();
+  const demo = allowDemoBooking();
   const testDouble =
     Boolean(reserveInventoryOverride || ticketInventoryOverride) &&
     process.env.NODE_ENV !== "production";
@@ -118,6 +137,19 @@ export function getSupplierBookingCapability(supplierCode, booking = null) {
     bookLive = rh.canReserve;
     ticketLive = rh.canTicket;
     reasons.push(...rh.reasons);
+  } else if (code === DEMO_SUPPLIER_CODE) {
+    if (demo) {
+      searchConfigured = true;
+      bookLive = true;
+      ticketLive = true;
+      reasons.push(
+        "Demo corpus fare — reserved and ticketed locally with a DEMO- reference, never sent to a supplier",
+      );
+    } else {
+      reasons.push(
+        "Demo corpus fare, but DEMO_FLIGHT_INVENTORY is not enabled — this booking cannot be fulfilled",
+      );
+    }
   } else if (!code) {
     reasons.push("Booking has no supplierCode — cannot revalidate or reserve inventory");
   } else {
@@ -298,6 +330,26 @@ async function airPriceWithTravelport(booking) {
 export async function revalidateSupplierOffer(booking) {
   const cap = getSupplierBookingCapability(booking?.supplierCode);
 
+  // Demo corpus: the snapshot IS the source of truth — there is no supplier to
+  // re-price against. Echo the stored net fare rather than inventing one, so
+  // the booking engine's "never fabricate a fare" rule still holds.
+  if (booking?.supplierCode === DEMO_SUPPLIER_CODE) {
+    if (!cap.canReserve) {
+      return { status: "unconfigured", details: { capability: cap } };
+    }
+    return {
+      status: "ok",
+      netMinor: booking.netMinor ?? booking.amountMinor,
+      currency: booking.currency,
+      details: {
+        demo: true,
+        capability: cap,
+        supplierBookingRefs: bookingRefsForRevalidation(booking?.supplierBookingRefs),
+        reason: "Demo corpus fare — snapshot price accepted without a supplier re-price",
+      },
+    };
+  }
+
   // Live path: Travelport AirPrice when credentials are configured.
   if (
     isTravelportConfigured() &&
@@ -407,6 +459,19 @@ export async function reserveSupplierInventory(booking) {
 
   const cap = getSupplierBookingCapability(booking?.supplierCode, booking);
 
+  // Demo corpus: no supplier exists to call. The DEMO- prefix keeps these
+  // references obviously non-real wherever a locator is displayed or exported.
+  if (booking?.supplierCode === DEMO_SUPPLIER_CODE) {
+    if (!cap.canReserve) {
+      return { status: "unconfigured", externalRef: null, details: { capability: cap } };
+    }
+    return {
+      status: "ok",
+      externalRef: `DEMO-${String(booking.id ?? "").slice(-6).toUpperCase() || "000000"}`,
+      details: { demo: true, reason: "Demo corpus fare — no supplier reservation was made" },
+    };
+  }
+
   if (booking?.supplierCode === "RATEHAWK" || booking?.product === "HOTEL") {
     if (isRateHawkConfigured() && booking?.supplierCode === "RATEHAWK") {
       const live = await bookRateHawkReservation(booking);
@@ -501,6 +566,21 @@ export async function ticketSupplierInventory(booking) {
   }
 
   const code = String(booking?.supplierCode || "").toUpperCase();
+
+  // Demo corpus: issue a clearly-marked DEMO ticket number. Never routed to
+  // Travelport — these fares are historical and were never held with a carrier.
+  if (code === DEMO_SUPPLIER_CODE) {
+    const cap = getSupplierBookingCapability(code, booking);
+    if (!cap.canTicket) {
+      return { status: "unconfigured", details: { capability: cap } };
+    }
+    return {
+      status: "ok",
+      externalRef: booking?.externalRef ?? null,
+      ticketNumbers: [`DEMO-${String(booking?.id ?? "").slice(-8).toUpperCase() || "00000000"}`],
+      details: { demo: true, reason: "Demo corpus fare — no ticket was issued with a carrier" },
+    };
+  }
 
   if (code === "RATEHAWK" || booking?.product === "HOTEL") {
     if (isRateHawkConfigured() && code === "RATEHAWK") {

@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
-  ArrowRight,
   Check,
   User,
   CreditCard,
@@ -13,6 +12,7 @@ import {
 } from "lucide-react";
 import { Button, Spinner, buttonClassName } from "@/components/ui";
 import {
+  isBookingTicketed,
   parsePriceChangedError,
   ticketNumbersFromMetadata,
   voucherRefsFromMetadata,
@@ -55,6 +55,7 @@ import { CheckoutCorporateSection } from "./_components/CheckoutCorporateSection
 import { CheckoutRewardsSection } from "./_components/CheckoutRewardsSection";
 import { CheckoutVisaWarning } from "./_components/CheckoutVisaWarning";
 import { CheckoutPriceChangeAlert } from "./_components/CheckoutPriceChangeAlert";
+import { TicketIssuedPanel } from "./_components/TicketIssuedPanel";
 import {
   CheckoutQuotedActions,
   CheckoutReservedActions,
@@ -491,7 +492,11 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
 
       <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-12 lg:gap-8">
         <div className="flex flex-col gap-4 lg:col-span-7 xl:col-span-8">
-          {approvalGate && (booking.status !== "QUOTED" || quotedStep === "PAYMENT") ? (
+          {/* Ticketing is terminal — the approval gate and payment-method
+              picker are spent at that point and only add noise. */}
+          {approvalGate &&
+          !isBookingTicketed(booking.status) &&
+          (booking.status !== "QUOTED" || quotedStep === "PAYMENT") ? (
             <CheckoutCorporateSection
               bookingId={bookingId}
               bookingStatus={booking.status}
@@ -550,7 +555,7 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
             />
           ) : null}
 
-          {!payCap?.configured ? (
+          {!payCap?.configured && !isBookingTicketed(booking.status) ? (
             <div className="fo-checkout__notice text-[13px] text-[var(--ink-soft)]">
               Payment gateway unconfigured — live card capture is unavailable until credentials are
               set.
@@ -628,27 +633,8 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
             />
           ) : null}
 
-          {booking.status === "TICKETED" ? (
-            <div className="fo-desk__panel space-y-3 text-center">
-              <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-[var(--fo-desk-wash)] text-[var(--cyan)]">
-                <Check className="h-5 w-5" aria-hidden />
-              </div>
-              <h3 className="m-0 text-[16px] font-semibold text-[var(--navy)]">Ticket issued</h3>
-              <p className="mx-auto m-0 max-w-md text-[13px] text-[var(--ink-soft)]">
-                Confirmed with supplier
-                {booking.externalRef ? ` (PNR ${booking.externalRef})` : ""}. E-tickets are in your
-                email and Traveller Vault.
-              </p>
-              <div className="pt-1">
-                <Link
-                  href="/journey"
-                  className={buttonClassName({ size: "md" })}
-                >
-                  View in My Journey
-                  <ArrowRight className="h-4 w-4" aria-hidden />
-                </Link>
-              </div>
-            </div>
+          {isBookingTicketed(booking.status) ? (
+            <TicketIssuedPanel booking={booking} />
           ) : null}
         </div>
 

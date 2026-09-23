@@ -12,6 +12,12 @@ const { default: prisma } = await import("../../config/prisma.js");
 const corporateService = await import("./corporate.service.js");
 const invoiceService = await import("./corporate.invoices.js");
 
+// These tests assert that the credit / policy / approval gates REJECT. A local
+// `.env` with DEMO_FLIGHT_INVENTORY=true enables the demo bypass and would
+// silently turn those assertions green. Cleared AFTER the imports above —
+// config/prisma.js calls dotenv.config() again and would restore it.
+delete process.env.DEMO_FLIGHT_INVENTORY;
+
 const FINANCE_PERMS = { global: ["corporate:company:write"], byCompany: {} };
 const bookingsService = await import("../bookings/bookings.service.js");
 const pricingService = await import("../pricing/pricing.service.js");

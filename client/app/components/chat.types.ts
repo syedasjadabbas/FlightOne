@@ -24,6 +24,8 @@ export interface AskAiChatResult {
   send: (text: string) => void;
   /** Abandon the in-flight search. No-op when nothing is running. */
   stop: () => void;
+  /** Surface an out-of-band failure in the transcript (not persisted). */
+  pushAssistantNotice: (text: string) => void;
   /** Re-run a turn from an edited user message, dropping everything after it. */
   editAndResend: (messageId: string, nextText: string) => void;
   /** Re-ask the most recent user message. */

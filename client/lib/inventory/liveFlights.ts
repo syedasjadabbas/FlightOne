@@ -49,9 +49,9 @@ export async function searchLiveFlights(q: LiveFlightQuery): Promise<FlightOffer
       : {}),
   };
 
-  const offers = q.preferredCarriers?.length
-    ? await searchFlightsPreferredThenOpen(query, q.preferredCarriers)
-    : await searchSuppliers({ product: "FLIGHT", query });
+  // Always via searchFlightsPreferredThenOpen — it owns the dedupe cache, and
+  // calling searchSuppliers directly would bypass it.
+  const offers = await searchFlightsPreferredThenOpen(query, q.preferredCarriers);
 
   if (!offers) return null;
   return offers.filter((o): o is FlightOffer => o.type === "flight");

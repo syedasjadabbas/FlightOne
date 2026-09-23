@@ -22,7 +22,16 @@ type BookingLike = {
   currency: string;
   externalRef?: string | null;
   metadata?: unknown;
+  supplierBookingRefs?: unknown;
 };
+
+/** Minutes → "13h 54m"; null for unknown so callers can fall back. */
+function formatMinutes(minutes: unknown): string | null {
+  if (typeof minutes !== "number" || !Number.isFinite(minutes) || minutes <= 0) return null;
+  const h = Math.floor(minutes / 60);
+  const m = Math.round(minutes % 60);
+  return h > 0 ? `${h}h ${m}m` : `${m}m`;
+}
 
 const AIRPORT_CITIES: Record<string, string> = {
   LHE: "Lahore",
@@ -122,37 +131,82 @@ export function CheckoutBookingSummary({
   const pricingMeta = meta.pricing || {};
   const pricingInput = pricingMeta.input || {};
 
+  // Flight detail lives on `supplierBookingRefs.itinerary` (persisted from the
+  // supplier snapshot), NOT in `metadata` — reading only metadata is why the
+  // trip card showed an origin/destination pair with "—" for every time.
+  const refs = (
+    booking.supplierBookingRefs && typeof booking.supplierBookingRefs === "object"
+      ? booking.supplierBookingRefs
+      : {}
+  ) as Record<string, any>;
+  const itin = (refs.itinerary && typeof refs.itinerary === "object" ? refs.itinerary : {}) as
+    Record<string, any>;
+  const outSegs: Record<string, any>[] = Array.isArray(itin.segments) ? itin.segments : [];
+  const retSegs: Record<string, any>[] = Array.isArray(itin.returnSegments)
+    ? itin.returnSegments
+    : [];
+  const firstOut = outSegs[0] ?? {};
+  const lastOut = outSegs[outSegs.length - 1] ?? {};
+  const firstRet = retSegs[0] ?? {};
+  const lastRet = retSegs[retSegs.length - 1] ?? {};
+
   const routeString = meta.route || pricingInput.route || null;
   const routeParts =
     typeof routeString === "string"
       ? routeString.split("-").map((s: string) => s.trim().toUpperCase()).filter(Boolean)
       : [];
   const originCode =
-    metaString(meta, "origin", "originCode") || routeParts[0] || null;
+    metaString(meta, "origin", "originCode") ||
+    itin.origin ||
+    firstOut.originCode ||
+    routeParts[0] ||
+    null;
   const destCode =
-    metaString(meta, "destination", "destinationCode") || routeParts[1] || null;
+    metaString(meta, "destination", "destinationCode") ||
+    itin.destination ||
+    lastOut.destinationCode ||
+    routeParts[1] ||
+    null;
   const hasReturnLeg = Boolean(
-    meta.returnDate || routeParts.length > 2 || meta.isRoundTrip || meta.legs?.length > 1,
+    meta.returnDate ||
+      itin.returnDate ||
+      retSegs.length > 0 ||
+      routeParts.length > 2 ||
+      meta.isRoundTrip ||
+      meta.legs?.length > 1,
   );
 
+  // `supplierCode` is a last resort — GALILEO_DEMO is not an airline.
   const airlineCode =
-    metaString(meta, "airlineCode", "airline") || booking.supplierCode || null;
+    metaString(meta, "airlineCode", "airline") ||
+    itin.carrier ||
+    firstOut.carrier ||
+    booking.supplierCode ||
+    null;
   const airlineTitle =
     metaString(meta, "airlineName") || getAirlineName(airlineCode);
-  const flightNum = metaString(meta, "flightNumber");
-  const cabinText = formatCabin(meta.cabin || pricingInput.cabin);
+  const flightNum =
+    metaString(meta, "flightNumber") || itin.flightNumber || firstOut.flightNumber || null;
+  const cabinText = formatCabin(meta.cabin || pricingInput.cabin || itin.cabin);
 
   const outboundDate = formatDisplayDate(
-    meta.departureDate || meta.departAt || null,
+    meta.departureDate || meta.departAt || itin.departureDate || firstOut.departureDate || null,
   );
-  const returnDate = formatDisplayDate(meta.returnDate || null);
-  const departTime = metaString(meta, "departTime");
-  const arriveTime = metaString(meta, "arriveTime");
-  const duration = metaString(meta, "duration");
-  const returnDepartTime = metaString(meta, "returnDepartTime");
-  const returnArriveTime = metaString(meta, "returnArriveTime");
-  const returnDuration = metaString(meta, "returnDuration");
-  const returnFlightNum = metaString(meta, "returnFlightNumber");
+  const returnDate = formatDisplayDate(
+    meta.returnDate || itin.returnDate || firstRet.departureDate || null,
+  );
+  const departTime =
+    metaString(meta, "departTime") || itin.departTimeLocal || firstOut.departTimeLocal || null;
+  const arriveTime =
+    metaString(meta, "arriveTime") || itin.arriveTimeLocal || lastOut.arriveTimeLocal || null;
+  const duration = metaString(meta, "duration") || formatMinutes(itin.durationMinutes);
+  const returnDepartTime =
+    metaString(meta, "returnDepartTime") || firstRet.departTimeLocal || null;
+  const returnArriveTime =
+    metaString(meta, "returnArriveTime") || lastRet.arriveTimeLocal || null;
+  const returnDuration =
+    metaString(meta, "returnDuration") || formatMinutes(itin.returnDurationMinutes);
+  const returnFlightNum = metaString(meta, "returnFlightNumber") || firstRet.flightNumber || null;
 
   const totalAmountMinor = booking.amountMinor;
   const hasNet =

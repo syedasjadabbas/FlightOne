@@ -33,6 +33,43 @@ const MAX_NEARBY = 3;
 const MAX_HUBS = 3;
 const MAX_STITCHED = 6;
 
+/**
+ * Ceiling on *exploratory* supplier calls (nearby gateways + hub stitching)
+ * for one user query. Primary searches are never budgeted — every leg the
+ * traveller actually asked for is always searched.
+ *
+ * Without this, each leg independently spent up to ~10 extra calls, so a
+ * 4-leg open-jaw with two candidate origins issued 100+ live Travelport
+ * searches at 30-45s each. They saturated the connection until calls began
+ * tripping the 45s abort, which presented as an outage.
+ */
+const MAX_EXPLORATORY_SEARCHES = 12;
+
+let exploratoryBudget = MAX_EXPLORATORY_SEARCHES;
+let budgetOwner: symbol | null = null;
+
+/**
+ * Opens a shared budget for one user query. Returns a release fn. Nested
+ * callers join the existing budget rather than resetting it.
+ */
+export function beginSearchBudget(): () => void {
+  if (budgetOwner) return () => {};
+  const owner = Symbol("search-budget");
+  budgetOwner = owner;
+  exploratoryBudget = MAX_EXPLORATORY_SEARCHES;
+  return () => {
+    if (budgetOwner === owner) budgetOwner = null;
+  };
+}
+
+/** Claim `n` exploratory slots; returns how many were actually granted. */
+function claimBudget(n: number): number {
+  if (!budgetOwner) return n; // no budget open — preserve existing behaviour
+  const granted = Math.max(0, Math.min(n, exploratoryBudget));
+  exploratoryBudget -= granted;
+  return granted;
+}
+
 function searchableIata(code: string): boolean {
   return isKnownIata(code);
 }
@@ -40,9 +77,19 @@ function searchableIata(code: string): boolean {
 export async function searchFlightsWithRouting(
   query: FlightSearchQuery,
   preferredCarriers?: string[],
+  opts?: {
+    /**
+     * Skip nearby-gateway and hub exploration. Set for multi-leg itineraries:
+     * alt airports are useful on a single origin→destination ask, but on a
+     * 4-leg open-jaw they multiply into dozens of combinations the traveller
+     * never asked for — and every extra leg makes it worse.
+     */
+    skipExploratory?: boolean;
+  },
 ): Promise<Offer[] | null> {
   const primary = await searchFlightsPreferredThenOpen(query, preferredCarriers);
   if (primary && primary.length > 0) return primary;
+  if (opts?.skipExploratory) return primary;
 
   const nearby = await searchNearbyGateways(query, preferredCarriers);
   if (nearby.length > 0) return nearby;
@@ -64,10 +111,13 @@ async function searchNearbyGateways(
     .filter((c) => c !== origin && searchableIata(c))
     .slice(0, 1);
 
-  const jobs: { origin: string; destination: string }[] = [
+  const allJobs: { origin: string; destination: string }[] = [
     ...destAlts.map((destination) => ({ origin, destination })),
     ...originAlts.map((o) => ({ origin: o, destination: dest })),
   ].filter((j) => searchableIata(j.origin) && searchableIata(j.destination));
+
+  // Trim to whatever the shared per-query budget still allows.
+  const jobs = allJobs.slice(0, claimBudget(allJobs.length));
 
   if (jobs.length === 0) return [];
 
@@ -111,6 +161,10 @@ async function searchViaHubs(
       !sameMetro(h, origin) &&
       !sameMetro(h, dest),
   ).slice(0, MAX_HUBS);
+
+  // Each hub costs two searches (origin→hub, hub→dest), so claim in pairs.
+  const hubsAllowed = Math.floor(claimBudget(hubs.length * 2) / 2);
+  hubs.length = Math.min(hubs.length, hubsAllowed);
 
   const stitched: FlightOffer[] = [];
   for (const hub of hubs) {

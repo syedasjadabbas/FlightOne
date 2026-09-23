@@ -633,18 +633,14 @@ export function useAskAiChat(
       }
     }
     const replyFromApi = data.reply || "";
+    // Capture the resolved reply from the updater, but DO NOT persist inside
+    // it: a state updater must be pure. React invokes it twice under
+    // StrictMode, which fired the save twice and created two conversations
+    // for one send — the duplicate sidebar entries.
+    let finalReply = replyFromApi;
     setMessages((prev) => {
       const existing = prev.find((m) => m.id === assistantId)?.content || "";
-      const finalReply = replyFromApi || existing;
-      if (userContent && finalReply.trim()) {
-        void persistAuthenticatedTurn(
-          userContent,
-          finalReply,
-          data.meta.provider,
-          data.meta.travelPlan ?? previousTravelPlanRef.current,
-          data.searchPanel ?? searchPanelRef.current,
-        );
-      }
+      finalReply = replyFromApi || existing;
       return prev.map((m) =>
         m.id === assistantId
           ? {
@@ -655,11 +651,32 @@ export function useAskAiChat(
           : m,
       );
     });
+
+    if (userContent && finalReply.trim()) {
+      void persistAuthenticatedTurn(
+        userContent,
+        finalReply,
+        data.meta.provider,
+        data.meta.travelPlan ?? previousTravelPlanRef.current,
+        data.searchPanel ?? searchPanelRef.current,
+      );
+    }
   }
 
   /** Abandon the in-flight search. No-op when nothing is running. */
   function stop() {
     abortRef.current?.abort();
+  }
+
+  /**
+   * Surface an out-of-band failure (e.g. checkout couldn't start) in the
+   * transcript. Local-only — not persisted, since it isn't a model turn.
+   */
+  function pushAssistantNotice(text: string) {
+    setMessages((prev) => [
+      ...prev,
+      { id: crypto.randomUUID(), role: "assistant", content: text },
+    ]);
   }
 
   /**
@@ -690,6 +707,7 @@ export function useAskAiChat(
     provider,
     send,
     stop,
+    pushAssistantNotice,
     editAndResend,
     retryLastTurn,
     searchPanel,

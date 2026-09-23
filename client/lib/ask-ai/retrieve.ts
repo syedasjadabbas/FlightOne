@@ -2,7 +2,7 @@ import { search, type OfferQuery } from "@/lib/inventory/inventory";
 import { searchLiveFlights } from "@/lib/inventory/liveFlights";
 import { searchLiveHotels } from "@/lib/inventory/liveHotels";
 import { searchSuppliers } from "@/lib/inventory/supplierSearch";
-import { searchFlightsWithRouting } from "@/lib/inventory/searchFlightsRouted";
+import { beginSearchBudget, searchFlightsWithRouting } from "@/lib/inventory/searchFlightsRouted";
 import {
   DEFAULT_ORIGIN_PLACE,
   iataToPlace,
@@ -117,16 +117,27 @@ export async function retrieveFromPlan(
     .filter((c) => /^[A-Z0-9]{2}$/.test(c));
   const flightLegCount = searches.filter((s) => s.product === "FLIGHT").length;
 
-  const liveResults = await Promise.all(
-    searches.map((body, index) => {
-      if (body.product !== "FLIGHT") {
-        return searchSuppliers(body);
-      }
-      const flightIndex = searches.slice(0, index).filter((s) => s.product === "FLIGHT").length;
-      const carriersForLeg = carriersForPreferredLeg(preferredAll, flightIndex, flightLegCount);
-      return searchFlightsWithRouting(body.query, carriersForLeg);
-    }),
-  );
+  // One shared exploratory budget for the whole query — without it each leg
+  // independently fanned out across alt airports and hubs, and a multi-leg
+  // open-jaw issued 100+ live Travelport searches.
+  const releaseBudget = beginSearchBudget();
+  let liveResults: (Offer[] | null)[];
+  try {
+    liveResults = await Promise.all(
+      searches.map((body, index) => {
+        if (body.product !== "FLIGHT") {
+          return searchSuppliers(body);
+        }
+        const flightIndex = searches.slice(0, index).filter((s) => s.product === "FLIGHT").length;
+        const carriersForLeg = carriersForPreferredLeg(preferredAll, flightIndex, flightLegCount);
+        return searchFlightsWithRouting(body.query, carriersForLeg, {
+          skipExploratory: flightLegCount > 1,
+        });
+      }),
+    );
+  } finally {
+    releaseBudget();
+  }
 
   const legBuckets: Offer[][] = [];
   const legLive: boolean[] = [];

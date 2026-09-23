@@ -25,6 +25,8 @@ import {
   buildAskAiSystemPrompt,
 } from "@/lib/ask-ai/prompt";
 import { extractTravelPlan } from "@/lib/consultant/extractTravelPlan";
+import { isDemoInventoryEnabled } from "@/lib/demo/demoInventory";
+import { demoTravelPlan } from "@/lib/demo/demoPlan";
 import { extractIntent, looksComplexForHeuristic } from "@/lib/consultant/intent";
 import {
   askAiServiceErrorReply,
@@ -410,13 +412,20 @@ export async function runAskAi(
   }
 
   sink?.onStatus?.("extract");
-  const planRaw = await extractTravelPlan(req.message, req.history, {
-    today,
-    defaultOriginIata,
-    defaultOriginPlace: originPlace,
-    location,
-    previousTravelPlan: req.previousTravelPlan ?? null,
-  });
+  // Demo mode must never depend on an LLM: multi-city is the only shape the
+  // heuristic extractor refuses, so with LLM_PROVIDER=off every multi-leg ask
+  // returned "trip planning AI is temporarily unreachable". Parse it straight
+  // from the corpus first; null falls through to the normal pipeline.
+  const demoPlan = isDemoInventoryEnabled() ? demoTravelPlan(req.message) : null;
+  const planRaw =
+    demoPlan ??
+    (await extractTravelPlan(req.message, req.history, {
+      today,
+      defaultOriginIata,
+      defaultOriginPlace: originPlace,
+      location,
+      previousTravelPlan: req.previousTravelPlan ?? null,
+    }));
 
   const plan = planRaw?.action === "close" ? null : planRaw;
 

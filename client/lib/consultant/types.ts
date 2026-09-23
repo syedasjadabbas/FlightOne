@@ -96,6 +96,12 @@ export interface OfferCard {
   lowestFareOnItineraryMinor?: number;
   /** Hub-stitched multi-ticket construction (not a single through fare). */
   hubStitched?: boolean;
+  /**
+   * Extra context forwarded to the quote endpoint. Used by multi-city trips to
+   * carry every leg alongside the first-leg snapshot the booking is anchored
+   * to — see lib/bookings/offerFromItinerary.ts.
+   */
+  metadata?: Record<string, unknown>;
 }
 
 export interface OfferCardFlight {
@@ -258,5 +264,9 @@ export interface ItinerarySummary {
     marketReference?: boolean;
     /** Full sector breakdown for detail modal. */
     segments?: FlightSegment[];
+    /** Source offer id — lets a trip card quote this leg like a single offer. */
+    offerId?: string;
+    /** Supplier snapshot for this leg; absent on synthetic / web-meta legs. */
+    supplierOfferSnapshotId?: string;
   }>;
 }

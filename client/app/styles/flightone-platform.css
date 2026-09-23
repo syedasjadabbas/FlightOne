@@ -1653,13 +1653,25 @@
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  flex-shrink: 0;
-  margin: 0;
-  font-size: 0.65rem;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 1.125rem;
+  height: 1.125rem;
+  border-radius: 999px;
+  background: var(--white) !important;
+  border: 1px solid color-mix(in oklab, var(--cyan) 35%, transparent);
   color: var(--cyan);
-  line-height: 1;
-  background: white;
-  padding: 0 0.12rem;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-shadow: 0 1px 3px rgba(14, 22, 32, 0.06);
+}
+
+.flight-result-row__line-plane-icon {
+  width: 0.65rem;
+  height: 0.65rem;
+  flex-shrink: 0;
+  transform: rotate(90deg);
 }
 
 .flight-result-row__line--skeleton .flight-result-row__line-track {
@@ -1694,9 +1706,13 @@
   color: var(--navy);
 }
 
+/* The 32px logo is taller than its ~20px text line, so `flex-start` pinned both
+   tops and left the logo hanging ~6px below the badge and airline name.
+   Centring shares one baseline; `flex-wrap` on the text keeps this correct when
+   the badge + name + flight number wrap to a second line. */
 .flight-result-row__identity {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 0.5rem;
 }
 

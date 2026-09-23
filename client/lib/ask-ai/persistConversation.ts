@@ -18,12 +18,24 @@ async function rtkSafe<T>(promise: Promise<T>): Promise<T | null> {
   }
 }
 
+/**
+ * In-flight create, so concurrent callers share one request.
+ *
+ * The `existingId` guard alone is not enough: the caller only learns the new id
+ * after this resolves, so two calls in the same tick both see `null` and both
+ * POST — producing two conversations for one chat. Cleared on settle so a new
+ * chat (or a failed create) can start a fresh one.
+ */
+let creating: Promise<string | null> | null = null;
+
 export async function ensureConversationId(
   existingId: string | null,
   title?: string,
 ): Promise<string | null> {
   if (existingId) return existingId;
-  const created = await rtkSafe(
+  if (creating) return creating;
+
+  creating = rtkSafe(
     store
       .dispatch(
         conversationsApi.endpoints.createConversation.initiate(
@@ -32,8 +44,13 @@ export async function ensureConversationId(
         ),
       )
       .unwrap(),
-  );
-  return created?.id ?? null;
+  ).then((created) => created?.id ?? null);
+
+  try {
+    return await creating;
+  } finally {
+    creating = null;
+  }
 }
 
 /** Module 13 — request human handoff for an owned conversation. */

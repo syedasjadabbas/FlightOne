@@ -194,23 +194,23 @@
 }
 
 /* ── Traveller summary card ─────────────────────────────────────
- * This is a completed step, but it rendered with the same neutral weight as
- * the pending panels below it. A left accent rail in the same green as the
- * "Ready" chip marks it as checked off, and the edit affordance becomes a real
- * pill target instead of a low-contrast text link.
+ * A completed step that otherwise rendered with the same neutral weight as the
+ * pending panels below it. The accent rail and wash use the brand blue so this
+ * matches the rest of the app; the green is reserved for the "Ready" chip,
+ * where it carries status meaning rather than brand identity.
  */
 
 .fo-checkout .fo-checkout__traveller {
   position: relative;
   overflow: hidden;
   padding-left: 1.4rem;
-  /* Fades across the full width rather than stopping at 9rem — a fixed stop
+  /* Fades across the full width rather than stopping at a fixed offset, which
      put a hard vertical seam in the middle of the card. */
   background:
     linear-gradient(
       to right,
-      rgba(16, 185, 129, 0.06),
-      rgba(16, 185, 129, 0) 70%
+      rgba(8, 150, 191, 0.07),
+      rgba(8, 150, 191, 0) 70%
     ),
     var(--white);
 }
@@ -220,26 +220,25 @@
   position: absolute;
   inset: 0 auto 0 0;
   width: 3px;
-  background: #059669;
+  background: var(--sky-solid);
 }
 
-/* The parent is `items-start` so the avatar tracks the name row rather than the
-   midpoint of the whole two-line block — centring against the block left it
-   sitting visibly low against the name. The 40px disc is taller than the ~22px
-   name line, so it is pulled up by half the difference to share that centre
-   (measured: without this the disc sits 7.7px low). */
+/* The row is `items-start` so the avatar tracks the NAME row, not the midpoint
+   of the whole two-line block — centring the row put the disc 8.7px below the
+   name (measured). The 40px disc is taller than the ~22px name line, so pull it
+   up by half that difference to share the name's centreline. */
 .fo-checkout .fo-checkout__traveller-avatar {
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  margin-top: -0.5rem;
+  margin-top: -0.55rem;
   width: 2.5rem;
   height: 2.5rem;
   border-radius: 999px;
-  color: #047857;
-  background: rgba(16, 185, 129, 0.1);
-  box-shadow: inset 0 0 0 1px rgba(4, 120, 87, 0.16);
+  color: var(--sky-solid);
+  background: rgba(8, 150, 191, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(9, 124, 159, 0.18);
 }
 
 /* `--cyan` (#0896bf) is 3.43:1 on white and fails AA at this size; `--navy`
@@ -278,5 +277,339 @@
   .fo-checkout .fo-checkout__traveller-edit:hover,
   .fo-checkout .fo-checkout__traveller-edit:active {
     transform: none;
+  }
+}
+
+/* ── E-ticket document ─────────────────────────────────────────────────────
+   Tactile card: soft multi-layer shadow, no visible gray border. Printable —
+   see the @media print block at the end, which strips app chrome so Cmd-P /
+   "Download" produces the ticket alone. */
+
+.fo-ticket {
+  --fo-ticket-pad: 1.25rem;
+  background: var(--white);
+  border-radius: 0.875rem;
+  overflow: hidden;
+  box-shadow:
+    0 1px 2px color-mix(in oklab, var(--navy) 6%, transparent),
+    0 6px 16px -6px color-mix(in oklab, var(--navy) 14%, transparent),
+    0 18px 40px -24px color-mix(in oklab, var(--navy) 22%, transparent);
+}
+
+.fo-ticket__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: var(--fo-ticket-pad);
+  background: var(--deep-navy);
+  color: var(--white);
+}
+
+.fo-ticket__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.fo-ticket__brand-mark {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  background: var(--sky-solid);
+  color: var(--white);
+}
+
+.fo-ticket__brand-name {
+  display: block;
+  font-size: 0.9375rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.fo-ticket__brand-sub {
+  display: block;
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  /* 70% white on --deep-navy clears AA for this size. */
+  color: color-mix(in oklab, var(--white) 70%, transparent);
+}
+
+.fo-ticket__refs {
+  display: flex;
+  gap: 1.5rem;
+  margin: 0;
+  text-align: right;
+}
+
+.fo-ticket__refs dt {
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: color-mix(in oklab, var(--white) 70%, transparent);
+}
+
+.fo-ticket__refs dd {
+  margin: 0.125rem 0 0;
+  font-size: 0.875rem;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+
+.fo-ticket__demo {
+  margin: 0;
+  padding: 0.625rem var(--fo-ticket-pad);
+  background: color-mix(in oklab, #b45309 12%, var(--white));
+  color: #7c3f06;
+  font-size: 0.75rem;
+  font-weight: 550;
+}
+
+.fo-ticket__body {
+  padding: var(--fo-ticket-pad);
+  display: grid;
+  gap: 1.25rem;
+}
+
+.fo-ticket__meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  gap: 0.875rem 1rem;
+  margin: 0;
+  padding-bottom: 1rem;
+  border-bottom: 1px dashed var(--fo-desk-line);
+}
+
+.fo-ticket__meta dt {
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+}
+
+.fo-ticket__meta dd {
+  margin: 0.1875rem 0 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.fo-ticket__bound-title {
+  margin: 0 0 0.625rem;
+  font-size: 0.6875rem;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--sky-solid);
+}
+
+.fo-ticket__sectors {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.875rem;
+}
+
+.fo-ticket__sector {
+  padding: 0.875rem;
+  border-radius: 0.625rem;
+  background: var(--fo-desk-wash);
+}
+
+.fo-ticket__sector-flight {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.625rem;
+}
+
+.fo-ticket__sector-code {
+  font-size: 0.8125rem;
+  font-weight: 650;
+  color: var(--navy);
+  font-variant-numeric: tabular-nums;
+}
+
+.fo-ticket__sector-class {
+  font-size: 0.6875rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--navy) 8%, var(--white));
+  color: var(--ink-soft);
+}
+
+.fo-ticket__sector-leg {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.fo-ticket__stop--end {
+  text-align: right;
+}
+
+.fo-ticket__stop-time {
+  display: block;
+  font-size: 1.125rem;
+  font-weight: 650;
+  color: var(--navy);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.fo-ticket__nextday {
+  font-size: 0.625rem;
+  color: var(--sky-solid);
+  margin-left: 0.125rem;
+}
+
+.fo-ticket__stop-code {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.fo-ticket__stop-date {
+  display: block;
+  font-size: 0.6875rem;
+  color: var(--ink-soft);
+}
+
+.fo-ticket__leg-mid {
+  position: relative;
+  display: grid;
+  place-items: center;
+  gap: 0.25rem;
+}
+
+.fo-ticket__leg-line {
+  display: block;
+  width: 100%;
+  height: 1px;
+  background: var(--fo-desk-line-strong);
+}
+
+.fo-ticket__leg-icon {
+  width: 0.875rem;
+  height: 0.875rem;
+  color: var(--sky-solid);
+}
+
+.fo-ticket__leg-duration {
+  font-size: 0.6875rem;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.fo-ticket__layover {
+  margin: 0.625rem 0 0;
+  font-size: 0.6875rem;
+  color: var(--ink-soft);
+}
+
+.fo-ticket__nosectors {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--ink-soft);
+}
+
+.fo-ticket__fare-rows {
+  margin: 0;
+  display: grid;
+  gap: 0.375rem;
+}
+
+.fo-ticket__fare-rows > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.8125rem;
+  color: var(--ink-soft);
+}
+
+.fo-ticket__fare-rows dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.fo-ticket__fare-total {
+  margin-top: 0.375rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed var(--fo-desk-line);
+}
+
+.fo-ticket__fare-total dt,
+.fo-ticket__fare-total dd {
+  font-size: 1rem !important;
+  font-weight: 650;
+  color: var(--navy) !important;
+}
+
+.fo-ticket__foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  justify-content: space-between;
+  padding: 0.75rem var(--fo-ticket-pad);
+  background: color-mix(in oklab, var(--navy) 4%, var(--white));
+  font-size: 0.6875rem;
+  color: var(--ink-soft);
+}
+
+@media (max-width: 30rem) {
+  .fo-ticket__refs {
+    text-align: left;
+  }
+
+  .fo-ticket__sector-leg {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .fo-ticket__stop--end {
+    text-align: left;
+  }
+
+  .fo-ticket__leg-mid {
+    grid-auto-flow: column;
+    justify-content: start;
+    gap: 0.5rem;
+  }
+
+  .fo-ticket__leg-line {
+    width: 2rem;
+  }
+}
+
+/* Download = print-to-PDF: hide app chrome so only the ticket prints. */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .fo-ticket,
+  .fo-ticket * {
+    visibility: visible;
+  }
+
+  .fo-ticket {
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 100%;
+    box-shadow: none;
+  }
+
+  .fo-ticket__head {
+    /* Force the brand bar to print rather than drop to white. */
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 }

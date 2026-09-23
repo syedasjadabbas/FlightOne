@@ -146,7 +146,15 @@ function BoundHero({
   );
 }
 
-function FarePanel({ offer, onBook }: { offer: OfferCard; onBook: () => void }) {
+function FarePanel({
+  offer,
+  onBook,
+  booking,
+}: {
+  offer: OfferCard;
+  onBook: () => void;
+  booking?: boolean;
+}) {
   const flight = offer.flight!;
   const brand = fareFamilyLabel(flight.fareBrandName, flight.cabin);
   const supplierLines = formatSupplierPriceBreakdown(flight.supplierPriceBreakdown);
@@ -202,9 +210,15 @@ function FarePanel({ offer, onBook }: { offer: OfferCard; onBook: () => void }) 
         </div>
       </div>
 
-      <button type="button" onClick={onBook} className="fo-fare-summary__cta">
-        View Deal
-        <span aria-hidden>→</span>
+      <button
+        type="button"
+        onClick={onBook}
+        disabled={booking}
+        aria-busy={booking}
+        className="fo-fare-summary__cta"
+      >
+        {booking ? "Opening checkout…" : "View Deal"}
+        {booking ? null : <span aria-hidden>→</span>}
       </button>
 
       {offer.unitsLeft != null && offer.unitsLeft <= 3 ? (
@@ -292,10 +306,13 @@ export function FlightOfferDetailModal({
   offer,
   onClose,
   onBook,
+  booking,
 }: {
   offer: OfferCard;
   onClose: () => void;
   onBook: () => void;
+  /** Quote in flight — CTAs show pending and the modal stays mounted. */
+  booking?: boolean;
 }) {
   const flight = offer.flight!;
   const titleId = useId();
@@ -462,7 +479,7 @@ export function FlightOfferDetailModal({
           </div>
 
           <div className="fo-detail-fare-col">
-            <FarePanel offer={offer} onBook={onBook} />
+            <FarePanel offer={offer} onBook={onBook} booking={booking} />
           </div>
         </div>
       </div>
@@ -472,8 +489,14 @@ export function FlightOfferDetailModal({
           <span className="fo-detail-mobile-bar__label">Total</span>
           <span className="fo-detail-mobile-bar__amount offer-price">{offer.price}</span>
         </div>
-        <button type="button" onClick={onBook} className="fo-detail-mobile-bar__cta">
-          View Deal
+        <button
+          type="button"
+          onClick={onBook}
+          disabled={booking}
+          aria-busy={booking}
+          className="fo-detail-mobile-bar__cta"
+        >
+          {booking ? "Opening checkout…" : "View Deal"}
         </button>
       </div>
     </div>

@@ -15,6 +15,9 @@ import { ResultsRail } from "./ResultsRail";
 
 export type AskAiView = "chat" | "results";
 
+/** Result of a book attempt — `navigating` means a page redirect is under way. */
+export type BookOfferOutcome = { navigating: boolean };
+
 /**
  * Two full-screen workspaces: Chat and Results.
  * Both stay mounted so conversation + search state are preserved when switching.
@@ -65,8 +68,17 @@ export function AskAiShell({
   onTogglePill: (pillId: string) => void;
   onSortChange: (sort: ResultsSortKey) => void;
   onSendFilter?: (text: string) => void;
-  onBookOffer?: (offer: OfferCard) => void;
-  onBookTrip?: (itinerary: ItinerarySummary) => void;
+  /**
+   * May be async — the detail modal holds its pending state until it settles.
+   * Resolve `{ navigating: true }` when a full-page redirect has been started,
+   * so the modal stays mounted instead of repainting the screen behind it.
+   */
+  onBookOffer?: (
+    offer: OfferCard,
+  ) => BookOfferOutcome | void | Promise<BookOfferOutcome | void>;
+  onBookTrip?: (
+    itinerary: ItinerarySummary,
+  ) => BookOfferOutcome | void | Promise<BookOfferOutcome | void>;
   onTripTitleChange?: (title: string) => void;
   view?: AskAiView;
   onViewChange?: (view: AskAiView) => void;
@@ -76,6 +88,8 @@ export function AskAiShell({
   conversationId?: string | null;
 }) {
   const [detailOffer, setDetailOffer] = useState<OfferCard | null>(null);
+  /** True while a quote is in flight, so the detail modal holds instead of closing. */
+  const [booking, setBooking] = useState(false);
   const [detailTrip, setDetailTrip] = useState<ItinerarySummary | null>(null);
   const [viewUncontrolled, setViewUncontrolled] = useState<AskAiView>("chat");
   const contentScrollRef = useRef<HTMLDivElement>(null);
@@ -118,11 +132,11 @@ export function AskAiShell({
   }
 
   function handleBookOffer(offer: OfferCard) {
-    onBookOffer?.(offer);
+    return onBookOffer?.(offer);
   }
 
   function handleBookTrip(itinerary: ItinerarySummary) {
-    onBookTrip?.(itinerary);
+    return onBookTrip?.(itinerary);
   }
 
   function handleViewOffer(offer: OfferCard) {
@@ -188,10 +202,28 @@ export function AskAiShell({
       {detailOffer?.type === "flight" && detailOffer.flight ? (
         <FlightOfferDetailModal
           offer={detailOffer}
+          booking={booking}
           onClose={() => setDetailOffer(null)}
           onBook={() => {
-            handleBookOffer(detailOffer);
-            setDetailOffer(null);
+            // Stay open while the quote is in flight. Closing here dropped the
+            // traveller onto the chat view for the ~1-2s the quote took, which
+            // looked like "View Deal goes back to chat" before checkout opened.
+            setBooking(true);
+            // Close ONLY on failure. `window.location.href` schedules the
+            // navigation and returns immediately, so tearing the modal down in
+            // a `.finally()` un-mounts it while the browser is still on this
+            // page — that repaint is the flash of the results screen.
+            void Promise.resolve(handleBookOffer(detailOffer)).then(
+              (outcome) => {
+                if (outcome?.navigating) return;
+                setBooking(false);
+                setDetailOffer(null);
+              },
+              () => {
+                setBooking(false);
+                setDetailOffer(null);
+              },
+            );
           }}
         />
       ) : null}
@@ -199,10 +231,23 @@ export function AskAiShell({
       {detailTrip ? (
         <TripDetailModal
           itinerary={detailTrip}
+          booking={booking}
           onClose={() => setDetailTrip(null)}
           onBook={() => {
-            handleBookTrip(detailTrip);
-            setDetailTrip(null);
+            // Same teardown rule as the single-offer modal: hold while the
+            // quote is in flight, and close ONLY when we are not navigating.
+            setBooking(true);
+            void Promise.resolve(handleBookTrip(detailTrip)).then(
+              (outcome) => {
+                if (outcome?.navigating) return;
+                setBooking(false);
+                setDetailTrip(null);
+              },
+              () => {
+                setBooking(false);
+                setDetailTrip(null);
+              },
+            );
           }}
         />
       ) : null}

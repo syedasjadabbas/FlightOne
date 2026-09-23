@@ -389,8 +389,25 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.15rem 0.35rem;
-  overflow-wrap: anywhere;
+  justify-content: flex-start;
+  gap: 0.2rem 0.35rem;
+}
+
+.flight-result-row__meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  white-space: nowrap;
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+  line-height: 1.35;
+}
+
+.flight-result-row__meta-dot {
+  color: var(--ink-faint);
+  opacity: 0.55;
+  font-weight: 400;
+  font-size: 0.8rem;
 }
 
 .flight-result-row__airline {
@@ -414,6 +431,22 @@
   text-align: right;
 }
 
+.flight-result-row__price-row,
+.flight-result-row__price-val {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 0.35rem;
+  flex-wrap: nowrap;
+}
+
+.flight-result-row__price-code {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--navy);
+  letter-spacing: 0.02em;
+}
+
 .flight-result-row__cta {
   flex: 0 0 auto;
   max-width: 100%;
@@ -429,16 +462,19 @@
 @container fo-flight-row (min-width: 44rem) {
   .flight-result-row {
     grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
   }
 
   .flight-result-row__scan {
     grid-template-columns:
-      minmax(0, 1.15fr)
-      minmax(0, auto)
-      minmax(2.75rem, 1fr)
-      minmax(0, auto)
-      minmax(0, 1fr);
+      minmax(7rem, 1.25fr)
+      auto
+      minmax(4.5rem, 1fr)
+      auto
+      minmax(6rem, 1.25fr);
     grid-template-areas: "airline dep mid arr meta";
+    gap: 0 0.85rem;
+    align-items: center;
   }
 
   .flight-result-row__col--dep,
@@ -461,36 +497,14 @@
   .flight-result-row__aside {
     flex-direction: column;
     align-items: flex-end;
+    justify-content: center;
     flex-wrap: nowrap;
     min-width: min(100%, 9.5rem);
-  }
-
-  /* The fare column (price + CTA + feedback buttons) is ~170px tall against a
-     ~48px scan row. With `align-items: center` on the row the short column was
-     centred against the tall one, leaving ~76px of dead space under the flight
-     details. Align both to the top so the itinerary reads level with the fare. */
-  .flight-result-row {
-    align-items: start;
-  }
-
-  .flight-result-row__aside {
-    justify-content: flex-start;
-  }
-
-  /* Keep the scan's own columns centred on each other — only the outer
-     row/aside relationship changes. */
-  .flight-result-row__scan {
-    align-items: center;
-  }
-
-  /* The fare block is the tallest thing in the row, so its internal spacing
-     sets the row height. Tighten it on wide rows where there is no wrapping. */
-  .flight-result-row__aside {
-    gap: 0.25rem;
+    gap: 0.35rem;
   }
 
   .flight-result-row__aside .offer-feedback {
-    margin-top: 0.25rem;
+    margin-top: 0.15rem;
   }
 }
 

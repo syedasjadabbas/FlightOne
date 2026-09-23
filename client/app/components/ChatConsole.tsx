@@ -13,6 +13,12 @@ import { useTravellerLocation } from "./useTravellerLocation";
 import { AskAiShell, useAskAiChat, type AskAiView } from "./ask-ai";
 import { ChatLayout } from "./ChatLayout";
 import { useAuthStore } from "@/store/auth.store";
+import {
+  stashPendingCheckout,
+  startCheckout,
+  takePendingCheckout,
+} from "@/lib/bookings/startCheckout";
+import { offerCardFromItinerary } from "@/lib/bookings/offerFromItinerary";
 import { useCorporateProfileStore } from "@/store/corporateProfile.store";
 import {
   useListConversationsQuery,
@@ -199,54 +205,33 @@ export function ChatConsole() {
   }, [chat.searchPanel, chat.activeOriginIdx]);
 
   const handleQuoteAndCheckout = async (offerToBook: OfferCard, token: string) => {
-    try {
-      const corp = useCorporateProfileStore.getState();
-      const payload = {
-        ...offerToBook,
-        ...(corp.mode === "CORPORATE" && corp.companyId
-          ? { companyId: corp.companyId }
-          : {}),
-      };
-      const res = await fetch("/api/bookings/quote", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-      const json = await res.json().catch(() => null);
-      if (!res.ok) {
-        console.error("[checkout] quote failed:", json);
-        return;
-      }
-      const bookingId = json?.data?.id;
-      if (!bookingId) {
-        console.error("[checkout] missing booking id in quote response:", json);
-        return;
-      }
-      window.location.href = `/checkout/${bookingId}`;
-    } catch (err) {
-      console.error("[checkout] handleQuoteAndCheckout error:", err);
+    const corp = useCorporateProfileStore.getState();
+    const result = await startCheckout(offerToBook, token, {
+      ...(corp.mode === "CORPORATE" && corp.companyId ? { companyId: corp.companyId } : {}),
+    });
+    // Every failure path used to `return` after a console.error. The detail
+    // modal had already closed, so the user landed back in chat with no
+    // explanation and no way to tell a stale quote from a real outage.
+    if (!result.ok) {
+      chat.pushAssistantNotice(result.message);
+      return { navigating: false };
     }
+    window.location.href = `/checkout/${result.bookingId}`;
+    // Navigation is scheduled, not immediate — tell the caller to keep its UI
+    // mounted so nothing repaints before the browser leaves this page.
+    return { navigating: true };
   };
 
-  // Auto-resume pending checkout offer after user returns from login
+  // Resume a checkout stashed before a login that landed somewhere other than
+  // /checkout/resume (e.g. an old bookmarked redirect). The resume route is
+  // the normal path; this is the safety net.
   useEffect(() => {
     if (!hasHydrated || !accessToken) return;
-    try {
-      const pendingRaw = sessionStorage.getItem("flightone_pending_checkout_offer");
-      if (pendingRaw) {
-        sessionStorage.removeItem("flightone_pending_checkout_offer");
-        const pendingOffer = JSON.parse(pendingRaw) as OfferCard;
-        if (pendingOffer) {
-          void handleQuoteAndCheckout(pendingOffer, accessToken);
-        }
-      }
-    } catch {
-      // ignore
-    }
+    const pendingOffer = takePendingCheckout();
+    if (pendingOffer) void handleQuoteAndCheckout(pendingOffer, accessToken);
+    // Resume fires once when auth settles. `handleQuoteAndCheckout` is
+    // recreated each render, so listing it here would re-run the redirect.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasHydrated, accessToken]);
 
   return (
@@ -305,21 +290,35 @@ export function ChatConsole() {
           onBookOffer={(offer) => {
             const currentToken = useAuthStore.getState().accessToken;
             if (!currentToken) {
-              try {
-                sessionStorage.setItem("flightone_pending_checkout_offer", JSON.stringify(offer));
-              } catch {
-                // ignore
-              }
-              window.location.href = `/login?redirect=${encodeURIComponent("/chat?resumeCheckout=true")}`;
-              return;
+              stashPendingCheckout(offer);
+              // Return to the dedicated resume route, not /chat — landing on
+              // chat mounted the whole console before bouncing to traveller
+              // details, which read as "View Deal goes back to chat".
+              window.location.href = `/login?redirect=${encodeURIComponent("/checkout/resume")}`;
+              // Also a scheduled navigation — keep the modal up rather than
+              // flashing the results screen on the way to login.
+              return { navigating: true };
             }
-            void handleQuoteAndCheckout(offer, currentToken);
+            return handleQuoteAndCheckout(offer, currentToken);
           }}
           onBookTrip={(itinerary) => {
-            setView("chat");
-            chat.send(
-              `I'd like to book this complete trip (${itinerary.hops.join(" → ")}) at ${itinerary.totalPrice}`,
-            );
+            // Same flow as a single-leg offer: quote and go to checkout. This
+            // used to bounce back to chat and send a message, which is why
+            // multi-city looked like a different product.
+            const offer = offerCardFromItinerary(itinerary);
+            if (!offer) {
+              chat.pushAssistantNotice(
+                "That trip has no bookable supplier fare on its first leg. Try a different trip or date.",
+              );
+              return { navigating: false };
+            }
+            const currentToken = useAuthStore.getState().accessToken;
+            if (!currentToken) {
+              stashPendingCheckout(offer);
+              window.location.href = `/login?redirect=${encodeURIComponent("/checkout/resume")}`;
+              return { navigating: true };
+            }
+            return handleQuoteAndCheckout(offer, currentToken);
           }}
           chat={
             <ChatLayout

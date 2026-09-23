@@ -3,7 +3,17 @@
 import { useEffect, useId, useRef } from "react";
 import { createPortal } from "react-dom";
 import type { ItinerarySummary } from "@/lib/consultant/types";
-import { formatDurationLabel } from "./flightOfferFormat";
+import { formatPriceMinor } from "@/lib/ask-ai/sidebarFilters";
+import {
+  BAGGAGE_UNAVAILABLE,
+  cabinLabel,
+  formatDurationLabel,
+} from "./flightOfferFormat";
+import {
+  DetailFareMotif,
+  DoodleLuggage,
+  DoodlePassport,
+} from "@/components/travel/TravelDoodles";
 import { TripLegDetailCard } from "./trip/TripLegDetailCard";
 
 const ANGLE_LABEL: Record<string, string> = {
@@ -18,10 +28,12 @@ const ANGLE_LABEL: Record<string, string> = {
 function FarePanel({
   itinerary,
   onBook,
+  booking,
   className = "",
 }: {
   itinerary: ItinerarySummary;
   onBook: () => void;
+  booking?: boolean;
   className?: string;
 }) {
   const isMultiTicket = itinerary.construction === "multiple_tickets";
@@ -34,66 +46,149 @@ function FarePanel({
   const totalDuration =
     itinerary.legs?.reduce((sum, leg) => sum + (leg.durationMinutes || 0), 0) ?? 0;
 
+  const legs = itinerary.legs ?? [];
+  // Fare composition, per leg — the trip total is the sum of its legs, so the
+  // breakdown is the legs themselves rather than a base/tax split.
+  const legRows = legs
+    .filter((l) => l.priceMinor != null)
+    .map((l) => ({
+      label: `${l.originCode} → ${l.destinationCode}`,
+      value: formatPriceMinor(l.priceMinor!, l.currency ?? itinerary.currency),
+    }));
+  const checkedKg = legs.map((l) => l.baggageKg).filter((k): k is number => k != null);
+  const cabins = [...new Set(legs.map((l) => l.cabin).filter(Boolean))] as string[];
+  const refundableLegs = legs.filter((l) => l.refundable === true).length;
+
   return (
-    <aside
-      className={`rounded-2xl border border-transparent bg-white p-5 ${className}`}
-      style={{
-        boxShadow: "var(--shadow-soft), inset 0 1px 0 #ffffff",
-        backgroundImage:
-          "radial-gradient(120% 80% at 100% 0%, color-mix(in oklab, var(--signal) 10%, transparent), transparent 55%)",
-      }}
-    >
-      <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--ink-faint)]">
-        Complete trip
-      </p>
-      <p className="mt-2 text-[13px] text-[var(--ink-soft)]">
-        {isMultiTicket ? "Self-transfer · separate tickets" : "Single ticket"}
-        {totalDuration > 0 ? ` · ${formatDurationLabel(totalDuration, "long")} total` : ""}
-      </p>
-      <p className="text-[9px] font-semibold uppercase tracking-[0.08em] text-[var(--ink-faint)]">
-        {code}
-      </p>
-      <p className="offer-price text-[2rem] font-semibold leading-none tracking-[-0.03em] text-[var(--ink)]">
-        {amount}
-      </p>
+    <aside className={`fo-fare-summary fo-fare-summary--detail fo-fare-ticket ${className}`}>
+      <DetailFareMotif className="fo-fare-ticket__motif" />
+      <div className="fo-fare-ticket__stub" aria-hidden>
+        <span className="fo-fare-ticket__stub-hole" />
+        <span className="fo-fare-ticket__stub-hole" />
+        <span className="fo-fare-ticket__stub-hole" />
+      </div>
+
+      <div className="fo-fare-summary__top">
+        <p className="fo-fare-summary__eyebrow">Complete trip</p>
+        <p className="offer-price fo-fare-summary__price">
+          {code ? <span className="fo-fare-summary__price-code">{code}</span> : null}
+          <span className="fo-fare-summary__price-amount">{amount}</span>
+        </p>
+        <p className="fo-fare-summary__brand">
+          {isMultiTicket ? "Self-transfer · separate tickets" : "Single ticket"}
+          {totalDuration > 0 ? ` · ${formatDurationLabel(totalDuration, "long")} total` : ""}
+        </p>
+        <div className="fo-fare-summary__tags">
+          {cabins.map((c) => (
+            <span key={c} className="fo-fare-summary__tag">
+              {cabinLabel(c as "economy" | "premium" | "business")}
+            </span>
+          ))}
+          {legs.length > 0 ? (
+            <span className="fo-fare-summary__tag">{legs.length} legs</span>
+          ) : null}
+        </div>
+      </div>
+
+      <button
+        type="button"
+        onClick={onBook}
+        disabled={hasMarketReference || booking}
+        aria-busy={booking}
+        className="fo-fare-summary__cta"
+      >
+        {hasMarketReference
+          ? "Market reference only"
+          : booking
+            ? "Opening checkout…"
+            : "View Deal"}
+        {hasMarketReference || booking ? null : <span aria-hidden>→</span>}
+      </button>
 
       {isMultiTicket ? (
-        <p className="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[12px] leading-relaxed text-amber-800">
+        <p className="fo-fare-summary__notice">
           You change planes or airports between tickets. Allow extra time for immigration,
           baggage reclaim, and check-in.
         </p>
       ) : null}
 
       {hasMarketReference ? (
-        <p className="mt-3 rounded-lg border border-sky-500/30 bg-sky-500/10 px-3 py-2 text-[12px] leading-relaxed text-sky-800">
-          Some legs are Google Flights market estimates — not bookable through FlightOne. Use
-          Continue booking only for GDS-priced segments.
+        <p className="fo-fare-summary__notice">
+          Some legs are Google Flights market estimates — not bookable through FlightOne.
         </p>
+      ) : (
+        <p className="fo-fare-summary__notice">
+          Price captured at search. Confirm before ticketing.
+        </p>
+      )}
+
+      {legRows.length > 0 ? (
+        <div className="fo-fare-summary__block">
+          <p className="fo-fare-summary__section-title">Fare composition</p>
+          {legRows.map((row) => (
+            <div key={row.label} className="fo-fare-summary__row">
+              <span className="fo-fare-summary__row-label">{row.label}</span>
+              <span className="fo-fare-summary__row-value">{row.value}</span>
+            </div>
+          ))}
+          <div className="fo-fare-summary__row">
+            <span className="fo-fare-summary__row-label">Trip total</span>
+            <span className="fo-fare-summary__row-value">{itinerary.totalPrice}</span>
+          </div>
+        </div>
       ) : null}
+
+      <div className="fo-fare-summary__block">
+        <p className="fo-fare-summary__section-title">
+          <DoodleLuggage className="fo-fare-summary__section-icon" size={14} />
+          Baggage
+        </p>
+        {checkedKg.length > 0 ? (
+          <div className="fo-fare-summary__row">
+            <span className="fo-fare-summary__row-label">Checked</span>
+            <span className="fo-fare-summary__row-value">
+              {/* Lowest allowance across legs — the one that actually binds. */}
+              {Math.min(...checkedKg)} kg
+            </span>
+          </div>
+        ) : (
+          <p className="fo-fare-summary__note">{BAGGAGE_UNAVAILABLE}</p>
+        )}
+      </div>
+
+      <div className="fo-fare-summary__block">
+        <p className="fo-fare-summary__section-title">
+          <DoodlePassport className="fo-fare-summary__section-icon" size={14} />
+          Fare rules
+        </p>
+        <div className="fo-fare-summary__row">
+          <span className="fo-fare-summary__row-label">Refundable</span>
+          <span className="fo-fare-summary__row-value">
+            {refundableLegs === 0
+              ? "No"
+              : refundableLegs === legs.length
+                ? "Yes"
+                : `${refundableLegs} of ${legs.length} legs`}
+          </span>
+        </div>
+        <div className="fo-fare-summary__row">
+          <span className="fo-fare-summary__row-label">Ticketing</span>
+          <span className="fo-fare-summary__row-value">
+            {isMultiTicket ? "Separate tickets" : "Single ticket"}
+          </span>
+        </div>
+      </div>
 
       {itinerary.reasons.length > 0 ? (
-        <ul className="mt-4 space-y-1.5 border-t border-[var(--line)] pt-4">
+        <div className="fo-fare-summary__block">
+          <p className="fo-fare-summary__section-title">Why this trip</p>
           {itinerary.reasons.map((r) => (
-            <li
-              key={r}
-              className="flex items-start gap-2 text-[11px] leading-relaxed text-[var(--ink-soft)]"
-            >
-              <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-[var(--signal)]" aria-hidden />
+            <p key={r} className="fo-fare-summary__note">
               {r}
-            </li>
+            </p>
           ))}
-        </ul>
+        </div>
       ) : null}
-
-      <button
-        type="button"
-        onClick={onBook}
-        disabled={hasMarketReference}
-        className="book-btn mt-6 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[var(--sky-solid)] px-5 py-3.5 text-[15px] font-semibold tracking-[-0.01em] text-white shadow-[0_4px_14px_rgba(8,150,191,0.35),inset_0_1px_0_rgba(255,255,255,0.3)] transition-all duration-150 hover:-translate-y-px hover:bg-[color-mix(in_oklab,var(--electric)_90%,var(--navy))] hover:shadow-[0_8px_22px_rgba(0,122,229,0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sky)]/40 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none disabled:hover:translate-y-0"
-      >
-        {hasMarketReference ? "Market reference only" : "Continue booking"}
-        {!hasMarketReference ? <span aria-hidden>→</span> : null}
-      </button>
     </aside>
   );
 }
@@ -102,10 +197,13 @@ export function TripDetailModal({
   itinerary,
   onClose,
   onBook,
+  booking,
 }: {
   itinerary: ItinerarySummary;
   onClose: () => void;
   onBook: () => void;
+  /** Quote in flight — CTA shows pending and the modal stays mounted. */
+  booking?: boolean;
 }) {
   const titleId = useId();
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -192,11 +290,11 @@ export function TripDetailModal({
             ) : (
               <p className="text-[14px] text-[var(--ink-soft)]">{itinerary.hops.join(" → ")}</p>
             )}
-            <FarePanel itinerary={itinerary} onBook={onBook} className="mt-4 lg:hidden" />
+            <FarePanel itinerary={itinerary} onBook={onBook} booking={booking} className="mt-4 lg:hidden" />
           </div>
 
           <div className="hidden lg:sticky lg:top-6 lg:block">
-            <FarePanel itinerary={itinerary} onBook={onBook} />
+            <FarePanel itinerary={itinerary} onBook={onBook} booking={booking} />
           </div>
         </div>
       </div>

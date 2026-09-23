@@ -53,6 +53,13 @@ function toLeg(offer: FlightOffer, pricedMinor?: number, currency?: string): Non
     ...(pricedMinor != null ? { priceMinor: pricedMinor, currency: currency ?? offer.netFare.currency } : {}),
     ...(offer.segments?.length ? { segments: offer.segments } : {}),
     ...(marketReference ? { marketReference: true as const } : {}),
+    // Carried through so a multi-city trip can be quoted leg-by-leg like a
+    // single-leg offer. Without it "View deal" on a trip card had no supplier
+    // reference and could only fall back to sending a chat message.
+    ...(offer.id ? { offerId: offer.id } : {}),
+    ...(offer.supplierOfferSnapshotId
+      ? { supplierOfferSnapshotId: offer.supplierOfferSnapshotId }
+      : {}),
   };
 }
 

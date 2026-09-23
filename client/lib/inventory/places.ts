@@ -75,6 +75,28 @@ export const PLACE_TO_IATA: Record<string, string> = {
   Multan: "MUX",
   Peshawar: "PEW",
   Sialkot: "SKT",
+  // Captured in the Galileo demo corpus (lib/demo/galileo-fares.json) but never
+  // mapped — the city names "Boston" / "Milan" could not resolve to a code.
+  Boston: "BOS",
+  Milan: "MXP",
+  // Multi-city demo journeys (see galileo-fares.json `journeys`). Without these
+  // the city name in a leg query cannot resolve to an IATA code.
+  Vienna: "VIE",
+  Prague: "PRG",
+  Athens: "ATH",
+  Lisbon: "LIS",
+  Edinburgh: "EDI",
+  Dublin: "DUB",
+  Chicago: "ORD",
+  Vancouver: "YVR",
+  Melbourne: "MEL",
+  Auckland: "AKL",
+  Johannesburg: "JNB",
+  Nairobi: "NBO",
+  "Cape Town": "CPT",
+  "Las Vegas": "LAS",
+  Seattle: "SEA",
+  Miami: "MIA",
 };
 
 const IATA_TO_PLACE: Record<string, string> = Object.fromEntries(

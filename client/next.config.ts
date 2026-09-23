@@ -25,14 +25,10 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  async rewrites() {
-    return [
-      {
-        source: "/api/v1/:path*",
-        destination: "http://localhost:8084/api/v1/:path*",
-      },
-    ];
-  },
+  // No API rewrite: the client calls Express by absolute URL via
+  // NEXT_PUBLIC_API_URL (see lib/api/baseApi.ts), same as crm-client. The old
+  // hardcoded localhost:8084 proxy resolved to the serverless function itself
+  // on Vercel, so anything routed through it failed in production.
 };
 
 export default nextConfig;

@@ -29,6 +29,21 @@ import {
 export { CORPORATE_FINANCE_PERMISSION };
 
 /**
+ * Demo mode skips the corporate spend gate so a scripted demo can reach
+ * payment. Hard-blocked in production: these are real financial controls, and
+ * an env flag alone must never be enough to disable them on a live deployment.
+ */
+function isDemoBookingEnabled() {
+  return (
+    process.env.NODE_ENV !== "production" &&
+    // `test` is excluded too: the suite asserts that the credit and approval
+    // gates REJECT, and a demo bypass silently turned those assertions green.
+    process.env.NODE_ENV !== "test" &&
+    process.env.DEMO_FLIGHT_INVENTORY === "true"
+  );
+}
+
+/**
  * Whether effective permissions allow setting creditLimitMinor / markupBps.
  * Accepts `{ global, byCompany }` from requireAuth or a Set (internal auth).
  */
@@ -1078,6 +1093,23 @@ export async function assertCorporateBookingAllowed({
       400,
       `Booking currency ${currency} does not match company currency ${company.currency}`,
     );
+  }
+
+  // Demo mode: the corporate spend gate (credit limit → policy → approval) is
+  // a three-step wall that a scripted demo cannot clear without seeding an
+  // APPROVED ApprovalRequest per booking. Membership and company-active are
+  // still enforced above — only the spend controls are skipped, and only
+  // outside production.
+  if (isDemoBookingEnabled()) {
+    return {
+      membership,
+      company,
+      policy: await getEffectivePolicy(companyId),
+      approval: null,
+      evaluation: { withinPolicy: true, violations: [] },
+      violation: { amountViolation: false, cabinViolation: false },
+      demoBypass: true,
+    };
   }
 
   const availableCredit = company.creditLimitMinor - company.creditUsedMinor;

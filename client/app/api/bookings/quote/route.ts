@@ -8,6 +8,68 @@ import { quotePayloadFromOffer, type QuoteableOffer } from "@/lib/bookings/quote
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+/**
+ * Exchange an offline demo fare for a real SupplierOfferSnapshot row.
+ *
+ * Returns null when minting fails, so the caller falls through to the normal
+ * "no snapshot" 409 rather than surfacing a confusing demo-specific error.
+ */
+async function mintDemoSnapshot(
+  input: Record<string, unknown>,
+  auth: string,
+): Promise<string | null> {
+  const flight = (input.flight as Record<string, unknown> | undefined) ?? {};
+  const netMinor = Number(input.priceMinor);
+  if (!Number.isInteger(netMinor) || netMinor <= 0) return null;
+
+  const origin = String(flight.originCode ?? input.originCode ?? "").toUpperCase();
+  const destination = String(flight.destinationCode ?? input.destinationCode ?? "").toUpperCase();
+  if (origin.length !== 3 || destination.length !== 3) return null;
+
+  const res = await fetch(`${API_BASE_URL}/suppliers/demo-snapshot`, {
+    method: "POST",
+    headers: {
+      Authorization: auth,
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      offerId: String(input.id ?? ""),
+      currency: String(input.currency ?? "PKR").toUpperCase().slice(0, 3),
+      netMinor,
+      product: input.type === "hotel" ? "HOTEL" : "FLIGHT",
+      itinerary: {
+        origin,
+        destination,
+        departureDate: flight.departureDate ?? new Date().toISOString().slice(0, 10),
+        ...(input.returnDate ? { returnDate: input.returnDate } : {}),
+        ...(flight.cabin ? { cabin: String(flight.cabin) } : {}),
+        ...(flight.airlineCode ? { carrier: String(flight.airlineCode) } : {}),
+        ...(typeof flight.stops === "number" ? { stops: flight.stops } : {}),
+        ...(typeof flight.durationMinutes === "number"
+          ? { durationMinutes: flight.durationMinutes }
+          : {}),
+        ...(flight.flightNumber ? { flightNumber: String(flight.flightNumber) } : {}),
+        ...(flight.departTimeLocal ? { departTimeLocal: String(flight.departTimeLocal) } : {}),
+        ...(flight.arriveTimeLocal ? { arriveTimeLocal: String(flight.arriveTimeLocal) } : {}),
+        // Sectors are what the e-ticket prints — without them the issued
+        // ticket shows an origin/destination pair with blank times.
+        ...(Array.isArray(flight.segments) ? { segments: flight.segments } : {}),
+        ...(Array.isArray(flight.returnSegments)
+          ? { returnSegments: flight.returnSegments }
+          : {}),
+      },
+    }),
+    cache: "no-store",
+  });
+
+  if (!res.ok) return null;
+  const json = (await res.json().catch(() => null)) as
+    | { data?: { supplierOfferSnapshotId?: string } }
+    | null;
+  return json?.data?.supplierOfferSnapshotId ?? null;
+}
+
 export async function POST(request: Request) {
   const auth = request.headers.get("authorization");
   if (!auth?.toLowerCase().startsWith("bearer ")) {
@@ -27,6 +89,13 @@ export async function POST(request: Request) {
       typeof input.supplierOfferSnapshotId === "string" && input.supplierOfferSnapshotId.trim()
         ? input.supplierOfferSnapshotId.trim()
         : null;
+
+    // A `snap_demo_*` id comes from the offline corpus and matches no DB row,
+    // so the booking engine would reject it as an invalid reference. Exchange
+    // it for a genuine snapshot before quoting.
+    if (snapshotId?.startsWith("snap_demo_")) {
+      snapshotId = await mintDemoSnapshot(input, auth);
+    }
 
     if (!snapshotId) {
       // Resolve snapshot dynamically for the authenticated user
@@ -94,6 +163,18 @@ export async function POST(request: Request) {
 
     if (snapshotId) {
       input.supplierOfferSnapshotId = snapshotId;
+    } else {
+      // Without a snapshot Express can only reject this, and its rejection was
+      // surfacing as an empty `{}` to the client. Fail here with a reason the
+      // UI can actually show — 409 so it reads as "re-price", not "broken".
+      return Response.json(
+        {
+          error:
+            "This fare's supplier quote is no longer available. Run the search again to re-price it.",
+          code: "SNAPSHOT_UNAVAILABLE",
+        },
+        { status: 409 },
+      );
     }
 
     const meta =

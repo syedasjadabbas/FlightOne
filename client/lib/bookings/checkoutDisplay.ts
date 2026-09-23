@@ -11,6 +11,17 @@ export function formatMinor(amountMinor: number, currency: string) {
   }
 }
 
+/**
+ * Ticketing is terminal, but the booking does not stay on `TICKETED` — it
+ * advances to `ACTIVE` once the trip is live and `COMPLETED` after travel.
+ * Comparing to `"TICKETED"` alone hides the issued ticket the moment the
+ * status moves on, which is what left checkout showing the payment panel for
+ * an already-ticketed booking.
+ */
+export function isBookingTicketed(status: string | null | undefined): boolean {
+  return status === "TICKETED" || status === "ACTIVE" || status === "COMPLETED";
+}
+
 export function ticketNumbersFromMetadata(
   metadata: Record<string, unknown> | null | undefined,
 ): string[] {
