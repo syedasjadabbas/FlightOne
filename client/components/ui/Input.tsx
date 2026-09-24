@@ -48,7 +48,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
               ? "border-danger/60 focus-visible:border-danger focus-visible:ring-danger/15"
               : "border-black/10 hover:border-black/20",
             "disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-black/10",
-            isPassword && allowTogglePassword ? "pr-10" : "",
+            isPassword && allowTogglePassword ? "pr-11" : "",
             className,
           )}
           {...rest}
@@ -59,7 +59,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
             onClick={() => setShowPassword((prev) => !prev)}
             aria-label={showPassword ? "Hide password" : "Show password"}
             tabIndex={-1}
-            className="absolute right-2.5 flex h-7 w-7 items-center justify-center rounded-lg text-ink-faint hover:text-ink focus:outline-none transition-colors"
+            className="absolute right-1.5 flex h-9 w-9 items-center justify-center rounded-lg text-ink-faint hover:text-ink focus:outline-none transition-colors"
           >
             {showPassword ? (
               <svg

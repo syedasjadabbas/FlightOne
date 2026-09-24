@@ -695,6 +695,8 @@ export default function Footer() {
           text-decoration: none;
           display: inline-flex;
           align-items: baseline;
+          padding: 3px 0;
+          min-height: 28px;
           gap: 0.5rem;
           transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), color 0.24s ease;
           cursor: pointer;
@@ -735,7 +737,8 @@ export default function Footer() {
           text-decoration: none;
           background: none;
           border: none;
-          padding: 0;
+          padding: 3px 0;
+          min-height: 28px;
           cursor: pointer;
           text-align: left;
           display: inline-flex;

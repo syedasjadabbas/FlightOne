@@ -368,7 +368,7 @@ export function ChatLayout({
                   <button
                     type="button"
                     onClick={onToggleSidebar}
-                    className="mr-auto inline-flex items-center gap-1.5 rounded-lg border border-[var(--line)] bg-white px-2.5 py-1 text-xs font-semibold text-[var(--navy)] transition-colors hover:border-[color-mix(in_oklab,var(--electric)_40%,var(--line))] hover:bg-[color-mix(in_oklab,var(--electric)_4%,white)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--electric)]/35 lg:hidden"
+                    className="mr-auto inline-flex min-h-[34px] items-center gap-1.5 rounded-lg border border-[var(--line)] bg-white px-3 py-1.5 text-xs font-semibold text-[var(--navy)] transition-colors hover:border-[color-mix(in_oklab,var(--electric)_40%,var(--line))] hover:bg-[color-mix(in_oklab,var(--electric)_4%,white)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--electric)]/35 lg:hidden"
                     aria-label="Open past chats"
                   >
                     <PanelLeft className="h-3.5 w-3.5 text-[var(--sky)]" strokeWidth={1.9} />
