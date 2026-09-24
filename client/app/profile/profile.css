@@ -27,12 +27,22 @@
 
 /* ── Top Navigation Rail ──────────────────────────────────── */
 .fo-profile__nav-rail {
+  position: sticky;
+  top: 4.5rem;
+  z-index: 25;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem 1rem;
-  padding: 0.35rem 0.4rem;
+  padding: 0.45rem 0.65rem;
+  border-radius: 9999px;
+  background: rgba(232, 236, 233, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 8px 24px -6px rgba(14, 22, 32, 0.08);
+  transition: all 0.2s ease;
 }
 
 .fo-profile__brand-badge {
@@ -1267,6 +1277,25 @@
   opacity: 0.85;
 }
 
+/* ── Tab Panel Content Container & Animated Switch ───────── */
+.fo-profile__panel-container {
+  position: relative;
+  width: 100%;
+  scroll-margin-top: 6.5rem;
+  animation: foTabFadeIn 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes foTabFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .fo-profile__tab-pill,
   .fo-profile__cta-primary,
@@ -1279,5 +1308,8 @@
     transition: none !important;
     animation: none !important;
     transform: none !important;
+  }
+  .fo-profile__panel-container {
+    animation: none !important;
   }
 }

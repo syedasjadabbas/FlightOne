@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
+  AlertCircle,
   ArrowRight,
   CheckCircle2,
   Lock,
@@ -10,6 +11,7 @@ import {
   Plane,
   UserPlus,
   Users,
+  X,
 } from "lucide-react";
 import { Button, Input, SearchableSelect, Spinner, buttonClassName } from "@/components/ui";
 import "./groups.css";
@@ -31,7 +33,64 @@ import {
   isValidGroupPassengerCount,
   MIN_GROUP_PASSENGERS,
 } from "@/lib/groups/groupRequest";
+import { apiErrorMessage } from "@/lib/api/apiErrorMessage";
 import { useAuthStore } from "@/store/auth.store";
+
+type GroupToastMsg = {
+  text: string;
+  error?: boolean;
+};
+
+function GroupToast({
+  msg,
+  onClose,
+}: {
+  msg: GroupToastMsg | null;
+  onClose: () => void;
+}) {
+  useEffect(() => {
+    if (!msg) return;
+    const t = setTimeout(() => {
+      onClose();
+    }, 4500);
+    return () => clearTimeout(t);
+  }, [msg, onClose]);
+
+  if (!msg) return null;
+
+  return (
+    <div className="fo-gm-toast-container" role="status" aria-live="polite">
+      <div
+        className={`fo-gm-toast ${
+          msg.error ? "fo-gm-toast--error" : "fo-gm-toast--ok"
+        }`}
+      >
+        <div className="fo-gm-toast-icon" aria-hidden>
+          {msg.error ? (
+            <AlertCircle className="h-4 w-4" />
+          ) : (
+            <CheckCircle2 className="h-4 w-4" />
+          )}
+        </div>
+        <div className="fo-gm-toast-content">
+          <p className="fo-gm-toast-title">
+            {msg.error ? "Action Failed" : "Success"}
+          </p>
+          <p className="fo-gm-toast-text">{msg.text}</p>
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          className="fo-gm-toast-close"
+          aria-label="Dismiss notification"
+        >
+          <X className="h-3.5 w-3.5" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 
 const TYPES: GroupType[] = [
   "FAMILY",
@@ -126,6 +185,7 @@ export function GroupsPageClient() {
   const [quickMsg, setQuickMsg] = useState<string | null>(null);
   const [inviteMsg, setInviteMsg] = useState<string | null>(null);
   const [invitePendingId, setInvitePendingId] = useState<string | null>(null);
+  const [toastMsg, setToastMsg] = useState<GroupToastMsg | null>(null);
 
   if (!hasHydrated) {
     return (
@@ -171,28 +231,34 @@ export function GroupsPageClient() {
     const count = parseInt(passengerCount, 10);
     if (!isValidGroupPassengerCount(count)) {
       setFormMsg("Group travel requests require at least 10 travellers.");
+      setToastMsg({ text: "Group travel requests require at least 10 travellers.", error: true });
       return;
     }
     if (!groupName.trim()) {
       setFormMsg("Please enter your group name.");
+      setToastMsg({ text: "Please enter your group name.", error: true });
       return;
     }
     if (!origin.trim()) {
       setFormMsg("Please enter your origin.");
+      setToastMsg({ text: "Please enter your origin.", error: true });
       return;
     }
     if (!destination.trim()) {
       setFormMsg("Please enter your destination.");
+      setToastMsg({ text: "Please enter your destination.", error: true });
       return;
     }
     const email = contactEmail.trim() || user?.email || "";
     const name = contactName.trim() || user?.name || "";
     if (!name) {
       setFormMsg("Please enter your contact name.");
+      setToastMsg({ text: "Please enter your contact name.", error: true });
       return;
     }
     if (!email) {
       setFormMsg("Please enter your contact email.");
+      setToastMsg({ text: "Please enter your contact email.", error: true });
       return;
     }
 
@@ -229,6 +295,10 @@ export function GroupsPageClient() {
       setFormSuccess(
         `Request submitted for “${created.name}”. Status: ${created.status}. The group desk will review it manually — no tickets or fares have been issued.`,
       );
+      setToastMsg({
+        text: `Request submitted for “${created.name}”. Status: ${created.status}.`,
+        error: false,
+      });
       setCreatedRequestId(created.id);
       setCreatedGroupId(created.groupId || created.group?.id || null);
       setSelectedRequestId(created.id);
@@ -239,12 +309,15 @@ export function GroupsPageClient() {
       void refetchRequests();
       void refetch();
     } catch (err) {
-      setFormMsg(formatGroupRequestSubmitError(err));
+      const errMsg = formatGroupRequestSubmitError(err);
+      setFormMsg(errMsg);
+      setToastMsg({ text: errMsg, error: true });
     }
   }
 
   return (
     <div className="fo-groups__master-stage">
+      <GroupToast msg={toastMsg} onClose={() => setToastMsg(null)} />
       <div className="fo-groups__nav-rail">
         <span className="fo-groups__brand-badge">
           <span className="fo-groups__brand-dot" aria-hidden />
@@ -305,15 +378,19 @@ export function GroupsPageClient() {
                   type="button"
                   size="sm"
                   disabled={invitePendingId === g.id}
+                  icon={invitePendingId === g.id ? <Spinner size="sm" /> : undefined}
                   onClick={async () => {
                     setInviteMsg(null);
                     setInvitePendingId(g.id);
                     try {
                       await acceptInvite(g.id).unwrap();
                       setInviteMsg(`Joined ${g.name}.`);
+                      setToastMsg({ text: `Joined ${g.name}.`, error: false });
                       void refetch();
-                    } catch {
-                      setInviteMsg("Could not accept the invitation. Try again.");
+                    } catch (err) {
+                      const msg = apiErrorMessage(err, "Could not accept the invitation. Try again.");
+                      setInviteMsg(msg);
+                      setToastMsg({ text: msg, error: true });
                     } finally {
                       setInvitePendingId(null);
                     }
@@ -332,9 +409,12 @@ export function GroupsPageClient() {
                     try {
                       await declineInvite(g.id).unwrap();
                       setInviteMsg(`Declined invitation to ${g.name}.`);
+                      setToastMsg({ text: `Declined invitation to ${g.name}.`, error: false });
                       void refetch();
-                    } catch {
-                      setInviteMsg("Could not decline the invitation. Try again.");
+                    } catch (err) {
+                      const msg = apiErrorMessage(err, "Could not decline the invitation. Try again.");
+                      setInviteMsg(msg);
+                      setToastMsg({ text: msg, error: true });
                     } finally {
                       setInvitePendingId(null);
                     }
@@ -695,9 +775,18 @@ export function GroupsPageClient() {
                                 size="sm"
                                 variant="ghost"
                                 disabled={cancelState.isLoading}
+                                icon={cancelState.isLoading ? <Spinner size="sm" /> : undefined}
                                 onClick={async () => {
-                                  await cancelRequest({ requestId: r.id });
-                                  void refetchRequests();
+                                  try {
+                                    await cancelRequest({ requestId: r.id }).unwrap();
+                                    setToastMsg({ text: "Group request cancelled.", error: false });
+                                    void refetchRequests();
+                                  } catch (err) {
+                                    setToastMsg({
+                                      text: apiErrorMessage(err, "Could not cancel request."),
+                                      error: true,
+                                    });
+                                  }
                                 }}
                               >
                                 {cancelState.isLoading ? "Cancelling…" : "Cancel request"}
@@ -776,6 +865,8 @@ export function GroupsPageClient() {
                       label="Group name"
                       value={quickName}
                       onChange={(e) => setQuickName(e.target.value)}
+                      placeholder="e.g. Family Reunion"
+                      disabled={createState.isLoading}
                     />
                     <SearchableSelect
                       label="Type"
@@ -787,7 +878,7 @@ export function GroupsPageClient() {
                     <Button
                       type="button"
                       disabled={createState.isLoading || !quickName.trim()}
-                      icon={<Users className="fo-gm-icon" aria-hidden />}
+                      icon={createState.isLoading ? <Spinner size="sm" /> : <Users className="fo-gm-icon" aria-hidden />}
                       onClick={async () => {
                         setQuickMsg(null);
                         try {
@@ -795,15 +886,19 @@ export function GroupsPageClient() {
                             name: quickName.trim(),
                             type: quickType,
                           }).unwrap();
+                          setToastMsg({ text: `Created workspace “${quickName.trim()}”.`, error: false });
                           setQuickName("");
                           window.location.href = `/groups/${g.id}`;
-                        } catch {
-                          setQuickMsg("Could not create group.");
+                        } catch (err) {
+                          const msg = apiErrorMessage(err, "Could not create group.");
+                          setQuickMsg(msg);
+                          setToastMsg({ text: msg, error: true });
                         }
                       }}
                     >
                       {createState.isLoading ? "Creating…" : "Create workspace"}
                     </Button>
+                    {quickMsg ? <p className="fo-gm-msg fo-gm-msg--danger">{quickMsg}</p> : null}
                   </div>
                 </section>
 
@@ -816,21 +911,26 @@ export function GroupsPageClient() {
                       label="Invite code"
                       value={inviteCode}
                       onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+                      placeholder="e.g. 96CF4A03FFFF"
+                      disabled={joinState.isLoading}
                     />
                     <Button
                       type="button"
                       variant="secondary"
                       disabled={joinState.isLoading || !inviteCode.trim()}
-                      icon={<UserPlus className="fo-gm-icon" aria-hidden />}
+                      icon={joinState.isLoading ? <Spinner size="sm" /> : <UserPlus className="fo-gm-icon" aria-hidden />}
                       onClick={async () => {
                         setQuickMsg(null);
                         try {
                           await joinGroup({ inviteCode: inviteCode.trim() }).unwrap();
                           setInviteCode("");
                           void refetch();
+                          setToastMsg({ text: "Successfully joined trip group.", error: false });
                           setQuickMsg("Successfully joined trip group.");
-                        } catch {
-                          setQuickMsg("Invalid invite code or unable to join.");
+                        } catch (err) {
+                          const msg = apiErrorMessage(err, "Invalid invite code or unable to join.");
+                          setQuickMsg(msg);
+                          setToastMsg({ text: msg, error: true });
                         }
                       }}
                     >

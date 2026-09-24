@@ -1,10 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
+  AlertCircle,
   ArrowLeft,
   BookMarked,
+  CheckCircle2,
   FileText,
   Images,
   LogOut,
@@ -15,8 +17,9 @@ import {
   Radio,
   Users,
   Vote,
+  X,
 } from "lucide-react";
-import { Button, Input } from "@/components/ui";
+import { Button, Input, Spinner } from "@/components/ui";
 import {
   useCreateAnnouncementMutation,
   useCreateEmergencyMutation,
@@ -42,6 +45,7 @@ import {
   useUploadPhotoMutation,
   useVotePollMutation,
 } from "@/lib/api/groups.api";
+import { apiErrorMessage } from "@/lib/api/apiErrorMessage";
 import { useAuthStore } from "@/store/auth.store";
 import { GroupEmpty } from "./_components/GroupEmpty";
 import { GroupInviteCode } from "./_components/GroupInviteCode";
@@ -67,22 +71,77 @@ function fileToBase64(file: File): Promise<string> {
   });
 }
 
+type GroupToastMsg = {
+  text: string;
+  error?: boolean;
+};
+
+function GroupToast({
+  msg,
+  onClose,
+}: {
+  msg: GroupToastMsg | null;
+  onClose: () => void;
+}) {
+  useEffect(() => {
+    if (!msg) return;
+    const t = setTimeout(() => {
+      onClose();
+    }, 4500);
+    return () => clearTimeout(t);
+  }, [msg, onClose]);
+
+  if (!msg) return null;
+
+  return (
+    <div className="fo-gm-toast-container" role="status" aria-live="polite">
+      <div
+        className={`fo-gm-toast ${
+          msg.error ? "fo-gm-toast--error" : "fo-gm-toast--ok"
+        }`}
+      >
+        <div className="fo-gm-toast-icon" aria-hidden>
+          {msg.error ? (
+            <AlertCircle className="h-4 w-4" />
+          ) : (
+            <CheckCircle2 className="h-4 w-4" />
+          )}
+        </div>
+        <div className="fo-gm-toast-content">
+          <p className="fo-gm-toast-title">
+            {msg.error ? "Action Failed" : "Action Completed"}
+          </p>
+          <p className="fo-gm-toast-text">{msg.text}</p>
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          className="fo-gm-toast-close"
+          aria-label="Dismiss notification"
+        >
+          <X className="h-3.5 w-3.5" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function GroupDetailClient({ groupId }: { groupId: string }) {
   const hasHydrated = useAuthStore((s) => s.hasHydrated);
   const accessToken = useAuthStore((s) => s.accessToken);
   const skip = !hasHydrated || !accessToken;
 
   const { data: group, isLoading, isError, error, refetch } = useGetGroupQuery(groupId, { skip });
-  const { data: members, isLoading: membersLoading } = useListMembersQuery(groupId, { skip });
-  const { data: announcements, isLoading: announcementsLoading } = useListAnnouncementsQuery(groupId, { skip });
-  const { data: polls, isLoading: pollsLoading } = useListPollsQuery(groupId, { skip });
-  const { data: itinerary, isLoading: itineraryLoading } = useGetItineraryQuery(groupId, { skip });
-  const { data: flightStatus, isLoading: flightStatusLoading } = useGetFlightStatusQuery(groupId, { skip });
-  const { data: liveUpdates } = useGetLiveUpdatesQuery(groupId, { skip });
-  const { data: documents, isLoading: documentsLoading } = useListGroupDocumentsQuery(groupId, { skip });
-  const { data: attendance, isLoading: attendanceLoading } = useListAttendanceQuery(groupId, { skip });
-  const { data: photos, isLoading: photosLoading } = useListPhotosQuery(groupId, { skip });
-  const { data: memories, isLoading: memoriesLoading } = useListMemoriesQuery(groupId, { skip });
+  const { data: members, isLoading: membersLoading, refetch: refetchMembers } = useListMembersQuery(groupId, { skip });
+  const { data: announcements, isLoading: announcementsLoading, refetch: refetchAnnouncements } = useListAnnouncementsQuery(groupId, { skip });
+  const { data: polls, isLoading: pollsLoading, refetch: refetchPolls } = useListPollsQuery(groupId, { skip });
+  const { data: itinerary, isLoading: itineraryLoading, refetch: refetchItinerary } = useGetItineraryQuery(groupId, { skip });
+  const { data: flightStatus, isLoading: flightStatusLoading, refetch: refetchFlightStatus } = useGetFlightStatusQuery(groupId, { skip });
+  const { data: liveUpdates, refetch: refetchLiveUpdates } = useGetLiveUpdatesQuery(groupId, { skip });
+  const { data: documents, isLoading: documentsLoading, refetch: refetchDocuments } = useListGroupDocumentsQuery(groupId, { skip });
+  const { data: attendance, isLoading: attendanceLoading, refetch: refetchAttendance } = useListAttendanceQuery(groupId, { skip });
+  const { data: photos, isLoading: photosLoading, refetch: refetchPhotos } = useListPhotosQuery(groupId, { skip });
+  const { data: memories, isLoading: memoriesLoading, refetch: refetchMemories } = useListMemoriesQuery(groupId, { skip });
 
   const [inviteEmail, setInviteEmail] = useState("");
   const [annBody, setAnnBody] = useState("");
@@ -92,21 +151,29 @@ export function GroupDetailClient({ groupId }: { groupId: string }) {
   const [bookingId, setBookingId] = useState("");
   const [vaultDocId, setVaultDocId] = useState("");
   const [waypointLabel, setWaypointLabel] = useState("");
-  const [localMsg, setLocalMsg] = useState<string | null>(null);
+  const [localMsg, setLocalMsg] = useState<GroupToastMsg | null>(null);
   const [photoBusy, setPhotoBusy] = useState(false);
+  const [votingKey, setVotingKey] = useState<string | null>(null);
+  const [checkingInId, setCheckingInId] = useState<string | null>(null);
+  const [sectionAlerts, setSectionAlerts] = useState<Record<string, { type: "success" | "error"; text: string }>>({});
 
-  const [invite] = useInviteMemberMutation();
-  const [announce] = useCreateAnnouncementMutation();
-  const [emergency] = useCreateEmergencyMutation();
-  const [createPoll] = useCreatePollMutation();
+  function setSectionFeedback(sectionKey: string, text: string, type: "success" | "error" = "success") {
+    setSectionAlerts((prev) => ({ ...prev, [sectionKey]: { type, text } }));
+    setLocalMsg({ text, error: type === "error" });
+  }
+
+  const [invite, { isLoading: isInviting }] = useInviteMemberMutation();
+  const [announce, { isLoading: isAnnouncing }] = useCreateAnnouncementMutation();
+  const [emergency, { isLoading: isSendingEmergency }] = useCreateEmergencyMutation();
+  const [createPoll, { isLoading: isCreatingPoll }] = useCreatePollMutation();
   const [vote] = useVotePollMutation();
-  const [shareBooking] = useShareBookingMutation();
-  const [shareDoc] = useShareDocumentMutation();
-  const [createWp] = useCreateWaypointMutation();
+  const [shareBooking, { isLoading: isSharingBooking }] = useShareBookingMutation();
+  const [shareDoc, { isLoading: isSharingDoc }] = useShareDocumentMutation();
+  const [createWp, { isLoading: isCreatingWp }] = useCreateWaypointMutation();
   const [markAtt] = useMarkAttendanceMutation();
   const [uploadPhoto] = useUploadPhotoMutation();
-  const [genMemory] = useGenerateMemoryMutation();
-  const [leave] = useLeaveGroupMutation();
+  const [genMemory, { isLoading: isGeneratingMemory }] = useGenerateMemoryMutation();
+  const [leave, { isLoading: isLeaving }] = useLeaveGroupMutation();
 
   const isOrganizer = useMemo(() => {
     const role = group?.myMembership?.role || group?.myRole;
@@ -131,6 +198,8 @@ export function GroupDetailClient({ groupId }: { groupId: string }) {
 
   return (
     <div className="fo-gm-page">
+      <GroupToast msg={localMsg} onClose={() => setLocalMsg(null)} />
+
       <header className="fo-gm-masthead">
         <div className="fo-gm-masthead__inner">
           <Link href="/groups" className="fo-gm-back fo-gm-back--icon">
@@ -150,14 +219,18 @@ export function GroupDetailClient({ groupId }: { groupId: string }) {
           </div>
           <GroupInviteCode code={group.inviteCode} />
           {localMsg ? (
-            <p className="fo-gm-msg" role="status">
-              {localMsg}
+            <p
+              className={`fo-gm-msg ${localMsg.error ? "fo-gm-msg--danger" : ""}`}
+              role="status"
+            >
+              {localMsg.text}
             </p>
           ) : null}
         </div>
       </header>
 
       <div className="fo-gm-ledger">
+        {/* MEMBERS SECTION */}
         <GroupSection icon={Users} title="Members" loading={membersLoading}>
           {(members || []).length === 0 ? (
             <GroupEmpty
@@ -169,7 +242,7 @@ export function GroupDetailClient({ groupId }: { groupId: string }) {
             <ul className="fo-gm-list">
               {(members || []).map((m) => (
                 <li key={m.id} className="fo-gm-inline">
-                  <span>{m.displayName || m.userId.slice(0, 8)}</span>
+                  <span>{m.displayName || m.email || m.userId.slice(0, 8)}</span>
                   <span className="fo-gm-inline__muted">
                     {m.role} · {m.status}
                   </span>
@@ -178,31 +251,57 @@ export function GroupDetailClient({ groupId }: { groupId: string }) {
             </ul>
           )}
           {isOrganizer ? (
-            <div className="fo-gm-form fo-gm-form--row">
-              <Input
-                label="Invite by email"
-                value={inviteEmail}
-                onChange={(e) => setInviteEmail(e.target.value)}
-              />
-              <Button
-                type="button"
-                size="sm"
-                onClick={async () => {
-                  try {
-                    await invite({ groupId, email: inviteEmail.trim() }).unwrap();
-                    setInviteEmail("");
-                    setLocalMsg("Invitation sent.");
-                  } catch {
-                    setLocalMsg("Invite failed.");
-                  }
-                }}
-              >
-                Invite
-              </Button>
+            <div className="fo-gm-form">
+              <div className="fo-gm-form--row">
+                <Input
+                  label="Invite by email"
+                  value={inviteEmail}
+                  onChange={(e) => setInviteEmail(e.target.value)}
+                  placeholder="colleague@example.com"
+                  disabled={isInviting}
+                />
+                <Button
+                  type="button"
+                  size="sm"
+                  disabled={isInviting || !inviteEmail.trim()}
+                  icon={isInviting ? <Spinner size="sm" /> : undefined}
+                  onClick={async () => {
+                    if (!inviteEmail.trim()) {
+                      setSectionFeedback("members", "Please enter an email address.", "error");
+                      return;
+                    }
+                    try {
+                      await invite({ groupId, email: inviteEmail.trim() }).unwrap();
+                      const sentEmail = inviteEmail.trim();
+                      setInviteEmail("");
+                      await refetchMembers();
+                      setSectionFeedback("members", `Invitation successfully sent to ${sentEmail}.`);
+                    } catch (err) {
+                      setSectionFeedback("members", apiErrorMessage(err, "Invite failed."), "error");
+                    }
+                  }}
+                >
+                  {isInviting ? "Inviting…" : "Invite"}
+                </Button>
+              </div>
+              {sectionAlerts["members"] ? (
+                <div
+                  className={`fo-gm-inline-alert fo-gm-inline-alert--${sectionAlerts["members"].type}`}
+                  role="status"
+                >
+                  {sectionAlerts["members"].type === "success" ? (
+                    <CheckCircle2 className="h-4 w-4 shrink-0" />
+                  ) : (
+                    <AlertCircle className="h-4 w-4 shrink-0" />
+                  )}
+                  <span>{sectionAlerts["members"].text}</span>
+                </div>
+              ) : null}
             </div>
           ) : null}
         </GroupSection>
 
+        {/* SHARED ITINERARY SECTION */}
         <GroupSection
           icon={Plane}
           title="Shared itinerary"
@@ -236,30 +335,59 @@ export function GroupDetailClient({ groupId }: { groupId: string }) {
               })}
             </ul>
           )}
-          <div className="fo-gm-form fo-gm-form--row">
-            <Input
-              label="Your booking ID"
-              value={bookingId}
-              onChange={(e) => setBookingId(e.target.value)}
-            />
-            <Button
-              type="button"
-              size="sm"
-              onClick={async () => {
-                try {
-                  await shareBooking({ groupId, bookingId: bookingId.trim() }).unwrap();
-                  setBookingId("");
-                  setLocalMsg("Booking shared.");
-                } catch {
-                  setLocalMsg("Could not share booking (must be yours).");
-                }
-              }}
-            >
-              Share
-            </Button>
+          <div className="fo-gm-form">
+            <div className="fo-gm-form--row">
+              <Input
+                label="Your booking ID"
+                value={bookingId}
+                onChange={(e) => setBookingId(e.target.value)}
+                placeholder="e.g. bk_9214a7ff"
+                disabled={isSharingBooking}
+              />
+              <Button
+                type="button"
+                size="sm"
+                disabled={isSharingBooking || !bookingId.trim()}
+                icon={isSharingBooking ? <Spinner size="sm" /> : undefined}
+                onClick={async () => {
+                  if (!bookingId.trim()) {
+                    setSectionFeedback("itinerary", "Please enter your booking ID.", "error");
+                    return;
+                  }
+                  try {
+                    await shareBooking({ groupId, bookingId: bookingId.trim() }).unwrap();
+                    setBookingId("");
+                    await refetchItinerary();
+                    setSectionFeedback("itinerary", "Booking successfully shared with group itinerary.");
+                  } catch (err) {
+                    setSectionFeedback(
+                      "itinerary",
+                      apiErrorMessage(err, "Could not share booking (must be owned by you)."),
+                      "error",
+                    );
+                  }
+                }}
+              >
+                {isSharingBooking ? "Sharing…" : "Share"}
+              </Button>
+            </div>
+            {sectionAlerts["itinerary"] ? (
+              <div
+                className={`fo-gm-inline-alert fo-gm-inline-alert--${sectionAlerts["itinerary"].type}`}
+                role="status"
+              >
+                {sectionAlerts["itinerary"].type === "success" ? (
+                  <CheckCircle2 className="h-4 w-4 shrink-0" />
+                ) : (
+                  <AlertCircle className="h-4 w-4 shrink-0" />
+                )}
+                <span>{sectionAlerts["itinerary"].text}</span>
+              </div>
+            ) : null}
           </div>
         </GroupSection>
 
+        {/* FLIGHT STATUS SECTION */}
         <GroupSection icon={Radio} title="Flight status" loading={flightStatusLoading}>
           {!flightStatus?.capability?.canPollLive ? (
             <p className="fo-gm-section__hint">
@@ -306,6 +434,7 @@ export function GroupDetailClient({ groupId }: { groupId: string }) {
           )}
         </GroupSection>
 
+        {/* SHARED DOCUMENTS SECTION */}
         <GroupSection
           icon={FileText}
           title="Shared documents"
@@ -327,34 +456,63 @@ export function GroupDetailClient({ groupId }: { groupId: string }) {
               ))}
             </ul>
           )}
-          <div className="fo-gm-form fo-gm-form--row">
-            <Input
-              label="Vault document ID"
-              value={vaultDocId}
-              onChange={(e) => setVaultDocId(e.target.value)}
-            />
-            <Button
-              type="button"
-              size="sm"
-              onClick={async () => {
-                try {
-                  await shareDoc({ groupId, vaultDocumentId: vaultDocId.trim() }).unwrap();
-                  setVaultDocId("");
-                  setLocalMsg("Document shared with group.");
-                } catch {
-                  setLocalMsg("Share failed — you must own the vault document.");
-                }
-              }}
-            >
-              Share from Vault
-            </Button>
+          <div className="fo-gm-form">
+            <div className="fo-gm-form--row">
+              <Input
+                label="Vault document ID"
+                value={vaultDocId}
+                onChange={(e) => setVaultDocId(e.target.value)}
+                placeholder="e.g. doc_1849f2b"
+                disabled={isSharingDoc}
+              />
+              <Button
+                type="button"
+                size="sm"
+                disabled={isSharingDoc || !vaultDocId.trim()}
+                icon={isSharingDoc ? <Spinner size="sm" /> : undefined}
+                onClick={async () => {
+                  if (!vaultDocId.trim()) {
+                    setSectionFeedback("documents", "Please enter a Vault document ID.", "error");
+                    return;
+                  }
+                  try {
+                    await shareDoc({ groupId, vaultDocumentId: vaultDocId.trim() }).unwrap();
+                    setVaultDocId("");
+                    await refetchDocuments();
+                    setSectionFeedback("documents", "Document successfully shared with group.");
+                  } catch (err) {
+                    setSectionFeedback(
+                      "documents",
+                      apiErrorMessage(err, "Share failed — you must own the vault document."),
+                      "error",
+                    );
+                  }
+                }}
+              >
+                {isSharingDoc ? "Sharing…" : "Share from Vault"}
+              </Button>
+            </div>
+            {sectionAlerts["documents"] ? (
+              <div
+                className={`fo-gm-inline-alert fo-gm-inline-alert--${sectionAlerts["documents"].type}`}
+                role="status"
+              >
+                {sectionAlerts["documents"].type === "success" ? (
+                  <CheckCircle2 className="h-4 w-4 shrink-0" />
+                ) : (
+                  <AlertCircle className="h-4 w-4 shrink-0" />
+                )}
+                <span>{sectionAlerts["documents"].text}</span>
+              </div>
+            ) : null}
           </div>
-          <Link href="/vault" className="fo-gm-link fo-gm-link--action">
+          <Link href="/vault" className="fo-gm-link fo-gm-link--action mt-3">
             <FileText className="h-3.5 w-3.5" aria-hidden />
             Open Vault
           </Link>
         </GroupSection>
 
+        {/* ANNOUNCEMENTS SECTION */}
         <GroupSection icon={Megaphone} title="Announcements" loading={announcementsLoading}>
           {(announcements || []).length === 0 ? (
             <GroupEmpty
@@ -381,59 +539,112 @@ export function GroupDetailClient({ groupId }: { groupId: string }) {
             </ul>
           )}
           {isOrganizer ? (
-            <div className="fo-gm-form">
-              <Input
-                label="Announcement"
-                value={annBody}
-                onChange={(e) => setAnnBody(e.target.value)}
-              />
-              <Button
-                type="button"
-                size="sm"
-                onClick={async () => {
-                  try {
-                    await announce({ groupId, body: annBody }).unwrap();
-                    setAnnBody("");
-                    setLocalMsg("Announcement posted.");
-                  } catch {
-                    setLocalMsg("Could not post announcement.");
-                  }
-                }}
-              >
-                Post
-              </Button>
-              <Input
-                label="Emergency broadcast"
-                value={emBody}
-                onChange={(e) => setEmBody(e.target.value)}
-              />
-              <Button
-                type="button"
-                size="sm"
-                variant="secondary"
-                onClick={async () => {
-                  if (
-                    !window.confirm(
-                      "Send emergency broadcast to all members on APP/EMAIL/WhatsApp?",
-                    )
-                  ) {
-                    return;
-                  }
-                  try {
-                    await emergency({ groupId, body: emBody }).unwrap();
-                    setEmBody("");
-                    setLocalMsg("Emergency broadcast sent.");
-                  } catch {
-                    setLocalMsg("Could not send emergency broadcast.");
-                  }
-                }}
-              >
-                Send emergency
-              </Button>
+            <div className="fo-gm-form space-y-4">
+              <div className="space-y-2">
+                <Input
+                  label="Announcement"
+                  value={annBody}
+                  onChange={(e) => setAnnBody(e.target.value)}
+                  placeholder="Team briefing at 09:00 in lobby"
+                  disabled={isAnnouncing}
+                />
+                <div className="pt-1.5">
+                  <Button
+                    type="button"
+                    size="sm"
+                    disabled={isAnnouncing || !annBody.trim()}
+                    icon={isAnnouncing ? <Spinner size="sm" /> : undefined}
+                    onClick={async () => {
+                      if (!annBody.trim()) {
+                        setSectionFeedback("announcements", "Please enter announcement text.", "error");
+                        return;
+                      }
+                      try {
+                        await announce({ groupId, body: annBody.trim() }).unwrap();
+                        setAnnBody("");
+                        await refetchAnnouncements();
+                        setSectionFeedback("announcements", "Announcement posted successfully.");
+                      } catch (err) {
+                        setSectionFeedback(
+                          "announcements",
+                          apiErrorMessage(err, "Could not post announcement."),
+                          "error",
+                        );
+                      }
+                    }}
+                  >
+                    {isAnnouncing ? "Posting…" : "Post"}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="pt-2 space-y-2 border-t border-black/5">
+                <Input
+                  label="Emergency broadcast"
+                  value={emBody}
+                  onChange={(e) => setEmBody(e.target.value)}
+                  placeholder="Urgent flight/gate relocation notice"
+                  disabled={isSendingEmergency}
+                />
+                <div className="pt-1.5">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="secondary"
+                    disabled={isSendingEmergency || !emBody.trim()}
+                    icon={isSendingEmergency ? <Spinner size="sm" /> : undefined}
+                    onClick={async () => {
+                      if (!emBody.trim()) {
+                        setSectionFeedback("announcements", "Please enter emergency broadcast text.", "error");
+                        return;
+                      }
+                      if (
+                        !window.confirm(
+                          "Send emergency broadcast to all members on APP/EMAIL/WhatsApp?",
+                        )
+                      ) {
+                        return;
+                      }
+                      try {
+                        await emergency({ groupId, body: emBody.trim() }).unwrap();
+                        setEmBody("");
+                        await refetchAnnouncements();
+                        setSectionFeedback(
+                          "announcements",
+                          "Emergency broadcast dispatched to all member channels.",
+                        );
+                      } catch (err) {
+                        setSectionFeedback(
+                          "announcements",
+                          apiErrorMessage(err, "Could not send emergency broadcast."),
+                          "error",
+                        );
+                      }
+                    }}
+                  >
+                    {isSendingEmergency ? "Sending broadcast…" : "Send emergency"}
+                  </Button>
+                </div>
+              </div>
+
+              {sectionAlerts["announcements"] ? (
+                <div
+                  className={`fo-gm-inline-alert fo-gm-inline-alert--${sectionAlerts["announcements"].type}`}
+                  role="status"
+                >
+                  {sectionAlerts["announcements"].type === "success" ? (
+                    <CheckCircle2 className="h-4 w-4 shrink-0" />
+                  ) : (
+                    <AlertCircle className="h-4 w-4 shrink-0" />
+                  )}
+                  <span>{sectionAlerts["announcements"].text}</span>
+                </div>
+              ) : null}
             </div>
           ) : null}
         </GroupSection>
 
+        {/* POLLS SECTION */}
         <GroupSection icon={Vote} title="Polls" loading={pollsLoading}>
           {(polls || []).length === 0 ? (
             <GroupEmpty
@@ -446,59 +657,119 @@ export function GroupDetailClient({ groupId }: { groupId: string }) {
               <div key={p.id} className="fo-gm-item">
                 <p className="fo-gm-row__title">{p.question}</p>
                 <div className="fo-gm-poll-options">
-                  {(p.options || []).map((opt, idx) => (
-                    <Button
-                      key={idx}
-                      type="button"
-                      size="sm"
-                      variant={p.myOptionIndex === idx ? "primary" : "secondary"}
-                      onClick={async () => {
-                        try {
-                          await vote({ groupId, pollId: p.id, optionIndex: idx }).unwrap();
-                          setLocalMsg("Vote recorded.");
-                        } catch {
-                          setLocalMsg("Could not record vote.");
-                        }
-                      }}
-                    >
-                      {opt} ({p.voteCounts?.[String(idx)] || 0})
-                    </Button>
-                  ))}
+                  {(p.options || []).map((opt, idx) => {
+                    const voteKey = `${p.id}-${idx}`;
+                    const isVotingThis = votingKey === voteKey;
+                    return (
+                      <Button
+                        key={idx}
+                        type="button"
+                        size="sm"
+                        variant={p.myOptionIndex === idx ? "primary" : "secondary"}
+                        disabled={isVotingThis}
+                        icon={isVotingThis ? <Spinner size="sm" /> : undefined}
+                        onClick={async () => {
+                          setVotingKey(voteKey);
+                          try {
+                            await vote({ groupId, pollId: p.id, optionIndex: idx }).unwrap();
+                            await refetchPolls();
+                            setSectionFeedback("polls", `Vote recorded for “${opt}”.`);
+                          } catch (err) {
+                            setSectionFeedback(
+                              "polls",
+                              apiErrorMessage(err, "Could not record vote."),
+                              "error",
+                            );
+                          } finally {
+                            setVotingKey(null);
+                          }
+                        }}
+                      >
+                        {isVotingThis
+                          ? "Recording…"
+                          : `${opt} (${p.voteCounts?.[String(idx)] || 0})`}
+                      </Button>
+                    );
+                  })}
                 </div>
               </div>
             ))
           )}
           {isOrganizer ? (
-            <div className="fo-gm-form">
-              <Input label="Question" value={pollQ} onChange={(e) => setPollQ(e.target.value)} />
+            <div className="fo-gm-form space-y-2.5">
+              <Input
+                label="Question"
+                value={pollQ}
+                onChange={(e) => setPollQ(e.target.value)}
+                placeholder="e.g. Which dinner slot works best?"
+                disabled={isCreatingPoll}
+              />
               <Input
                 label="Options (comma-separated)"
                 value={pollOpts}
                 onChange={(e) => setPollOpts(e.target.value)}
+                placeholder="19:00, 20:30, 21:00"
+                disabled={isCreatingPoll}
               />
-              <Button
-                type="button"
-                size="sm"
-                onClick={async () => {
-                  const options = pollOpts
-                    .split(",")
-                    .map((s) => s.trim())
-                    .filter(Boolean);
-                  try {
-                    await createPoll({ groupId, question: pollQ, options }).unwrap();
-                    setPollQ("");
-                    setLocalMsg("Poll created.");
-                  } catch {
-                    setLocalMsg("Could not create poll.");
-                  }
-                }}
-              >
-                Create poll
-              </Button>
+              <div className="pt-1.5">
+                <Button
+                  type="button"
+                  size="sm"
+                  disabled={isCreatingPoll || !pollQ.trim()}
+                  icon={isCreatingPoll ? <Spinner size="sm" /> : undefined}
+                  onClick={async () => {
+                    if (!pollQ.trim()) {
+                      setSectionFeedback("polls", "Please enter a poll question.", "error");
+                      return;
+                    }
+                    const options = pollOpts
+                      .split(",")
+                      .map((s) => s.trim())
+                      .filter(Boolean);
+                    if (options.length < 2) {
+                      setSectionFeedback(
+                        "polls",
+                        "Please provide at least 2 comma-separated options.",
+                        "error",
+                      );
+                      return;
+                    }
+                    try {
+                      await createPoll({ groupId, question: pollQ.trim(), options }).unwrap();
+                      setPollQ("");
+                      setPollOpts("Yes, No");
+                      await refetchPolls();
+                      setSectionFeedback("polls", "Poll created successfully.");
+                    } catch (err) {
+                      setSectionFeedback(
+                        "polls",
+                        apiErrorMessage(err, "Could not create poll."),
+                        "error",
+                      );
+                    }
+                  }}
+                >
+                  {isCreatingPoll ? "Creating poll…" : "Create poll"}
+                </Button>
+              </div>
+              {sectionAlerts["polls"] ? (
+                <div
+                  className={`fo-gm-inline-alert fo-gm-inline-alert--${sectionAlerts["polls"].type}`}
+                  role="status"
+                >
+                  {sectionAlerts["polls"].type === "success" ? (
+                    <CheckCircle2 className="h-4 w-4 shrink-0" />
+                  ) : (
+                    <AlertCircle className="h-4 w-4 shrink-0" />
+                  )}
+                  <span>{sectionAlerts["polls"].text}</span>
+                </div>
+              ) : null}
             </div>
           ) : null}
         </GroupSection>
 
+        {/* ATTENDANCE SECTION */}
         <GroupSection icon={MapPinned} title="Attendance" loading={attendanceLoading}>
           {(attendance?.waypoints || []).length === 0 ? (
             <GroupEmpty
@@ -508,55 +779,98 @@ export function GroupDetailClient({ groupId }: { groupId: string }) {
             />
           ) : (
             <ul className="fo-gm-list">
-              {attendance!.waypoints.map((w) => (
-                <li key={w.id} className="fo-gm-inline">
-                  <span>{w.label}</span>
-                  <Button
-                    type="button"
-                    size="sm"
-                    onClick={async () => {
-                      try {
-                        await markAtt({ groupId, waypointId: w.id, status: "PRESENT" }).unwrap();
-                        setLocalMsg(`Checked in at ${w.label}.`);
-                      } catch {
-                        setLocalMsg("Could not check in.");
-                      }
-                    }}
-                  >
-                    Check in
-                  </Button>
-                </li>
-              ))}
+              {attendance!.waypoints.map((w) => {
+                const isCheckingInThis = checkingInId === w.id;
+                return (
+                  <li key={w.id} className="fo-gm-inline">
+                    <span>{w.label}</span>
+                    <Button
+                      type="button"
+                      size="sm"
+                      disabled={isCheckingInThis}
+                      icon={isCheckingInThis ? <Spinner size="sm" /> : undefined}
+                      onClick={async () => {
+                        setCheckingInId(w.id);
+                        try {
+                          await markAtt({ groupId, waypointId: w.id, status: "PRESENT" }).unwrap();
+                          await refetchAttendance();
+                          setSectionFeedback("attendance", `Checked in at “${w.label}”.`);
+                        } catch (err) {
+                          setSectionFeedback(
+                            "attendance",
+                            apiErrorMessage(err, "Could not check in."),
+                            "error",
+                          );
+                        } finally {
+                          setCheckingInId(null);
+                        }
+                      }}
+                    >
+                      {isCheckingInThis ? "Checking in…" : "Check in"}
+                    </Button>
+                  </li>
+                );
+              })}
             </ul>
           )}
           {isOrganizer ? (
-            <div className="fo-gm-form fo-gm-form--row">
-              <Input
-                label="Waypoint label"
-                value={waypointLabel}
-                onChange={(e) => setWaypointLabel(e.target.value)}
-              />
-              <Button
-                type="button"
-                size="sm"
-                onClick={async () => {
-                  try {
-                    await createWp({ groupId, label: waypointLabel }).unwrap();
-                    setWaypointLabel("");
-                    setLocalMsg("Waypoint added.");
-                  } catch {
-                    setLocalMsg("Could not add waypoint.");
-                  }
-                }}
-              >
-                Add waypoint
-              </Button>
+            <div className="fo-gm-form">
+              <div className="fo-gm-form--row">
+                <Input
+                  label="Waypoint label"
+                  value={waypointLabel}
+                  onChange={(e) => setWaypointLabel(e.target.value)}
+                  placeholder="Gate A4 Gathering Point"
+                  disabled={isCreatingWp}
+                />
+                <Button
+                  type="button"
+                  size="sm"
+                  disabled={isCreatingWp || !waypointLabel.trim()}
+                  icon={isCreatingWp ? <Spinner size="sm" /> : undefined}
+                  onClick={async () => {
+                    if (!waypointLabel.trim()) {
+                      setSectionFeedback("attendance", "Please enter a waypoint label.", "error");
+                      return;
+                    }
+                    try {
+                      await createWp({ groupId, label: waypointLabel.trim() }).unwrap();
+                      const label = waypointLabel.trim();
+                      setWaypointLabel("");
+                      await refetchAttendance();
+                      setSectionFeedback("attendance", `Waypoint “${label}” added.`);
+                    } catch (err) {
+                      setSectionFeedback(
+                        "attendance",
+                        apiErrorMessage(err, "Could not add waypoint."),
+                        "error",
+                      );
+                    }
+                  }}
+                >
+                  {isCreatingWp ? "Adding…" : "Add waypoint"}
+                </Button>
+              </div>
+              {sectionAlerts["attendance"] ? (
+                <div
+                  className={`fo-gm-inline-alert fo-gm-inline-alert--${sectionAlerts["attendance"].type}`}
+                  role="status"
+                >
+                  {sectionAlerts["attendance"].type === "success" ? (
+                    <CheckCircle2 className="h-4 w-4 shrink-0" />
+                  ) : (
+                    <AlertCircle className="h-4 w-4 shrink-0" />
+                  )}
+                  <span>{sectionAlerts["attendance"].text}</span>
+                </div>
+              ) : null}
             </div>
           ) : null}
           <p className="fo-gm-section__hint">Scope: {attendance?.scope || "—"}</p>
         </GroupSection>
 
-        <GroupSection icon={Images} title="Photo gallery">
+        {/* PHOTO GALLERY SECTION */}
+        <GroupSection icon={Images} title="Photo gallery" loading={photosLoading}>
           {!photos?.storage?.canUpload ? (
             <p className="fo-gm-section__hint">
               Photo storage is not configured on the server (Vault local storage required).
@@ -578,58 +892,102 @@ export function GroupDetailClient({ groupId }: { groupId: string }) {
               ))}
             </ul>
           )}
-          <label className="fo-gm-file-label">
-            <span className="fo-gm-file-label__text">
-              {photoBusy ? "Uploading…" : "Choose photo"}
-            </span>
-            <input
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              className="fo-gm-file"
-              disabled={photoBusy}
-              onChange={async (e) => {
-                const file = e.target.files?.[0];
-                e.target.value = "";
-                if (!file) return;
-                setPhotoBusy(true);
-                try {
-                  const contentBase64 = await fileToBase64(file);
-                  await uploadPhoto({
-                    groupId,
-                    contentBase64,
-                    contentType: file.type,
-                    caption: file.name,
-                  }).unwrap();
-                  setLocalMsg("Photo uploaded.");
-                } catch {
-                  setLocalMsg("Photo upload failed.");
-                } finally {
-                  setPhotoBusy(false);
-                }
-              }}
-            />
-          </label>
+          <div className="fo-gm-form">
+            <label className="fo-gm-file-label">
+              <span className="fo-gm-file-label__text">
+                {photoBusy ? "Uploading photo…" : "Choose photo"}
+              </span>
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="fo-gm-file"
+                disabled={photoBusy}
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  e.target.value = "";
+                  if (!file) return;
+                  setPhotoBusy(true);
+                  try {
+                    const contentBase64 = await fileToBase64(file);
+                    await uploadPhoto({
+                      groupId,
+                      contentBase64,
+                      contentType: file.type,
+                      caption: file.name,
+                    }).unwrap();
+                    await refetchPhotos();
+                    setSectionFeedback("photos", `Photo “${file.name}” uploaded to gallery.`);
+                  } catch (err) {
+                    setSectionFeedback(
+                      "photos",
+                      apiErrorMessage(err, "Photo upload failed."),
+                      "error",
+                    );
+                  } finally {
+                    setPhotoBusy(false);
+                  }
+                }}
+              />
+            </label>
+            {sectionAlerts["photos"] ? (
+              <div
+                className={`fo-gm-inline-alert fo-gm-inline-alert--${sectionAlerts["photos"].type}`}
+                role="status"
+              >
+                {sectionAlerts["photos"].type === "success" ? (
+                  <CheckCircle2 className="h-4 w-4 shrink-0" />
+                ) : (
+                  <AlertCircle className="h-4 w-4 shrink-0" />
+                )}
+                <span>{sectionAlerts["photos"].text}</span>
+              </div>
+            ) : null}
+          </div>
         </GroupSection>
 
-        <GroupSection icon={BookMarked} title="Trip memories">
-          <Button
-            type="button"
-            size="sm"
-            onClick={async () => {
-              try {
-                const m = await genMemory(groupId).unwrap();
-                setLocalMsg(
-                  m.status === "INSUFFICIENT_DATA"
-                    ? "Not enough group activity for a memory yet."
-                    : "Memory generated from attributed data.",
-                );
-              } catch {
-                setLocalMsg("Could not generate memory.");
-              }
-            }}
-          >
-            Generate trip memory
-          </Button>
+        {/* TRIP MEMORIES SECTION */}
+        <GroupSection icon={BookMarked} title="Trip memories" loading={memoriesLoading}>
+          <div className="fo-gm-form">
+            <Button
+              type="button"
+              size="sm"
+              disabled={isGeneratingMemory}
+              icon={isGeneratingMemory ? <Spinner size="sm" /> : undefined}
+              onClick={async () => {
+                try {
+                  const m = await genMemory(groupId).unwrap();
+                  await refetchMemories();
+                  setSectionFeedback(
+                    "memories",
+                    m.status === "INSUFFICIENT_DATA"
+                      ? "Not enough group activity for a memory summary yet."
+                      : "Memory generated successfully from group events.",
+                  );
+                } catch (err) {
+                  setSectionFeedback(
+                    "memories",
+                    apiErrorMessage(err, "Could not generate memory."),
+                    "error",
+                  );
+                }
+              }}
+            >
+              {isGeneratingMemory ? "Generating memory…" : "Generate trip memory"}
+            </Button>
+            {sectionAlerts["memories"] ? (
+              <div
+                className={`fo-gm-inline-alert fo-gm-inline-alert--${sectionAlerts["memories"].type}`}
+                role="status"
+              >
+                {sectionAlerts["memories"].type === "success" ? (
+                  <CheckCircle2 className="h-4 w-4 shrink-0" />
+                ) : (
+                  <AlertCircle className="h-4 w-4 shrink-0" />
+                )}
+                <span>{sectionAlerts["memories"].text}</span>
+              </div>
+            ) : null}
+          </div>
           {(memories || []).length === 0 ? (
             <GroupEmpty
               icon={BookMarked}
@@ -655,20 +1013,25 @@ export function GroupDetailClient({ groupId }: { groupId: string }) {
           type="button"
           variant="secondary"
           size="sm"
-          icon={<LogOut className="h-3.5 w-3.5" aria-hidden />}
+          disabled={isLeaving}
+          icon={isLeaving ? <Spinner size="sm" /> : <LogOut className="h-3.5 w-3.5" aria-hidden />}
           onClick={async () => {
             if (!window.confirm("Leave this group? Shared content access ends going forward.")) {
               return;
             }
             try {
               await leave(groupId).unwrap();
+              setLocalMsg({ text: "Left group successfully.", error: false });
               window.location.href = "/groups";
-            } catch {
-              setLocalMsg("Could not leave the group. Try again.");
+            } catch (err) {
+              setLocalMsg({
+                text: apiErrorMessage(err, "Could not leave the group. Try again."),
+                error: true,
+              });
             }
           }}
         >
-          Leave group
+          {isLeaving ? "Leaving group…" : "Leave group"}
         </Button>
         <p className="fo-gm-footer">
           Ask Ava about this group in{" "}

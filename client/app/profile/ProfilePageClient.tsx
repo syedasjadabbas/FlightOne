@@ -79,6 +79,18 @@ export function ProfilePageClient() {
   const [isCopiedId, setIsCopiedId] = useState(false);
   const [avatarError, setAvatarError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  const handleTabChange = (tab: ProfileTab) => {
+    setActiveTab(tab);
+    window.setTimeout(() => {
+      if (panelRef.current) {
+        const yOffset = -90; // offset so the top of panel is nicely positioned below header
+        const y = panelRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+        window.scrollTo({ top: y, behavior: "smooth" });
+      }
+    }, 40);
+  };
 
   const authUser = useAuthStore((s) => s.user);
   const hasHydrated = useAuthStore((s) => s.hasHydrated);
@@ -290,7 +302,7 @@ export function ProfilePageClient() {
 
         {/* Center Tabs */}
         <div className="fo-profile__nav-center">
-          <ProfileTabs active={activeTab} onChange={setActiveTab} />
+          <ProfileTabs active={activeTab} onChange={handleTabChange} />
         </div>
 
         {/* Right Actions */}
@@ -504,6 +516,8 @@ export function ProfilePageClient() {
 
       {/* ── Active Tab Content Panel ─────────────────────────────────── */}
       <div
+        ref={panelRef}
+        key={activeTab}
         role="tabpanel"
         id={panelId}
         aria-labelledby={`profile-tab-${activeTab.toLowerCase()}`}

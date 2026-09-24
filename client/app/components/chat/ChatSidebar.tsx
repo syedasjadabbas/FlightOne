@@ -6,14 +6,19 @@ import {
   Archive,
   BedDouble,
   Briefcase,
+  Check,
   Clock,
+  Copy,
+  Eye,
   FileText,
+  LifeBuoy,
   Loader2,
   Lock,
   MoreHorizontal,
   Mountain,
   Plus,
   Search,
+  Trash2,
   Users,
   X,
   Plane,
@@ -386,7 +391,7 @@ export function ChatSidebar({
                       key={conv.id}
                       className={`fo-conv-row group flex items-center justify-between rounded-xl ${
                         isActive ? "fo-conv-row--active text-white" : "text-slate-300"
-                      }`}
+                      } ${isMenuOpen ? "fo-conv-row--menu-open" : ""}`}
                     >
                       <button
                         type="button"
@@ -441,7 +446,7 @@ export function ChatSidebar({
                           aria-expanded={isMenuOpen}
                           className={`rounded-lg p-1.5 text-slate-400 transition-colors duration-150 hover:bg-white/[0.1] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sky)]/40 ${
                             isMenuOpen
-                              ? "block bg-white/[0.1] text-white"
+                              ? "block bg-white/[0.15] text-white"
                               : "hidden group-hover:block group-focus-within:block focus:block"
                           }`}
                         >
@@ -451,59 +456,57 @@ export function ChatSidebar({
                         {/* Popover Action Menu */}
                         {isMenuOpen && (
                           <div
-                            className="fo-conv-reveal pointer-events-auto absolute right-0 top-full z-50 mt-1 w-48 rounded-xl border border-slate-700/80 bg-[#091e33] p-1.5 shadow-2xl"
+                            className="fo-conv-menu pointer-events-auto shadow-2xl"
                             role="menu"
                             aria-orientation="vertical"
+                            onClick={(e) => e.stopPropagation()}
                           >
                             <button
                               type="button"
                               role="menuitem"
-                              onClick={() => handleSelect(conv.id)}
-                              className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 transition-colors duration-150 hover:bg-slate-800 hover:text-white"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleSelect(conv.id);
+                              }}
+                              className="fo-conv-menu__item"
                             >
-                              <svg className="h-3.5 w-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                              </svg>
+                              <Eye className="h-3.5 w-3.5 text-slate-400" />
                               <span>Open chat</span>
                             </button>
+
                             <button
                               type="button"
                               role="menuitem"
                               onClick={(e) => void handleCopyId(conv.id, e)}
-                              className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 transition-colors duration-150 hover:bg-slate-800 hover:text-white"
+                              className="fo-conv-menu__item"
                             >
-                              <svg className="h-3.5 w-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth="2"
-                                  d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"
-                                />
-                              </svg>
-                              <span>{copiedId === conv.id ? "Copied ID!" : "Copy chat ID"}</span>
+                              {copiedId === conv.id ? (
+                                <>
+                                  <Check className="h-3.5 w-3.5 text-emerald-400" />
+                                  <span className="text-emerald-400 font-semibold">Copied ID!</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Copy className="h-3.5 w-3.5 text-slate-400" />
+                                  <span>Copy chat ID</span>
+                                </>
+                              )}
                             </button>
+
                             <button
                               type="button"
                               role="menuitem"
                               onClick={(e) => void handleEscalate(conv.id, e)}
-                              className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs text-[#409bec] transition-colors duration-150 hover:bg-slate-800 hover:text-[#6fb4f1]"
+                              className="fo-conv-menu__item text-[#409bec] hover:text-[#6fb4f1]"
                             >
-                              <svg className="h-3.5 w-3.5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth="2"
-                                  d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"
-                                />
-                              </svg>
+                              <LifeBuoy className="h-3.5 w-3.5 text-sky-400" />
                               <span>{escalatedId === conv.id ? "Support notified" : "Consultant help"}</span>
                             </button>
 
                             {onDeleteConversation && (
                               <div className="mt-1 border-t border-slate-700/60 pt-1">
                                 {confirmDeleteId === conv.id ? (
-                                  <div className="rounded-lg bg-rose-950/60 p-2 border border-rose-800/70 text-xs">
+                                  <div className="rounded-lg bg-rose-950/80 p-2 border border-rose-800/80 text-xs">
                                     <p className="text-[11px] font-semibold text-rose-200 mb-1.5 leading-tight">
                                       Delete this chat?
                                     </p>
@@ -535,7 +538,7 @@ export function ChatSidebar({
                                         }}
                                         className="rounded bg-rose-600 px-2 py-0.5 text-[11px] font-medium text-white hover:bg-rose-500 disabled:opacity-50 transition-colors"
                                       >
-                                        {deletingId === conv.id ? "Deleting..." : "Delete"}
+                                        {deletingId === conv.id ? "Deleting…" : "Delete"}
                                       </button>
                                     </div>
                                   </div>
@@ -547,16 +550,9 @@ export function ChatSidebar({
                                       e.stopPropagation();
                                       setConfirmDeleteId(conv.id);
                                     }}
-                                    className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs text-rose-400 hover:bg-rose-950/40 hover:text-rose-300 transition-colors"
+                                    className="fo-conv-menu__item fo-conv-menu__item--danger"
                                   >
-                                    <svg className="h-3.5 w-3.5 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                      <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                      />
-                                    </svg>
+                                    <Trash2 className="h-3.5 w-3.5 text-rose-400" />
                                     <span>Delete chat</span>
                                   </button>
                                 )}

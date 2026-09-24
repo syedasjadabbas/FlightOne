@@ -565,4 +565,92 @@ html.fo-chat-landing body {
   .fo-conv-reveal {
     animation: none;
   }
+
+  .fo-conv-menu {
+    animation: none;
+  }
 }
+
+/* ── Conversation Row Action Popover Menu ─────────────────── */
+.fo-conv-row {
+  position: relative;
+  overflow: visible;
+}
+
+.fo-conv-row--menu-open {
+  z-index: 50 !important;
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.fo-chat-sidebar__menu-container {
+  position: relative;
+  overflow: visible;
+}
+
+.fo-conv-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  z-index: 999;
+  width: 12.5rem;
+  padding: 0.35rem;
+  border-radius: 0.875rem;
+  background-color: #0b1726 !important;
+  background: linear-gradient(180deg, #0e1c2e 0%, #091524 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  box-shadow:
+    0 20px 45px -8px rgba(0, 0, 0, 0.75),
+    0 0 0 1px rgba(255, 255, 255, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  animation: fo-conv-menu-pop 180ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes fo-conv-menu-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.fo-conv-menu__item {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.45rem 0.65rem;
+  border-radius: 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #cbd5e1;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.fo-conv-menu__item:hover {
+  background-color: rgba(255, 255, 255, 0.09);
+  color: #ffffff;
+}
+
+.fo-conv-menu__item--active {
+  color: #38bdf8;
+}
+
+.fo-conv-menu__item--danger {
+  color: #f87171;
+}
+
+.fo-conv-menu__item--danger:hover {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+}
+

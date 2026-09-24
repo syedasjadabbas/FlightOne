@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "node app.js",
-    "dev": "nodemon app.js",
+    "dev": "node --watch app.js",
     "db:create": "bash scripts/db-create.sh",
     "db:drop": "bash scripts/db-drop.sh",
     "db:migrate": "prisma migrate dev",

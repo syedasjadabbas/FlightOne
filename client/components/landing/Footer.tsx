@@ -150,40 +150,34 @@ export default function Footer() {
         >
           {/* Left Column: Brand Headline & Vision */}
           <div style={{ maxWidth: '640px', flex: '1 1 380px' }}>
-            {/* Trust badge with live pulse */}
+            {/* Editorial section kicker */}
             <div
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '0.625rem',
-                backgroundColor: 'rgba(255, 255, 255, 0.06)',
-                border: '1px solid rgba(255, 255, 255, 0.12)',
-                borderRadius: '9999px',
-                padding: '6px 14px',
-                marginBottom: '1.25rem',
+                gap: '0.65rem',
+                marginBottom: '1.1rem',
               }}
             >
               <span
                 style={{
-                  width: '7px',
-                  height: '7px',
-                  borderRadius: '50%',
-                  backgroundColor: '#25D366',
-                  boxShadow: '0 0 10px #25D366',
-                  flexShrink: 0,
+                  width: '16px',
+                  height: '1.5px',
+                  backgroundColor: '#74C9DD',
+                  opacity: 0.75,
                 }}
               />
               <span
                 style={{
                   fontFamily: 'var(--font-sans)',
-                  fontSize: '0.6875rem',
+                  fontSize: '0.8125rem',
                   fontWeight: 600,
-                  letterSpacing: '0.1em',
+                  letterSpacing: '0.08em',
                   textTransform: 'uppercase',
                   color: '#74C9DD',
                 }}
               >
-                Verified Travel Consultant · 24h Turnaround
+                Bespoke Travel Advisory · Direct 24/7 Assistance
               </span>
             </div>
 
@@ -285,27 +279,10 @@ export default function Footer() {
               href={COMPANY_INFO.contact.whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.625rem',
-                backgroundColor: '#007AE5',
-                color: '#FFFFFF',
-                borderRadius: '9999px',
-                padding: '12px 22px',
-                fontFamily: 'var(--font-sans)',
-                fontSize: '0.875rem',
-                fontWeight: 600,
-                textDecoration: 'none',
-                letterSpacing: '-0.01em',
-                boxShadow: '0 8px 24px rgba(0, 122, 229, 0.35)',
-                transition: 'background-color 0.25s ease, transform 0.25s ease',
-              }}
-              className="hover:bg-[#0066cc] hover:scale-[1.02]"
+              className="fo-footer-cta-btn"
             >
               <span>Chat on WhatsApp</span>
-              <span style={{ fontSize: '1.1rem' }}>→</span>
+              <span className="fo-footer-cta-arrow">→</span>
             </Link>
           </div>
         </div>
@@ -366,22 +343,10 @@ export default function Footer() {
                 <li key={link.label}>
                   <Link
                     href={`/chat?q=${encodeURIComponent(link.query)}`}
-                    style={{
-                      fontFamily: 'var(--font-sans)',
-                      fontSize: '0.9375rem',
-                      color: 'rgba(245, 244, 223, 0.85)',
-                      textDecoration: 'none',
-                      display: 'inline-flex',
-                      alignItems: 'baseline',
-                      gap: '0.5rem',
-                      transition: 'color 0.2s ease, transform 0.2s ease',
-                    }}
-                    className="hover:text-white hover:translate-x-1"
+                    className="fo-footer-nav-link"
                   >
-                    <span style={{ fontWeight: 500 }}>{link.label}</span>
-                    <span style={{ fontSize: '0.75rem', color: 'rgba(245, 244, 223, 0.45)' }}>
-                      · {link.desc}
-                    </span>
+                    <span className="fo-dest-label">{link.label}</span>
+                    <span className="fo-dest-desc">· {link.desc}</span>
                   </Link>
                 </li>
               ))}
@@ -424,17 +389,9 @@ export default function Footer() {
                 <li key={link.label}>
                   <Link
                     href={link.href}
-                    style={{
-                      fontFamily: 'var(--font-sans)',
-                      fontSize: '0.9375rem',
-                      fontWeight: 450,
-                      color: 'rgba(245, 244, 223, 0.85)',
-                      textDecoration: 'none',
-                      transition: 'color 0.2s ease, transform 0.2s ease',
-                    }}
-                    className="hover:text-white hover:translate-x-1"
+                    className="fo-footer-nav-link"
                   >
-                    {link.label}
+                    <span className="fo-dest-label">{link.label}</span>
                   </Link>
                 </li>
               ))}
@@ -477,22 +434,9 @@ export default function Footer() {
                   <button
                     type="button"
                     onClick={() => setInfoTopic(link.topic)}
-                    style={{
-                      fontFamily: 'var(--font-sans)',
-                      fontSize: '0.9375rem',
-                      fontWeight: 450,
-                      color: 'rgba(245, 244, 223, 0.85)',
-                      textDecoration: 'none',
-                      background: 'none',
-                      border: 'none',
-                      padding: 0,
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                      transition: 'color 0.2s ease, transform 0.2s ease',
-                    }}
-                    className="hover:text-white hover:translate-x-1"
+                    className="fo-footer-btn-link"
                   >
-                    {link.label}
+                    <span className="fo-dest-label">{link.label}</span>
                   </button>
                 </li>
               ))}
@@ -530,18 +474,7 @@ export default function Footer() {
             {/* Newsletter Input Capsule */}
             <form
               onSubmit={handleSubmit}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                backgroundColor: 'rgba(255, 255, 255, 0.06)',
-                border: isFocused
-                  ? '1px solid #74C9DD'
-                  : '1px solid rgba(255, 255, 255, 0.16)',
-                borderRadius: '9999px',
-                padding: '4px 6px 4px 16px',
-                boxShadow: isFocused ? '0 0 16px rgba(116, 201, 221, 0.2)' : 'none',
-                transition: 'border-color 0.25s ease, box-shadow 0.25s ease',
-              }}
+              className={`fo-footer-newsletter-form ${isFocused ? 'is-focused' : ''}`}
             >
               <input
                 type="email"
@@ -551,39 +484,15 @@ export default function Footer() {
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
                 placeholder="Enter e-mail address"
-                style={{
-                  width: '100%',
-                  background: 'transparent',
-                  border: 'none',
-                  outline: 'none',
-                  fontFamily: 'var(--font-sans)',
-                  fontSize: '0.875rem',
-                  color: '#F5F4DF',
-                }}
+                className="fo-footer-newsletter-input"
               />
               <button
                 type="submit"
                 aria-label="Submit email"
                 disabled={subscribing}
-                style={{
-                  width: '32px',
-                  height: '32px',
-                  borderRadius: '50%',
-                  backgroundColor: '#007AE5',
-                  border: 'none',
-                  color: '#FFFFFF',
-                  fontSize: '1rem',
-                  cursor: subscribing ? 'default' : 'pointer',
-                  opacity: subscribing ? 0.6 : 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                  transition: 'background-color 0.2s ease, transform 0.2s ease',
-                }}
-                className="hover:bg-[#0066cc] hover:scale-105"
+                className="fo-footer-submit-btn"
               >
-                {subscribing ? '···' : '→'}
+                <span className="fo-submit-icon">{subscribing ? '···' : '→'}</span>
               </button>
             </form>
 
@@ -616,47 +525,23 @@ export default function Footer() {
                 href={COMPANY_INFO.contact.whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{
-                  fontFamily: 'var(--font-sans)',
-                  fontSize: '0.8125rem',
-                  color: 'rgba(245, 244, 223, 0.85)',
-                  textDecoration: 'none',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                }}
-                className="hover:text-[#25D366]"
+                className="fo-footer-social-link fo-whatsapp"
               >
-                WhatsApp ↗
+                <span>WhatsApp</span> <span className="fo-arrow-up">↗</span>
               </a>
               <a
                 href={COMPANY_INFO.social.instagram}
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{
-                  fontFamily: 'var(--font-sans)',
-                  fontSize: '0.8125rem',
-                  color: 'rgba(245, 244, 223, 0.85)',
-                  textDecoration: 'none',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                }}
-                className="hover:text-white"
+                className="fo-footer-social-link fo-instagram"
               >
-                Instagram ↗
+                <span>Instagram</span> <span className="fo-arrow-up">↗</span>
               </a>
               <a
                 href={`mailto:${COMPANY_INFO.contact.email}`}
-                style={{
-                  fontFamily: 'var(--font-sans)',
-                  fontSize: '0.8125rem',
-                  color: 'rgba(245, 244, 223, 0.85)',
-                  textDecoration: 'none',
-                }}
-                className="hover:text-white"
+                className="fo-footer-social-link fo-email"
               >
-                Email Support ↗
+                <span>Email Support</span> <span className="fo-arrow-up">↗</span>
               </a>
             </div>
           </div>
@@ -780,13 +665,13 @@ export default function Footer() {
               fontSize: '0.78rem',
             }}
           >
-            <Link href="/support" style={{ color: 'rgba(245, 244, 223, 0.75)', textDecoration: 'none' }} className="hover:text-white">
+            <Link href="/support" className="fo-footer-legal-link">
               FAQ
             </Link>
-            <Link href="/refunds" style={{ color: 'rgba(245, 244, 223, 0.75)', textDecoration: 'none' }} className="hover:text-white">
+            <Link href="/refunds" className="fo-footer-legal-link">
               Refunds
             </Link>
-            <Link href="/escalations" style={{ color: 'rgba(245, 244, 223, 0.75)', textDecoration: 'none' }} className="hover:text-white">
+            <Link href="/escalations" className="fo-footer-legal-link">
               Contact
             </Link>
             <span style={{ color: 'rgba(245, 244, 223, 0.45)' }}>·</span>
@@ -801,6 +686,235 @@ export default function Footer() {
         footer ::placeholder {
           color: rgba(245, 244, 223, 0.55) !important;
         }
+
+        /* ── Navigation Links (Destinations & Experiences) ── */
+        .fo-footer-nav-link {
+          font-family: var(--font-sans);
+          font-size: 0.9375rem;
+          color: rgba(245, 244, 223, 0.82);
+          text-decoration: none;
+          display: inline-flex;
+          align-items: baseline;
+          gap: 0.5rem;
+          transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), color 0.24s ease;
+          cursor: pointer;
+        }
+
+        .fo-footer-nav-link .fo-dest-label {
+          font-weight: 500;
+          color: rgba(245, 244, 223, 0.88);
+          transition: color 0.22s ease, letter-spacing 0.22s ease;
+        }
+
+        .fo-footer-nav-link .fo-dest-desc {
+          font-size: 0.75rem;
+          color: rgba(245, 244, 223, 0.45);
+          transition: color 0.22s ease, opacity 0.22s ease;
+        }
+
+        .fo-footer-nav-link:hover {
+          transform: translateX(6px);
+          color: #FFFFFF;
+        }
+
+        .fo-footer-nav-link:hover .fo-dest-label {
+          color: #FFFFFF;
+        }
+
+        .fo-footer-nav-link:hover .fo-dest-desc {
+          color: #74C9DD;
+          opacity: 0.9;
+        }
+
+        /* ── Button Links (FlightOne Company Topics) ── */
+        .fo-footer-btn-link {
+          font-family: var(--font-sans);
+          font-size: 0.9375rem;
+          font-weight: 450;
+          color: rgba(245, 244, 223, 0.82);
+          text-decoration: none;
+          background: none;
+          border: none;
+          padding: 0;
+          cursor: pointer;
+          text-align: left;
+          display: inline-flex;
+          align-items: baseline;
+          transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), color 0.24s ease;
+        }
+
+        .fo-footer-btn-link .fo-dest-label {
+          font-weight: 500;
+          color: rgba(245, 244, 223, 0.88);
+          transition: color 0.22s ease;
+        }
+
+        .fo-footer-btn-link:hover {
+          transform: translateX(6px);
+        }
+
+        .fo-footer-btn-link:hover .fo-dest-label {
+          color: #FFFFFF;
+        }
+
+        /* ── Social & Support Links ── */
+        .fo-footer-social-link {
+          font-family: var(--font-sans);
+          font-size: 0.8125rem;
+          font-weight: 500;
+          color: rgba(245, 244, 223, 0.82);
+          text-decoration: none;
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          transition: color 0.2s ease, transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .fo-footer-social-link .fo-arrow-up {
+          font-size: 0.75rem;
+          transition: transform 0.22s ease;
+        }
+
+        .fo-footer-social-link:hover {
+          color: #FFFFFF;
+          transform: translateY(-2px);
+        }
+
+        .fo-footer-social-link:hover .fo-arrow-up {
+          transform: translate(2px, -2px);
+        }
+
+        .fo-footer-social-link.fo-whatsapp:hover {
+          color: #25D366;
+        }
+
+        .fo-footer-social-link.fo-instagram:hover {
+          color: #FF70A6;
+        }
+
+        .fo-footer-social-link.fo-email:hover {
+          color: #74C9DD;
+        }
+
+        /* ── Main WhatsApp CTA Button ── */
+        .fo-footer-cta-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.625rem;
+          background-color: #007AE5;
+          color: #FFFFFF;
+          border-radius: 9999px;
+          padding: 12px 22px;
+          font-family: var(--font-sans);
+          font-size: 0.875rem;
+          font-weight: 600;
+          text-decoration: none;
+          letter-spacing: -0.01em;
+          box-shadow: 0 8px 24px rgba(0, 122, 229, 0.35);
+          transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.24s ease, box-shadow 0.24s ease;
+        }
+
+        .fo-footer-cta-btn .fo-footer-cta-arrow {
+          font-size: 1.1rem;
+          transition: transform 0.24s ease;
+          display: inline-block;
+        }
+
+        .fo-footer-cta-btn:hover {
+          background-color: #0066cc;
+          transform: translateY(-2px) scale(1.02);
+          box-shadow: 0 12px 30px rgba(0, 122, 229, 0.5);
+        }
+
+        .fo-footer-cta-btn:hover .fo-footer-cta-arrow {
+          transform: translateX(4px);
+        }
+
+        .fo-footer-cta-btn:active {
+          transform: translateY(0) scale(0.98);
+        }
+
+        /* ── Newsletter Capsule ── */
+        .fo-footer-newsletter-form {
+          display: flex;
+          align-items: center;
+          background-color: rgba(255, 255, 255, 0.06);
+          border: 1px solid rgba(255, 255, 255, 0.16);
+          border-radius: 9999px;
+          padding: 4px 6px 4px 16px;
+          transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
+        }
+
+        .fo-footer-newsletter-form:hover {
+          border-color: rgba(255, 255, 255, 0.3);
+          background-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .fo-footer-newsletter-form.is-focused {
+          border-color: #74C9DD !important;
+          box-shadow: 0 0 16px rgba(116, 201, 221, 0.25) !important;
+          background-color: rgba(255, 255, 255, 0.09) !important;
+        }
+
+        .fo-footer-newsletter-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          outline: none;
+          font-family: var(--font-sans);
+          font-size: 0.875rem;
+          color: #F5F4DF;
+        }
+
+        .fo-footer-submit-btn {
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          background-color: #007AE5;
+          border: none;
+          color: #FFFFFF;
+          font-size: 1rem;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.22s ease, box-shadow 0.22s ease;
+        }
+
+        .fo-footer-submit-btn .fo-submit-icon {
+          display: inline-block;
+          transition: transform 0.2s ease;
+        }
+
+        .fo-footer-submit-btn:hover:not(:disabled) {
+          background-color: #0066cc;
+          transform: scale(1.1);
+          box-shadow: 0 4px 14px rgba(0, 122, 229, 0.55);
+        }
+
+        .fo-footer-submit-btn:hover:not(:disabled) .fo-submit-icon {
+          transform: translateX(2px);
+        }
+
+        .fo-footer-submit-btn:active:not(:disabled) {
+          transform: scale(0.94);
+        }
+
+        /* ── Legal Links ── */
+        .fo-footer-legal-link {
+          color: rgba(245, 244, 223, 0.75);
+          text-decoration: none;
+          transition: color 0.2s ease, transform 0.2s ease;
+          display: inline-block;
+        }
+
+        .fo-footer-legal-link:hover {
+          color: #FFFFFF;
+          transform: translateY(-1px);
+        }
+
         @media (max-width: 1024px) {
           .footer-nav-grid {
             grid-template-columns: repeat(2, 1fr) !important;

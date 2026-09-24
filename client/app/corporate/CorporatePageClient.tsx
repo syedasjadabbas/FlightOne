@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   Building2,
   CheckCircle2,
@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   Users,
   AlertCircle,
+  X,
 } from "lucide-react";
 import { Button, Input, Pagination, Spinner, pageCountFor, paginateItems, buttonClassName } from "@/components/ui";
 import "./corporate.css";
@@ -60,6 +61,48 @@ function invoiceTone(status: string): "neutral" | "ok" | "warn" {
   return "neutral";
 }
 
+function CorporateToast({
+  msg,
+  onClose,
+}: {
+  msg: { text: string; error?: boolean } | null;
+  onClose: () => void;
+}) {
+  if (!msg) return null;
+  return (
+    <div className="fo-corporate__toast-container">
+      <div
+        className={`fo-corporate__toast ${
+          msg.error ? "fo-corporate__toast--error" : "fo-corporate__toast--ok"
+        }`}
+        role={msg.error ? "alert" : "status"}
+      >
+        <div className="mt-0.5 shrink-0">
+          {msg.error ? (
+            <AlertCircle className="h-4 w-4 text-[#ff4d4f]" aria-hidden />
+          ) : (
+            <CheckCircle2 className="h-4 w-4 text-[#25D366]" aria-hidden />
+          )}
+        </div>
+        <div className="fo-corporate__toast-content">
+          <p className="fo-corporate__toast-title">
+            {msg.error ? "Action Alert" : "Action Completed"}
+          </p>
+          <p className="fo-corporate__toast-text">{msg.text}</p>
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close notification"
+          className="fo-corporate__toast-close"
+        >
+          <X className="h-3.5 w-3.5" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function MsgLine({ msg }: { msg: { text: string; error?: boolean } | null }) {
   if (!msg) return null;
   return (
@@ -67,8 +110,6 @@ function MsgLine({ msg }: { msg: { text: string; error?: boolean } | null }) {
       className={`fo-corporate__status ${
         msg.error ? "fo-corporate__status--error" : "fo-corporate__status--ok"
       }`}
-      // `alert` interrupts the screen reader for failures the user must act on;
-      // `status` announces successes politely without cutting off other output.
       role={msg.error ? "alert" : "status"}
     >
       {msg.error ? (
@@ -139,17 +180,18 @@ export function CorporatePageClient() {
     { skip: skip || !activeCompanyId },
   );
 
-  const [decide] = useDecideApprovalMutation();
-  const [createApproval] = useCreateApprovalMutation();
-  const [updateCompany] = useUpdateCompanyMutation();
-  const [createCompany] = useCreateCompanyMutation();
-  const [createProjectCode] = useCreateProjectCodeMutation();
-  const [updateProjectCode] = useUpdateProjectCodeMutation();
-  const [issueInvoice] = useIssueInvoiceMutation();
+  const [decide, { isLoading: isDeciding }] = useDecideApprovalMutation();
+  const [createApproval, { isLoading: isCreatingApproval }] = useCreateApprovalMutation();
+  const [updateCompany, { isLoading: isUpdatingCompany }] = useUpdateCompanyMutation();
+  const [createCompany, { isLoading: isCreatingCompany }] = useCreateCompanyMutation();
+  const [createProjectCode, { isLoading: isCreatingProjectCode }] = useCreateProjectCodeMutation();
+  const [updateProjectCode, { isLoading: isUpdatingProjectCode }] = useUpdateProjectCodeMutation();
+  const [issueInvoice, { isLoading: isIssuingInvoice }] = useIssueInvoiceMutation();
   const [fetchInvoicePdf] = useLazyGetInvoicePdfQuery();
-  const [updateInvoiceStatus] = useUpdateInvoiceStatusMutation();
+  const [updateInvoiceStatus, { isLoading: isUpdatingInvoiceStatus }] = useUpdateInvoiceStatusMutation();
 
   const [bookingIdForApproval, setBookingIdForApproval] = useState("");
+  const [approvalMsg, setApprovalMsg] = useState<{ text: string; error?: boolean } | null>(null);
   const [bookingIdForInvoice, setBookingIdForInvoice] = useState("");
   const [newCompanyName, setNewCompanyName] = useState("");
   const [creditLimitInput, setCreditLimitInput] = useState("");
@@ -159,6 +201,14 @@ export function CorporatePageClient() {
   const [bookingsPage, setBookingsPage] = useState(1);
   const [invoicesPage, setInvoicesPage] = useState(1);
   const [auditPage, setAuditPage] = useState(1);
+
+  useEffect(() => {
+    if (!msg) return;
+    const timer = setTimeout(() => {
+      setMsg(null);
+    }, 4500);
+    return () => clearTimeout(timer);
+  }, [msg]);
 
   const policyList = useMemo(() => (Array.isArray(policies) ? policies : []), [policies]);
   const memberList = useMemo(() => (Array.isArray(members) ? members : []), [members]);
@@ -212,9 +262,11 @@ export function CorporatePageClient() {
   }
 
   return (
-    <div className="fo-corporate__master-stage">
-      <div className="fo-corporate__nav-rail">
-        <span className="fo-corporate__brand-badge">
+    <>
+      <CorporateToast msg={msg} onClose={() => setMsg(null)} />
+      <div className="fo-corporate__master-stage">
+        <div className="fo-corporate__nav-rail">
+          <span className="fo-corporate__brand-badge">
           <span className="fo-corporate__brand-dot" aria-hidden />
           Corporate
         </span>
@@ -336,7 +388,7 @@ export function CorporatePageClient() {
           <Button
             size="sm"
             type="button"
-            disabled={!newCompanyName.trim()}
+            disabled={!newCompanyName.trim() || isCreatingCompany}
             onClick={async () => {
               setMsg(null);
               try {
@@ -349,8 +401,16 @@ export function CorporatePageClient() {
               }
             }}
           >
-            Create company
+            {isCreatingCompany ? (
+              <span className="inline-flex items-center gap-2">
+                <Spinner size="sm" />
+                Creating…
+              </span>
+            ) : (
+              "Create company"
+            )}
           </Button>
+          <MsgLine msg={msg} />
         </section>
       ) : null}
 
@@ -366,6 +426,9 @@ export function CorporatePageClient() {
               ) : null
             }
           />
+          <div className="px-4 pt-2">
+            <MsgLine msg={msg} />
+          </div>
           {!approvals?.items?.length ? (
             <p className="fo-desk__empty">No pending approvals.</p>
           ) : (
@@ -392,10 +455,11 @@ export function CorporatePageClient() {
                           <Button
                             size="sm"
                             type="button"
+                            disabled={isDeciding}
                             onClick={async () => {
                               try {
                                 await decide({ id: a.id, decision: "APPROVE" }).unwrap();
-                                setMsg({ text: "Approved" });
+                                setMsg({ text: `Approved booking #${a.bookingId}` });
                               } catch (err) {
                                 setMsg({ text: apiErrorMessage(err, "Approve failed"), error: true });
                               }
@@ -407,10 +471,11 @@ export function CorporatePageClient() {
                             size="sm"
                             variant="secondary"
                             type="button"
+                            disabled={isDeciding}
                             onClick={async () => {
                               try {
                                 await decide({ id: a.id, decision: "REJECT" }).unwrap();
-                                setMsg({ text: "Rejected" });
+                                setMsg({ text: `Rejected booking #${a.bookingId}` });
                               } catch (err) {
                                 setMsg({ text: apiErrorMessage(err, "Reject failed"), error: true });
                               }
@@ -435,35 +500,59 @@ export function CorporatePageClient() {
           <Input
             label="Booking ID"
             value={bookingIdForApproval}
-            onChange={(e) => setBookingIdForApproval(e.target.value)}
+            onChange={(e) => {
+              setBookingIdForApproval(e.target.value);
+              if (approvalMsg) setApprovalMsg(null);
+            }}
             placeholder="From checkout or chat quote"
           />
-          <Button
-            size="sm"
-            type="button"
-            disabled={!bookingIdForApproval.trim()}
-            onClick={async () => {
-              setMsg(null);
-              try {
-                await createApproval({
-                  bookingId: bookingIdForApproval.trim(),
-                  companyId: activeCompanyId,
-                }).unwrap();
-                setBookingIdForApproval("");
-                setMsg({ text: "Approval requested" });
-              } catch (err) {
-                setMsg({
-                  text: apiErrorMessage(
-                    err,
-                    "Could not create approval (check booking ownership / company).",
-                  ),
-                  error: true,
-                });
-              }
-            }}
-          >
-            Submit for approval
-          </Button>
+          <div className="flex flex-wrap items-center gap-3">
+            <Button
+              size="sm"
+              type="button"
+              disabled={!bookingIdForApproval.trim() || isCreatingApproval}
+              onClick={async () => {
+                const targetBookingId = bookingIdForApproval.trim();
+                setApprovalMsg(null);
+                setMsg(null);
+                try {
+                  const res = await createApproval({
+                    bookingId: targetBookingId,
+                    companyId: activeCompanyId,
+                  }).unwrap();
+                  setBookingIdForApproval("");
+                  const feedback = {
+                    text:
+                      res?.status === "APPROVED"
+                        ? `Booking #${targetBookingId} is within company policy and has been automatically approved.`
+                        : `Approval requested for booking #${targetBookingId}. Sent to company approvers.`,
+                  };
+                  setApprovalMsg(feedback);
+                  setMsg(feedback);
+                } catch (err) {
+                  const feedback = {
+                    text: apiErrorMessage(
+                      err,
+                      "Could not create approval. Please verify that the booking exists and belongs to your account and company.",
+                    ),
+                    error: true,
+                  };
+                  setApprovalMsg(feedback);
+                  setMsg(feedback);
+                }
+              }}
+            >
+              {isCreatingApproval ? (
+                <span className="inline-flex items-center gap-2">
+                  <Spinner size="sm" />
+                  Submitting…
+                </span>
+              ) : (
+                "Submit for approval"
+              )}
+            </Button>
+          </div>
+          <MsgLine msg={approvalMsg} />
         </section>
       ) : null}
 
@@ -661,7 +750,7 @@ export function CorporatePageClient() {
               <Button
                 size="sm"
                 type="button"
-                disabled={!bookingIdForInvoice.trim()}
+                disabled={!bookingIdForInvoice.trim() || isIssuingInvoice}
                 onClick={async () => {
                   setMsg(null);
                   try {
@@ -670,7 +759,7 @@ export function CorporatePageClient() {
                       bookingId: bookingIdForInvoice.trim(),
                     }).unwrap();
                     setBookingIdForInvoice("");
-                    setMsg({ text: `Issued ${inv.invoiceNumber}` });
+                    setMsg({ text: `Issued invoice ${inv.invoiceNumber}` });
                   } catch (err) {
                     setMsg({
                       text: apiErrorMessage(
@@ -682,8 +771,16 @@ export function CorporatePageClient() {
                   }
                 }}
               >
-                Issue invoice
+                {isIssuingInvoice ? (
+                  <span className="inline-flex items-center gap-2">
+                    <Spinner size="sm" />
+                    Issuing…
+                  </span>
+                ) : (
+                  "Issue invoice"
+                )}
               </Button>
+              <MsgLine msg={msg} />
             </div>
           ) : (
             <p className="fo-desk__empty">Only company ADMIN can issue invoices.</p>
@@ -809,7 +906,7 @@ export function CorporatePageClient() {
               <Button
                 size="sm"
                 type="button"
-                disabled={!newProjectCode.trim() || !newProjectName.trim()}
+                disabled={!newProjectCode.trim() || !newProjectName.trim() || isCreatingProjectCode}
                 onClick={async () => {
                   setMsg(null);
                   try {
@@ -832,8 +929,16 @@ export function CorporatePageClient() {
                   }
                 }}
               >
-                Add project code
+                {isCreatingProjectCode ? (
+                  <span className="inline-flex items-center gap-2">
+                    <Spinner size="sm" />
+                    Adding…
+                  </span>
+                ) : (
+                  "Add project code"
+                )}
               </Button>
+              <MsgLine msg={msg} />
             </div>
           ) : (
             <p className="fo-desk__empty">Only company ADMIN can manage project codes.</p>
@@ -882,7 +987,7 @@ export function CorporatePageClient() {
             <Button
               size="sm"
               type="button"
-              disabled={!creditLimitInput.trim()}
+              disabled={!creditLimitInput.trim() || isUpdatingCompany}
               onClick={async () => {
                 const n = Number(creditLimitInput);
                 if (!Number.isFinite(n) || n < 0) {
@@ -906,8 +1011,16 @@ export function CorporatePageClient() {
                 }
               }}
             >
-              Update credit limit
+              {isUpdatingCompany ? (
+                <span className="inline-flex items-center gap-2">
+                  <Spinner size="sm" />
+                  Updating…
+                </span>
+              ) : (
+                "Update credit limit"
+              )}
             </Button>
+            <MsgLine msg={msg} />
           </PermissionGate>
           <div>
             <p className="fo-desk__section-label" style={{ marginBottom: "0.5rem" }}>
@@ -993,5 +1106,6 @@ export function CorporatePageClient() {
       <MsgLine msg={msg} />
     </div>
     </div>
+    </>
   );
 }
