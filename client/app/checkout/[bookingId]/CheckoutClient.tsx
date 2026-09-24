@@ -218,13 +218,16 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
     [booking],
   );
 
+  const [isHolding, setIsHolding] = useState(false);
+
   const busy =
     payState.isLoading ||
     reserveState.isLoading ||
     ticketState.isLoading ||
     acceptState.isLoading ||
     creditState.isLoading ||
-    approvalState.isLoading;
+    approvalState.isLoading ||
+    isHolding;
 
   const corporateBlocked =
     Boolean(approvalGate?.corporate) && approvalGate?.canProceed === false;
@@ -411,8 +414,16 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
     }
 
     const travellerSnapshot = buildTravellerSnapshot(formData);
+    setIsHolding(true);
 
     try {
+      if (!hasSuccessfulPayment && !pendingPayment) {
+        await pay({
+          id: bookingId,
+          method: "onelink_ibft",
+        }).unwrap();
+      }
+
       await reserve({
         id: bookingId,
         clientAmountMinor: serverAmountMinor,
@@ -422,6 +433,8 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
       await refetchGate();
     } catch (err) {
       if (!capturePriceChange(err)) setLocalError(apiErrorMessage(err));
+    } finally {
+      setIsHolding(false);
     }
   }
 
@@ -592,7 +605,7 @@ export function CheckoutClient({ bookingId }: { bookingId: string }) {
               corporateBlocked={corporateBlocked}
               canCapture={Boolean(payCap?.canCapture)}
               paying={payState.isLoading}
-              reserving={reserveState.isLoading}
+              reserving={isHolding || reserveState.isLoading}
               onPay={() => void onPay()}
               onReserve={() => void onReserve()}
               amountMinor={booking.amountMinor}

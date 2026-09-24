@@ -48,4 +48,7 @@ Thumbs.db
 # TypeScript Cache
 *.tsbuildinfo
 next-env.d.ts
+vault-storage/
+**/vault-storage/
+filght-one-server/
 

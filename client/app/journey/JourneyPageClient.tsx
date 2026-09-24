@@ -6,6 +6,7 @@ import {
   AlertCircle,
   ArrowRight,
   Check,
+  ChevronDown,
   ChevronRight,
   Clock,
   Info,
@@ -21,7 +22,6 @@ import {
 } from "lucide-react";
 import { Button, Spinner, BrandedLoader } from "@/components/ui";
 import {
-  TravellerPagination,
   TravellerSection,
   TravellerState,
   TravellerStatStrip,
@@ -42,7 +42,8 @@ import {
 } from "./_components/JourneyWatchCard";
 import "./journey.css";
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 100;
+const INITIAL_VISIBLE_COUNT = 4;
 
 type Flash = { text: string; type: "success" | "error" | "info" };
 type JourneyCategory = "ALL" | "ACTIVE" | "UPCOMING" | "COMPLETED";
@@ -52,12 +53,14 @@ export function JourneyPageClient() {
   const accessToken = useAuthStore((s) => s.accessToken);
   const skip = !hasHydrated || !accessToken;
 
-  const [page, setPage] = useState(1);
   const [selectedCategory, setSelectedCategory] = useState<JourneyCategory>("ALL");
+  const [expandedWatchId, setExpandedWatchId] = useState<string | null>(null);
+  const [hasManuallyToggled, setHasManuallyToggled] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
 
   const { data: capability } = useGetJourneyCapabilityQuery(undefined, { skip });
   const { data, isLoading, isError, refetch } = useListJourneyWatchesQuery(
-    { page, pageSize: PAGE_SIZE },
+    { page: 1, pageSize: PAGE_SIZE },
     { skip },
   );
 
@@ -92,6 +95,23 @@ export function JourneyPageClient() {
     if (selectedCategory === "COMPLETED") return completed;
     return allItems;
   }, [selectedCategory, inProgress, upcoming, completed, allItems]);
+
+  // Default expanded journey: most relevant (active flight), otherwise first upcoming, otherwise first completed
+  const defaultWatchId = useMemo(() => {
+    return inProgress[0]?.id || upcoming[0]?.id || completed[0]?.id || null;
+  }, [inProgress, upcoming, completed]);
+
+  const effectiveExpandedId = hasManuallyToggled
+    ? expandedWatchId
+    : (expandedWatchId ?? defaultWatchId);
+
+  function handleToggleExpand(watchId: string) {
+    setHasManuallyToggled(true);
+    setExpandedWatchId((current) => {
+      const active = current !== null ? current : defaultWatchId;
+      return active === watchId ? null : watchId;
+    });
+  }
 
   // First active or upcoming flight for hero preview
   const previewWatch = inProgress[0] || upcoming[0] || null;
@@ -146,6 +166,8 @@ export function JourneyPageClient() {
           reason: r.reason,
         },
       }));
+      setHasManuallyToggled(true);
+      setExpandedWatchId(watchId);
       setMsg({
         text: r.autoBooked
           ? "Unexpected auto-book flag — FlightOne does not auto-rebook."
@@ -203,6 +225,8 @@ export function JourneyPageClient() {
       <JourneyWatchCard
         key={w.id}
         watch={w}
+        isExpanded={effectiveExpandedId === w.id}
+        onToggleExpand={() => handleToggleExpand(w.id)}
         busy={activeWatchId === w.id}
         isPolling={isPolling}
         isLoadingAlts={isLoadingAlts}
@@ -253,6 +277,8 @@ export function JourneyPageClient() {
   }
 
   const empty = inProgress.length === 0 && upcoming.length === 0 && completed.length === 0;
+  const visibleWatches = displayedWatches.slice(0, visibleCount);
+  const remainingCount = displayedWatches.length - visibleCount;
 
   return (
     <div className="fo-journey__master-stage">
@@ -270,7 +296,10 @@ export function JourneyPageClient() {
             <button
               type="button"
               className={`fo-journey__tab-pill${selectedCategory === "ALL" ? " fo-journey__tab-pill--active" : ""}`}
-              onClick={() => setSelectedCategory("ALL")}
+              onClick={() => {
+                setSelectedCategory("ALL");
+                setVisibleCount(INITIAL_VISIBLE_COUNT);
+              }}
             >
               <Plane size={14} strokeWidth={2} className="fo-journey__tab-icon" />
               <span>All Trips ({allItems.length})</span>
@@ -278,7 +307,10 @@ export function JourneyPageClient() {
             <button
               type="button"
               className={`fo-journey__tab-pill${selectedCategory === "ACTIVE" ? " fo-journey__tab-pill--active" : ""}`}
-              onClick={() => setSelectedCategory("ACTIVE")}
+              onClick={() => {
+                setSelectedCategory("ACTIVE");
+                setVisibleCount(INITIAL_VISIBLE_COUNT);
+              }}
             >
               <Radio size={14} strokeWidth={2} className="fo-journey__tab-icon text-emerald" />
               <span>Active Now ({inProgress.length})</span>
@@ -286,7 +318,10 @@ export function JourneyPageClient() {
             <button
               type="button"
               className={`fo-journey__tab-pill${selectedCategory === "UPCOMING" ? " fo-journey__tab-pill--active" : ""}`}
-              onClick={() => setSelectedCategory("UPCOMING")}
+              onClick={() => {
+                setSelectedCategory("UPCOMING");
+                setVisibleCount(INITIAL_VISIBLE_COUNT);
+              }}
             >
               <Clock size={14} strokeWidth={2} className="fo-journey__tab-icon" />
               <span>Upcoming ({upcoming.length})</span>
@@ -294,14 +329,16 @@ export function JourneyPageClient() {
             <button
               type="button"
               className={`fo-journey__tab-pill${selectedCategory === "COMPLETED" ? " fo-journey__tab-pill--active" : ""}`}
-              onClick={() => setSelectedCategory("COMPLETED")}
+              onClick={() => {
+                setSelectedCategory("COMPLETED");
+                setVisibleCount(INITIAL_VISIBLE_COUNT);
+              }}
             >
               <ShieldCheck size={14} strokeWidth={2} className="fo-journey__tab-icon" />
               <span>Completed ({completed.length})</span>
             </button>
           </div>
         </div>
-
       </div>
 
       {/* ── Master Hero Showcase Section ─────────────────────────────── */}
@@ -386,72 +423,72 @@ export function JourneyPageClient() {
             </div>
 
             <div className="fo-journey__canvas-instruments">
-            {/* Floating Flight Radar Dial */}
-            <div className="fo-journey__dial-widget">
-              <div className="fo-journey__dial-head">
-                <span className="fo-journey__dial-label">RADAR SYNC</span>
-                <span className="fo-journey__dial-arrow">↗</span>
-              </div>
+              {/* Floating Flight Radar Dial */}
+              <div className="fo-journey__dial-widget">
+                <div className="fo-journey__dial-head">
+                  <span className="fo-journey__dial-label">RADAR SYNC</span>
+                  <span className="fo-journey__dial-arrow">↗</span>
+                </div>
 
-              <div className="fo-journey__dial-circle-wrap">
-                <svg className="fo-journey__dial-svg" viewBox="0 0 96 96">
-                  <circle
-                    cx="48"
-                    cy="48"
-                    r={radius}
-                    className="fo-journey__dial-track"
-                    strokeWidth="6"
-                  />
-                  <circle
-                    cx="48"
-                    cy="48"
-                    r={radius}
-                    className="fo-journey__dial-progress"
-                    strokeWidth="6"
-                    strokeDasharray={circumference}
-                    strokeDashoffset={strokeOffset}
-                    strokeLinecap="round"
-                    transform="rotate(-90 48 48)"
-                  />
-                </svg>
+                <div className="fo-journey__dial-circle-wrap">
+                  <svg className="fo-journey__dial-svg" viewBox="0 0 96 96">
+                    <circle
+                      cx="48"
+                      cy="48"
+                      r={radius}
+                      className="fo-journey__dial-track"
+                      strokeWidth="6"
+                    />
+                    <circle
+                      cx="48"
+                      cy="48"
+                      r={radius}
+                      className="fo-journey__dial-progress"
+                      strokeWidth="6"
+                      strokeDasharray={circumference}
+                      strokeDashoffset={strokeOffset}
+                      strokeLinecap="round"
+                      transform="rotate(-90 48 48)"
+                    />
+                  </svg>
 
-                <div className="fo-journey__dial-value">
-                  <span className="fo-journey__dial-number">{radarPercent}</span>
-                  <span className="fo-journey__dial-percent">%</span>
+                  <div className="fo-journey__dial-value">
+                    <span className="fo-journey__dial-number">{radarPercent}</span>
+                    <span className="fo-journey__dial-percent">%</span>
+                  </div>
+                </div>
+
+                <div className="fo-journey__dial-status-pills">
+                  <span className={`fo-journey__dial-status-pill${radarPercent === 100 ? " fo-journey__dial-status-pill--active" : ""}`}>
+                    En Route
+                  </span>
+                  <span className={`fo-journey__dial-status-pill${radarPercent < 100 && radarPercent >= 50 ? " fo-journey__dial-status-pill--active" : ""}`}>
+                    Ticketed
+                  </span>
+                  <span className={`fo-journey__dial-status-pill${radarPercent < 50 ? " fo-journey__dial-status-pill--active" : ""}`}>
+                    Standby
+                  </span>
                 </div>
               </div>
 
-              <div className="fo-journey__dial-status-pills">
-                <span className={`fo-journey__dial-status-pill${radarPercent === 100 ? " fo-journey__dial-status-pill--active" : ""}`}>
-                  En Route
-                </span>
-                <span className={`fo-journey__dial-status-pill${radarPercent < 100 && radarPercent >= 50 ? " fo-journey__dial-status-pill--active" : ""}`}>
-                  Ticketed
-                </span>
-                <span className={`fo-journey__dial-status-pill${radarPercent < 50 ? " fo-journey__dial-status-pill--active" : ""}`}>
-                  Standby
-                </span>
-              </div>
-            </div>
-
-            {/* Floating Active Flight Widget (Bottom Right) */}
-            <div className="fo-journey__flight-widget">
-              <div className="fo-journey__flight-icon">
-                <Plane size={18} strokeWidth={2.2} className="rotate-45" />
-              </div>
-              <div className="fo-journey__flight-info">
-                <p className="fo-journey__flight-name">
-                  {previewOrigin} → {previewDest}
-                </p>
-                <p className="fo-journey__flight-sub">
-                  Flight {previewFlightNum}
-                </p>
-                <div className="fo-journey__flight-status">
-                  <span className="fo-journey__flight-dot" />
-                  <span>{activeFlightsCount > 0 ? "In Flight Live" : upcomingFlightsCount > 0 ? "Scheduled" : "Radar Ready"}</span>
+              {/* Floating Active Flight Widget (Bottom Right) */}
+              <div className="fo-journey__flight-widget">
+                <div className="fo-journey__flight-icon">
+                  <Plane size={18} strokeWidth={2.2} className="rotate-45" />
+                </div>
+                <div className="fo-journey__flight-info">
+                  <p className="fo-journey__flight-name">
+                    {previewOrigin} → {previewDest}
+                  </p>
+                  <p className="fo-journey__flight-sub">
+                    Flight {previewFlightNum}
+                  </p>
+                  <div className="fo-journey__flight-status">
+                    <span className="fo-journey__flight-dot" />
+                    <span>{activeFlightsCount > 0 ? "In Flight Live" : upcomingFlightsCount > 0 ? "Scheduled" : "Radar Ready"}</span>
+                  </div>
                 </div>
               </div>
-            </div>
             </div>
           </div>
         </div>
@@ -563,52 +600,46 @@ export function JourneyPageClient() {
           </div>
         </div>
       ) : (
-        <div className="flex flex-col gap-8">
-          {selectedCategory === "ALL" ? (
-            <>
-              {inProgress.length > 0 ? (
-                <TravellerSection title={`Active now · ${inProgress.length}`}>
-                  <div className="fo-journey__stack">{inProgress.map(renderWatch)}</div>
-                </TravellerSection>
-              ) : null}
+        <div className="flex flex-col gap-6">
+          <TravellerSection
+            title={
+              selectedCategory === "ALL"
+                ? `All Journeys · ${allItems.length}`
+                : selectedCategory === "ACTIVE"
+                  ? `Active Now · ${inProgress.length}`
+                  : selectedCategory === "UPCOMING"
+                    ? `Upcoming Trips · ${upcoming.length}`
+                    : `Completed Trips · ${completed.length}`
+            }
+          >
+            {displayedWatches.length === 0 ? (
+              <p className="text-center text-sm py-8 text-ink-soft">
+                No trips currently found in this category.
+              </p>
+            ) : (
+              <div className="fo-journey__stack">
+                {visibleWatches.map(renderWatch)}
+              </div>
+            )}
+          </TravellerSection>
 
-              {upcoming.length > 0 ? (
-                <TravellerSection title={`Upcoming · ${upcoming.length}`}>
-                  <div className="fo-journey__stack">{upcoming.map(renderWatch)}</div>
-                </TravellerSection>
-              ) : null}
-
-              {completed.length > 0 ? (
-                <TravellerSection title={`Completed · ${completed.length}`}>
-                  <div className="fo-journey__stack">{completed.map(renderWatch)}</div>
-                </TravellerSection>
-              ) : null}
-            </>
-          ) : (
-            <TravellerSection
-              title={`${selectedCategory === "ACTIVE" ? "Active Now" : selectedCategory === "UPCOMING" ? "Upcoming Trips" : "Completed Trips"} · ${displayedWatches.length}`}
-            >
-              {displayedWatches.length === 0 ? (
-                <p className="text-center text-sm py-8 text-ink-soft">
-                  No trips currently found in this category.
-                </p>
-              ) : (
-                <div className="fo-journey__stack">{displayedWatches.map(renderWatch)}</div>
-              )}
-            </TravellerSection>
-          )}
-
-          {data ? (
-            <TravellerPagination
-              page={page}
-              pageSize={PAGE_SIZE}
-              total={data.total}
-              onPageChange={setPage}
-              label="Journey pages"
-            />
+          {/* Progressive Disclosure Button */}
+          {remainingCount > 0 ? (
+            <div className="flex justify-center pt-2">
+              <Button
+                size="md"
+                variant="secondary"
+                className="rounded-full font-semibold px-6 py-2.5 shadow-sm border border-black/10 hover:border-black/20"
+                onClick={() => setVisibleCount((prev) => prev + 5)}
+                icon={<ChevronDown size={15} strokeWidth={2.2} />}
+              >
+                Show more journeys ({remainingCount} remaining)
+              </Button>
+            </div>
           ) : null}
         </div>
       )}
     </div>
   );
 }
+

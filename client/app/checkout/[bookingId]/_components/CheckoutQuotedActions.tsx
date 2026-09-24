@@ -288,13 +288,13 @@ export function CheckoutQuotedActions({
           ) : null}
         </div>
 
-        {validationError ? (
+        {validationError || actionError ? (
           <div
             className="fo-checkout__alert flex items-center gap-2 text-[12px] font-medium text-[var(--danger)]"
             role="alert"
           >
             <AlertCircle className="h-4 w-4 shrink-0" aria-hidden />
-            <span>{validationError}</span>
+            <span>{validationError || actionError}</span>
           </div>
         ) : null}
 

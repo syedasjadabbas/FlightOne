@@ -421,6 +421,20 @@ export function FooterInfoModal({
           to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
+        @media (max-width: 640px) {
+          .footer-modal__overlay {
+            padding: 0.75rem;
+          }
+          .footer-modal__panel {
+            width: 100%;
+            height: 92vh;
+            border-radius: 1.25rem;
+          }
+          .footer-modal__body {
+            padding: 1.25rem 1rem 1.75rem;
+          }
+        }
+
         @media (prefers-reduced-motion: reduce) {
           .footer-modal__overlay,
           .footer-modal__panel {

@@ -761,27 +761,27 @@
 .fo-journey__stack {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 0.85rem;
 }
 
 .fo-journey__watch {
-  border-radius: clamp(1.25rem, 2.2vw, 1.85rem);
+  border-radius: 1.25rem;
   background: #ffffff;
-  border: none;
+  border: 1px solid rgba(14, 22, 32, 0.07);
   box-shadow:
     0 1px 2px rgba(14, 22, 32, 0.04),
-    0 12px 28px -10px rgba(14, 22, 32, 0.08);
-  padding: clamp(1.25rem, 2vw, 1.75rem);
+    0 8px 20px -6px rgba(14, 22, 32, 0.06);
+  padding: 0.95rem 1.15rem;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 0.65rem;
   transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .fo-journey__watch:hover {
   transform: translateY(-1px);
   box-shadow:
-    0 20px 45px -10px rgba(14, 22, 32, 0.1),
+    0 14px 30px -8px rgba(14, 22, 32, 0.09),
     0 1px 3px rgba(14, 22, 32, 0.02),
     inset 0 1px 0 #ffffff;
 }
@@ -791,8 +791,8 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem 1rem;
-  padding-bottom: 0.85rem;
+  gap: 0.5rem 0.75rem;
+  padding-bottom: 0.55rem;
   border-bottom: 1px solid rgba(14, 22, 32, 0.06);
 }
 
@@ -800,15 +800,15 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.65rem;
+  gap: 0.5rem;
 }
 
 .fo-journey__flight {
   margin: 0;
   font-family: var(--font-hero);
-  font-size: 1.15rem;
+  font-size: 0.95rem;
   font-weight: 800;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
   color: #0e1620;
 }
 
@@ -816,17 +816,17 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
 }
 
 .fo-journey__fact {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.25rem 0.65rem;
+  gap: 0.3rem;
+  padding: 0.2rem 0.55rem;
   border-radius: 9999px;
   background: rgba(14, 22, 32, 0.05);
-  font-size: 0.75rem;
+  font-size: 0.725rem;
   font-weight: 600;
   color: #0e1620;
 }
@@ -842,13 +842,13 @@
   font-weight: 500;
 }
 
-/* ── Route Arc Header (Big IATA Codes) ─────────────────────── */
+/* ── Route Arc Header (Compact IATA Codes) ─────────────────── */
 .fo-journey__route {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  gap: 1rem;
-  padding: 0.75rem 0;
+  gap: 0.75rem;
+  padding: 0.15rem 0;
 }
 
 .fo-journey__endpoint {
@@ -864,23 +864,24 @@
 .fo-journey__iata {
   margin: 0;
   font-family: var(--font-hero);
-  font-size: clamp(2rem, 4.5vw, 2.75rem);
+  font-size: 1.35rem;
   font-weight: 800;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.03em;
   line-height: 1;
   color: #0e1620;
 }
 
 .fo-journey__when {
-  margin: 0.35rem 0 0;
-  font-size: 0.9375rem;
-  font-weight: 700;
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 800;
   /* --sky is 3.43:1 on white (fails AA for text); --sky-solid is 4.78:1. */
   color: var(--sky-solid);
+  line-height: 1;
 }
 
 .fo-journey__day {
-  margin: 0.15rem 0 0;
+  margin: 0.2rem 0 0;
   font-size: 0.75rem;
   font-weight: 500;
   color: var(--ink-faint);
@@ -889,8 +890,8 @@
 .fo-journey__route-mid {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  min-width: 6rem;
+  gap: 0.4rem;
+  min-width: 4.5rem;
   color: var(--sky);
 }
 
@@ -903,21 +904,21 @@
 
 .fo-journey__route-plane {
   display: inline-flex;
-  height: 2rem;
-  width: 2rem;
+  height: 1.65rem;
+  width: 1.65rem;
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
   background: #0e1620;
   color: #ffffff;
-  box-shadow: 0 4px 10px rgba(14, 22, 32, 0.2);
+  box-shadow: 0 2px 8px rgba(14, 22, 32, 0.18);
   flex-shrink: 0;
 }
 
 .fo-journey__muted {
   margin: 0;
-  font-size: 0.8125rem;
-  line-height: 1.5;
+  font-size: 0.775rem;
+  line-height: 1.45;
   color: var(--ink-soft);
 }
 
@@ -1209,7 +1210,187 @@
   }
 }
 
-/* ── Itinerary detail (journey.details.js) ─────────────────── */
+/* ── Summary Bar (Route Chain & Facts) ────────────────────── */
+.fo-journey__summary-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.15rem 0;
+}
+
+.fo-journey__route-chain {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  background: rgba(14, 22, 32, 0.04);
+  font-size: 0.725rem;
+  font-weight: 600;
+  color: #0e1620;
+}
+
+.fo-journey__fact-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--sky) 8%, #ffffff);
+  border: 1px solid rgba(8, 150, 191, 0.12);
+  font-size: 0.725rem;
+  font-weight: 600;
+  color: #0e1620;
+}
+
+.fo-journey__notice-pill {
+  font-size: 0.725rem;
+  color: var(--ink-faint);
+  margin-left: 0.2rem;
+}
+
+/* ── Compact Summary Card (Collapsed State) ───────────────── */
+.fo-journey__compact-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem 1.25rem;
+  padding: 0.75rem 1.15rem;
+  border-radius: 1.15rem;
+  background: #ffffff;
+  border: 1px solid rgba(14, 22, 32, 0.08);
+  box-shadow:
+    0 1px 2px rgba(14, 22, 32, 0.04),
+    0 4px 14px -4px rgba(14, 22, 32, 0.05);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fo-journey__compact-card:hover {
+  border-color: rgba(8, 150, 191, 0.25);
+  box-shadow:
+    0 10px 24px -6px rgba(14, 22, 32, 0.08),
+    0 1px 3px rgba(14, 22, 32, 0.02);
+  transform: translateY(-1px);
+}
+
+.fo-journey__compact-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1 1 20rem;
+  min-width: 0;
+}
+
+.fo-journey__compact-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem 0.75rem;
+}
+
+.fo-journey__compact-headline {
+  margin: 0;
+  font-family: var(--font-hero);
+  font-size: 0.875rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: #0e1620;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fo-journey__compact-route-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem 0.75rem;
+}
+
+.fo-journey__compact-route {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
+  font-size: 0.8125rem;
+}
+
+.fo-journey__compact-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
+}
+
+.fo-journey__compact-ref {
+  font-size: 0.75rem;
+  color: var(--ink-faint);
+}
+
+.fo-journey__compact-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.fo-journey__close-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  background: rgba(14, 22, 32, 0.05);
+  border: 1px solid rgba(14, 22, 32, 0.08);
+  font-size: 0.725rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.fo-journey__close-btn:hover {
+  background: rgba(14, 22, 32, 0.09);
+  color: #0e1620;
+}
+
+/* ── Split 2-Column Details Grid ───────────────────────────── */
+.fo-journey__details-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  animation: fo-fade-slide 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fo-fade-slide {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (min-width: 960px) {
+  .fo-journey__details-grid {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+.fo-journey__details-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+}
+
+/* ── Itinerary detail & Segment styles ─────────────────────── */
 .fo-journey__carrier {
   font-size: 0.75rem;
   font-weight: 600;
@@ -1217,12 +1398,21 @@
 }
 
 .fo-journey__stops {
-  margin: -0.25rem 0 0;
+  margin: 0;
+  padding: 0.5rem 0.85rem;
+  border-radius: 0.75rem;
+  background: rgba(14, 22, 32, 0.035);
+  border: 1px solid rgba(14, 22, 32, 0.06);
   font-family: var(--font-hero);
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
   font-weight: 700;
   letter-spacing: -0.01em;
   color: #0e1620;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
+  word-break: break-word;
 }
 
 .fo-journey__facts {
@@ -1238,6 +1428,7 @@
   padding: 0.25rem 0.65rem;
   border-radius: 9999px;
   background: color-mix(in oklab, var(--sky) 8%, #ffffff);
+  border: 1px solid rgba(8, 150, 191, 0.12);
   font-size: 0.75rem;
   font-weight: 600;
   color: #0e1620;
@@ -1246,7 +1437,7 @@
 .fo-journey__leg-body {
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: 0.4rem;
   min-width: 0;
   flex: 1;
 }
@@ -1254,25 +1445,51 @@
 .fo-journey__leg-head {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.2rem 0.5rem;
+  align-items: center;
+  gap: 0.35rem 0.6rem;
   margin: 0;
 }
 
 .fo-journey__leg-label {
   font-size: 0.6875rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--sky-solid);
+  background: rgba(8, 150, 191, 0.1);
+  padding: 0.15rem 0.45rem;
+  border-radius: 0.35rem;
 }
 
 .fo-journey__leg-route {
   font-weight: 700;
   color: #0e1620;
+  font-size: 0.875rem;
 }
 
-.fo-journey__leg-cities,
+.fo-journey__leg-cities {
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+
+.fo-journey__leg-facts-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0;
+}
+
+.fo-journey__leg-fact-pill {
+  font-size: 0.725rem;
+  color: var(--ink-soft);
+  font-weight: 500;
+  background: rgba(14, 22, 32, 0.04);
+  padding: 0.1rem 0.45rem;
+  border-radius: 0.35rem;
+}
+
 .fo-journey__leg-facts {
   margin: 0;
   font-size: 0.75rem;
@@ -1290,32 +1507,71 @@
 }
 
 .fo-journey__segs {
-  margin: 0.4rem 0 0;
+  margin: 0.35rem 0 0;
   padding: 0;
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.5rem;
+}
+
+.fo-journey__seg {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
 }
 
 .fo-journey__seg-main {
-  display: grid;
-  grid-template-columns: 4.5rem minmax(0, 1fr) auto;
-  align-items: baseline;
-  gap: 0.6rem;
-  padding: 0.45rem 0.65rem;
-  border-radius: 0.65rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.45rem 0.75rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 0.75rem;
   background: color-mix(in oklab, var(--sky) 5%, #ffffff);
+  border: 1px solid rgba(8, 150, 191, 0.12);
   font-size: 0.8125rem;
+  min-width: 0;
+}
+
+.fo-journey__seg-left {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.65rem;
+  min-width: 0;
+}
+
+.fo-journey__seg-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  margin-left: auto;
 }
 
 .fo-journey__seg-flight {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-weight: 700;
+  font-size: 0.75rem;
   color: #0e1620;
+  background: rgba(14, 22, 32, 0.07);
+  padding: 0.15rem 0.45rem;
+  border-radius: 0.35rem;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
 }
 
 .fo-journey__seg-times {
   color: var(--ink-soft);
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.35rem;
+  font-size: 0.8125rem;
+  line-height: 1.35;
 }
 
 .fo-journey__seg-times strong {
@@ -1334,17 +1590,36 @@
   font-size: 0.75rem;
   color: var(--ink-soft);
   white-space: nowrap;
+  background: rgba(14, 22, 32, 0.04);
+  padding: 0.1rem 0.4rem;
+  border-radius: 0.35rem;
 }
 
 .fo-journey__seg-layover {
-  margin: 0.2rem 0 0 0.65rem;
-  font-size: 0.75rem;
-  color: var(--ink-soft);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0.1rem 0 0.15rem 0.5rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 0.5rem;
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px dashed rgba(245, 158, 11, 0.3);
+  font-size: 0.725rem;
+  font-weight: 600;
+  color: #92400e;
+  width: fit-content;
+  max-width: calc(100% - 1rem);
 }
 
 @media (max-width: 40rem) {
   .fo-journey__seg-main {
-    grid-template-columns: 1fr;
-    gap: 0.15rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+  }
+
+  .fo-journey__seg-right {
+    margin-left: 0;
   }
 }
+

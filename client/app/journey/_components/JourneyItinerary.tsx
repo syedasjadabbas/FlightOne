@@ -1,4 +1,4 @@
-import { Car, Hotel, Plane } from "lucide-react";
+import { Car, Clock, Hotel, Plane } from "lucide-react";
 import type { JourneyItineraryItem, JourneySegment } from "@/lib/api/journey.api";
 import { airlineDisplayName } from "@/lib/consultant/airlines";
 import { iataToPlace } from "@/lib/inventory/places";
@@ -31,28 +31,35 @@ function SegmentRow({ segment, isLast }: { segment: JourneySegment; isLast: bool
   return (
     <li className="fo-journey__seg">
       <div className="fo-journey__seg-main">
-        <span className="fo-journey__seg-flight">
-          {segment.carrier
-            ? formatFlightNumber(segment.carrier, segment.flightNumber ?? "")
-            : (segment.flightNumber ?? "—")}
-        </span>
-        <span className="fo-journey__seg-times tabular-nums">
-          <strong>{segment.departTimeLocal ?? "—"}</strong> {segment.originCode}
-          <span className="fo-journey__leg-sep" aria-hidden>
-            →
+        <div className="fo-journey__seg-left">
+          <span className="fo-journey__seg-flight">
+            {segment.carrier
+              ? formatFlightNumber(segment.carrier, segment.flightNumber ?? "")
+              : (segment.flightNumber ?? "—")}
           </span>
-          <strong>{segment.arriveTimeLocal ?? "—"}</strong>
-          {nextDay ? <sup className="fo-journey__seg-nextday">+1</sup> : null}{" "}
-          {segment.destinationCode}
-        </span>
-        <span className="fo-journey__seg-meta">
-          {[formatDuration(segment.durationMinutes), segment.aircraft].filter(Boolean).join(" · ")}
-        </span>
+          <span className="fo-journey__seg-times tabular-nums">
+            <strong>{segment.departTimeLocal ?? "—"}</strong> {segment.originCode}
+            <span className="fo-journey__leg-sep" aria-hidden>
+              →
+            </span>
+            <strong>{segment.arriveTimeLocal ?? "—"}</strong>
+            {nextDay ? <sup className="fo-journey__seg-nextday">+1</sup> : null}{" "}
+            {segment.destinationCode}
+          </span>
+        </div>
+        <div className="fo-journey__seg-right">
+          <span className="fo-journey__seg-meta">
+            {[formatDuration(segment.durationMinutes), segment.aircraft].filter(Boolean).join(" · ")}
+          </span>
+        </div>
       </div>
       {layover ? (
-        <p className="fo-journey__seg-layover">
-          {layover} connection in {iataToPlace(segment.destinationCode)}
-        </p>
+        <div className="fo-journey__seg-layover">
+          <Clock size={11} strokeWidth={2.2} className="text-amber-700 shrink-0" aria-hidden />
+          <span>
+            {layover} connection in {iataToPlace(segment.destinationCode)}
+          </span>
+        </div>
       ) : null}
     </li>
   );
@@ -74,7 +81,7 @@ function FlightLeg({ item }: { item: JourneyItineraryItem }) {
 
   return (
     <div className="fo-journey__leg-body">
-      <p className="fo-journey__leg-head">
+      <div className="fo-journey__leg-head">
         {item.label ? <span className="fo-journey__leg-label">{item.label}</span> : null}
         <span className="fo-journey__leg-route">
           {item.origin || "—"} → {item.destination || "—"}
@@ -84,8 +91,16 @@ function FlightLeg({ item }: { item: JourneyItineraryItem }) {
             {iataToPlace(item.origin)} to {iataToPlace(item.destination)}
           </span>
         ) : null}
-      </p>
-      {facts.length > 0 ? <p className="fo-journey__leg-facts">{facts.join(" · ")}</p> : null}
+      </div>
+      {facts.length > 0 ? (
+        <div className="fo-journey__leg-facts-row">
+          {facts.map((fact, idx) => (
+            <span key={idx} className="fo-journey__leg-fact-pill">
+              {fact}
+            </span>
+          ))}
+        </div>
+      ) : null}
       {segments.length > 0 ? (
         <ol className="fo-journey__segs">
           {segments.map((s, i) => (
@@ -99,17 +114,21 @@ function FlightLeg({ item }: { item: JourneyItineraryItem }) {
       ) : item.flightNumber || item.departTimeLocal ? (
         // No sector breakdown stored for this leg — show what is known on one
         // line rather than a sector row that would imply it is non-stop.
-        <p className="fo-journey__seg-main">
-          <span className="fo-journey__seg-flight">{item.flightNumber ?? "—"}</span>
-          <span className="fo-journey__seg-times tabular-nums">
-            <strong>{item.departTimeLocal ?? "—"}</strong> {item.origin}
-            <span className="fo-journey__leg-sep" aria-hidden>
-              →
+        <div className="fo-journey__seg-main">
+          <div className="fo-journey__seg-left">
+            <span className="fo-journey__seg-flight">{item.flightNumber ?? "—"}</span>
+            <span className="fo-journey__seg-times tabular-nums">
+              <strong>{item.departTimeLocal ?? "—"}</strong> {item.origin}
+              <span className="fo-journey__leg-sep" aria-hidden>
+                →
+              </span>
+              <strong>{item.arriveTimeLocal ?? "—"}</strong> {item.destination}
             </span>
-            <strong>{item.arriveTimeLocal ?? "—"}</strong> {item.destination}
-          </span>
-          <span className="fo-journey__seg-meta">{formatDuration(item.durationMinutes) ?? ""}</span>
-        </p>
+          </div>
+          <div className="fo-journey__seg-right">
+            <span className="fo-journey__seg-meta">{formatDuration(item.durationMinutes) ?? ""}</span>
+          </div>
+        </div>
       ) : null}
     </div>
   );
@@ -120,19 +139,23 @@ function HotelStay({ item }: { item: JourneyItineraryItem }) {
     typeof item.nights === "number" ? `${item.nights} night${item.nights === 1 ? "" : "s"}` : null;
   return (
     <div className="fo-journey__leg-body">
-      <p className="fo-journey__leg-head">
+      <div className="fo-journey__leg-head">
         <span className="fo-journey__leg-route">{item.hotelName || "Hotel stay"}</span>
         {item.city ? <span className="fo-journey__leg-cities">{item.city}</span> : null}
-      </p>
-      <p className="fo-journey__leg-facts">
+      </div>
+      <div className="fo-journey__leg-facts-row">
         {[
           item.checkInDate ? `Check-in ${formatTicketDate(item.checkInDate.slice(0, 10))}` : null,
           item.checkOutDate ? `Check-out ${formatTicketDate(item.checkOutDate.slice(0, 10))}` : null,
           nights,
         ]
-          .filter(Boolean)
-          .join(" · ")}
-      </p>
+          .filter((f): f is string => Boolean(f))
+          .map((fact, idx) => (
+            <span key={idx} className="fo-journey__leg-fact-pill">
+              {fact}
+            </span>
+          ))}
+      </div>
       {item.roomType || item.boardType || item.confirmationRef ? (
         <p className="fo-journey__leg-facts">
           {[item.roomType, item.boardType].filter(Boolean).join(" · ")}
@@ -148,10 +171,10 @@ function HotelStay({ item }: { item: JourneyItineraryItem }) {
 function TransferLeg({ item }: { item: JourneyItineraryItem }) {
   return (
     <div className="fo-journey__leg-body">
-      <p className="fo-journey__leg-head">
+      <div className="fo-journey__leg-head">
         <span className="fo-journey__leg-route">Transfer</span>
         {item.transferRef ? <span className="fo-journey__ref">{item.transferRef}</span> : null}
-      </p>
+      </div>
       {item.pickupAt ? (
         <p className="fo-journey__leg-facts">
           Pickup {formatDate(item.pickupAt)} at {formatTime(item.pickupAt)}
@@ -190,3 +213,4 @@ export function JourneyItinerary({ items }: { items: JourneyItineraryItem[] }) {
     </ul>
   );
 }
+

@@ -1222,6 +1222,7 @@ export default function HeroExperienceSequence() {
         ══════════════════════════════════════════════════════════════════ */}
         <div
           ref={cornerLabelLeftRef}
+          className="hidden sm:block"
           style={{
             position: 'absolute',
             bottom: '1.875rem',
@@ -1248,6 +1249,7 @@ export default function HeroExperienceSequence() {
 
         <div
           ref={cornerLabelRightRef}
+          className="hidden sm:block"
           style={{
             position: 'absolute',
             bottom: '1.875rem',

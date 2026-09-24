@@ -13,8 +13,8 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-/** PKR 50,000,000 — comfortably above a business-class long-haul demo fare. */
-const DEMO_CREDIT_LIMIT_MINOR = 5_000_000_000;
+/** PKR 20,000,000 — fits INT4 (32-bit signed int max 2,147,483,647) and well above demo fares. */
+const DEMO_CREDIT_LIMIT_MINOR = 2_000_000_000;
 
 async function main() {
   if (process.env.NODE_ENV === "production") {

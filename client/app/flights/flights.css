@@ -518,6 +518,27 @@
   color: var(--ink-soft);
 }
 
+@media (max-width: 1023px) {
+  .fo-flights__submit {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .fo-flights__destinations {
+    grid-template-columns: 1fr;
+  }
+  .fo-flights__trust-strip {
+    grid-template-columns: 1fr;
+  }
+  .fo-flights__nav-tabs {
+    width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .fo-flights__nav-tab,
   .fo-flights__submit,

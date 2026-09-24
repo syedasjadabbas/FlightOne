@@ -128,7 +128,7 @@ export default function TechPreviewSection() {
           <div
             style={{
               position: 'absolute',
-              inset: '-10% -5%',
+              inset: 0,
               zIndex: 1,
               overflow: 'hidden',
             }}
