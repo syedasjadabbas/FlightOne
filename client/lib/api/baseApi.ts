@@ -57,11 +57,34 @@ export interface ApiEnvelope<T> {
 export const CSRF_HEADER = "X-FlightOne-CSRF";
 
 /**
+ * Pre-session endpoints where a 401 means "wrong password / code", not
+ * "access token expired". Refreshing on these would let a leftover
+ * `fo_refresh` cookie sign the user in despite a wrong password.
+ */
+const CREDENTIAL_PATHS = new Set([
+  "/auth/login",
+  "/auth/register",
+  "/auth/refresh",
+  "/auth/2fa/setup",
+  "/auth/2fa/confirm",
+  "/auth/2fa/verify",
+  "/auth/verify-email",
+  "/auth/resend-verification",
+  "/auth/forgot-password",
+  "/auth/reset-password",
+]);
+
+export function isCredentialRequest(args: string | FetchArgs): boolean {
+  const url = typeof args === "string" ? args : args.url;
+  return CREDENTIAL_PATHS.has(url.split("?")[0]);
+}
+
+/**
  * Wraps `fetchBaseQuery` to:
  *  1. dynamically target the matching backend origin on localhost or LAN,
  *  2. unwrap the `{ success, message, data }` envelope so every endpoint's
  *     `query`/`transformResponse` just deals in plain response shapes,
- *  3. on a 401, attempt exactly one `/auth/refresh` + retry (dev guide §3);
+ *  3. on a 401 (except credential endpoints), attempt exactly one `/auth/refresh` + retry (dev guide §3);
  *     if that fails, clear the session so the next protected navigation
  *     bounces to `/login` via `proxy.ts`.
  */
@@ -84,7 +107,7 @@ const baseQueryWithReauth: BaseQueryFn<
 
   let result = await rawBaseQuery(args, api, extraOptions);
 
-  if (result.error?.status === 401) {
+  if (result.error?.status === 401 && !isCredentialRequest(args)) {
     // `refreshSessionOnce` already clears the session itself when the server
     // definitively rejects the refresh (401/403). On a transient failure
     // (network blip, 5xx) it deliberately leaves the session intact — do not
